@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Mining - Fast Cycle</title>
+    <title>TON Mining - Auto Pop Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -11,173 +11,143 @@
 
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .page { display: none; animation: fadeIn 0.2s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        /* Reklam Doğrulama Ekranı */
         .ad-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
             z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; /* Tıklanabilir olduğunu belli eder */
         }
-        .progress-ring {
-            width: 80px; height: 80px; border: 6px solid #1e293b;
-            border-top: 6px solid #38bdf8; border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .ton-logo {
+            width: 140px; height: 140px; margin: 0 auto;
+            background: radial-gradient(circle, #0088cc 0%, #001a2e 100%);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 40px rgba(0, 136, 204, 0.3);
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .ton-glow { box-shadow: 0 0 40px rgba(56, 189, 248, 0.2); }
+        .pulse-border { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); } }
     </style>
 </head>
-<body class="flex justify-center min-h-screen">
+<body>
 
-    <div id="adVerify" class="ad-overlay">
-        <div class="progress-ring mb-6"></div>
-        <h2 class="text-xl font-black mb-2 tracking-tight">ENERJİ YÜKLENİYOR</h2>
-        <p class="text-gray-500 text-sm px-10 text-center">Reklam onaylanıyor, lütfen bekleyin...</p>
-        <div id="adTimer" class="mt-6 text-6xl font-mono text-sky-400 font-black">5</div>
+    <div id="adLayer" class="ad-overlay" onclick="handleAdClick()">
+        <div class="bg-blue-600 p-6 rounded-full mb-6 animate-bounce">
+            <i class="fa-solid fa-bolt text-4xl"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white">ENERJİ YÜKLE</h2>
+        <p class="text-gray-400 mt-2">Devam etmek için ekrana dokun</p>
+        <div id="verifyTimer" class="hidden mt-4 text-4xl font-mono text-sky-400 font-black">5</div>
     </div>
 
-    <div class="w-full max-w-md bg-[#0f1218] flex flex-col relative border-x border-gray-800">
-        
-        <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#0b0e14]">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-[#0f1218]">
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
             <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiyem</p>
-                <h2 id="headerBalance" class="text-2xl font-black text-white">0.0000 <span class="text-sky-500">TON</span></h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiye</p>
+                <h2 id="totalBal" class="text-2xl font-black">0.0000 TON</h2>
             </div>
-            <div class="bg-sky-500/10 p-2 rounded-xl border border-sky-500/20">
-                <i class="fa-solid fa-bolt text-sky-500 animate-pulse"></i>
-            </div>
+            <i class="fa-solid fa-diamond text-sky-500 text-xl"></i>
         </div>
 
-        <main class="flex-grow p-6">
-            
-            <section id="miningPage" class="page active text-center">
-                <div class="mt-10 mb-8 relative">
-                    <div class="w-40 h-40 mx-auto bg-gradient-to-b from-sky-500 to-blue-700 rounded-full flex items-center justify-center ton-glow border-4 border-[#0f1218]">
-                        <i class="fa-solid fa-diamond text-6xl text-white"></i>
-                    </div>
-                </div>
+        <div class="flex-grow flex flex-col items-center justify-center p-6 space-y-8">
+            <div id="logoContainer" class="ton-logo pulse-border">
+                <i class="fa-solid fa-diamond text-6xl text-white"></i>
+            </div>
 
-                <div class="space-y-1">
-                    <h1 id="miningCounter" class="text-5xl font-black tracking-tighter text-white">0.00000000</h1>
-                    <p class="text-sky-500 font-bold text-xs tracking-widest uppercase">TON Kazılıyor</p>
-                </div>
+            <div class="text-center">
+                <h1 id="miningVal" class="text-5xl font-black tracking-tighter">0.00000000</h1>
+                <p class="text-sky-500 font-bold text-sm tracking-widest mt-1 uppercase">Madencilik Aktif</p>
+            </div>
 
-                <div class="mt-10 bg-gray-900/80 p-5 rounded-[30px] border border-gray-800">
-                    <div class="flex justify-between items-center mb-3 px-2">
-                        <span class="text-xs font-bold text-gray-400 uppercase">Kalan Enerji</span>
-                        <span id="timerText" class="text-sky-400 font-mono font-bold bg-sky-950 px-3 py-1 rounded-lg">00:30</span>
-                    </div>
-                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                        <div id="progressBar" class="bg-sky-500 h-full transition-all duration-1000" style="width: 100%"></div>
-                    </div>
+            <div class="w-full bg-gray-900 p-5 rounded-3xl border border-gray-800">
+                <div class="flex justify-between text-xs font-bold mb-3 uppercase tracking-tighter">
+                    <span class="text-gray-500">Reklama Kalan</span>
+                    <span id="timerTxt" class="text-sky-400 font-mono">00:30</span>
                 </div>
-
-                <div class="mt-10 space-y-3">
-                    <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black active:scale-95 transition shadow-lg">
-                        KAZANCI TOPLA
-                    </button>
-                    <button id="adBtn" onclick="startAd()" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black hidden animate-pulse">
-                        <i class="fa-solid fa-play mr-2"></i> +30 SN ENERJİ AL
-                    </button>
+                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                    <div id="bar" class="bg-sky-500 h-full transition-all duration-1000" style="width: 100%"></div>
                 </div>
-            </section>
+            </div>
 
-            <section id="walletPage" class="page space-y-6">
-                <h2 class="text-2xl font-black">Cüzdan</h2>
-                <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800 shadow-inner">
-                    <p class="text-gray-500 text-xs font-bold">TOPLAM BAKİYE</p>
-                    <h3 id="walletBalance" class="text-3xl font-black mt-1">0.0000 TON</h3>
-                </div>
-                <div class="space-y-4">
-                    <label class="text-xs text-gray-400 ml-2 font-bold uppercase">TON Adresiniz</label>
-                    <input type="text" placeholder="UQ... ya da EQ..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-2xl text-sm focus:outline-none focus:border-sky-500 transition">
-                    <button class="w-full bg-gray-800 py-4 rounded-2xl font-bold text-gray-600 cursor-not-allowed">PARA ÇEK (Min 0.5)</button>
-                </div>
-            </section>
-
-        </main>
-
-        <nav class="p-6 bg-[#0b0e14] border-t border-gray-800 flex justify-around">
-            <button onclick="showPage('miningPage')" class="nav-icon text-sky-500 flex flex-col items-center gap-1 transition">
-                <i class="fa-solid fa-hammer text-xl"></i>
-                <span class="text-[10px] font-bold">MINING</span>
+            <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black shadow-xl active:scale-95 transition">
+                KAZANCI TOPLA
             </button>
-            <button onclick="showPage('walletPage')" class="nav-icon text-gray-500 flex flex-col items-center gap-1 transition">
-                <i class="fa-solid fa-wallet text-xl"></i>
-                <span class="text-[10px] font-bold">CÜZDAN</span>
-            </button>
+        </div>
+
+        <nav class="p-6 border-t border-gray-800 flex justify-around opacity-50">
+            <i class="fa-solid fa-hammer text-sky-500 text-xl"></i>
+            <i class="fa-solid fa-wallet text-gray-600 text-xl"></i>
+            <i class="fa-solid fa-gear text-gray-600 text-xl"></i>
         </nav>
     </div>
 
     <script>
         let balance = 0.0;
         let mining = 0.0;
-        let timeLeft = 30; 
-        let isActive = true;
-
-        // Adexium Widget Hazırlığı
+        let timeLeft = 30;
+        let isRunning = true;
         let adexWidget;
+
+        // Reklamı yükle
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof AdexiumWidget !== 'undefined') {
-                adexWidget = new AdexiumWidget({wid: 'f7f09b78-558a-498d-98c5-ab496ebd1cd9', firstAdImpressionIntervalInSeconds: 1});
-            }
+            adexWidget = new AdexiumWidget({wid: 'f7f09b78-558a-498d-98c5-ab496ebd1cd9', firstAdImpressionIntervalInSeconds: 1});
         });
 
-        // 1 Saniyelik Döngü
+        // Ana Döngü
         setInterval(() => {
-            if (isActive && timeLeft > 0) {
-                mining += 0.00005; // 0.00005 TON / Saniye
+            if (isRunning && timeLeft > 0) {
+                mining += 0.00005;
                 timeLeft--;
-                document.getElementById('miningCounter').innerText = mining.toFixed(8);
+                document.getElementById('miningVal').innerText = mining.toFixed(8);
                 updateUI();
-            } else if (timeLeft <= 0 && isActive) {
-                stopMining();
+            } else if (timeLeft <= 0 && isRunning) {
+                showAdLayer();
             }
         }, 1000);
 
         function updateUI() {
-            document.getElementById('timerText').innerText = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
-            document.getElementById('progressBar').style.width = (timeLeft / 30 * 100) + "%";
+            document.getElementById('timerTxt').innerText = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
+            document.getElementById('bar').style.width = (timeLeft / 30 * 100) + "%";
         }
 
-        function stopMining() {
-            isActive = false;
-            document.getElementById('adBtn').classList.remove('hidden');
-            document.getElementById('timerText').innerText = "ENERJİ BİTTİ";
-            document.getElementById('timerText').classList.replace('text-sky-400', 'text-red-500');
+        function showAdLayer() {
+            isRunning = false;
+            document.getElementById('adLayer').style.display = 'flex';
         }
 
-        function startAd() {
-            // Reklamı Tetikle
+        // Reklam tetikleme ve doğrulama
+        function handleAdClick() {
+            // 1. Reklamı aç (Kullanıcı tıkladığı için tarayıcı izin verir)
             if(adexWidget) adexWidget.autoMode();
 
-            // 5 Saniyelik Doğrulama Ekranı
-            const overlay = document.getElementById('adVerify');
-            const adTimerDisp = document.getElementById('adTimer');
-            overlay.style.display = 'flex';
+            // 2. Doğrulama animasyonuna geç
+            const timerBox = document.getElementById('verifyTimer');
+            const layerInfo = document.querySelector('#adLayer p');
+            const layerIcon = document.querySelector('#adLayer div');
             
-            let verifyTime = 5; // 5 saniye bekleme
-            adTimerDisp.innerText = verifyTime;
+            layerIcon.classList.remove('animate-bounce');
+            layerInfo.innerText = "Doğrulanıyor...";
+            timerBox.classList.remove('hidden');
 
-            const intv = setInterval(() => {
-                verifyTime--;
-                adTimerDisp.innerText = verifyTime;
-                if(verifyTime <= 0) {
-                    clearInterval(intv);
-                    finishAd();
+            let vTime = 5;
+            timerBox.innerText = vTime;
+
+            const vInt = setInterval(() => {
+                vTime--;
+                timerBox.innerText = vTime;
+                if(vTime <= 0) {
+                    clearInterval(vInt);
+                    resetMining();
                 }
             }, 1000);
         }
 
-        function finishAd() {
-            document.getElementById('adVerify').style.display = 'none';
-            document.getElementById('adBtn').classList.add('hidden');
-            document.getElementById('timerText').classList.replace('text-red-500', 'text-sky-400');
+        function resetMining() {
+            document.getElementById('adLayer').style.display = 'none';
+            // Görseli eski haline döndür (bir sonraki reklam için)
+            document.getElementById('verifyTimer').classList.add('hidden');
+            document.querySelector('#adLayer p').innerText = "Devam etmek için ekrana dokun";
+            document.querySelector('#adLayer div').classList.add('animate-bounce');
+            
             timeLeft = 30;
-            isActive = true;
+            isRunning = true;
             updateUI();
         }
 
@@ -185,21 +155,9 @@
             if(mining > 0) {
                 balance += mining;
                 mining = 0;
-                document.getElementById('miningCounter').innerText = "0.00000000";
-                const bText = balance.toFixed(4) + " TON";
-                document.getElementById('headerBalance').innerText = bText;
-                document.getElementById('walletBalance').innerText = bText;
+                document.getElementById('miningVal').innerText = "0.00000000";
+                document.getElementById('totalBal').innerText = balance.toFixed(4) + " TON";
             }
-        }
-
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            // Alt menü renklerini güncelle
-            const buttons = document.querySelectorAll('.nav-icon');
-            buttons.forEach(btn => btn.classList.replace('text-sky-500', 'text-gray-500'));
-            event.currentTarget.classList.replace('text-gray-500', 'text-sky-500');
         }
     </script>
 </body>
