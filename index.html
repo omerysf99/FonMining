@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Mining - Manual Ad</title>
+    <title>TON Mining - Secure Ad Flow</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,10 +18,9 @@
         .active { display: block; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        /* Enerji Bitti Kutucuğu */
         #adModal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 100; backdrop-filter: blur(8px); align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 100; backdrop-filter: blur(10px); align-items: center; justify-content: center;
         }
 
         .mining-logo {
@@ -36,14 +35,25 @@
 
     <div id="adModal">
         <div class="bg-[#161b22] w-[85%] p-8 rounded-[32px] border border-blue-500/30 text-center shadow-2xl">
-            <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid fa-battery-empty text-blue-500 text-3xl"></i>
+            <div id="modalIcon" class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-video text-blue-500 text-3xl"></i>
             </div>
-            <h2 class="text-2xl font-black mb-2">Enerji Tükendi!</h2>
-            <p class="text-gray-400 text-sm mb-6">Madenciliğe devam etmek için kısa bir video izle ve <span class="text-blue-400 font-bold">30sn</span> kazan.</p>
-            <button onclick="watchAdNow()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-900/20 transition-all">
-                VİDEO İZLE & KAZAN
-            </button>
+            
+            <div id="modalContent">
+                <h2 class="text-2xl font-black mb-2">Enerji Gerekiyor</h2>
+                <p class="text-gray-400 text-sm mb-6">Madenciliğe devam etmek için reklamı sonuna kadar izleyin.</p>
+                <button id="startAdBtn" onclick="watchAdNow()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg transition-all active:scale-95">
+                    REKLAMI BAŞLAT
+                </button>
+            </div>
+
+            <div id="verifyingContent" class="hidden">
+                <h2 class="text-xl font-black mb-2 text-blue-400">REKLAM İZLENİYOR</h2>
+                <p class="text-gray-500 text-xs mb-6">Lütfen bekleyin, enerji yükleniyor...</p>
+                <div class="text-4xl font-mono font-black text-white bg-gray-800 inline-block px-6 py-2 rounded-2xl border border-gray-700">
+                    <span id="adCount">10</span>s
+                </div>
+            </div>
         </div>
     </div>
 
@@ -51,67 +61,52 @@
         
         <div class="p-5 flex justify-between items-center border-b border-[#30363d]">
             <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiyem</p>
-                <h2 id="headerBalance" class="text-xl font-black text-white">0.0000 TON</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiye</p>
+                <h2 id="headerBalance" class="text-xl font-black">0.0000 TON</h2>
             </div>
-            <div class="flex items-center gap-1.5 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold text-blue-400">ONLINE</span>
+            <div class="flex items-center gap-1.5 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 text-[10px] font-bold text-blue-400">
+                LIVE
             </div>
         </div>
 
         <main class="flex-grow p-6">
             <section id="miningPage" class="page active text-center">
-                <div class="mt-8 mb-8">
-                    <div id="logoBox" class="mining-logo">
-                        <i class="fa-solid fa-gem text-5xl text-white"></i>
-                    </div>
-                </div>
-
+                <div class="mt-8 mb-8"><div class="mining-logo"><i class="fa-solid fa-gem text-5xl text-white"></i></div></div>
                 <div class="space-y-1">
                     <h1 id="miningCounter" class="text-5xl font-black tracking-tighter">0.00000000</h1>
                     <p class="text-blue-500 font-bold text-xs tracking-widest uppercase">Kazılan TON</p>
                 </div>
 
                 <div class="mt-8 ton-card p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Kalan Süre</span>
-                        <span id="timer" class="text-blue-400 font-mono font-bold">00:30</span>
+                    <div class="flex justify-between items-center mb-3 text-[10px] font-bold text-gray-500 uppercase">
+                        <span>Kalan Enerji</span>
+                        <span id="timer" class="text-blue-400 font-mono text-base">00:30</span>
                     </div>
                     <div class="w-full bg-[#0d1117] h-2 rounded-full overflow-hidden border border-[#30363d]">
                         <div id="bar" class="bg-blue-500 h-full transition-all duration-1000" style="width: 100%"></div>
                     </div>
                 </div>
 
-                <button onclick="collect()" class="w-full mt-8 bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition">
-                    TOPLA
-                </button>
+                <button onclick="collect()" class="w-full mt-8 bg-white text-black py-4 rounded-2xl font-black shadow-xl">BAKİYEYE AKTAR</button>
             </section>
 
             <section id="walletPage" class="page space-y-6">
                 <h2 class="text-2xl font-black">Cüzdan</h2>
                 <div class="ton-card p-6">
-                    <p class="text-gray-400 text-xs font-bold uppercase">Çekilebilir</p>
-                    <h3 id="walletBalance" class="text-3xl font-black mt-1 text-white">0.0000 TON</h3>
+                    <p class="text-gray-400 text-xs font-bold">ÇEKİLEBİLİR BAKİYE</p>
+                    <h3 id="walletBalance" class="text-3xl font-black mt-1">0.0000 TON</h3>
                 </div>
-                
                 <div class="ton-card p-5 space-y-4">
-                    <input type="text" placeholder="TON Adresiniz" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm focus:outline-none focus:border-blue-500">
-                    <input type="number" id="wAmount" step="0.01" placeholder="Miktar (Min 0.10)" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm focus:outline-none focus:border-blue-500">
-                    <button onclick="handleWithdraw()" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold">ÇEKİM GÖNDER</button>
+                    <input type="text" placeholder="TON Adresiniz" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm focus:outline-none">
+                    <input type="number" id="wAmount" placeholder="Miktar (Min 0.10)" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm focus:outline-none">
+                    <button onclick="handleWithdraw()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold">ÇEKİM TALEBİ</button>
                 </div>
             </section>
         </main>
 
         <nav class="p-6 border-t border-[#30363d] flex justify-around bg-[#0d1117]">
-            <button onclick="showPage('miningPage')" class="nav-btn text-blue-500 flex flex-col items-center gap-1">
-                <i class="fa-solid fa-hammer text-xl"></i>
-                <span class="text-[10px] font-bold tracking-widest">KAZIM</span>
-            </button>
-            <button onclick="showPage('walletPage')" class="nav-btn text-gray-500 flex flex-col items-center gap-1">
-                <i class="fa-solid fa-wallet text-xl"></i>
-                <span class="text-[10px] font-bold tracking-widest">CÜZDAN</span>
-            </button>
+            <button onclick="showPage('miningPage')" class="nav-btn text-blue-500 flex flex-col items-center gap-1"><i class="fa-solid fa-hammer"></i><span class="text-[10px] font-bold">KAZIM</span></button>
+            <button onclick="showPage('walletPage')" class="nav-btn text-gray-500 flex flex-col items-center gap-1"><i class="fa-solid fa-wallet"></i><span class="text-[10px] font-bold">CÜZDAN</span></button>
         </nav>
     </div>
 
@@ -129,7 +124,7 @@
             adFormat: 'interstitial' 
         });
 
-        const miningLoop = setInterval(() => {
+        setInterval(() => {
             if (isRunning && timeLeft > 0) {
                 mining += 0.00005;
                 timeLeft--;
@@ -148,20 +143,38 @@
         function stopMiningAndShowModal() {
             isRunning = false;
             document.getElementById('adModal').style.display = 'flex';
+            document.getElementById('modalContent').classList.remove('hidden');
+            document.getElementById('verifyingContent').classList.add('hidden');
         }
 
         function watchAdNow() {
-            // Reklamı tetikle (Buton tıklamasıyla tetiklendiği için hata vermez)
+            // Reklamı Başlat
             adWidget.autoMode();
             
-            // Reklam açılırken 3 saniye bekle ve sonra süreyi yenile
-            setTimeout(() => {
-                document.getElementById('adModal').style.display = 'none';
-                timeLeft = 30;
-                isRunning = true;
-                updateUI();
-                WebApp.HapticFeedback.notificationOccurred('success');
-            }, 3000);
+            // Görünümü Değiştir (Sayaç Modu)
+            document.getElementById('modalContent').classList.add('hidden');
+            document.getElementById('verifyingContent').classList.remove('hidden');
+            
+            let adWait = 10; // Reklam bitişini simüle eden 10 sn'lik zorunlu bekleme
+            document.getElementById('adCount').innerText = adWait;
+
+            const adCounter = setInterval(() => {
+                adWait--;
+                document.getElementById('adCount').innerText = adWait;
+                
+                if(adWait <= 0) {
+                    clearInterval(adCounter);
+                    grantReward();
+                }
+            }, 1000);
+        }
+
+        function grantReward() {
+            document.getElementById('adModal').style.display = 'none';
+            timeLeft = 30;
+            isRunning = true;
+            updateUI();
+            WebApp.HapticFeedback.notificationOccurred('success');
         }
 
         function collect() {
@@ -169,22 +182,6 @@
                 balance += mining;
                 mining = 0;
                 document.getElementById('miningCounter').innerText = "0.00000000";
-                const fmt = balance.toFixed(4) + " TON";
-                document.getElementById('headerBalance').innerText = fmt;
-                document.getElementById('walletBalance').innerText = fmt;
-                WebApp.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        function handleWithdraw() {
-            const amt = parseFloat(document.getElementById('wAmount').value);
-            if (amt < 0.10 || isNaN(amt)) {
-                alert("Minimum çekim 0.10 TON.");
-            } else if (amt > balance) {
-                alert("Yetersiz bakiye.");
-            } else {
-                alert("Talebiniz alındı (0.10 TON+).");
-                balance -= amt;
                 updateUIBalances();
             }
         }
@@ -193,6 +190,17 @@
             const fmt = balance.toFixed(4) + " TON";
             document.getElementById('headerBalance').innerText = fmt;
             document.getElementById('walletBalance').innerText = fmt;
+        }
+
+        function handleWithdraw() {
+            const amt = parseFloat(document.getElementById('wAmount').value);
+            if (amt >= 0.10 && amt <= balance) {
+                alert("Talep Alındı!");
+                balance -= amt;
+                updateUIBalances();
+            } else {
+                alert("Hata: Minimum 0.10 TON veya yetersiz bakiye.");
+            }
         }
 
         function showPage(id) {
