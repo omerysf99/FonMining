@@ -3,138 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Otomatik Mining</title>
+    <title>TON Mining Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .glass-card { background: white; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; user-select: none; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .ton-logo-container {
-            width: 180px; height: 180px; margin: 20px auto;
-            background: radial-gradient(circle, #0088cc 0%, #005580 100%);
+        .glass-card { background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .ton-logo {
+            width: 160px; height: 160px; margin: auto;
+            background: linear-gradient(135deg, #0088cc 0%, #00aaff 100%);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 136, 204, 0.3); position: relative;
+            box-shadow: 0 10px 30px rgba(0, 136, 204, 0.4);
         }
-        .ton-symbol { font-size: 80px; color: white; font-weight: bold; }
         
-        /* Reklam Geçiş Ekranı */
         #adOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column;
-            align-items: center; justify-content: center; color: white;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
-        .loader {
-            border: 5px solid #f3f3f3; border-top: 5px solid #0088cc;
-            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { border: 4px solid #333; border-top: 4px solid #0088cc; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="flex justify-center items-center min-h-screen">
+<body class="flex justify-center min-h-screen bg-slate-50">
 
     <div id="adOverlay">
         <div class="loader mb-4"></div>
-        <h2 class="text-xl font-bold">REKLAM İZLENİYOR...</h2>
-        <p class="text-gray-400 text-sm mt-2">Madencilik birazdan devam edecek</p>
+        <p class="font-bold">REKLAM İZLENİYOR...</p>
+        <p class="text-xs text-gray-500 mt-2">Lütfen bekleyin, mining devam edecek.</p>
     </div>
 
-    <div class="w-full max-w-md p-4 space-y-4">
+    <div class="w-full max-w-md bg-white min-h-screen flex flex-col relative shadow-2xl">
         
-        <div class="glass-card p-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-sky-500 p-2.5 rounded-full text-white"><i class="fas fa-gem"></i></div>
-                <div>
-                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Баланс</p>
-                    <p id="totalTon" class="font-bold text-gray-800 text-lg">0.0000 TON</p>
+        <div class="p-6 pb-2 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ana Bakiye</p>
+                <h2 id="totalBalanceDisp" class="text-2xl font-black text-gray-800">0.0000 TON</h2>
+            </div>
+            <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold border border-blue-100">
+                LIVE
+            </div>
+        </div>
+
+        <hr class="mx-6 border-slate-100">
+
+        <main class="flex-grow p-6 overflow-y-auto">
+            
+            <section id="miningPage" class="page active text-center space-y-6">
+                <div class="ton-logo mt-4">
+                    <i class="fa-solid fa-diamond text-6xl text-white"></i>
                 </div>
-            </div>
-            <button class="bg-gray-100 p-2.5 rounded-xl text-gray-600"><i class="fas fa-wallet"></i></button>
-        </div>
+                
+                <div>
+                    <h1 id="miningCounter" class="text-4xl font-black text-slate-800 tracking-tighter">0.00000000</h1>
+                    <p class="text-blue-500 font-bold text-sm">TON KAZILIYOR</p>
+                </div>
 
-        <div class="glass-card p-8 text-center">
-            <div class="ton-logo-container">
-                <div class="ton-symbol"><i class="fa-solid fa-diamond"></i></div>
-            </div>
+                <div class="inline-block px-6 py-2 bg-slate-100 rounded-2xl border border-slate-200">
+                    <span id="timerDisplay" class="text-slate-600 font-mono font-bold">KALAN: 01:00</span>
+                </div>
 
-            <div class="mt-6">
-                <h1 id="miningCounter" class="text-3xl font-black text-gray-800 tracking-tighter">0.00000000 TON</h1>
-                <p class="text-sm text-yellow-500 font-bold mt-1">76.88 GH/s <i class="fas fa-bolt"></i></p>
-            </div>
-
-            <div class="mt-4 py-2 px-6 bg-blue-50 rounded-full inline-block border border-blue-100">
-                <span id="timerDisplay" class="text-blue-600 font-bold text-sm">KALAN SÜRE: 01:00</span>
-            </div>
-
-            <div class="flex flex-col space-y-3 mt-8">
-                <button onclick="collectMining()" class="w-full bg-sky-500 hover:bg-sky-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-sky-200 transition-all active:scale-95">
-                    ЗАБРАТЬ (TOPLA)
+                <button onclick="collectMining()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black shadow-xl shadow-blue-200 active:scale-95 transition-transform">
+                    KAZANCI TOPLA (ЗАБРАТЬ)
                 </button>
-                <div class="text-[10px] text-gray-400 font-medium">SÜRE BİTİNCE OTOMATİK REKLAM İZLENİR</div>
-            </div>
-        </div>
+                
+                <p class="text-[11px] text-gray-400">Süre dolduğunda reklam otomatik başlar ve kazım devam eder.</p>
+            </section>
 
-        <div class="glass-card p-4 flex justify-around text-gray-300">
-            <i class="fas fa-wallet text-xl"></i>
-            <i class="fas fa-users text-xl"></i>
-            <i class="fas fa-铺 text-xl text-sky-500"></i>
-            <i class="fas fa-chart-pie text-xl"></i>
-            <i class="fas fa-cog text-xl"></i>
-        </div>
+            <section id="walletPage" class="page space-y-4">
+                <h2 class="text-xl font-black text-slate-800">Cüzdan ve Çekim</h2>
+                <div class="glass-card p-6 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+                    <p class="text-xs opacity-60">Çekilebilir Tutar</p>
+                    <h3 id="withdrawBalanceDisp" class="text-3xl font-bold mt-1">0.0000 TON</h3>
+                </div>
+
+                <div class="glass-card p-4 space-y-4 border border-slate-100">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">TON Cüzdan Adresi</label>
+                        <input type="text" placeholder="UQ..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 block mb-1">Çekilecek Miktar</label>
+                        <input type="number" id="withdrawAmount" placeholder="Min: 0.5 TON" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button onclick="requestWithdraw()" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 active:scale-95 transition">
+                        TON ÇEK (WITHDRAW)
+                    </button>
+                    <p class="text-[10px] text-center text-gray-400 italic">Çekim talepleri 24 saat içinde onaylanır.</p>
+                </div>
+            </section>
+
+            <section id="tasksPage" class="page space-y-4">
+                <h2 class="text-xl font-black text-slate-800">Günlük Görevler</h2>
+                <div class="p-4 bg-white border border-slate-100 rounded-2xl flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-telegram text-blue-500 text-2xl"></i>
+                        <div>
+                            <p class="text-sm font-bold">Kanalımıza Katıl</p>
+                            <p class="text-[10px] text-emerald-500">+0.05 TON</p>
+                        </div>
+                    </div>
+                    <button class="bg-slate-100 px-4 py-2 rounded-xl text-xs font-bold">GİT</button>
+                </div>
+            </section>
+
+        </main>
+
+        <nav class="p-4 bg-white border-t border-slate-100 flex justify-around">
+            <button onclick="showPage('miningPage')" class="nav-btn text-blue-600 flex flex-col items-center space-y-1">
+                <i class="fas fa-hammer text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Mining</span>
+            </button>
+            <button onclick="showPage('walletPage')" class="nav-btn text-gray-400 flex flex-col items-center space-y-1">
+                <i class="fas fa-wallet text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Cüzdan</span>
+            </button>
+            <button onclick="showPage('tasksPage')" class="nav-btn text-gray-400 flex flex-col items-center space-y-1">
+                <i class="fas fa-tasks text-xl"></i>
+                <span class="text-[10px] font-bold uppercase">Görevler</span>
+            </button>
+        </nav>
     </div>
 
     <script>
         let currentMining = 0.0;
         let totalBalance = 0.0;
-        let timeLeft = 60; // 60 saniye
+        let timeLeft = 60;
         let isMining = true;
 
-        const miningDisplay = document.getElementById('miningCounter');
-        const totalDisplay = document.getElementById('totalTon');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const adOverlay = document.getElementById('adOverlay');
+        // Sayfa Değiştirme Fonksiyonu
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // Buton renklerini güncelle
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-blue-600', 'text-gray-400'));
+            event.currentTarget.classList.replace('text-gray-400', 'text-blue-600');
+        }
 
-        // Ana Döngü
-        const mainLogic = setInterval(() => {
-            if (isMining) {
-                if (timeLeft > 0) {
-                    // Saniyede 0.00005 TON kazanç
-                    currentMining += 0.00005;
-                    miningDisplay.innerText = currentMining.toFixed(8) + " TON";
-                    
-                    timeLeft--;
-                    updateTimerUI();
-                } else {
-                    triggerAutoAd();
-                }
+        // Mining Döngüsü
+        setInterval(() => {
+            if (isMining && timeLeft > 0) {
+                currentMining += 0.00005;
+                document.getElementById('miningCounter').innerText = currentMining.toFixed(8);
+                timeLeft--;
+                updateTimerUI();
+            } else if (timeLeft <= 0 && isMining) {
+                autoAdCycle();
             }
         }, 1000);
 
         function updateTimerUI() {
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            timerDisplay.innerText = `KALAN SÜRE: ${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timerDisplay').innerText = `KALAN: ${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        function triggerAutoAd() {
+        function autoAdCycle() {
             isMining = false;
-            adOverlay.style.display = 'flex'; // Reklam ekranını göster
-            
-            // 5 saniye "reklam izleniyor" simülasyonu
+            document.getElementById('adOverlay').style.display = 'flex';
             setTimeout(() => {
-                adOverlay.style.display = 'none';
-                timeLeft = 60; // Süreyi yenile
+                document.getElementById('adOverlay').style.display = 'none';
+                timeLeft = 60;
                 isMining = true;
                 updateTimerUI();
-            }, 5000); 
+            }, 5000); // 5 saniye otomatik reklam
         }
 
         function collectMining() {
             if(currentMining > 0) {
                 totalBalance += currentMining;
-                totalDisplay.innerText = totalBalance.toFixed(4) + " TON";
                 currentMining = 0;
-                miningDisplay.innerText = "0.00000000 TON";
+                document.getElementById('miningCounter').innerText = "0.00000000";
+                updateBalances();
+            }
+        }
+
+        function updateBalances() {
+            const val = totalBalance.toFixed(4) + " TON";
+            document.getElementById('totalBalanceDisp').innerText = val;
+            document.getElementById('withdrawBalanceDisp').innerText = val;
+        }
+
+        function requestWithdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            if (amount > totalBalance) {
+                alert("Yetersiz bakiye!");
+            } else if (amount < 0.5) {
+                alert("Minimum çekim miktarı 0.5 TON'dur.");
+            } else {
+                alert("Çekim talebiniz alındı! Cüzdanınız kontrol ediliyor.");
+                totalBalance -= parseFloat(amount);
+                updateBalances();
             }
         }
     </script>
