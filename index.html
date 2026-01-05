@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Mining - Live Only</title>
+    <title>Fonix Mining Pro</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script type="module">
+        // Firebase Modülleri
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
@@ -29,10 +30,10 @@
         const tg = window.Telegram.WebApp;
 
         // Değişkenler
-        let userId = tg.initDataUnsafe?.user?.id || "web_tester";
+        let userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_user_123";
         let balance = 0.0;
         let currentMining = 0.0;
-        let isMiningActive = false; // Başlangıçta kapalı
+        let isMiningActive = false;
         let adCounter = 0;
 
         const adWidget = new AdexiumWidget({
@@ -40,68 +41,67 @@
             adFormat: 'interstitial'
         });
 
-        // Firebase Veri Yükleme
+        // VERİ YÜKLEME
         async function loadData() {
             try {
-                const userDoc = doc(db, "users", userId.toString());
-                const snap = await getDoc(userDoc);
+                const userRef = doc(db, "users", userId);
+                const snap = await getDoc(userRef);
                 
                 if (snap.exists()) {
                     const data = snap.data();
                     balance = data.balance || 0;
                     currentMining = data.currentMining || 0;
                 } else {
-                    await setDoc(userDoc, { balance: 0, currentMining: 0, joinDate: new Date() });
+                    await setDoc(userRef, { 
+                        balance: 0, 
+                        currentMining: 0, 
+                        username: tg.initDataUnsafe?.user?.username || "Bilinmiyor",
+                        joinDate: serverTimestamp() 
+                    });
                 }
-                
-                isMiningActive = true; // Veriler gelince kazım başlar
+                isMiningActive = true;
                 updateUI();
-            } catch (e) {
-                console.error("Firebase Hatası:", e);
-                tg.showAlert("Veritabanına bağlanılamadı!");
+            } catch (error) {
+                console.error("Veri yükleme hatası:", error);
+                tg.showAlert("Veritabanı bağlantısı kurulamadı!");
             }
         }
 
-        // Firebase Veri Kaydetme
+        // VERİ KAYDETME
         async function saveData() {
             if (!isMiningActive) return;
-            const userDoc = doc(db, "users", userId.toString());
-            await updateDoc(userDoc, {
-                balance: balance,
-                currentMining: currentMining,
-                lastActive: new Date()
-            });
+            try {
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, {
+                    balance: balance,
+                    currentMining: currentMining,
+                    lastSeen: serverTimestamp()
+                });
+            } catch (e) { console.error("Kaydetme hatası:", e); }
         }
 
-        // Ana Döngü (Uygulama açıkken çalışır)
+        // MINING MOTORU
         setInterval(() => {
-            if(isMiningActive) {
-                currentMining += 0.000005; // Saniyede 0.000005
+            if (isMiningActive) {
+                currentMining += 0.000005;
                 adCounter++;
-                
                 document.getElementById('miningVal').innerText = currentMining.toFixed(8);
                 
-                // 25 Saniyede Bir Reklam
-                if(adCounter >= 25) {
+                // 25 Saniyede Reklam
+                if (adCounter >= 25) {
                     adCounter = 0;
-                    isMiningActive = false; // Reklam sırasında kazımı durdur
+                    isMiningActive = false;
                     adWidget.autoMode();
-                    
-                    // Reklam bitişi varsayımı (3 sn sonra)
-                    setTimeout(() => { 
-                        isMiningActive = true; 
-                        saveData(); // Reklamdan sonra buluta yedekle
-                    }, 3000);
+                    setTimeout(() => { isMiningActive = true; saveData(); }, 4000);
                 }
 
-                // Her 15 saniyede bir otomatik bulut yedeği
-                if(adCounter % 15 === 0) saveData();
+                // 15 Saniyede Bir Oto Kayıt
+                if (adCounter % 15 === 0) saveData();
             }
         }, 1000);
 
-        // Global Fonksiyonlar
+        // FONKSİYONLARI PENCEREYE BAĞLA
         window.collect = async () => {
-            if (currentMining <= 0) return;
             balance += currentMining;
             currentMining = 0;
             updateUI();
@@ -113,11 +113,10 @@
             const addr = document.getElementById('wAddress').value.trim();
             const amt = parseFloat(document.getElementById('wAmount').value);
 
-            if (addr.length < 15 || isNaN(amt) || amt < 0.10) {
-                tg.showAlert("Hatalı adres veya geçersiz miktar (Min 0.10).");
+            if (addr.length < 10 || isNaN(amt) || amt < 0.10) {
+                tg.showAlert("Hatalı veri! Min: 0.10 TON");
                 return;
             }
-
             if (amt > balance) {
                 tg.showAlert("Yetersiz bakiye!");
                 return;
@@ -125,28 +124,31 @@
 
             tg.showConfirm(`${amt} TON çekilsin mi?`, async (ok) => {
                 if(ok) {
-                    balance -= amt;
-                    updateUI();
-                    await addDoc(collection(db, "withdrawals"), {
-                        userId, addr, amt, status: "pending", date: new Date()
-                    });
-                    await saveData();
-                    tg.showAlert("Talebiniz gönderildi!");
+                    try {
+                        balance -= amt;
+                        updateUI();
+                        await addDoc(collection(db, "withdrawals"), {
+                            userId, addr, amt, status: "pending", date: serverTimestamp()
+                        });
+                        await saveData();
+                        tg.showAlert("Talebiniz yöneticiye iletildi.");
+                    } catch (e) { tg.showAlert("Hata oluştu."); }
                 }
             });
         };
 
         window.switchTab = (id, btn) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.style.color = '#6b7280');
             btn.style.color = '#0088cc';
             tg.HapticFeedback.selectionChanged();
         };
 
         function updateUI() {
-            document.getElementById('topBal').innerText = balance.toFixed(4) + " TON";
-            document.getElementById('walletBal').innerText = balance.toFixed(4) + " TON";
+            const bFmt = balance.toFixed(4) + " TON";
+            document.getElementById('topBal').innerText = bFmt;
+            document.getElementById('walletBal').innerText = bFmt;
             document.getElementById('miningVal').innerText = currentMining.toFixed(8);
         }
 
@@ -156,11 +158,9 @@
 
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-active { color: #0088cc !important; }
         .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); }
-        .gem-glow { filter: drop-shadow(0 0 15px rgba(0, 136, 204, 0.4)); animation: pulse 2s infinite; }
+        .gem-glow { filter: drop-shadow(0 0 20px rgba(0, 136, 204, 0.4)); animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     </style>
 </head>
@@ -168,27 +168,27 @@
     <div class="w-full max-w-md bg-[#0d1117] flex flex-col relative border-x border-[#30363d]">
         
         <div class="p-4 border-b border-[#30363d] flex justify-between items-center bg-[#0b0e14]">
-            <h2 id="topBal" class="text-lg font-black tracking-tight text-blue-400">Yükleniyor...</h2>
+            <h2 id="topBal" class="text-lg font-black text-blue-400">Yükleniyor...</h2>
             <div class="flex items-center gap-1">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold text-gray-400 uppercase">Fonix Mining</span>
+                <span class="text-[10px] font-bold text-gray-500 uppercase">Fonix Mining</span>
             </div>
         </div>
 
-        <main class="flex-grow p-6 pb-24 overflow-y-auto">
-            <section id="tab-mining" class="tab-content active text-center">
+        <main class="flex-grow p-6 pb-24">
+            <section id="tab-mining" class="tab-content text-center">
                 <div class="my-16 flex justify-center"><i class="fa-solid fa-gem text-8xl text-blue-500 gem-glow"></i></div>
                 <h1 id="miningVal" class="text-6xl font-black tracking-tighter">0.00000000</h1>
-                <p class="text-blue-500 font-bold text-xs uppercase mb-10 tracking-widest">Kazılan TON</p>
-                <button onclick="collect()" class="w-full bg-white text-black py-5 rounded-2xl font-black text-lg shadow-2xl active:scale-95 transition">BAKİYEYE AKTAR</button>
+                <p class="text-blue-500 font-bold text-xs uppercase mb-10">Kazanılan</p>
+                <button onclick="collect()" class="w-full bg-white text-black py-5 rounded-2xl font-black active:scale-95 transition shadow-lg">BAKİYEYE AKTAR</button>
             </section>
 
-            <section id="tab-wallet" class="tab-content space-y-4">
+            <section id="tab-wallet" class="tab-content hidden space-y-4">
                 <h2 class="text-2xl font-black">Cüzdan</h2>
                 <div class="bg-[#161b22] p-6 rounded-3xl border border-[#30363d]"><h3 id="walletBal" class="text-4xl font-black text-blue-400">0.0000 TON</h3></div>
-                <div class="space-y-3 bg-[#161b22] p-6 rounded-3xl border border-[#30363d]">
-                    <input type="text" id="wAddress" placeholder="TON Cüzdan Adresi" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm outline-none focus:border-blue-500">
-                    <input type="number" id="wAmount" placeholder="Miktar (Min 0.10)" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm outline-none focus:border-blue-500">
+                <div class="bg-[#161b22] p-6 rounded-3xl border border-[#30363d] space-y-4">
+                    <input type="text" id="wAddress" placeholder="Cüzdan Adresi" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm outline-none">
+                    <input type="number" id="wAmount" placeholder="Miktar" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-xl text-sm outline-none">
                     <button onclick="handleWithdrawal()" class="w-full ton-btn py-4 rounded-xl font-black">PARA ÇEK</button>
                 </div>
             </section>
