@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Mining - 30s Cycle</title>
+    <title>TON Mining - Fast Cycle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -11,7 +11,7 @@
 
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page { display: none; animation: fadeIn 0.2s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
@@ -21,7 +21,7 @@
             z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
         }
         .progress-ring {
-            width: 100px; height: 100px; border: 6px solid #1e293b;
+            width: 80px; height: 80px; border: 6px solid #1e293b;
             border-top: 6px solid #38bdf8; border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -34,9 +34,9 @@
 
     <div id="adVerify" class="ad-overlay">
         <div class="progress-ring mb-6"></div>
-        <h2 class="text-xl font-black mb-2">REKLAM DOĞRULANIYOR</h2>
-        <p class="text-gray-500 text-sm px-10 text-center">Reklam arka planda açıldı. 30 saniye ek süre için bekleyin...</p>
-        <div id="adTimer" class="mt-6 text-5xl font-mono text-sky-400 font-black">10</div>
+        <h2 class="text-xl font-black mb-2 tracking-tight">ENERJİ YÜKLENİYOR</h2>
+        <p class="text-gray-500 text-sm px-10 text-center">Reklam onaylanıyor, lütfen bekleyin...</p>
+        <div id="adTimer" class="mt-6 text-6xl font-mono text-sky-400 font-black">5</div>
     </div>
 
     <div class="w-full max-w-md bg-[#0f1218] flex flex-col relative border-x border-gray-800">
@@ -62,7 +62,7 @@
 
                 <div class="space-y-1">
                     <h1 id="miningCounter" class="text-5xl font-black tracking-tighter text-white">0.00000000</h1>
-                    <p class="text-sky-500 font-bold text-xs tracking-widest">TON KAZILIYOR</p>
+                    <p class="text-sky-500 font-bold text-xs tracking-widest uppercase">TON Kazılıyor</p>
                 </div>
 
                 <div class="mt-10 bg-gray-900/80 p-5 rounded-[30px] border border-gray-800">
@@ -70,7 +70,7 @@
                         <span class="text-xs font-bold text-gray-400 uppercase">Kalan Enerji</span>
                         <span id="timerText" class="text-sky-400 font-mono font-bold bg-sky-950 px-3 py-1 rounded-lg">00:30</span>
                     </div>
-                    <div class="w-full bg-gray-800 h-2 rounded-full">
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
                         <div id="progressBar" class="bg-sky-500 h-full transition-all duration-1000" style="width: 100%"></div>
                     </div>
                 </div>
@@ -79,34 +79,35 @@
                     <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black active:scale-95 transition shadow-lg">
                         KAZANCI TOPLA
                     </button>
-                    <button id="adBtn" onclick="startAd()" class="w-full bg-sky-500 text-white py-4 rounded-2xl font-black hidden animate-bounce">
-                        <i class="fa-solid fa-play mr-2"></i> +30 SN SÜRE KAZAN
+                    <button id="adBtn" onclick="startAd()" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black hidden animate-pulse">
+                        <i class="fa-solid fa-play mr-2"></i> +30 SN ENERJİ AL
                     </button>
                 </div>
             </section>
 
             <section id="walletPage" class="page space-y-6">
                 <h2 class="text-2xl font-black">Cüzdan</h2>
-                <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800">
+                <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800 shadow-inner">
                     <p class="text-gray-500 text-xs font-bold">TOPLAM BAKİYE</p>
                     <h3 id="walletBalance" class="text-3xl font-black mt-1">0.0000 TON</h3>
                 </div>
                 <div class="space-y-4">
-                    <input type="text" placeholder="TON Adresiniz" class="w-full bg-gray-900 border border-gray-800 p-4 rounded-2xl text-sm focus:outline-none">
-                    <button class="w-full bg-gray-800 py-4 rounded-2xl font-bold text-gray-400 cursor-not-allowed">PARA ÇEK (Min 0.5)</button>
+                    <label class="text-xs text-gray-400 ml-2 font-bold uppercase">TON Adresiniz</label>
+                    <input type="text" placeholder="UQ... ya da EQ..." class="w-full bg-gray-900 border border-gray-800 p-4 rounded-2xl text-sm focus:outline-none focus:border-sky-500 transition">
+                    <button class="w-full bg-gray-800 py-4 rounded-2xl font-bold text-gray-600 cursor-not-allowed">PARA ÇEK (Min 0.5)</button>
                 </div>
             </section>
 
         </main>
 
         <nav class="p-6 bg-[#0b0e14] border-t border-gray-800 flex justify-around">
-            <button onclick="showPage('miningPage')" class="text-sky-500 flex flex-col items-center gap-1">
+            <button onclick="showPage('miningPage')" class="nav-icon text-sky-500 flex flex-col items-center gap-1 transition">
                 <i class="fa-solid fa-hammer text-xl"></i>
                 <span class="text-[10px] font-bold">MINING</span>
             </button>
-            <button onclick="showPage('walletPage')" class="text-gray-500 flex flex-col items-center gap-1">
+            <button onclick="showPage('walletPage')" class="nav-icon text-gray-500 flex flex-col items-center gap-1 transition">
                 <i class="fa-solid fa-wallet text-xl"></i>
-                <span class="text-[10px] font-bold">WALLET</span>
+                <span class="text-[10px] font-bold">CÜZDAN</span>
             </button>
         </nav>
     </div>
@@ -114,19 +115,21 @@
     <script>
         let balance = 0.0;
         let mining = 0.0;
-        let timeLeft = 30; // Başlangıç 30 sn
+        let timeLeft = 30; 
         let isActive = true;
 
-        // Sayfa yüklendiğinde reklamı tanımla
+        // Adexium Widget Hazırlığı
         let adexWidget;
         document.addEventListener('DOMContentLoaded', () => {
-            adexWidget = new AdexiumWidget({wid: 'f7f09b78-558a-498d-98c5-ab496ebd1cd9', firstAdImpressionIntervalInSeconds: 1});
+            if (typeof AdexiumWidget !== 'undefined') {
+                adexWidget = new AdexiumWidget({wid: 'f7f09b78-558a-498d-98c5-ab496ebd1cd9', firstAdImpressionIntervalInSeconds: 1});
+            }
         });
 
-        // 1 Saniyelik Ana Döngü
+        // 1 Saniyelik Döngü
         setInterval(() => {
             if (isActive && timeLeft > 0) {
-                mining += 0.00005; // Her saniye 0.00005 TON
+                mining += 0.00005; // 0.00005 TON / Saniye
                 timeLeft--;
                 document.getElementById('miningCounter').innerText = mining.toFixed(8);
                 updateUI();
@@ -143,20 +146,22 @@
         function stopMining() {
             isActive = false;
             document.getElementById('adBtn').classList.remove('hidden');
-            document.getElementById('timerText').innerText = "BİTTİ";
+            document.getElementById('timerText').innerText = "ENERJİ BİTTİ";
             document.getElementById('timerText').classList.replace('text-sky-400', 'text-red-500');
         }
 
         function startAd() {
-            // Reklamı tetikle (Popunder)
-            adexWidget.autoMode();
+            // Reklamı Tetikle
+            if(adexWidget) adexWidget.autoMode();
 
-            // Doğrulama ekranını aç
+            // 5 Saniyelik Doğrulama Ekranı
             const overlay = document.getElementById('adVerify');
             const adTimerDisp = document.getElementById('adTimer');
             overlay.style.display = 'flex';
             
-            let verifyTime = 10;
+            let verifyTime = 5; // 5 saniye bekleme
+            adTimerDisp.innerText = verifyTime;
+
             const intv = setInterval(() => {
                 verifyTime--;
                 adTimerDisp.innerText = verifyTime;
@@ -171,7 +176,7 @@
             document.getElementById('adVerify').style.display = 'none';
             document.getElementById('adBtn').classList.add('hidden');
             document.getElementById('timerText').classList.replace('text-red-500', 'text-sky-400');
-            timeLeft = 30; // 30 sn süre ver
+            timeLeft = 30;
             isActive = true;
             updateUI();
         }
@@ -190,6 +195,11 @@
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            
+            // Alt menü renklerini güncelle
+            const buttons = document.querySelectorAll('.nav-icon');
+            buttons.forEach(btn => btn.classList.replace('text-sky-500', 'text-gray-500'));
+            event.currentTarget.classList.replace('text-gray-500', 'text-sky-500');
         }
     </script>
 </body>
