@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Mining</title>
+    <title>Fonix Mining - 10s Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -18,10 +18,15 @@
         
         .nav-active { color: #0088cc !important; border-top: 2px solid #0088cc; }
         .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); }
-        .gem-container {
-            width: 200px; height: 200px; margin: 0 auto;
-            background: radial-gradient(circle, rgba(0, 136, 204, 0.1) 0%, transparent 70%);
-            display: flex; align-items: center; justify-content: center;
+        
+        /* Elmas Animasyonu */
+        .gem-glow {
+            filter: drop-shadow(0 0 15px rgba(0, 136, 204, 0.4));
+            animation: pulse-gem 2s infinite;
+        }
+        @keyframes pulse-gem {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
     </style>
 </head>
@@ -36,15 +41,15 @@
             </div>
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold text-gray-400">FONIX MINING</span>
+                <span class="text-[10px] font-bold text-gray-400">FONIX LIVE</span>
             </div>
         </div>
 
         <main class="flex-grow p-6 pb-24">
             
             <section id="tab-mining" class="tab-content active text-center">
-                <div class="gem-container my-12">
-                    <i class="fa-solid fa-gem text-8xl text-blue-500 drop-shadow-[0_0_20px_rgba(0,136,204,0.5)]"></i>
+                <div class="my-16 flex justify-center">
+                    <i class="fa-solid fa-gem text-8xl text-blue-500 gem-glow"></i>
                 </div>
 
                 <div class="space-y-1 mb-10">
@@ -52,27 +57,29 @@
                     <p class="text-blue-500 font-bold text-xs uppercase tracking-widest">Kazılan TON</p>
                 </div>
 
-                <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition">
-                    TOPLA
+                <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition shadow-xl">
+                    KAZANCI TOPLA
                 </button>
-                <p class="mt-4 text-[10px] text-gray-600">Her 20 saniyede bir otomatik reklam kontrolü yapılır.</p>
+                <p class="mt-6 text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    Her 0.0005 TON Birikince Reklam Tetiklenir
+                </p>
             </section>
 
             <section id="tab-wallet" class="tab-content space-y-4">
                 <h2 class="text-2xl font-black mb-4">Cüzdan</h2>
                 <div class="bg-[#161b22] p-6 rounded-3xl border border-[#30363d]">
-                    <p class="text-gray-500 text-[10px] font-bold uppercase">Mevcut Bakiye</p>
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Toplam Bakiyeniz</p>
                     <h3 id="walletBal" class="text-4xl font-black mt-1">0.0000 TON</h3>
                 </div>
                 <div class="bg-[#161b22] p-6 rounded-3xl border border-[#30363d] space-y-4">
-                    <input type="text" placeholder="TON Adresiniz" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-2xl text-sm focus:outline-none">
-                    <button onclick="withdraw()" class="w-full ton-btn py-4 rounded-2xl font-black">PARA ÇEK (Min 0.10)</button>
+                    <input type="text" placeholder="TON Adresiniz (UQ...)" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-2xl text-sm focus:outline-none focus:border-blue-500 transition-all">
+                    <button onclick="withdraw()" class="w-full ton-btn py-4 rounded-2xl font-black shadow-lg shadow-blue-500/10">PARA ÇEK (Min 0.10)</button>
                 </div>
             </section>
 
             <section id="tab-tasks" class="tab-content space-y-4">
                 <h2 class="text-2xl font-black mb-4">Görevler</h2>
-                <div id="channelTask" class="bg-[#161b22] p-4 rounded-2xl border border-[#30363d] flex justify-between items-center">
+                <div class="bg-[#161b22] p-4 rounded-2xl border border-[#30363d] flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <i class="fa-brands fa-telegram text-2xl text-blue-400"></i>
                         <div>
@@ -80,22 +87,22 @@
                             <p class="text-[10px] text-blue-400 font-bold">+0.05 TON</p>
                         </div>
                     </div>
-                    <button id="taskBtn" onclick="doTask()" class="ton-btn px-6 py-2 rounded-xl text-xs font-black transition">YAP</button>
+                    <button onclick="doTask(this)" class="ton-btn px-6 py-2 rounded-xl text-xs font-black">YAP</button>
                 </div>
             </section>
 
         </main>
 
         <nav class="p-4 border-t border-[#30363d] flex justify-around bg-[#0b0e14] fixed bottom-0 w-full max-w-md">
-            <button onclick="switchTab('tab-mining', this)" class="nav-btn nav-active flex flex-col items-center gap-1 flex-1">
+            <button onclick="switchTab('tab-mining', this)" class="nav-btn nav-active flex flex-col items-center gap-1 flex-1 transition-all">
                 <i class="fa-solid fa-hammer text-lg"></i>
                 <span class="text-[10px] font-bold uppercase">Kazım</span>
             </button>
-            <button onclick="switchTab('tab-wallet', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1">
+            <button onclick="switchTab('tab-wallet', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1 transition-all">
                 <i class="fa-solid fa-wallet text-lg"></i>
                 <span class="text-[10px] font-bold uppercase">Cüzdan</span>
             </button>
-            <button onclick="switchTab('tab-tasks', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1">
+            <button onclick="switchTab('tab-tasks', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1 transition-all">
                 <i class="fa-solid fa-list-check text-lg"></i>
                 <span class="text-[10px] font-bold uppercase">Görev</span>
             </button>
@@ -110,39 +117,41 @@
         let balance = 0.0;
         let currentMining = 0.0;
         let isMiningActive = true;
-        let adIntervalSeconds = 0;
+        let totalMiningSession = 0.0; // Reklam kontrolü için oturum sayacı
 
         const adexiumWidget = new AdexiumWidget({
             wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
             adFormat: 'interstitial'
         });
 
-        // Ana Motor (1 Saniye)
+        // Ana Motor (Her Saniye)
         setInterval(() => {
             if(isMiningActive) {
-                currentMining += 0.00005;
-                adIntervalSeconds++;
+                const step = 0.00005;
+                currentMining += step;
+                totalMiningSession += step;
+                
                 document.getElementById('miningVal').innerText = currentMining.toFixed(8);
                 
-                // 20 Saniyede bir otomatik reklam tetikle
-                if(adIntervalSeconds >= 20) {
-                    runAutoAd();
+                // Belirttiğin miktar (0.0005) dolunca reklam çıkar (Her 10 saniyede bir)
+                if(totalMiningSession >= 0.0005) {
+                    triggerAd();
                 }
             }
         }, 1000);
 
-        function runAutoAd() {
-            isMiningActive = false; // Madenciliği durdur
-            adIntervalSeconds = 0; // Sayacı sıfırla
+        function triggerAd() {
+            isMiningActive = false; // Kazımı durdur
+            totalMiningSession = 0; // Reklam sayacını sıfırla
             
-            // Reklamı çağır
+            // Adexium reklamı başlat
             adexiumWidget.autoMode();
             
-            // Reklamın yüklenmesi/kapanması için kısa bir tampon süre sonra madenciliği geri başlat
+            // Reklamın açılma/kapanma süresi için 2 saniye bekle ve devam et
             setTimeout(() => {
                 isMiningActive = true;
                 tg.HapticFeedback.notificationOccurred('success');
-            }, 3000); 
+            }, 2000);
         }
 
         function collect() {
@@ -155,16 +164,15 @@
             }
         }
 
-        function doTask() {
+        function doTask(btn) {
             tg.openTelegramLink('https://t.me/fonixmining');
             setTimeout(() => {
                 balance += 0.05;
                 updateBalances();
-                const btn = document.getElementById('taskBtn');
                 btn.innerText = "OK";
                 btn.classList.replace('ton-btn', 'bg-gray-700');
                 btn.disabled = true;
-                tg.showAlert('Görev Tamamlandı: 0.05 TON eklendi.');
+                tg.showAlert('Ödül Alındı!');
             }, 3000);
         }
 
@@ -183,7 +191,7 @@
         }
 
         function withdraw() {
-            tg.showAlert("Min çekim 0.10 TON. Bakiyeniz incelendikten sonra gönderilecektir.");
+            tg.showAlert("Minimum çekim 0.10 TON. Talebiniz incelendikten sonra cüzdanınıza iletilecektir.");
         }
     </script>
 </body>
