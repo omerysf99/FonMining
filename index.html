@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TON Mining App</title>
+    <title>Fon Mining App</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -16,7 +16,6 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Reklam Bekleme Katmanı */
         #adOverlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98);
             z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
@@ -24,15 +23,17 @@
         
         .nav-active { color: #0088cc !important; }
         .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #005580 100%); }
+        .task-card { background: #161b22; border: 1px solid #30363d; transition: all 0.2s; }
+        .task-done { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body class="flex justify-center min-h-screen">
 
     <div id="adOverlay">
         <div class="text-center p-8">
-            <div class="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
             <h2 class="text-2xl font-black mb-2">ENERJİ YÜKLENİYOR</h2>
-            <p class="text-gray-500 text-sm mb-6">Reklam bittikten sonra süreniz tanımlanacaktır.</p>
+            <p class="text-gray-500 text-sm mb-6">Reklam bittikten sonra kazım devam edecektir.</p>
             <div id="adCountdown" class="text-5xl font-mono font-bold text-white">10</div>
         </div>
     </div>
@@ -41,17 +42,17 @@
         
         <div class="p-4 border-b border-[#30363d] flex justify-between items-center bg-[#0b0e14]">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 ton-btn rounded-lg flex items-center justify-center">
+                <div class="w-8 h-8 ton-btn rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
                     <i class="fa-solid fa-gem text-sm"></i>
                 </div>
                 <h2 id="topBal" class="text-lg font-black tracking-tight">0.0000 TON</h2>
             </div>
             <div class="text-[10px] font-bold text-gray-500 bg-gray-800/50 px-3 py-1 rounded-full border border-gray-700">
-                MIN: 0.10 TON
+                FON MINING
             </div>
         </div>
 
-        <main class="flex-grow p-6 overflow-y-auto">
+        <main class="flex-grow p-6 overflow-y-auto pb-24">
             
             <section id="tab-mining" class="tab-content active text-center">
                 <div class="my-10 relative">
@@ -65,7 +66,7 @@
 
                 <div class="bg-[#161b22] p-5 rounded-3xl border border-[#30363d]">
                     <div class="flex justify-between items-center mb-3">
-                        <span class="text-xs font-bold text-gray-500">ENERJİ SÜRESİ</span>
+                        <span class="text-xs font-bold text-gray-500 uppercase">Enerji Durumu</span>
                         <span id="timerTxt" class="text-blue-400 font-mono font-bold">00:30</span>
                     </div>
                     <div class="w-full bg-[#0b0e14] h-2 rounded-full overflow-hidden">
@@ -73,7 +74,7 @@
                     </div>
                 </div>
 
-                <button onclick="collect()" class="w-full mt-8 bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition">
+                <button onclick="collect()" class="w-full mt-8 bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition shadow-xl">
                     KAZANCI TOPLA
                 </button>
             </section>
@@ -87,37 +88,42 @@
                 <div class="bg-[#161b22] p-6 rounded-3xl border border-[#30363d] space-y-4">
                     <input type="text" placeholder="TON Cüzdan Adresiniz" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-2xl text-sm focus:outline-none focus:border-blue-500">
                     <input type="number" id="wAmt" placeholder="Miktar (Min 0.10)" class="w-full bg-[#0d1117] border border-[#30363d] p-4 rounded-2xl text-sm focus:outline-none">
-                    <button onclick="withdraw()" class="w-full ton-btn py-4 rounded-2xl font-black shadow-lg">PARA ÇEK</button>
+                    <button onclick="withdraw()" class="w-full ton-btn py-4 rounded-2xl font-black shadow-lg shadow-blue-500/20 active:scale-95 transition">PARA ÇEK</button>
                 </div>
+                <p class="text-center text-[10px] text-gray-600">Minimum çekim 0.10 TON'dur.</p>
             </section>
 
             <section id="tab-tasks" class="tab-content space-y-4">
                 <h2 class="text-2xl font-black mb-6">Görevler</h2>
-                <div class="bg-[#161b22] p-4 rounded-2xl border border-[#30363d] flex justify-between items-center opacity-60">
+                
+                <div id="channelTask" class="task-card p-4 rounded-2xl flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <i class="fa-brands fa-telegram text-2xl text-blue-400"></i>
+                        <div class="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center">
+                            <i class="fa-brands fa-telegram text-2xl text-blue-400"></i>
+                        </div>
                         <div>
                             <p class="text-sm font-bold">Kanala Katıl</p>
-                            <p class="text-[10px] text-gray-500">+0.05 TON</p>
+                            <p class="text-[10px] text-blue-400 font-bold">+0.0500 TON</p>
                         </div>
                     </div>
-                    <button class="bg-gray-800 px-4 py-1.5 rounded-lg text-xs font-bold">YAP</button>
+                    <button id="taskBtn" onclick="doTask()" class="ton-btn px-6 py-2 rounded-xl text-xs font-black shadow-lg active:scale-95 transition">YAP</button>
                 </div>
-                <p class="text-center text-gray-600 text-xs mt-10 italic">Yeni görevler yakında eklenecek...</p>
+
+                <p class="text-center text-gray-600 text-[10px] mt-10 italic uppercase tracking-widest">Daha fazla görev yakında...</p>
             </section>
 
         </main>
 
-        <nav class="p-4 border-t border-[#30363d] flex justify-around bg-[#0b0e14]">
-            <button onclick="switchTab('tab-mining', this)" class="nav-btn nav-active flex flex-col items-center gap-1">
+        <nav class="p-4 border-t border-[#30363d] flex justify-around bg-[#0b0e14] fixed bottom-0 w-full max-w-md">
+            <button onclick="switchTab('tab-mining', this)" class="nav-btn nav-active flex flex-col items-center gap-1 flex-1">
                 <i class="fa-solid fa-hammer text-xl"></i>
                 <span class="text-[10px] font-bold uppercase">Kazım</span>
             </button>
-            <button onclick="switchTab('tab-wallet', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1">
+            <button onclick="switchTab('tab-wallet', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1">
                 <i class="fa-solid fa-wallet text-xl"></i>
                 <span class="text-[10px] font-bold uppercase">Cüzdan</span>
             </button>
-            <button onclick="switchTab('tab-tasks', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1">
+            <button onclick="switchTab('tab-tasks', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 flex-1">
                 <i class="fa-solid fa-list-check text-xl"></i>
                 <span class="text-[10px] font-bold uppercase">Görevler</span>
             </button>
@@ -133,14 +139,15 @@
         let currentMining = 0.0;
         let timeLeft = 30;
         let isMiningActive = true;
+        let taskCompleted = false; // Görev durumu
 
-        // Adexium Widget Tanımlama
+        // Adexium Widget
         const adexiumWidget = new AdexiumWidget({
             wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
             adFormat: 'interstitial'
         });
 
-        // Ana Döngü
+        // Mining Motoru
         setInterval(() => {
             if(isMiningActive && timeLeft > 0) {
                 currentMining += 0.00005;
@@ -155,7 +162,7 @@
 
         function triggerAdFlow() {
             isMiningActive = false;
-            adexiumWidget.autoMode(); // Doğrudan reklamı tetikler
+            adexiumWidget.autoMode();
             
             document.getElementById('adOverlay').style.display = 'flex';
             let wait = 10;
@@ -172,6 +179,30 @@
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             }, 1000);
+        }
+
+        // KANAL GÖREVİ FONKSİYONU
+        function doTask() {
+            // Kanalı aç
+            tg.openTelegramLink('https://t.me/FonMining');
+            
+            // Ödülü ver (Gerçek sistemde bunu bir veritabanı ile kontrol etmelisin)
+            if (!taskCompleted) {
+                setTimeout(() => {
+                    balance += 0.05;
+                    taskCompleted = true;
+                    updateBalances();
+                    
+                    // Butonu güncelle
+                    const btn = document.getElementById('taskBtn');
+                    btn.innerText = "TAMAMLANDI";
+                    btn.classList.replace('ton-btn', 'bg-emerald-600');
+                    document.getElementById('channelTask').classList.add('task-done');
+                    
+                    tg.HapticFeedback.notificationOccurred('success');
+                    tg.showAlert('Tebrikler! 0.05 TON Görev Ödülü Eklendi.');
+                }, 2000); // 2 saniye sonra ödül yüklenir
+            }
         }
 
         function collect() {
@@ -201,11 +232,15 @@
         function withdraw() {
             const amt = parseFloat(document.getElementById('wAmt').value);
             if(amt >= 0.10 && amt <= balance) {
-                alert("Çekim talebi başarılı! İnceleniyor.");
-                balance -= amt;
-                updateBalances();
+                tg.showConfirm(`0.10 TON ve üzeri çekim talebiniz işleme alınsın mı?`, (confirm) => {
+                   if(confirm) {
+                       balance -= amt;
+                       updateBalances();
+                       tg.showAlert("Başarılı! Çekim talebiniz 24 saat içinde sonuçlanacaktır.");
+                   }
+                });
             } else {
-                alert("Hata: Geçersiz miktar veya yetersiz bakiye.");
+                tg.showAlert("Lütfen geçerli bir miktar girin (Min 0.10 TON).");
             }
         }
     </script>
