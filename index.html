@@ -3,161 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Mining - Auto Pop Fix</title>
+    <title>TON Mining - Video Ad Edition</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script type="text/javascript" src="https://cdn.atechp.space/assets/js/pp.min.js"></script>
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 
     <style>
-        body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .ad-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; /* Tıklanabilir olduğunu belli eder */
+        body { 
+            background-color: #0b0e14; 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden;
+            touch-action: manipulation;
         }
-        .ton-logo {
+        .ton-card { background: #161b22; border: 1px solid #30363d; border-radius: 28px; }
+        .page { display: none; }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Mining Logo Efekti */
+        .mining-logo {
             width: 140px; height: 140px; margin: 0 auto;
             background: radial-gradient(circle, #0088cc 0%, #001a2e 100%);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 40px rgba(0, 136, 204, 0.3);
+            box-shadow: 0 0 40px rgba(0, 136, 204, 0.2);
+            position: relative;
         }
-        .pulse-border { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); } }
+        .mining-active::after {
+            content: ''; position: absolute; inset: -10px;
+            border: 2px solid #0088cc; border-radius: 50%;
+            animation: ripple 2s infinite;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
     </style>
 </head>
-<body>
+<body class="flex justify-center min-h-screen">
 
-    <div id="adLayer" class="ad-overlay" onclick="handleAdClick()">
-        <div class="bg-blue-600 p-6 rounded-full mb-6 animate-bounce">
-            <i class="fa-solid fa-bolt text-4xl"></i>
-        </div>
-        <h2 class="text-2xl font-black text-white">ENERJİ YÜKLE</h2>
-        <p class="text-gray-400 mt-2">Devam etmek için ekrana dokun</p>
-        <div id="verifyTimer" class="hidden mt-4 text-4xl font-mono text-sky-400 font-black">5</div>
-    </div>
-
-    <div class="max-w-md mx-auto min-h-screen flex flex-col bg-[#0f1218]">
-        <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+    <div class="w-full max-w-md bg-[#0d1117] flex flex-col relative border-x border-[#30363d]">
+        
+        <div class="p-5 flex justify-between items-center border-b border-[#30363d] bg-[#0d1117]/80 backdrop-blur-md sticky top-0 z-10">
             <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiye</p>
-                <h2 id="totalBal" class="text-2xl font-black">0.0000 TON</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Bakiyeniz</p>
+                <h2 id="totalBalance" class="text-xl font-black text-white">0.0000 TON</h2>
             </div>
-            <i class="fa-solid fa-diamond text-sky-500 text-xl"></i>
+            <div class="flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                <span class="text-[10px] font-bold text-blue-400">CANLI</span>
+            </div>
         </div>
 
-        <div class="flex-grow flex flex-col items-center justify-center p-6 space-y-8">
-            <div id="logoContainer" class="ton-logo pulse-border">
-                <i class="fa-solid fa-diamond text-6xl text-white"></i>
-            </div>
-
-            <div class="text-center">
-                <h1 id="miningVal" class="text-5xl font-black tracking-tighter">0.00000000</h1>
-                <p class="text-sky-500 font-bold text-sm tracking-widest mt-1 uppercase">Madencilik Aktif</p>
-            </div>
-
-            <div class="w-full bg-gray-900 p-5 rounded-3xl border border-gray-800">
-                <div class="flex justify-between text-xs font-bold mb-3 uppercase tracking-tighter">
-                    <span class="text-gray-500">Reklama Kalan</span>
-                    <span id="timerTxt" class="text-sky-400 font-mono">00:30</span>
+        <main class="flex-grow p-6">
+            
+            <section id="miningPage" class="page active text-center">
+                <div class="mt-8 mb-10">
+                    <div id="logoAnim" class="mining-logo mining-active">
+                        <i class="fa-solid fa-gem text-5xl text-white"></i>
+                    </div>
                 </div>
-                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                    <div id="bar" class="bg-sky-500 h-full transition-all duration-1000" style="width: 100%"></div>
-                </div>
-            </div>
 
-            <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black shadow-xl active:scale-95 transition">
-                KAZANCI TOPLA
+                <div class="space-y-1">
+                    <h1 id="miningCounter" class="text-5xl font-black tracking-tighter text-white">0.00000000</h1>
+                    <p class="text-blue-400 font-bold text-xs tracking-widest uppercase">TON Kazılıyor</p>
+                </div>
+
+                <div class="mt-10 ton-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-bold text-gray-400">ENERJİ DURUMU</span>
+                        <span id="timer" class="text-blue-400 font-mono font-bold text-lg">00:30</span>
+                    </div>
+                    <div class="w-full bg-[#0d1117] h-3 rounded-full overflow-hidden p-0.5 border border-[#30363d]">
+                        <div id="bar" class="bg-blue-500 h-full rounded-full transition-all duration-1000" style="width: 100%"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-4 italic">Her 30 saniyede bir video reklam ile enerji yenilenir.</p>
+                </div>
+
+                <div class="mt-10">
+                    <button onclick="collect()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-lg active:scale-95 transition shadow-xl">
+                        KAZANCI TOPLA
+                    </button>
+                </div>
+            </section>
+
+            <section id="walletPage" class="page space-y-6">
+                <h2 class="text-2xl font-black">Cüzdan</h2>
+                <div class="ton-card p-6">
+                    <p class="text-gray-400 text-xs font-bold">ÇEKİLEBİLİR</p>
+                    <h3 id="walletBalance" class="text-3xl font-black mt-1">0.0000 TON</h3>
+                </div>
+                <div class="space-y-4">
+                    <input type="text" placeholder="TON Cüzdan Adresi" class="w-full bg-[#161b22] border border-[#30363d] p-4 rounded-2xl text-sm focus:outline-none focus:border-blue-500 transition">
+                    <button class="w-full bg-gray-800 text-gray-500 py-4 rounded-2xl font-bold cursor-not-allowed border border-[#30363d]">PARA ÇEK (Min 0.5)</button>
+                </div>
+            </section>
+
+        </main>
+
+        <nav class="p-6 border-t border-[#30363d] flex justify-around bg-[#0d1117]">
+            <button onclick="showPage('miningPage')" class="nav-btn text-blue-500 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-hammer text-xl"></i>
+                <span class="text-[10px] font-bold">KAZIM</span>
             </button>
-        </div>
-
-        <nav class="p-6 border-t border-gray-800 flex justify-around opacity-50">
-            <i class="fa-solid fa-hammer text-sky-500 text-xl"></i>
-            <i class="fa-solid fa-wallet text-gray-600 text-xl"></i>
-            <i class="fa-solid fa-gear text-gray-600 text-xl"></i>
+            <button onclick="showPage('walletPage')" class="nav-btn text-gray-500 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-wallet text-xl"></i>
+                <span class="text-[10px] font-bold">CÜZDAN</span>
+            </button>
         </nav>
     </div>
 
     <script>
+        // Telegram WebApp Başlatma
+        const WebApp = window.Telegram.WebApp;
+        WebApp.expand(); // Uygulamayı tam ekran yap
+        WebApp.ready();
+
         let balance = 0.0;
         let mining = 0.0;
         let timeLeft = 30;
         let isRunning = true;
-        let adexWidget;
 
-        // Reklamı yükle
-        document.addEventListener('DOMContentLoaded', () => {
-            adexWidget = new AdexiumWidget({wid: 'f7f09b78-558a-498d-98c5-ab496ebd1cd9', firstAdImpressionIntervalInSeconds: 1});
+        // Reklam Objesi Tanımlama
+        const adWidget = new AdexiumWidget({
+            wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
+            adFormat: 'interstitial' 
         });
 
-        // Ana Döngü
-        setInterval(() => {
+        // Mining Motoru
+        const miningInterval = setInterval(() => {
             if (isRunning && timeLeft > 0) {
                 mining += 0.00005;
                 timeLeft--;
-                document.getElementById('miningVal').innerText = mining.toFixed(8);
+                document.getElementById('miningCounter').innerText = mining.toFixed(8);
                 updateUI();
             } else if (timeLeft <= 0 && isRunning) {
-                showAdLayer();
+                triggerVideoAd();
             }
         }, 1000);
 
         function updateUI() {
-            document.getElementById('timerTxt').innerText = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
+            document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
             document.getElementById('bar').style.width = (timeLeft / 30 * 100) + "%";
         }
 
-        function showAdLayer() {
+        function triggerVideoAd() {
             isRunning = false;
-            document.getElementById('adLayer').style.display = 'flex';
-        }
-
-        // Reklam tetikleme ve doğrulama
-        function handleAdClick() {
-            // 1. Reklamı aç (Kullanıcı tıkladığı için tarayıcı izin verir)
-            if(adexWidget) adexWidget.autoMode();
-
-            // 2. Doğrulama animasyonuna geç
-            const timerBox = document.getElementById('verifyTimer');
-            const layerInfo = document.querySelector('#adLayer p');
-            const layerIcon = document.querySelector('#adLayer div');
+            document.getElementById('logoAnim').classList.remove('mining-active');
             
-            layerIcon.classList.remove('animate-bounce');
-            layerInfo.innerText = "Doğrulanıyor...";
-            timerBox.classList.remove('hidden');
+            // Reklamı Başlat
+            console.log("Reklam tetikleniyor...");
+            adWidget.autoMode();
 
-            let vTime = 5;
-            timerBox.innerText = vTime;
-
-            const vInt = setInterval(() => {
-                vTime--;
-                timerBox.innerText = vTime;
-                if(vTime <= 0) {
-                    clearInterval(vInt);
-                    resetMining();
-                }
-            }, 1000);
-        }
-
-        function resetMining() {
-            document.getElementById('adLayer').style.display = 'none';
-            // Görseli eski haline döndür (bir sonraki reklam için)
-            document.getElementById('verifyTimer').classList.add('hidden');
-            document.querySelector('#adLayer p').innerText = "Devam etmek için ekrana dokun";
-            document.querySelector('#adLayer div').classList.add('animate-bounce');
-            
-            timeLeft = 30;
-            isRunning = true;
-            updateUI();
+            // Interstitial (Video) reklamlar genellikle kullanıcı kapatana kadar sürer.
+            // Biz burada kullanıcıya 5 saniyelik bir geçiş süresi tanıyoruz.
+            setTimeout(() => {
+                timeLeft = 30;
+                isRunning = true;
+                document.getElementById('logoAnim').classList.add('mining-active');
+                updateUI();
+                WebApp.HapticFeedback.notificationOccurred('success'); // Titreşim ver
+            }, 5000); // Reklamın açılması için 5 sn tampon süre
         }
 
         function collect() {
             if(mining > 0) {
                 balance += mining;
                 mining = 0;
-                document.getElementById('miningVal').innerText = "0.00000000";
-                document.getElementById('totalBal').innerText = balance.toFixed(4) + " TON";
+                document.getElementById('miningCounter').innerText = "0.00000000";
+                const bText = balance.toFixed(4) + " TON";
+                document.getElementById('totalBalance').innerText = bText;
+                document.getElementById('walletBalance').innerText = bText;
+                WebApp.HapticFeedback.impactOccurred('medium');
             }
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            // Navigasyon renklerini ayarla
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-blue-500', 'text-gray-500'));
+            event.currentTarget.classList.replace('text-gray-500', 'text-blue-500');
         }
     </script>
 </body>
