@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TON Otomatik Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass-card { background: white; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        
+        .ton-logo-container {
+            width: 180px; height: 180px; margin: 20px auto;
+            background: radial-gradient(circle, #0088cc 0%, #005580 100%);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 136, 204, 0.3); position: relative;
+        }
+        .ton-symbol { font-size: 80px; color: white; font-weight: bold; }
+        
+        /* Reklam Geçiş Ekranı */
+        #adOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column;
+            align-items: center; justify-content: center; color: white;
+        }
+        .loader {
+            border: 5px solid #f3f3f3; border-top: 5px solid #0088cc;
+            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen">
+
+    <div id="adOverlay">
+        <div class="loader mb-4"></div>
+        <h2 class="text-xl font-bold">REKLAM İZLENİYOR...</h2>
+        <p class="text-gray-400 text-sm mt-2">Madencilik birazdan devam edecek</p>
+    </div>
+
+    <div class="w-full max-w-md p-4 space-y-4">
+        
+        <div class="glass-card p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-500 p-2.5 rounded-full text-white"><i class="fas fa-gem"></i></div>
+                <div>
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Баланс</p>
+                    <p id="totalTon" class="font-bold text-gray-800 text-lg">0.0000 TON</p>
+                </div>
+            </div>
+            <button class="bg-gray-100 p-2.5 rounded-xl text-gray-600"><i class="fas fa-wallet"></i></button>
+        </div>
+
+        <div class="glass-card p-8 text-center">
+            <div class="ton-logo-container">
+                <div class="ton-symbol"><i class="fa-solid fa-diamond"></i></div>
+            </div>
+
+            <div class="mt-6">
+                <h1 id="miningCounter" class="text-3xl font-black text-gray-800 tracking-tighter">0.00000000 TON</h1>
+                <p class="text-sm text-yellow-500 font-bold mt-1">76.88 GH/s <i class="fas fa-bolt"></i></p>
+            </div>
+
+            <div class="mt-4 py-2 px-6 bg-blue-50 rounded-full inline-block border border-blue-100">
+                <span id="timerDisplay" class="text-blue-600 font-bold text-sm">KALAN SÜRE: 01:00</span>
+            </div>
+
+            <div class="flex flex-col space-y-3 mt-8">
+                <button onclick="collectMining()" class="w-full bg-sky-500 hover:bg-sky-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-sky-200 transition-all active:scale-95">
+                    ЗАБРАТЬ (TOPLA)
+                </button>
+                <div class="text-[10px] text-gray-400 font-medium">SÜRE BİTİNCE OTOMATİK REKLAM İZLENİR</div>
+            </div>
+        </div>
+
+        <div class="glass-card p-4 flex justify-around text-gray-300">
+            <i class="fas fa-wallet text-xl"></i>
+            <i class="fas fa-users text-xl"></i>
+            <i class="fas fa-铺 text-xl text-sky-500"></i>
+            <i class="fas fa-chart-pie text-xl"></i>
+            <i class="fas fa-cog text-xl"></i>
+        </div>
+    </div>
+
+    <script>
+        let currentMining = 0.0;
+        let totalBalance = 0.0;
+        let timeLeft = 60; // 60 saniye
+        let isMining = true;
+
+        const miningDisplay = document.getElementById('miningCounter');
+        const totalDisplay = document.getElementById('totalTon');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const adOverlay = document.getElementById('adOverlay');
+
+        // Ana Döngü
+        const mainLogic = setInterval(() => {
+            if (isMining) {
+                if (timeLeft > 0) {
+                    // Saniyede 0.00005 TON kazanç
+                    currentMining += 0.00005;
+                    miningDisplay.innerText = currentMining.toFixed(8) + " TON";
+                    
+                    timeLeft--;
+                    updateTimerUI();
+                } else {
+                    triggerAutoAd();
+                }
+            }
+        }, 1000);
+
+        function updateTimerUI() {
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            timerDisplay.innerText = `KALAN SÜRE: ${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function triggerAutoAd() {
+            isMining = false;
+            adOverlay.style.display = 'flex'; // Reklam ekranını göster
+            
+            // 5 saniye "reklam izleniyor" simülasyonu
+            setTimeout(() => {
+                adOverlay.style.display = 'none';
+                timeLeft = 60; // Süreyi yenile
+                isMining = true;
+                updateTimerUI();
+            }, 5000); 
+        }
+
+        function collectMining() {
+            if(currentMining > 0) {
+                totalBalance += currentMining;
+                totalDisplay.innerText = totalBalance.toFixed(4) + " TON";
+                currentMining = 0;
+                miningDisplay.innerText = "0.00000000 TON";
+            }
+        }
+    </script>
+</body>
+</html>
