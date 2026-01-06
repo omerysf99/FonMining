@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX PRO - TG ID SYSTEM</title>
+    <title>PINIX App - Pro v1.0.6</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -19,100 +19,129 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
-        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; margin: 0 auto; position: relative; display: flex; flex-direction: column; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+        #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at center, #1e0d3d 0%, var(--bg) 100%); }
 
-        /* HEADER */
+        /* REKLAM BAR */
+        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 9999; }
+        #ad-fill { width: 0%; height: 100%; background: var(--secondary); transition: linear; }
+
+        /* TOP STATS */
         .header-stats { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .stat-item { background: var(--card); border-radius: 16px; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
         .coin-meta { display: flex; align-items: center; gap: 10px; }
-        .icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid rgba(255,255,255,0.1); }
+        .icon-circle { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid rgba(255,255,255,0.1); }
 
         /* VIEWS */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
         .view.active { display: flex; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 
-        /* SWAP UI */
-        .swap-container { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); }
-        .swap-input-group { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
-        .swap-label { font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
-        .swap-row { display: flex; justify-content: space-between; align-items: center; }
-        .swap-input { background: transparent; border: none; color: white; font-size: 1.4rem; font-weight: 700; width: 60%; outline: none; }
-        .swap-divider { height: 40px; width: 40px; background: var(--primary); border-radius: 50%; margin: -20px auto; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; border: 4px solid var(--bg); font-size: 1.2rem; }
+        /* HOME MINING */
+        .fan-wrap { width: 220px; height: 220px; position: relative; margin: 30px auto; }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; animation: rotate 3s linear infinite; box-shadow: 0 0 50px rgba(124, 58, 237, 0.4); border: 4px solid var(--primary); }
+        .fan-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .mining-val { font-size: 2.8rem; font-weight: 800; color: var(--secondary); text-align: center; margin: 10px 0; font-family: 'Orbitron'; }
+        .power-tag { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 12px 25px; border-radius: 20px; align-self: center; display: flex; align-items: center; gap: 10px; }
 
         /* BUTTONS */
-        .btn { padding: 16px; border-radius: 20px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; text-align: center; }
-        .btn-green { background: var(--green); color: white; width: 100%; margin-top: 20px; }
-        .btn-purple { background: var(--primary); color: white; }
+        .btn { padding: 16px; border-radius: 22px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; text-align: center; font-size: 0.9rem; }
+        .btn-claim { background: var(--primary); color: white; flex: 1; }
+        .btn-swap-main { background: var(--green); color: white; flex: 1; }
+        .btn-boost { background: linear-gradient(to right, #b48a21, #eab308); color: black; width: 100%; margin-top: 15px; }
+
+        /* SWAP UI */
+        .swap-box { background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); }
+        .swap-field { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; border: 1px solid var(--border); }
+        .swap-input { background: transparent; border: none; color: white; font-size: 1.5rem; font-weight: 700; width: 70%; outline: none; }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #150d21; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); }
-        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; flex: 1; }
+        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: #150d21; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 10px; }
+        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; flex: 1; cursor: pointer; }
         .nav-link.active { color: var(--secondary); }
-        .nav-link i { display: block; font-size: 1.4rem; margin-bottom: 3px; font-style: normal; }
+        .nav-link i { display: block; font-size: 1.5rem; margin-bottom: 3px; font-style: normal; }
+
+        /* ADMIN & OBSERVER */
+        .admin-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; font-size: 0.6rem; padding: 4px 10px; border-radius: 10px; display: none; z-index: 10000; }
+        .obs-bar { display: none; background: #ef4444; padding: 8px; text-align: center; font-weight: 800; font-size: 0.75rem; position: sticky; top: 0; z-index: 11000; }
+        .user-card { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <div id="app">
+    <div id="obs-bar" class="obs-bar">OBSERVER: <span id="obs-id"></span> <button onclick="exitObs()" style="background:white; color:black; border:none; border-radius:5px; padding:2px 5px; margin-left:10px;">EXIT</button></div>
+    <div class="ad-timer"><div id="ad-fill"></div></div>
+    <div class="admin-badge" id="adm-btn" onclick="tab('v-admin')">ADMIN</div>
+
     <div class="header-stats">
         <div class="stat-item">
             <div class="coin-meta">
-                <div class="icon-circle" style="background:#4c1d95; border-color:#7c3aed;">π</div>
-                <div><p style="font-size:0.6rem; opacity:0.5;">PI Balance</p><p id="pi-top">0.0000</p></div>
+                <div class="icon-circle" style="background:#4c1d95; color:gold;">π</div>
+                <div><p style="font-size:0.6rem; opacity:0.5;">Balance</p><p style="font-weight:700;"><span id="pi-top">0.0000</span> PI</p></div>
             </div>
             <span style="opacity:0.3;">👛</span>
         </div>
         <div class="stat-item">
             <div class="coin-meta">
-                <div class="icon-circle" style="background:#1e1b4b; border-color:#3730a3;">🌀</div>
-                <div><p style="font-size:0.6rem; opacity:0.5;">PINIX Balance</p><p id="pnx-top">0</p></div>
+                <div class="icon-circle" style="background:#1e1b4b; color:white;">🌀</div>
+                <div><p style="font-size:0.6rem; opacity:0.5;">Balance</p><p style="font-weight:700;"><span id="pnx-top">0</span> PINIX</p></div>
             </div>
             <span style="opacity:0.3;">👛</span>
         </div>
     </div>
 
-    <div id="v-home" class="view active" style="align-items:center; justify-content:center;">
-        <div style="width:200px; height:200px; border-radius:50%; border:5px solid var(--primary); background:url('pinix.jpg') center/cover; animation:spin 4s linear infinite; box-shadow: 0 0 50px rgba(124,58,237,0.3);"></div>
-        <h1 id="uncl-ui" style="font-size:3rem; color:var(--secondary); margin-top:20px;">0.0000</h1>
-        <p style="opacity:0.4; font-size:0.7rem; letter-spacing:3px;">5 GH/s POWER</p>
-        <button class="btn btn-purple" style="width:80%; margin-top:30px;" onclick="triggerAdAndClaim()">CLAIM REWARDS</button>
+    <div id="v-home" class="view active">
+        <div class="fan-wrap"><div class="fan-img"></div><div class="fan-center">π</div></div>
+        <p style="text-align:center; opacity:0.4; font-size:0.8rem;">Mining...</p>
+        <h1 class="mining-val" id="uncl-ui">0.00000000</h1>
+        <div class="power-tag"><span style="color:var(--secondary);">⚡</span> <b>5 GH/s</b></div>
+        <div style="display:flex; gap:12px; margin-top:25px;">
+            <button class="btn btn-claim" onclick="doClaim()">Claim</button>
+            <button class="btn btn-swap-main" onclick="tab('v-swap')">⇆ Swap PINIX</button>
+        </div>
+        <button class="btn btn-boost" onclick="triggerAd()">🚀 BOOST POWER</button>
     </div>
 
     <div id="v-swap" class="view">
-        <h2 style="margin-bottom:20px; font-weight:800;">Swap Assets</h2>
-        <div class="swap-container">
-            <div class="swap-input-group">
-                <p class="swap-label">From (PINIX)</p>
-                <div class="swap-row">
-                    <input type="number" id="swap-from" class="swap-input" placeholder="0" oninput="calcSwap(this.value)">
-                    <span style="font-weight:800;">🌀</span>
+        <h2 style="margin-bottom:20px;">Swap</h2>
+        <div class="swap-box">
+            <div class="swap-field">
+                <p style="font-size:0.6rem; opacity:0.5;">From (PINIX)</p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <input type="number" id="s-from" class="swap-input" placeholder="0" oninput="document.getElementById('s-to').value = (this.value/100).toFixed(4)">
+                    <span>🌀</span>
                 </div>
             </div>
-            <div class="swap-divider">↓</div>
-            <div class="swap-input-group" style="margin-top:10px;">
-                <p class="swap-label">To (PI - Estimated)</p>
-                <div class="swap-row">
-                    <input type="text" id="swap-to" class="swap-input" placeholder="0.00" readonly>
-                    <span style="font-weight:800; color:#7c3aed;">π</span>
+            <div style="text-align:center; margin: -15px 0; position:relative; z-index:5;">
+                <div style="width:35px; height:35px; background:var(--primary); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--bg);">↓</div>
+            </div>
+            <div class="swap-field" style="margin-top:5px;">
+                <p style="font-size:0.6rem; opacity:0.5;">To (PI)</p>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <input type="text" id="s-to" class="swap-input" placeholder="0.0000" readonly>
+                    <span style="color:var(--primary);">π</span>
                 </div>
             </div>
-            <p style="font-size:0.6rem; opacity:0.4; margin-top:10px;">Rate: 100 PINIX = 1 PI</p>
-            <button class="btn btn-green" onclick="executeSwap()">CONFIRM SWAP</button>
+            <button class="btn btn-swap-main" style="width:100%; margin-top:20px;" onclick="executeSwap()">EXECUTE SWAP</button>
         </div>
     </div>
 
     <div id="v-ref" class="view">
-        <h2 style="margin-bottom:20px;">Referrals</h2>
-        <div class="swap-container" style="text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.5;">YOUR PERSONAL CODE</p>
-            <h1 id="my-code" style="color:var(--secondary); font-size:2rem; margin:15px 0;">---</h1>
-            <button class="btn btn-purple" style="width:100%;" onclick="shareRef()">INVITE VIA TELEGRAM</button>
+        <h2 style="margin-bottom:20px;">Friends</h2>
+        <div class="swap-box" style="text-align:center;">
+            <p style="font-size:0.7rem; opacity:0.5;">PERSONAL REFERRAL CODE</p>
+            <h1 id="ref-ui" style="color:var(--secondary); font-size:2.2rem; margin:15px 0; font-family:'Orbitron';">---</h1>
+            <button class="btn btn-claim" style="width:100%;" onclick="shareRef()">INVITE FRIENDS</button>
         </div>
-        <div style="margin-top:20px; font-size:0.75rem; color:rgba(255,255,255,0.5);">
-            Invite people using your code and get <b style="color:white;">100 PINIX</b> instantly.
-        </div>
+    </div>
+
+    <div id="v-admin" class="view">
+        <h2 style="color:#ef4444; margin-bottom:20px;">System Admin</h2>
+        <div id="admin-user-list">Loading users...</div>
+        <button class="btn" style="background:grey; margin-top:20px;" onclick="tab('v-home')">BACK</button>
     </div>
 
     <nav>
@@ -134,64 +163,99 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
+    const ADMIN_ID = "8392479231";
 
-    // KULLANICI KİMLİĞİ (TG ID)
-    let tgUser = tg.initDataUnsafe?.user;
-    let userId = tgUser?.id ? String(tgUser.id) : "guest_" + Math.random().toString(36).substring(7);
-    let userData = { pi: 0, pnx: 0, uncl: 0, refCode: "PNX-" + userId.substring(0,6) };
+    let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_88";
+    let activeUid = realUid;
+    let userData = { pi: 0, pnx: 0, uncl: 0, adCount: 0, refCode: "PX-" + realUid.substring(0,6) };
+    let widget;
 
-    async function initApp() {
-        const doc = await db.collection("users").doc(userId).get();
+    async function loadData() {
+        const doc = await db.collection("users").doc(activeUid).get();
         if(doc.exists) userData = doc.data();
-        else await db.collection("users").doc(userId).set(userData);
-        render();
-    }
-
-    // SWAP HESAPLAMA
-    function calcSwap(val) {
-        const res = (val / 100).toFixed(4);
-        document.getElementById('swap-to').value = res;
-    }
-
-    async function executeSwap() {
-        const amt = parseFloat(document.getElementById('swap-from').value);
-        if(amt >= 100 && userData.pnx >= amt) {
-            userData.pnx -= amt;
-            userData.pi += (amt / 100);
-            await db.collection("users").doc(userId).update(userData);
-            render();
-            alert("Swap Successful!");
-        } else {
-            alert("Min 100 PNX required!");
+        else {
+            userData.refCode = "PX-" + activeUid.substring(0,6);
+            await db.collection("users").doc(activeUid).set(userData);
         }
-    }
-
-    // REF PAYLAŞIMI
-    function shareRef() {
-        const link = `https://t.me/FonixMining2026Bot?start=${userData.refCode}`;
-        const text = `Join PINIX App! Start mining PI with 5 GH/s power. My code: ${userData.refCode}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
-    }
-
-    // CLAIM VE REKLAM
-    let adexium;
-    function triggerAdAndClaim() {
-        if(adexium) adexium.autoMode();
-        userData.pi += userData.uncl;
-        userData.uncl = 0;
-        db.collection("users").doc(userId).update(userData);
         render();
     }
 
+    async function sync() { if(activeUid === realUid) await db.collection("users").doc(realUid).update(userData); }
+
+    // ADS
+    function startAds() {
+        let s = 0;
+        setInterval(() => {
+            s++;
+            document.getElementById('ad-fill').style.width = (s/41)*100 + '%';
+            if(s >= 41) { s = 0; triggerAd(); }
+        }, 1000);
+    }
+
+    function triggerAd() {
+        if(widget) { widget.autoMode(); userData.adCount = (userData.adCount || 0) + 1; sync(); }
+    }
+
+    // MINING ENGINE (0.0001 PI/S)
     setInterval(() => {
         userData.uncl += 0.0001;
-        document.getElementById('uncl-ui').innerText = userData.uncl.toFixed(6);
+        document.getElementById('uncl-ui').innerText = userData.uncl.toFixed(8);
     }, 1000);
 
+    setInterval(sync, 25000);
+
+    function doClaim() {
+        if(userData.uncl < 0.001) return alert("Min 0.001 PI required");
+        triggerAd();
+        userData.pi += userData.uncl;
+        userData.uncl = 0;
+        render(); sync();
+    }
+
+    function executeSwap() {
+        const amt = parseFloat(document.getElementById('s-from').value);
+        if(amt >= 100 && userData.pnx >= amt) {
+            userData.pnx -= amt; userData.pi += (amt/100);
+            render(); sync(); alert("Swap Success!");
+        } else alert("Invalid Amount (Min 100)");
+    }
+
+    // ADMIN & OBSERVER
+    if(realUid === ADMIN_ID) document.getElementById('adm-btn').style.display = 'block';
+
+    async function fetchAdminUsers() {
+        const list = document.getElementById('admin-user-list');
+        list.innerHTML = "Fetching...";
+        const snap = await db.collection("users").get();
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            const el = document.createElement('div');
+            el.className = "user-card";
+            el.innerHTML = `ID: ${doc.id}<br>PI: ${d.pi.toFixed(4)} | Ads: ${d.adCount || 0}<br>
+            <button onclick="enterObs('${doc.id}')" style="background:var(--primary); border:none; color:white; padding:5px 10px; border-radius:8px; margin-top:10px;">Enter Screen</button>`;
+            list.appendChild(el);
+        });
+    }
+
+    function enterObs(id) {
+        activeUid = id;
+        document.getElementById('obs-bar').style.display = 'block';
+        document.getElementById('obs-id').innerText = id;
+        loadData(); tab('v-home');
+    }
+
+    function exitObs() {
+        activeUid = realUid;
+        document.getElementById('obs-bar').style.display = 'none';
+        loadData();
+    }
+
+    // UTILS
     function render() {
         document.getElementById('pi-top').innerText = userData.pi.toFixed(4);
-        document.getElementById('pnx-top').innerText = userData.pnx;
-        document.getElementById('my-code').innerText = userData.refCode;
+        document.getElementById('pnx-top').innerText = Math.floor(userData.pnx);
+        document.getElementById('ref-ui').innerText = userData.refCode;
     }
 
     function tab(id, el) {
@@ -201,11 +265,18 @@
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
+        if(id === 'v-admin') fetchAdminUsers();
+    }
+
+    function shareRef() {
+        const txt = `Start mining PI with 5 GH/s power! My code: ${userData.refCode}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(txt)}`);
     }
 
     window.onload = () => {
-        adexium = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-        initApp();
+        widget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+        loadData();
+        startAds();
     };
 </script>
 </body>
