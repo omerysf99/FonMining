@@ -3,189 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX PRO - Ads Mining</title>
+    <title>PINIX Ecosystem - Full Functional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #050308; 
-            color: white;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 414px;
-            height: 100%;
-            background: radial-gradient(circle at 50% 35%, #1e1135 0%, #050308 80%);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-        }
-
-        .fan-image {
-            width: 260px;
-            height: 260px;
-            object-fit: contain;
-            animation: spin 5s linear infinite;
-            filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.4));
-            margin: 20px auto;
-        }
-
+        body { background: #050308; color: white; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 414px; height: 100%; background: radial-gradient(circle at 50% 30%, #1e1135 0%, #050308 80%); position: relative; display: flex; flex-direction: column; }
+        .tab-content { display: none; height: 100%; overflow-y: auto; padding: 20px 20px 100px 20px; }
+        .active-tab { display: flex; flex-direction: column; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 20px; }
+        .digital { font-family: 'Orbitron', sans-serif; }
+        .fan-anim { animation: spin 5s linear infinite; filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.3)); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .digital-font { font-family: 'Orbitron', sans-serif; }
-
-        /* Boost Modal (Reklam Alanı) */
-        #boostModal {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 100; align-items: center; justify-content: center;
-            backdrop-filter: blur(15px);
-        }
-
-        .ad-timer {
-            width: 100px; height: 100px;
-            border-radius: 50%;
-            border: 4px solid #facc15;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; font-weight: bold; margin: 20px auto;
-        }
+        nav { background: rgba(10, 8, 15, 0.98); height: 85px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-around; align-items: center; position: absolute; bottom: 0; width: 100%; z-index: 50; }
+        .nav-item { color: #555; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: #facc15; }
+        .home-center { background: linear-gradient(135deg, #a855f7 0%, #f59e0b 100%); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -40px; border: 4px solid #050308; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: white; }
+        #adModal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        
-        <header class="p-5 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center font-black italic">P</div>
-                <h1 class="font-bold text-lg tracking-tighter">PINIX App</h1>
+        <div id="adModal">
+            <div class="text-center p-8">
+                <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                <h3 class="text-xl font-bold text-yellow-500 uppercase">Reklam İzleniyor</h3>
+                <p id="adTimer" class="text-4xl font-black mt-4 digital">5</p>
             </div>
-            <div id="status" class="text-[10px] bg-green-500/10 border border-green-500/30 px-3 py-1 rounded-full text-green-500 font-bold uppercase">
-                Active
-            </div>
-        </header>
+        </div>
 
-        <main class="flex-grow px-5 overflow-y-auto">
-            <div class="glass-card p-4 flex justify-between items-center mb-6">
-                <div class="flex items-center gap-3">
-                    <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-7 h-7" alt="pi">
-                    <div>
-                        <p class="text-[9px] text-gray-500 uppercase font-black">Main Balance</p>
-                        <p id="totalBalance" class="text-lg font-bold digital-font text-white">0.00000000</p>
+        <main class="flex-grow relative">
+            
+            <section id="tab-home" class="tab-content active-tab">
+                <div class="glass p-4 mb-6 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6">
+                        <div>
+                            <p class="text-[9px] text-gray-500 font-bold uppercase">Total Balance</p>
+                            <p id="totalBal" class="text-lg font-bold digital">0.00000000</p>
+                        </div>
                     </div>
                 </div>
-                <i class="fas fa-wallet text-gray-700"></i>
-            </div>
 
-            <div class="relative flex justify-center">
-                <img src="pinix.jpg" class="fan-image" alt="fan" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-12 h-12 bg-purple-900 rounded-full flex items-center justify-center border-2 border-purple-500">
-                        <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6" alt="pi">
+                <div class="flex-grow flex flex-col items-center justify-center">
+                    <div class="relative mb-4">
+                        <img src="pinix.jpg" class="w-64 h-64 fan-anim rounded-full" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-12 h-12 bg-purple-900 rounded-full border-2 border-purple-500 flex items-center justify-center">
+                                <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6">
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <p class="text-gray-500 text-[10px] font-bold italic mb-1 uppercase tracking-widest">Mining...</p>
-                <h2 id="miningVal" class="text-4xl font-black text-yellow-400 digital-font mb-4">0.00000000</h2>
-
-                <div class="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-8 py-3 rounded-2xl mb-8">
-                    <i class="fas fa-bolt text-yellow-500 text-xl"></i>
-                    <div class="text-left">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold">Mining Power</p>
-                        <p id="powerDisplay" class="font-bold text-lg digital-font text-white">0.00 GH/s</p>
+                    <p class="text-gray-500 text-[10px] font-bold tracking-widest uppercase mb-1">Current Mining</p>
+                    <h2 id="miningCount" class="text-4xl font-black text-yellow-400 digital mb-6">0.00000000</h2>
+                    <div class="glass px-8 py-3 flex items-center gap-4 mb-8">
+                        <i class="fas fa-bolt text-yellow-500 text-xl"></i>
+                        <div class="text-left">
+                            <p class="text-[9px] text-gray-400 uppercase font-bold">Hash Rate</p>
+                            <p id="powerStat" class="font-bold text-lg digital">0.00 GH/s</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <button onclick="claim()" class="w-full bg-[#7c3aed] py-4 rounded-[2rem] font-black text-lg active:scale-95 transition">CLAIM</button>
-                    <button onclick="watchAd()" class="w-full bg-[#facc15] py-5 rounded-[2rem] font-black text-xl text-black flex items-center justify-center gap-3 active:scale-95 transition">
-                        <i class="fas fa-play-circle"></i> REKLAM İZLE (+0.01 GH/s)
+                    <button onclick="claim()" class="w-full bg-purple-600 py-4 rounded-2xl font-black active:scale-95 transition">CLAIM PI</button>
+                    <button onclick="startAd()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fas fa-video"></i> WATCH AD (+0.01 GH/s)
                     </button>
                 </div>
-            </div>
+            </section>
+
+            <section id="tab-wallet" class="tab-content">
+                <h2 class="text-xl font-black mb-6 italic">MY WALLET</h2>
+                <div class="glass p-6 mb-4 text-center">
+                    <p class="text-gray-500 text-xs font-bold uppercase mb-2">Assets Value</p>
+                    <h3 class="text-3xl font-black digital text-green-400">$0.00</h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="glass p-4 flex justify-between items-center">
+                        <span class="font-bold">Withdraw Pi</span>
+                        <span class="text-gray-500 text-xs italic">Minimum 100 PI</span>
+                    </div>
+                    <div class="glass p-4 flex justify-between items-center text-purple-400 font-bold">
+                        <span>Swap to PINIX</span>
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-friends" class="tab-content text-center">
+                <i class="fas fa-users text-5xl text-purple-500 mt-10 mb-4"></i>
+                <h2 class="text-2xl font-black italic">INVITE FRIENDS</h2>
+                <p class="text-gray-400 text-sm mb-8">Her arkadaşın için kalıcı <b>+0.05 GH/s</b> kazan!</p>
+                <div class="glass p-6 mb-8">
+                    <p class="text-xs text-gray-500 mb-2 uppercase font-bold">Referral Code</p>
+                    <p class="text-xl font-black tracking-widest text-yellow-500">PINIX-777</p>
+                </div>
+                <button onclick="inviteFriend()" class="w-full bg-blue-600 py-4 rounded-2xl font-black active:scale-95 transition">ARKADAŞ EKLE (Simüle)</button>
+                <div id="friendList" class="mt-6 space-y-2">
+                    </div>
+            </section>
+
+            <section id="tab-missions" class="tab-content">
+                <h2 class="text-xl font-black mb-6 italic">DAILY MISSIONS</h2>
+                <div class="space-y-4">
+                    <div id="m1" class="glass p-5 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">Telegram Katıl</p>
+                            <p class="text-blue-400 text-xs font-bold">+0.10 GH/s</p>
+                        </div>
+                        <button onclick="doMission('m1', 0.10)" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-xs">YAP</button>
+                    </div>
+                    <div id="m2" class="glass p-5 flex justify-between items-center opacity-80">
+                        <div>
+                            <p class="font-bold">Twitter Takip</p>
+                            <p class="text-blue-400 text-xs font-bold">+0.05 GH/s</p>
+                        </div>
+                        <button onclick="doMission('m2', 0.05)" class="bg-white text-black px-4 py-2 rounded-lg font-bold text-xs">YAP</button>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
-        <div id="boostModal">
-            <div class="text-center p-8">
-                <h3 class="text-2xl font-bold mb-2">REKLAM YÜKLENİYOR</h3>
-                <p class="text-gray-400 text-sm mb-6">Ödül için reklamın bitmesini bekleyin...</p>
-                <div class="ad-timer" id="timer">5</div>
-                <p class="text-xs text-yellow-500 mt-4 font-bold uppercase tracking-widest">Mining Power Is Increasing...</p>
-            </div>
-        </div>
-
         <nav>
-            <div class="nav-item"><i class="fas fa-wallet mb-1 text-lg"></i><br>Wallet</div>
-            <div class="nav-item active"><i class="fas fa-home mb-1 text-lg"></i><br>Home</div>
-            <div class="nav-item"><i class="fas fa-tasks mb-1 text-lg"></i><br>Tasks</div>
+            <div onclick="switchTab('wallet', this)" class="nav-item">
+                <i class="fas fa-wallet text-xl mb-1"></i><br>Wallet
+            </div>
+            <div onclick="switchTab('friends', this)" class="nav-item">
+                <i class="fas fa-users text-xl mb-1"></i><br>Friends
+            </div>
+            <div onclick="switchTab('home', this)" class="nav-item active">
+                <div class="home-center">
+                    <i class="fas fa-home text-2xl"></i>
+                </div>
+                Home
+            </div>
+            <div onclick="switchTab('missions', this)" class="nav-item">
+                <i class="fas fa-bullseye text-xl mb-1"></i><br>Missions
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-ellipsis-h text-xl mb-1"></i><br>More
+            </div>
         </nav>
     </div>
 
     <script>
+        // STATE
         let mining = 0.00000000;
         let total = 0.00000000;
-        let power = 0.00; // Başlangıç gücü
-        let miningInterval;
+        let power = 0.00;
+        let friendsCount = 0;
 
-        // Kazım mekanizması
-        function updateMining() {
-            if (power > 0) {
-                mining += (0.000001 * power); // Güce göre artış hızı
-                document.getElementById('miningVal').innerText = mining.toFixed(8);
+        // KAZIM DÖNGÜSÜ
+        setInterval(() => {
+            if(power > 0) {
+                mining += (power * 0.000001);
+                document.getElementById('miningCount').innerText = mining.toFixed(8);
             }
+        }, 1000);
+
+        // SEKME DEĞİŞTİRME
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+            document.getElementById('tab-' + tab).classList.add('active-tab');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if(el.classList.contains('nav-item')) el.classList.add('active');
         }
-        setInterval(updateMining, 1000);
 
-        // Reklam İzleme Fonksiyonu
-        function watchAd() {
-            const modal = document.getElementById('boostModal');
-            const timerEl = document.getElementById('timer');
-            let timeLeft = 5;
-
+        // REKLAM FONKSİYONU
+        function startAd() {
+            const modal = document.getElementById('adModal');
+            const timer = document.getElementById('adTimer');
+            let count = 5;
             modal.style.display = 'flex';
-            timerEl.innerText = timeLeft;
-
-            const countdown = setInterval(() => {
-                timeLeft--;
-                timerEl.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
+            
+            let itv = setInterval(() => {
+                count--;
+                timer.innerText = count;
+                if(count <= 0) {
+                    clearInterval(itv);
                     modal.style.display = 'none';
-                    addPower();
+                    updatePower(0.01);
+                    timer.innerText = "5";
                 }
             }, 1000);
         }
 
-        // Güç Ekleme
-        function addPower() {
-            power += 0.01;
-            document.getElementById('powerDisplay').innerText = power.toFixed(2) + " GH/s";
-            alert("Tebrikler! Kazım gücünüz +0.01 GH/s arttı.");
+        // GÜÇ GÜNCELLEME
+        function updatePower(val) {
+            power += val;
+            document.getElementById('powerStat').innerText = power.toFixed(2) + " GH/s";
         }
 
+        // CLAIM
         function claim() {
             if(mining > 0) {
                 total += mining;
                 mining = 0;
-                document.getElementById('totalBalance').innerText = total.toFixed(8);
-                document.getElementById('miningVal').innerText = "0.00000000";
+                document.getElementById('totalBal').innerText = total.toFixed(8);
+                document.getElementById('miningCount').innerText = "0.00000000";
             }
+        }
+
+        // ARKADAŞ EKLEME (SİMÜLASYON)
+        function inviteFriend() {
+            friendsCount++;
+            updatePower(0.05);
+            const list = document.getElementById('friendList');
+            const item = document.createElement('div');
+            item.className = "glass p-3 text-xs flex justify-between";
+            item.innerHTML = `<span>User_${Math.floor(Math.random()*9000+1000)} katıldı!</span> <span class="text-green-500">+0.05 GH/s</span>`;
+            list.prepend(item);
+        }
+
+        // GÖREV YAPMA
+        function doMission(id, val) {
+            const m = document.getElementById(id);
+            m.style.opacity = "0.5";
+            m.querySelector('button').innerText = "TAMAMLANDI";
+            m.querySelector('button').disabled = true;
+            updatePower(val);
         }
     </script>
 </body>
