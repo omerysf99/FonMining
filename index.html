@@ -3,630 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hamster CEO: Tap-to-Earn</title>
+    <title>PINIX Mining App</title>
     <style>
-        /* --- CSS STİLLERİ --- */
         :root {
-            --bg-dark: #0f0f1a;
-            --card-bg: #1e1e2e;
-            --accent: #f3ba2f; /* Gold */
-            --energy-color: #00ff88;
-            --text-main: #ffffff;
-            --text-dim: #a0a0b8;
-            --neon-shadow: 0 0 15px rgba(243, 186, 47, 0.4);
+            --bg-dark: #0f051d;
+            --glass: rgba(255, 255, 255, 0.08);
+            --purple: #8b5cf6;
+            --green: #22c55e;
+            --gold: #eab308;
+            --text: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background: radial-gradient(circle at top, #2d1b4d 0%, var(--bg-dark) 100%);
+            color: var(--text);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* Üst Panel */
-        .header {
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(30,30,46,1) 0%, rgba(15,15,26,1) 100%);
-            border-bottom: 1px solid #333;
-        }
+        /* Üst Panel - Bakiyeler */
+        header { padding: 20px; text-align: center; }
+        .app-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .app-title span { color: #38bdf8; }
 
-        .coin-container {
+        .balance-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 5px;
-        }
-
-        .coin-icon {
-            font-size: 2.5rem;
-            filter: drop-shadow(0 0 5px var(--accent));
-        }
-
-        #balance {
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: var(--accent);
-            text-shadow: var(--neon-shadow);
-        }
-
-        .profit-per-hour {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-        }
-
-        /* Enerji Barı */
-        .energy-wrapper {
-            padding: 10px 30px;
-        }
-
-        .energy-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .energy-bar-bg {
-            height: 12px;
-            background: #333;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #444;
-        }
-
-        .energy-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00bd68, var(--energy-color));
-            width: 100%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--energy-color);
-        }
-
-        /* Ana İçerik Alanı */
-        .content {
-            flex: 1;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-            padding-bottom: 80px;
-        }
-
-        .panel {
-            display: none;
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-        }
-
-        .panel.active {
-            display: block;
-        }
-
-        /* Tap Alanı */
-        #tap-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .level-badge {
-            background: rgba(243, 186, 47, 0.1);
-            border: 1px solid var(--accent);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 20px;
-            color: var(--accent);
-        }
-
-        .hamster-btn {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle, #2e2e4a 0%, #1e1e2e 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(243, 186, 47, 0.1);
-            transition: transform 0.05s;
-            border: 8px solid #2a2a3a;
-        }
-
-        .hamster-btn:active {
-            transform: scale(0.96);
-        }
-
-        .hamster-emoji {
-            font-size: 120px;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
-        }
-
-        /* Floating Text Animasyonu */
-        .plus-one {
-            position: absolute;
-            color: #fff;
-            font-weight: bold;
-            font-size: 1.5rem;
-            pointer-events: none;
-            animation: float-up 0.8s ease-out forwards;
-            z-index: 100;
-            text-shadow: 0 0 5px var(--accent);
-        }
-
-        @keyframes float-up {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-150px) scale(1.5); }
-        }
-
-        /* Upgrade Kartları */
-        .upgrade-list {
-            display: flex;
-            flex-direction: column;
             gap: 15px;
         }
 
-        .upgrade-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #333;
-            transition: 0.3s;
-        }
+        .coin-icon { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .balance-info { text-align: left; }
+        .balance-label { font-size: 0.7rem; opacity: 0.6; }
+        .balance-value { font-size: 1.1rem; font-weight: bold; }
 
-        .upgrade-card:active { transform: scale(0.98); }
-
-        .up-info h4 { margin: 0; font-size: 1.1rem; color: var(--accent); }
-        .up-info p { margin: 5px 0 0; font-size: 0.8rem; color: var(--text-dim); }
-
-        .buy-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .buy-btn:disabled {
-            background: #444;
-            color: #888;
-        }
-
-        /* İstatistikler */
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            border-bottom: 1px solid #333;
-        }
-
-        /* Alt Navigasyon */
-        .nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background: #161625;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #333;
-            z-index: 1000;
-        }
-
-        .nav-item {
+        /* Orta Alan - Mining Motoru */
+        main {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            color: var(--text-dim);
-            font-size: 0.75rem;
-            cursor: pointer;
-            flex: 1;
-            padding: 10px;
-        }
-
-        .nav-item.active {
-            color: var(--accent);
-        }
-
-        .nav-item i { font-size: 1.5rem; }
-
-        /* Modal (Offline & Bonus) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            align-items: center;
             justify-content: center;
-            z-index: 2000;
             padding: 20px;
         }
 
-        .modal {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 25px;
-            text-align: center;
-            border: 2px solid var(--accent);
-            max-width: 400px;
+        .turbine-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin-bottom: 30px;
+        }
+
+        .turbine-img {
             width: 100%;
-        }
-
-        /* Dark Mode / Settings */
-        .settings-top {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 50;
-        }
-
-        .icon-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            padding: 8px;
+            height: 100%;
             border-radius: 50%;
+            animation: spin 10s linear infinite;
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.3);
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .mining-status { font-size: 0.9rem; opacity: 0.7; margin-bottom: 5px; }
+        .live-counter { font-size: 2rem; font-weight: 800; margin-bottom: 20px; color: var(--gold); }
+
+        .power-badge {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Butonlar */
+        .action-group { width: 100%; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        button {
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: white;
             cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-claim { background: var(--purple); grid-column: span 1; }
+        .btn-swap { background: var(--green); grid-column: span 1; }
+        .btn-boost { 
+            background: linear-gradient(90deg, #b45309, var(--gold)); 
+            grid-column: span 2; 
+            margin-top: 5px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        /* Alt Navigasyon */
+        nav {
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            font-size: 0.7rem;
+        }
+        .nav-item { opacity: 0.5; text-align: center; }
+        .nav-item.active { opacity: 1; color: var(--gold); }
+
+        /* Boost Overlay */
+        #boost-modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: #1a0b2e;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            padding: 30px;
+            transition: 0.4s ease;
+            z-index: 100;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+        }
+        #boost-modal.active { bottom: 0; }
+        .boost-item {
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="coin-container">
-            <span class="coin-icon">🪙</span>
-            <span id="balance">0</span>
-        </div>
-        <div class="profit-per-hour">
-            Pasif Kazanç: <span id="passive-rate">0</span> / sn
-        </div>
-    </div>
-
-    <div class="energy-wrapper">
-        <div class="energy-info">
-            <span>⚡ ENERJİ</span>
-            <span id="energy-text">100 / 100</span>
-        </div>
-        <div class="energy-bar-bg">
-            <div id="energy-fill" class="energy-bar-fill"></div>
-        </div>
-    </div>
-
-    <main class="content">
+    <header>
+        <div class="app-title">PINIX App <span>✔</span></div>
         
-        <div class="settings-top">
-            <button class="icon-btn" onclick="toggleMute()" id="mute-btn">🔊</button>
-        </div>
-
-        <div id="tap-panel" class="panel active">
-            <div class="level-badge" id="level-name">Level 1: Yeni Yetme Hamster</div>
-            <div class="hamster-btn" id="hamster-click">
-                <div class="hamster-emoji" id="hamster-visual">🐹</div>
+        <div class="balance-card">
+            <img src="pico.jpg" class="coin-icon" alt="PI">
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-value" id="pi-balance">0.00000000 PI</div>
             </div>
         </div>
 
-        <div id="upgrade-panel" class="panel">
-            <h2 style="text-align:center; color: var(--accent);">Geliştirmeler</h2>
-            <div class="upgrade-list">
-                <div class="upgrade-card">
-                    <div class="up-info">
-                        <h4>Tıklama Gücü</h4>
-                        <p>Her tap: +<span id="tap-power-val">1</span> coin</p>
-                        <p>Maliyet: 💰 <span id="cost-tap">50</span></p>
-                    </div>
-                    <button class="buy-btn" onclick="buyUpgrade('tap')">Geliştir</button>
-                </div>
-                <div class="upgrade-card">
-                    <div class="up-info">
-                        <h4>Hamster Çarkı</h4>
-                        <p>Otomatik: +<span id="passive-val">1</span>/sn</p>
-                        <p>Maliyet: 💰 <span id="cost-passive">150</span></p>
-                    </div>
-                    <button class="buy-btn" onclick="buyUpgrade('passive')">Satın Al</button>
-                </div>
-                <div class="upgrade-card">
-                    <div class="up-info">
-                        <h4>Enerji İçeceği</h4>
-                        <p>Max Enerji: +50</p>
-                        <p>Maliyet: 💰 <span id="cost-energy">200</span></p>
-                    </div>
-                    <button class="buy-btn" onclick="buyUpgrade('energy')">İç</button>
-                </div>
+        <div class="balance-card">
+            <img src="pinix.jpg" class="coin-icon" alt="PINIX">
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-value" id="pinix-balance">0 PINIX</div>
             </div>
         </div>
+    </header>
 
-        <div id="stats-panel" class="panel">
-            <h2 style="text-align:center">Borsa Raporu</h2>
-            <div class="stat-row">
-                <span>Toplam Tıklama:</span>
-                <b id="stat-taps">0</b>
-            </div>
-            <div class="stat-row">
-                <span>Toplam Kazanç:</span>
-                <b id="stat-total-earned">0</b>
-            </div>
-            <div class="stat-row">
-                <span>Mevcut Seviye:</span>
-                <b id="stat-level">1</b>
-            </div>
-            <div class="stat-row">
-                <span>Saatlik Kazanç:</span>
-                <b id="stat-hourly">0</b>
-            </div>
-            <div style="margin-top:30px; text-align:center">
-                <button class="buy-btn" style="background:#ff4444; color:white" onclick="resetGame()">VERİLERİ SIFIRLA</button>
-            </div>
+    <main>
+        <div class="turbine-container">
+            <img src="pinix.jpg" class="turbine-img" id="turbine">
         </div>
 
+        <div class="mining-status">Mining...</div>
+        <div class="live-counter" id="unclaimed-pi">0.00000000 PI</div>
+
+        <div class="power-badge">
+            <span>⚡ Mining Power</span>
+            <strong id="mining-power">5 GH/s</strong>
+        </div>
     </main>
 
-    <div class="modal-overlay" id="modal-offline">
-        <div class="modal">
-            <h2 style="color: var(--accent)">Tekrar Hoş Geldin!</h2>
-            <p id="offline-desc">Sen yokken hamsterların boş durmadı.</p>
-            <div style="font-size: 2rem; margin: 20px 0;">🪙 <span id="offline-amount">0</span></div>
-            <button class="buy-btn" onclick="closeModal('modal-offline')" style="width:100%">KAZANCI TOPLA</button>
-        </div>
+    <div class="action-group">
+        <button class="btn-claim" onclick="claimPI()">Claim</button>
+        <button class="btn-swap" onclick="swapToPinix()">Swap PINIX</button>
+        <button class="btn-boost" onclick="toggleBoost()">🚀 BOOST</button>
     </div>
 
-    <nav class="nav">
-        <div class="nav-item active" onclick="switchTab('tap', this)">
-            <i>🐹</i>
-            <span>Tap</span>
+    <div id="boost-modal">
+        <h3 style="margin-bottom: 20px;">Boost Your Earnings</h3>
+        <div class="boost-item">
+            <div>
+                <h4>Mining Power +5</h4>
+                <p style="font-size: 0.8rem; opacity: 0.6;">Sürekli GH/s artışı</p>
+            </div>
+            <button onclick="buyBoost('power', 10)" style="background: var(--purple); padding: 8px 15px;">10 PI</button>
         </div>
-        <div class="nav-item" onclick="switchTab('upgrade', this)">
-            <i>🛒</i>
-            <span>Market</span>
+        <div class="boost-item">
+            <div>
+                <h4>2x Temp Boost</h4>
+                <p style="font-size: 0.8rem; opacity: 0.6;">30 Dakika Boyunca</p>
+            </div>
+            <button onclick="buyBoost('temp', 5)" style="background: var(--purple); padding: 8px 15px;">5 PI</button>
         </div>
-        <div class="nav-item" onclick="switchTab('stats', this)">
-            <i>📊</i>
-            <span>Stats</span>
-        </div>
+        <button onclick="toggleBoost()" style="width: 100%; background: none; color: gray; margin-top: 20px;">Kapat</button>
+    </div>
+
+    <nav>
+        <div class="nav-item">Wallet</div>
+        <div class="nav-item">Friends</div>
+        <div class="nav-item active">Home</div>
+        <div class="nav-item">Missions</div>
+        <div class="nav-item">More</div>
     </nav>
 
     <script>
-        /* --- JAVASCRIPT OYUN MANTIĞI --- */
-
-        // Oyun Verileri
+        // State
         let state = {
-            coins: 0,
-            totalEarned: 0,
-            totalTaps: 0,
-            energy: 100,
-            maxEnergy: 100,
-            tapPower: 1,
-            passiveIncome: 0,
-            level: 1,
-            lastSave: Date.now(),
-            isMuted: false,
-            upgrades: {
-                tap: { level: 0, baseCost: 50 },
-                passive: { level: 0, baseCost: 150 },
-                energy: { level: 0, baseCost: 200 }
-            }
+            piBalance: 0,
+            pinixBalance: 0,
+            unclaimedPi: 0,
+            miningPower: 5,
+            multiplier: 1,
+            lastSave: Date.now()
         };
 
-        const levels = [
-            { name: "Yeni Yetme Hamster", emoji: "🐹", min: 0, bg: "#0f0f1a" },
-            { name: "Yatırımcı Hamster", emoji: "🐹💼", min: 5000, bg: "#1a1a2e" },
-            { name: "Broker Hamster", emoji: "🐹📈", min: 25000, bg: "#1e2a1e" },
-            { name: "Milyoner CEO", emoji: "🐹👑", min: 100000, bg: "#2a1e1e" },
-            { name: "Kripto Balinası", emoji: "🐳", min: 1000000, bg: "#1e2a2a" }
-        ];
-
-        // Başlatma
-        init();
-
-        function init() {
-            loadGame();
-            updateUI();
-            checkOfflineProfit();
-            
-            // Döngüler
-            setInterval(gameLoop, 1000); // Pasif Gelir & Enerji
-            setInterval(saveGame, 5000); // Otomatik Kayıt
-            
-            // Event Listeners
-            document.getElementById('hamster-click').addEventListener('pointerdown', handleTap);
-        }
-
-        // Ana Döngü (Saniyede 1 kez)
-        function gameLoop() {
-            // Pasif Gelir
-            if (state.passiveIncome > 0) {
-                addCoins(state.passiveIncome);
-            }
-
-            // Enerji Yenilenmesi
-            if (state.energy < state.maxEnergy) {
-                state.energy = Math.min(state.maxEnergy, state.energy + 1);
-            }
-
-            updateUI();
-        }
-
-        // Tıklama İşlemi
-        function handleTap(e) {
-            if (state.energy <= 0) return;
-
-            // Veri güncelleme
-            state.energy -= 1;
-            state.totalTaps += 1;
-            addCoins(state.tapPower);
-
-            // Görsel efektler
-            createPlusText(e.clientX, e.clientY);
-            vibrate(20);
-            updateUI();
-        }
-
-        function addCoins(amount) {
-            state.coins += amount;
-            state.totalEarned += amount;
-            checkLevel();
-        }
-
-        function createPlusText(x, y) {
-            const el = document.createElement('div');
-            el.className = 'plus-one';
-            el.innerText = `+${state.tapPower}`;
-            el.style.left = `${x - 20}px`;
-            el.style.top = `${y - 50}px`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        // Upgrade Mantığı
-        function buyUpgrade(type) {
-            const up = state.upgrades[type];
-            const cost = calculateCost(up.baseCost, up.level);
-
-            if (state.coins >= cost) {
-                state.coins -= cost;
-                up.level++;
-
-                if (type === 'tap') state.tapPower += 2;
-                if (type === 'passive') state.passiveIncome += 1;
-                if (type === 'energy') {
-                    state.maxEnergy += 50;
-                    state.energy = state.maxEnergy;
-                }
-
-                vibrate(50);
-                updateUI();
-                saveGame();
-            }
-        }
-
-        function calculateCost(base, level) {
-            return Math.floor(base * Math.pow(1.6, level));
-        }
-
-        // UI Güncelleme
-        function updateUI() {
-            document.getElementById('balance').innerText = Math.floor(state.coins).toLocaleString();
-            document.getElementById('passive-rate').innerText = state.passiveIncome;
-            document.getElementById('energy-text').innerText = `${state.energy} / ${state.maxEnergy}`;
-            document.getElementById('energy-fill').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
-            
-            // Upgrade Fiyatları
-            document.getElementById('cost-tap').innerText = calculateCost(state.upgrades.tap.baseCost, state.upgrades.tap.level).toLocaleString();
-            document.getElementById('cost-passive').innerText = calculateCost(state.upgrades.passive.baseCost, state.upgrades.passive.level).toLocaleString();
-            document.getElementById('cost-energy').innerText = calculateCost(state.upgrades.energy.baseCost, state.upgrades.energy.level).toLocaleString();
-            
-            // Buton durumları
-            document.querySelectorAll('.buy-btn').forEach(btn => {
-                const costText = btn.previousElementSibling.querySelector('span[id^="cost"]').innerText.replace(/,/g, '');
-                btn.disabled = state.coins < parseInt(costText);
-            });
-
-            // İstatistikler
-            document.getElementById('stat-taps').innerText = state.totalTaps;
-            document.getElementById('stat-total-earned').innerText = Math.floor(state.totalEarned).toLocaleString();
-            document.getElementById('stat-level').innerText = state.level;
-            document.getElementById('stat-hourly').innerText = (state.passiveIncome * 3600).toLocaleString();
-        }
-
-        // Level Sistemi
-        function checkLevel() {
-            let currentLevel = levels.slice().reverse().find(l => state.totalEarned >= l.min);
-            let levelIdx = levels.indexOf(currentLevel) + 1;
-
-            if (levelIdx !== state.level) {
-                state.level = levelIdx;
-                document.getElementById('level-name').innerText = `Level ${state.level}: ${currentLevel.name}`;
-                document.getElementById('hamster-visual').innerText = currentLevel.emoji;
-                document.body.style.backgroundColor = currentLevel.bg;
-            }
-        }
-
-        // Offline Kazanç Hesaplama
-        function checkOfflineProfit() {
-            const now = Date.now();
-            const elapsedSeconds = Math.floor((now - state.lastSave) / 1000);
-            
-            if (elapsedSeconds > 30 && state.passiveIncome > 0) {
-                const maxOffline = 8 * 3600; // 8 Saat sınırı
-                const actualSeconds = Math.min(elapsedSeconds, maxOffline);
-                const profit = actualSeconds * state.passiveIncome;
-                
-                state.coins += profit;
-                state.totalEarned += profit;
-                
-                document.getElementById('offline-amount').innerText = Math.floor(profit).toLocaleString();
-                document.getElementById('modal-offline').style.display = 'flex';
-            }
-        }
-
-        // Utility Fonksiyonlar
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId + '-panel').classList.add('active');
-            el.classList.add('active');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function saveGame() {
-            state.lastSave = Date.now();
-            localStorage.setItem('hamsterCEO_save', JSON.stringify(state));
-        }
-
-        function loadGame() {
-            const saved = localStorage.getItem('hamsterCEO_save');
+        // Initialize & Offline Mining
+        window.onload = () => {
+            const saved = localStorage.getItem('pinixState');
             if (saved) {
-                const parsed = JSON.parse(saved);
-                state = { ...state, ...parsed };
-                // Upgrade objesini koruyarak birleştir
-                state.upgrades = { ...state.upgrades, ...parsed.upgrades };
+                state = JSON.parse(saved);
+                const now = Date.now();
+                const diffSec = Math.min((now - state.lastSave) / 1000, 86400); // Max 24h
+                const offlineGain = (diffSec * (state.miningPower * 0.000001));
+                state.unclaimedPi += offlineGain;
+            }
+            updateUI();
+            startMiningLoop();
+        };
+
+        function startMiningLoop() {
+            setInterval(() => {
+                // Her saniye kazanılan PI: (Power * 0.000001)
+                const gain = (state.miningPower * 0.000001) / 10; // 100ms interval
+                state.unclaimedPi += (gain * state.multiplier);
+                state.lastSave = Date.now();
+                updateUI();
+                save();
+            }, 100);
+        }
+
+        function updateUI() {
+            document.getElementById('pi-balance').innerText = state.piBalance.toFixed(8) + " PI";
+            document.getElementById('pinix-balance').innerText = Math.floor(state.pinixBalance) + " PINIX";
+            document.getElementById('unclaimed-pi').innerText = state.unclaimedPi.toFixed(8) + " PI";
+            document.getElementById('mining-power').innerText = (state.miningPower * state.multiplier) + " GH/s";
+            
+            // Animasyon hızı güce göre artsın
+            const speed = Math.max(1, 10 - (state.miningPower / 10));
+            document.getElementById('turbine').style.animationDuration = speed + 's';
+        }
+
+        function claimPI() {
+            if(state.unclaimedPi <= 0) return;
+            state.piBalance += state.unclaimedPi;
+            state.unclaimedPi = 0;
+            updateUI();
+            save();
+        }
+
+        function swapToPinix() {
+            const rate = 10; // 1 PI = 10 PINIX
+            if(state.piBalance >= 1) {
+                state.piBalance -= 1;
+                state.pinixBalance += rate;
+                updateUI();
+                save();
+            } else {
+                alert("Yetersiz PI! En az 1 PI gerekli.");
             }
         }
 
-        function resetGame() {
-            if(confirm("Tüm emeğin silinecek! CEO koltuğunu bırakmak istediğine emin misin?")) {
-                localStorage.removeItem('hamsterCEO_save');
-                location.reload();
+        function buyBoost(type, price) {
+            if(state.piBalance >= price) {
+                state.piBalance -= price;
+                if(type === 'power') state.miningPower += 5;
+                if(type === 'temp') {
+                    state.multiplier = 2;
+                    setTimeout(() => { state.multiplier = 1; }, 30000 * 60);
+                }
+                toggleBoost();
+                updateUI();
+                save();
+            } else {
+                alert("Yetersiz bakiye!");
             }
         }
 
-        function toggleMute() {
-            state.isMuted = !state.isMuted;
-            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
+        function toggleBoost() {
+            document.getElementById('boost-modal').classList.toggle('active');
         }
 
-        function vibrate(ms) {
-            if (!state.isMuted && navigator.vibrate) {
-                navigator.vibrate(ms);
-            }
+        function save() {
+            localStorage.setItem('pinixState', JSON.stringify(state));
         }
     </script>
 </body>
