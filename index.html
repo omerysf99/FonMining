@@ -3,53 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fonix Mining Pro</title>
+    <title>Fonix Mining Pro - Admin Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        body {
-            background: radial-gradient(circle at top, #1e1136 0%, #08050e 100%);
-            color: white; font-family: 'Inter', sans-serif;
-            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
-        }
-        .app-container {
-            width: 375px; height: 667px; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; background: #0d0915; border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+        body { background: radial-gradient(circle at top, #1e1136 0%, #08050e 100%); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .app-container { width: 375px; height: 667px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #0d0915; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .mining-fan { animation: rotate 10s linear infinite; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
         .tab-content { display: none; flex-direction: column; height: calc(100% - 85px); padding: 20px; overflow-y: auto; }
         .tab-content.active { display: flex; }
         .nav-item { cursor: pointer; transition: all 0.3s ease; color: #6b7280; text-align: center; }
         .nav-item.active-tab { color: #eab308; }
-        
         .modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; justify-content: flex-end; }
         .modal-body { background: #161122; border-radius: 24px 24px 0 0; padding: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
         .input-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; padding: 14px; width: 100%; outline: none; color: white; font-size: 14px; }
+        .status-pending { color: #eab308; font-size: 10px; font-weight: bold; }
+        .status-paid { color: #22c55e; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        
         <div id="wallet" class="tab-content">
             <h2 class="text-2xl font-bold text-center mb-6">Wallet</h2>
             <div class="space-y-3 mb-6">
                 <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center border border-purple-400 font-bold">PI</div>
-                        <div><p class="text-gray-400 text-[10px] uppercase">Balance</p><p id="w-pi" class="font-bold text-lg">0.0000000</p></div>
-                    </div>
-                </div>
-                <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center border border-indigo-400 font-bold">PX</div>
-                        <div><p class="text-gray-400 text-[10px] uppercase">Pinix Token</p><p id="w-px" class="font-bold text-indigo-300 text-lg">100.00</p></div>
+                        <div><p class="text-gray-400 text-[10px] uppercase">Balance</p><p id="w-pi" class="font-bold text-lg text-yellow-500">0.0000000</p></div>
                     </div>
                 </div>
             </div>
@@ -57,182 +41,165 @@
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> WITHDRAW
             </button>
             <div class="mt-8">
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Recent Transactions</h4>
-                <div id="tx-history" class="space-y-2 text-center py-10 glass-card rounded-2xl">
-                    <p class="text-[10px] text-gray-600 italic">No transactions found</p>
-                </div>
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Your Withdrawals</h4>
+                <div id="user-withdraw-history" class="space-y-2">
+                    </div>
             </div>
         </div>
 
         <div id="friends" class="tab-content">
             <h2 class="text-2xl font-bold mb-6">Invite Friends</h2>
-            <div class="glass-card p-6 rounded-3xl text-center mb-8 border-purple-500/20">
-                <div class="w-16 h-16 bg-purple-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-user-plus text-3xl text-purple-500"></i>
-                </div>
-                <h3 class="font-bold mb-1">Personal Invite Link</h3>
-                <p id="invite-link-text" class="text-[11px] text-purple-400 font-mono bg-black/40 p-3 rounded-lg break-all">https://t.me/FonixMining2026Bot?start=user_310516</p>
+            <div class="glass-card p-6 rounded-3xl text-center mb-8">
+                <p id="invite-link-text" class="text-[11px] text-purple-400 font-mono bg-black/40 p-3 rounded-lg break-all">Loading link...</p>
             </div>
-            <div class="space-y-4">
-                <div class="flex justify-between items-center px-2 text-xs font-bold text-gray-400">
-                    <span>YOUR REFERRALS</span>
-                    <span class="text-purple-500">0 People</span>
-                </div>
-                <div class="glass-card p-4 rounded-2xl text-center text-xs text-gray-600 italic border-dashed border-white/10">
-                    Share your link to see your friends here.
-                </div>
-            </div>
-            <button onclick="copyInvite()" class="mt-auto w-full bg-[#8b5cf6] py-4 rounded-2xl font-black text-sm active:scale-95 transition">
-                <i class="fa-solid fa-copy mr-2"></i> COPY INVITE LINK
-            </button>
+            <button onclick="copyInvite()" class="mt-auto w-full bg-[#8b5cf6] py-4 rounded-2xl font-black text-sm">COPY LINK</button>
         </div>
 
         <div id="home" class="tab-content active">
-            <div class="space-y-2 mt-2">
-                <div class="glass-card p-3 rounded-2xl flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-[10px] border border-purple-400">PI</div>
-                        <div><p class="text-gray-400 text-[8px]">Balance</p><p id="h-pi" class="text-xs font-bold">0.0000000 PI</p></div>
-                    </div>
-                </div>
-                <div class="glass-card p-3 rounded-2xl flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-[10px] border border-indigo-400">PX</div>
-                        <div><p class="text-gray-400 text-[8px]">Balance</p><p id="h-px" class="text-xs font-bold text-indigo-300">100.00 PINIX</p></div>
-                    </div>
-                </div>
-            </div>
-
             <div class="flex-grow flex flex-col items-center justify-center">
-                <div class="relative w-48 h-48 flex items-center justify-center mb-4">
-                    <div class="absolute inset-0 bg-purple-600 rounded-full blur-[70px] opacity-20"></div>
-                    <img src="pinix.jpg" class="mining-fan w-44 h-44 rounded-full border-4 border-white/5 object-cover" onerror="this.src='https://via.placeholder.com/200'">
-                </div>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Mining Active</p>
-                <h2 id="mining-counter" class="text-4xl font-black text-yellow-500 mb-6 font-mono tracking-tighter">0.0000000</h2>
-                <div class="glass-card px-6 py-2 rounded-2xl border-yellow-500/20 flex items-center gap-3">
-                    <i class="fa-solid fa-bolt text-yellow-500"></i>
-                    <div class="text-left"><p class="font-black text-sm leading-none">5 GH/s</p><p class="text-[8px] text-gray-500 uppercase">Power</p></div>
-                </div>
+                <img src="pinix.jpg" class="mining-fan w-40 h-40 rounded-full border-4 border-white/5 object-cover mb-4">
+                <h2 id="mining-counter" class="text-4xl font-black text-yellow-500 font-mono">0.0000000</h2>
             </div>
-
-            <div class="space-y-3 mb-2">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="claimMining()" class="bg-[#8b5cf6] py-3.5 rounded-2xl font-bold text-sm active:scale-95 transition">CLAIM</button>
-                    <button onclick="swapPinix()" class="bg-[#22c55e] py-3.5 rounded-2xl font-bold text-sm text-black active:scale-95 transition">SWAP PX</button>
-                </div>
-                <button class="w-full bg-yellow-600 py-4 rounded-2xl font-black text-base shadow-lg active:scale-95 transition">BOOST</button>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="claimMining()" class="bg-[#8b5cf6] py-4 rounded-2xl font-bold">CLAIM</button>
+                <button onclick="switchTab('wallet', document.querySelector('.fa-wallet'))" class="bg-gray-800 py-4 rounded-2xl font-bold">WALLET</button>
             </div>
         </div>
 
-        <div id="missions" class="tab-content">
-            <h2 class="text-2xl font-bold mb-6 text-center">Daily Tasks</h2>
-            <div class="space-y-3">
-                <div class="glass-card p-4 rounded-2xl flex justify-between items-center" id="task-tg">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-sky-500/20 rounded-xl flex items-center justify-center text-sky-400 text-xl"><i class="fa-brands fa-telegram"></i></div>
-                        <div><p class="font-bold text-sm">Join Channel</p><p class="text-xs text-yellow-500">+50 PINIX</p></div>
-                    </div>
-                    <button onclick="startTelegramTask()" class="bg-white/10 px-6 py-2 rounded-xl text-xs font-bold active:scale-95 transition">GO</button>
+        <div id="admin" class="tab-content">
+            <h2 class="text-2xl font-bold text-center mb-6 text-red-500">Admin Panel</h2>
+            <div class="space-y-4" id="admin-request-list">
                 </div>
-            </div>
         </div>
 
         <div class="glass-card rounded-[2.5rem] p-3 flex justify-around items-center mx-4 mb-4 mt-auto">
             <div onclick="switchTab('wallet', this)" class="nav-item flex flex-col items-center gap-1"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[9px] font-bold">Wallet</span></div>
             <div onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1"><i class="fa-solid fa-users text-xl"></i><span class="text-[9px] font-bold">Friends</span></div>
             <div onclick="switchTab('home', this)" class="nav-item active-tab flex flex-col items-center gap-1"><div class="bg-yellow-500/20 p-2 rounded-full"><i class="fa-solid fa-house text-xl"></i></div><span class="text-[9px] font-bold">Home</span></div>
-            <div onclick="switchTab('missions', this)" class="nav-item flex flex-col items-center gap-1"><i class="fa-solid fa-bullseye text-xl"></i><span class="text-[9px] font-bold">Missions</span></div>
+            <div onclick="switchTab('admin', this)" class="nav-item flex flex-col items-center gap-1 text-red-900"><i class="fa-solid fa-lock text-xl"></i><span class="text-[9px] font-bold">Admin</span></div>
         </div>
 
         <div id="withdraw-modal" class="modal-overlay">
             <div class="modal-body">
                 <div class="flex justify-between items-center mb-6">
-                    <div class="w-8"></div><h3 class="text-lg font-black">WITHDRAW PI</h3><button onclick="closeWithdraw()" class="text-gray-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="bg-purple-600/10 border border-purple-500/20 rounded-2xl p-4 text-center mb-6">
-                    <p class="text-[10px] text-gray-400 uppercase mb-1">Available for withdrawal</p>
-                    <span id="modal-bal" class="text-xl font-black text-purple-400">0.0000000 PI</span>
+                    <h3 class="text-lg font-black uppercase">Withdraw PI</h3>
+                    <button onclick="closeWithdraw()" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="space-y-4 mb-6">
-                    <div><label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Wallet Address</label><input type="text" placeholder="Enter PI address" class="input-box mt-1"></div>
-                    <div class="relative"><label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Amount</label><input type="number" placeholder="0.00" class="input-box mt-1"><button class="absolute right-4 top-10 text-purple-400 font-bold text-xs">MAX</button></div>
+                    <input type="text" id="draw-address" placeholder="Wallet Address" class="input-box">
+                    <input type="number" id="draw-amount" placeholder="Amount (Min: 30)" class="input-box">
                 </div>
-                <button class="w-full bg-white/5 py-4 rounded-2xl font-bold text-gray-700 cursor-not-allowed">CONFIRM</button>
+                <button onclick="submitWithdraw()" class="w-full bg-[#22c55e] py-4 rounded-2xl font-bold text-black">CONFIRM WITHDRAWAL</button>
             </div>
         </div>
     </div>
 
     <script>
-        let piBalance = 0.0, pxBalance = 100.0, miningPending = 0.0;
-        const miningRate = 0.00001;
+        let piBalance = parseFloat(localStorage.getItem('piBalance')) || 0.0;
+        let miningPending = 0.0;
+        let requests = JSON.parse(localStorage.getItem('withdrawRequests')) || [];
 
-        // Davet Linki Güncelleme (Yeni Bot Linki)
         const randomID = Math.floor(Math.random() * 899999 + 100000);
         const myInviteLink = "https://t.me/FonixMining2026Bot?start=user_" + randomID;
         document.getElementById('invite-link-text').innerText = myInviteLink;
 
         setInterval(() => {
-            miningPending += miningRate / 10;
+            miningPending += 0.000001;
             document.getElementById('mining-counter').innerText = miningPending.toFixed(7);
         }, 100);
 
         function switchTab(id, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active-tab'); n.classList.add('text-gray-500'); });
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-tab'));
             document.getElementById(id).classList.add('active');
-            el.classList.add('active-tab'); el.classList.remove('text-gray-500');
+            if(el) el.classList.add('active-tab');
+            if(id === 'admin') loadAdminPanel();
             updateUI();
         }
 
         function claimMining() {
-            if(miningPending > 0.0001) {
-                piBalance += miningPending;
-                addHistory("Mining", "+" + miningPending.toFixed(5) + " PI");
-                miningPending = 0; updateUI();
+            piBalance += miningPending;
+            miningPending = 0;
+            saveData();
+            updateUI();
+        }
+
+        function submitWithdraw() {
+            const addr = document.getElementById('draw-address').value;
+            const amnt = parseFloat(document.getElementById('draw-amount').value);
+
+            if(addr.length < 5 || amnt < 30) {
+                alert("Minimum 30 PI and valid address required!");
+                return;
             }
+            if(piBalance < amnt) {
+                alert("Insufficient balance!");
+                return;
+            }
+
+            const newReq = {
+                id: Date.now(),
+                address: addr,
+                amount: amnt,
+                status: 'Pending',
+                date: new Date().toLocaleString()
+            };
+
+            requests.push(newReq);
+            piBalance -= amnt;
+            saveData();
+            alert("Withdrawal request sent to admin!");
+            closeWithdraw();
+            updateUI();
         }
 
-        function swapPinix() {
-            if(pxBalance >= 100) {
-                const gain = pxBalance / 100;
-                piBalance += gain;
-                addHistory("Swap", "+" + gain + " PI");
-                pxBalance = 0; updateUI();
-            } else { alert("Min 100 PX required!"); }
+        function loadAdminPanel() {
+            const list = document.getElementById('admin-request-list');
+            list.innerHTML = requests.length === 0 ? '<p class="text-center text-gray-600">No requests.</p>' : '';
+            
+            requests.forEach(req => {
+                const div = document.createElement('div');
+                div.className = 'glass-card p-4 rounded-xl text-xs space-y-2 border-l-4 ' + (req.status === 'Pending' ? 'border-yellow-500' : 'border-green-500');
+                div.innerHTML = `
+                    <div class="flex justify-between"><b>Addr:</b> <span class="text-gray-400">${req.address}</span></div>
+                    <div class="flex justify-between"><b>Amount:</b> <span class="text-yellow-500">${req.amount} PI</span></div>
+                    <div class="flex justify-between"><b>Date:</b> <span>${req.date}</span></div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="${req.status === 'Pending' ? 'status-pending' : 'status-paid'}">${req.status}</span>
+                        ${req.status === 'Pending' ? `<button onclick="approveReq(${req.id})" class="bg-green-600 px-3 py-1 rounded-lg text-white font-bold">Pay</button>` : ''}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
         }
 
-        function startTelegramTask() {
-            window.open("https://t.me/PiCoinMining2027", "_blank");
-            const btn = document.querySelector('#task-tg button');
-            btn.innerText = "Checking...";
-            setTimeout(() => {
-                pxBalance += 50; btn.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
-                btn.onclick = null; updateUI();
-            }, 3000);
+        function approveReq(id) {
+            const idx = requests.findIndex(r => r.id === id);
+            requests[idx].status = 'Paid';
+            saveData();
+            loadAdminPanel();
         }
 
-        function copyInvite() {
-            navigator.clipboard.writeText(myInviteLink);
-            alert("Invite link copied: " + myInviteLink);
+        function saveData() {
+            localStorage.setItem('piBalance', piBalance);
+            localStorage.setItem('withdrawRequests', JSON.stringify(requests));
         }
 
         function updateUI() {
-            document.getElementById('h-pi').innerText = piBalance.toFixed(7) + " PI";
             document.getElementById('w-pi').innerText = piBalance.toFixed(7);
-            document.getElementById('modal-bal').innerText = piBalance.toFixed(7) + " PI";
-            document.getElementById('h-px').innerText = pxBalance.toFixed(2) + " PINIX";
-            document.getElementById('w-px').innerText = pxBalance.toFixed(2);
-        }
-
-        function addHistory(title, amount) {
-            const hist = document.getElementById('tx-history');
-            if(hist.innerText.includes("No transactions")) hist.innerHTML = "";
-            hist.insertAdjacentHTML('afterbegin', `<div class="glass-card p-3 rounded-xl flex justify-between items-center mx-2 text-left mb-2"><div><p class="text-xs font-bold">${title}</p></div><p class="text-xs font-bold text-green-500">${amount}</p></div>`);
+            const hist = document.getElementById('user-withdraw-history');
+            hist.innerHTML = '';
+            requests.slice(-3).forEach(r => {
+                hist.innerHTML += `<div class="glass-card p-3 rounded-xl flex justify-between items-center text-[10px]">
+                    <span>${r.amount} PI</span>
+                    <span class="${r.status === 'Pending' ? 'text-yellow-500' : 'text-green-500'} font-bold">${r.status}</span>
+                </div>`;
+            });
         }
 
         function openWithdraw() { document.getElementById('withdraw-modal').style.display = 'flex'; }
         function closeWithdraw() { document.getElementById('withdraw-modal').style.display = 'none'; }
+        function copyInvite() { navigator.clipboard.writeText(myInviteLink); alert("Link copied!"); }
     </script>
 </body>
 </html>
