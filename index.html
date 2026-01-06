@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pinix Mining Pro</title>
+    <title>Pinix Mining App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -33,13 +33,13 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .mining-fan {
-            animation: rotate 8s linear infinite;
+            animation: rotate 10s linear infinite;
         }
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        .active-claim:active { transform: scale(0.95); transition: 0.1s; }
+        .active-btn:active { transform: scale(0.96); transition: 0.1s; }
     </style>
 </head>
 <body>
@@ -49,20 +49,20 @@
         <div class="space-y-3 mt-2">
             <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">PI</div>
+                    <div class="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-extrabold">PI</div>
                     <div>
-                        <p class="text-gray-400 text-[10px] leading-none uppercase tracking-wider">Main Balance</p>
-                        <p id="main-balance" class="font-bold text-sm">0.0000000 PI</p>
+                        <p class="text-gray-400 text-[9px] uppercase tracking-widest">Main Balance</p>
+                        <p id="main-balance" class="font-bold text-sm tracking-tight">0.0000000 PI</p>
                     </div>
                 </div>
                 <i class="fa-solid fa-wallet text-gray-500 text-sm"></i>
             </div>
 
-            <div class="glass-card rounded-2xl p-3 flex justify-between items-center opacity-70">
+            <div class="glass-card rounded-2xl p-3 flex justify-between items-center opacity-60">
                 <div class="flex items-center gap-3">
-                    <div class="bg-purple-900 rounded-full w-8 h-8 flex items-center justify-center text-xs">PX</div>
+                    <div class="bg-indigo-900 rounded-full w-8 h-8 flex items-center justify-center text-[10px]">PX</div>
                     <div>
-                        <p class="text-gray-400 text-[10px] leading-none">Pinix Tokens</p>
+                        <p class="text-gray-400 text-[9px]">Pinix Token</p>
                         <p class="font-bold text-sm">0 PINIX</p>
                     </div>
                 </div>
@@ -72,79 +72,84 @@
 
         <div class="flex-grow flex flex-col items-center justify-center">
             <div class="relative w-52 h-52 flex items-center justify-center mb-6">
-                <div class="absolute inset-0 bg-purple-600 rounded-full blur-[60px] opacity-20"></div>
-                <img src="pinix.jpg" alt="Fan" class="mining-fan w-48 h-48 rounded-full border-2 border-purple-500/20 object-cover">
-                <div class="absolute bg-purple-900 border-2 border-yellow-500 rounded-full p-2 shadow-xl">
-                    <i class="fa-solid fa-p text-yellow-500 text-xl"></i>
+                <div class="absolute inset-0 bg-purple-500 rounded-full blur-[70px] opacity-20"></div>
+                <img src="pinix.jpg" alt="Fan" class="mining-fan w-44 h-44 rounded-full border-4 border-purple-500/10 object-cover shadow-2xl shadow-purple-500/20">
+                <div class="absolute bg-[#1a0b2e] border-2 border-yellow-500 rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-p text-yellow-500 text-lg font-bold"></i>
                 </div>
             </div>
 
-            <p class="text-gray-400 text-xs italic mb-1 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Mining...
-            </p>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                <p class="text-gray-400 text-[11px] uppercase tracking-widest">Mining...</p>
+            </div>
+            
             <h2 id="mining-counter" class="text-3xl font-black text-yellow-500 mb-6 tracking-tighter">0.0000000 <span class="text-white text-xl font-normal ml-1">PI</span></h2>
 
-            <div class="glass-card rounded-2xl px-6 py-2 flex items-center gap-3 border-yellow-500/20">
-                <i class="fa-solid fa-bolt text-yellow-400 animate-bounce"></i>
+            <div class="glass-card rounded-2xl px-6 py-2.5 flex items-center gap-3 border-yellow-500/10">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
                 <div>
-                    <p class="text-[9px] text-gray-400 uppercase font-bold">Speed</p>
-                    <p class="font-bold text-sm text-yellow-500">0.00001 PI/s</p>
+                    <p class="text-[9px] text-gray-400 uppercase font-black">Mining Power</p>
+                    <p class="font-bold text-sm text-white">1 GH/s</p>
                 </div>
             </div>
         </div>
 
         <div class="space-y-3 mb-4">
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="claimMining()" class="active-claim bg-purple-600 py-3 rounded-xl font-bold text-sm shadow-lg shadow-purple-900/20 hover:bg-purple-500">Claim</button>
-                <button class="bg-[#22c55e] py-3 rounded-xl font-bold text-sm text-black flex items-center justify-center gap-2 opacity-80">
+                <button onclick="claimMining()" class="active-btn bg-purple-600 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-purple-900/40">Claim</button>
+                <button class="bg-[#22c55e] py-3.5 rounded-xl font-bold text-sm text-black flex items-center justify-center gap-2 opacity-90">
                     <i class="fa-solid fa-right-left"></i> Swap
                 </button>
             </div>
             
-            <button class="w-full bg-yellow-600 py-3.5 rounded-xl font-extrabold text-base flex items-center justify-center gap-2 active-claim">
-                <i class="fa-solid fa-rocket"></i> BOOST EARNINGS
+            <button class="active-btn w-full bg-yellow-600 py-4 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-yellow-900/30">
+                <i class="fa-solid fa-rocket"></i> BOOST
             </button>
         </div>
 
-        <div class="glass-card rounded-3xl p-3 flex justify-around items-center mb-2">
-            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[9px]">Wallet</span></div>
-            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-users text-sm"></i><span class="text-[9px]">Friends</span></div>
+        <div class="glass-card rounded-3xl p-3.5 flex justify-around items-center mb-2">
+            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px]">Wallet</span></div>
+            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-users text-sm"></i><span class="text-[8px]">Friends</span></div>
             <div class="flex flex-col items-center gap-1 text-yellow-500">
-                <div class="bg-yellow-500/10 p-1.5 rounded-full"><i class="fa-solid fa-house"></i></div>
-                <span class="text-[9px]">Home</span>
+                <div class="bg-yellow-500/20 p-1.5 rounded-full"><i class="fa-solid fa-house"></i></div>
+                <span class="text-[8px] font-bold">Home</span>
             </div>
-            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-bullseye text-sm"></i><span class="text-[9px]">Missions</span></div>
-            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-ellipsis text-sm"></i><span class="text-[9px]">More</span></div>
+            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-bullseye text-sm"></i><span class="text-[8px]">Missions</span></div>
+            <div class="flex flex-col items-center gap-1 text-gray-500"><i class="fa-solid fa-ellipsis text-sm"></i><span class="text-[8px]">More</span></div>
         </div>
     </div>
 
     <script>
         let currentMining = 0.0;
         let mainBalance = 0.0;
-        const rate = 0.00001; // Saniyelik kazanç
+        
+        // 1 GH/s = Günde 0.864 PI
+        // 0.864 / 24 saat / 3600 saniye = 0.00001 PI/s
+        const ratePerSecond = 0.00001; 
 
-        // Sayaç Güncelleme (Her 100ms'de bir akıcı görünüm için)
+        // Sayaç her 100ms'de bir güncellenir (0.1 saniye)
         setInterval(() => {
-            currentMining += rate / 10; 
+            currentMining += ratePerSecond / 10; 
             document.getElementById('mining-counter').innerHTML = 
                 currentMining.toFixed(7) + ' <span class="text-white text-xl font-normal ml-1">PI</span>';
         }, 100);
 
-        // Claim Fonksiyonu
         function claimMining() {
             if(currentMining > 0) {
                 mainBalance += currentMining;
                 currentMining = 0;
                 
-                // Arayüzü Güncelle
+                // Bakiyeyi güncelle
                 document.getElementById('main-balance').innerText = mainBalance.toFixed(7) + ' PI';
                 document.getElementById('mining-counter').innerHTML = 
                     '0.0000000 <span class="text-white text-xl font-normal ml-1">PI</span>';
                 
-                // Küçük bir efekt
+                // Buton geri bildirimi
                 const btn = event.target;
+                const oldText = btn.innerText;
                 btn.innerText = "Claimed!";
-                setTimeout(() => btn.innerText = "Claim", 1000);
+                setTimeout(() => btn.innerText = oldText, 1000);
             }
         }
     </script>
