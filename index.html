@@ -3,60 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX Mining App</title>
+    <title>PINIX Mining Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
+
+        :root {
+            --bg-deep: #0a0812;
+            --purple-glow: rgba(123, 97, 255, 0.15);
+            --pi-orange: #f97316;
+        }
 
         body {
-            /* Görseldeki derin mor-siyah radyal geçiş */
-            background: radial-gradient(circle at 50% 30%, #2a224a 0%, #151221 45%, #000000 100%);
-            color: white;
-            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 30%, #1e1642 0%, #0d0b1a 45%, var(--bg-deep) 100%);
+            color: #e2e8f0;
+            font-family: 'Rajdhani', sans-serif;
             height: 100vh;
-            margin: 0;
+            overflow: hidden;
             display: flex;
             justify-content: center;
-            overflow: hidden;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.04);
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        /* Dönen Pervane Animasyonu */
+        /* Gelişmiş Pervane Animasyonu */
+        .fan-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .mining-fan {
-            width: 260px;
-            height: 260px;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            animation: spin 15s linear infinite;
-            filter: drop-shadow(0 0 25px rgba(123, 97, 255, 0.25));
-            border-radius: 50%;
+            animation: spinFan 10s linear infinite;
+            filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.4));
         }
 
-        @keyframes spin {
+        @keyframes spinFan {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* Alt Navigasyon Home Butonu */
-        .nav-home-btn {
-            background: linear-gradient(135deg, #a855f7 0%, #f97316 100%);
-            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+        .pi-center-logo {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            background: #1a1625;
+            border: 3px solid #7c3aed;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.6);
         }
 
-        /* Boost Butonu Rengi */
+        /* Neon Butonlar */
+        .btn-claim { background: linear-gradient(135deg, #7c3aed, #4f46e5); transition: 0.3s; }
+        .btn-claim:hover { box-shadow: 0 0 20px rgba(124, 58, 237, 0.5); transform: translateY(-2px); }
+
+        .btn-swap { background: linear-gradient(135deg, #10b981, #059669); transition: 0.3s; }
+        .btn-swap:hover { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); transform: translateY(-2px); }
+
         .btn-boost {
-            background: linear-gradient(90deg, #9e7a20 0%, #d4a017 100%);
-            color: black;
+            background: linear-gradient(90deg, #b48a21 0%, #facc15 50%, #b48a21 100%);
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
             font-weight: 900;
+            letter-spacing: 2px;
         }
 
-        .active-scale:active {
-            transform: scale(0.96);
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .nav-active {
+            color: #f97316;
+            filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+        }
+
+        .home-float {
+            background: linear-gradient(135deg, #7c3aed, #f97316);
+            padding: 12px;
+            border-radius: 50%;
+            margin-top: -35px;
+            border: 4px solid #0a0812;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -64,101 +109,126 @@
 
     <div class="w-full max-w-md h-full flex flex-col p-6 relative">
         
-        <div class="flex justify-between items-center text-[12px] text-gray-400 mb-2">
-            <span>3:28 <i class="far fa-clock ml-1"></i></span>
+        <div class="flex justify-between items-center text-xs text-gray-400 mb-4 px-2 font-sans">
+            <span class="font-bold">3:28</span>
             <div class="flex items-center gap-2">
-                <i class="fas fa-plane"></i>
+                <i class="fas fa-plane-departure"></i>
                 <i class="fas fa-wifi"></i>
-                <i class="fas fa-battery-three-quarters text-red-500"></i>
+                <div class="flex items-center border border-gray-600 rounded px-1">
+                    <span class="text-[10px] mr-1">14</span>
+                    <i class="fas fa-battery-half text-red-500"></i>
+                </div>
             </div>
         </div>
 
         <div class="flex justify-between items-center mb-6">
-            <i class="fas fa-times text-xl text-gray-400"></i>
-            <h1 class="font-bold text-lg flex items-center gap-1 tracking-tight">
-                PINIX App <i class="fas fa-check-circle text-sky-400 text-[10px]"></i>
+            <i class="fas fa-chevron-left text-lg text-gray-400 hover:text-white cursor-pointer"></i>
+            <h1 class="font-bold text-xl tracking-wide flex items-center gap-2">
+                PINIX App <i class="fas fa-check-circle text-blue-400 text-xs"></i>
             </h1>
-            <i class="fas fa-ellipsis-v text-xl text-gray-400"></i>
+            <i class="fas fa-ellipsis-vertical text-lg text-gray-400 cursor-pointer"></i>
         </div>
 
         <div class="space-y-3 mb-8">
-            <div class="glass-card p-4 rounded-[24px] flex justify-between items-center">
+            <div class="glass p-4 rounded-2xl flex justify-between items-center relative overflow-hidden group">
                 <div class="flex items-center gap-4">
-                    <div class="bg-orange-500 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white shadow-lg">π</div>
+                    <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20">
+                        <span class="font-black text-white text-xl">π</span>
+                    </div>
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
-                        <p class="text-lg font-bold">0.0000000 PI</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Available Balance</p>
+                        <p class="text-lg font-bold tracking-tight text-white">0.0000000 PI</p>
                     </div>
                 </div>
-                <i class="fas fa-wallet text-gray-600"></i>
+                <i class="fas fa-wallet text-gray-600 group-hover:text-orange-400 transition-colors"></i>
             </div>
 
-            <div class="glass-card p-4 rounded-[24px] flex justify-between items-center">
+            <div class="glass p-4 rounded-2xl flex justify-between items-center group">
                 <div class="flex items-center gap-4">
-                    <img src="pinix.jpg" class="w-11 h-11 rounded-full border border-purple-500/20" alt="logo">
+                    <img src="image_ede985.jpg" class="w-10 h-10 rounded-full border border-purple-500/30" alt="pinix">
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
-                        <p class="text-lg font-bold">0 PINIX</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Locked Balance</p>
+                        <p class="text-lg font-bold tracking-tight text-white">0 PINIX</p>
                     </div>
                 </div>
-                <i class="fas fa-wallet text-gray-600"></i>
+                <i class="fas fa-wallet text-gray-600 group-hover:text-purple-400 transition-colors"></i>
             </div>
         </div>
 
         <div class="flex-grow flex flex-col items-center justify-center">
-            <div class="relative flex items-center justify-center mb-4">
-                <img src="pinix.jpg" class="mining-fan" alt="Pervane">
-                
-                <div class="absolute w-12 h-12 bg-[#1a1625] rounded-full border-2 border-purple-700/50 flex items-center justify-center z-10 shadow-2xl">
-                    <span class="text-orange-500 font-black text-sm">π</span>
+            <div class="fan-container mb-4">
+                <img src="image_ede985.jpg" class="mining-fan" alt="Mining Fan">
+                <div class="pi-center-logo">
+                    <span class="text-pi-orange font-black text-2xl">π</span>
                 </div>
             </div>
 
-            <p class="text-gray-500 text-sm italic tracking-widest animate-pulse mb-1">Mining...</p>
-            <h2 id="counter" class="text-4xl font-black text-yellow-500 tracking-tighter">0.0000000 PI</h2>
+            <div class="text-center">
+                <p class="text-gray-500 text-sm font-medium tracking-[0.2em] animate-pulse mb-1">DATA MINING ACTIVE</p>
+                <h2 id="live-counter" class="text-4xl font-black text-yellow-400 tracking-tighter drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
+                    0.0002435 PI
+                </h2>
+            </div>
 
-            <div class="glass-card mt-6 px-10 py-3 rounded-2xl flex items-center gap-4">
-                <i class="fas fa-bolt text-yellow-500 text-2xl"></i>
-                <div class="text-left leading-none">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Mining Power</p>
-                    <p class="font-black text-xl">5 GH/s</p>
+            <div class="glass mt-8 px-10 py-3 rounded-2xl flex items-center gap-4 border-l-4 border-l-yellow-500">
+                <i class="fas fa-bolt-lightning text-yellow-400 text-2xl animate-bounce"></i>
+                <div class="text-left">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Hash Rate</p>
+                    <p class="font-black text-xl tracking-wide">5 GH/s</p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-auto space-y-4 pb-24">
+        <div class="mt-auto space-y-4 pb-20">
             <div class="flex gap-4">
-                <button class="flex-1 bg-[#6d28d9] py-4 rounded-[22px] font-bold active-scale transition shadow-lg">Claim</button>
-                <button class="flex-1 bg-[#10b981] py-4 rounded-[22px] font-bold flex items-center justify-center gap-2 active-scale transition shadow-lg">
-                    <i class="fas fa-exchange-alt text-sm"></i> Swap PINIX
+                <button class="flex-1 btn-claim py-4 rounded-2xl font-bold active:scale-95 shadow-lg">Claim</button>
+                <button class="flex-1 btn-swap py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 shadow-lg">
+                    <i class="fas fa-shuffle text-sm"></i> Swap PINIX
                 </button>
             </div>
-            <button class="w-full btn-boost py-4 rounded-[22px] active-scale transition flex items-center justify-center gap-2 uppercase tracking-[0.2em]">
-                <i class="fas fa-rocket"></i> BOOST
+            <button class="w-full btn-boost py-4 rounded-2xl active:scale-[0.98] flex items-center justify-center gap-3 transition-all">
+                <i class="fas fa-rocket"></i> BOOST MINING
             </button>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-4 text-gray-500">
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-wallet text-xl"></i><span class="text-[9px] mt-1">Wallet</span></div>
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-users text-xl"></i><span class="text-[9px] mt-1">Friends</span></div>
-            <div class="flex flex-col items-center text-orange-500 relative -top-3">
-                <div class="nav-home-btn p-3 rounded-full mb-1"><i class="fas fa-home text-2xl text-white"></i></div>
-                <span class="text-[10px] font-bold">Home</span>
+        <div class="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around items-center py-4 px-2 text-gray-500 shadow-2xl">
+            <div class="flex flex-col items-center cursor-pointer hover:text-white transition-colors">
+                <i class="fas fa-wallet text-xl"></i>
+                <span class="text-[10px] mt-1 font-bold">Wallet</span>
             </div>
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-bullseye text-xl"></i><span class="text-[9px] mt-1">Missions</span></div>
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-ellipsis-h text-xl"></i><span class="text-[9px] mt-1">More</span></div>
+            <div class="flex flex-col items-center cursor-pointer hover:text-white transition-colors">
+                <i class="fas fa-user-group text-xl"></i>
+                <span class="text-[10px] mt-1 font-bold">Friends</span>
+            </div>
+            
+            <div class="home-float flex flex-col items-center cursor-pointer group">
+                <i class="fas fa-house text-2xl text-white group-hover:scale-110 transition-transform"></i>
+            </div>
+            
+            <div class="flex flex-col items-center cursor-pointer hover:text-white transition-colors">
+                <i class="fas fa-bullseye text-xl"></i>
+                <span class="text-[10px] mt-1 font-bold">Missions</span>
+            </div>
+            <div class="flex flex-col items-center cursor-pointer hover:text-white transition-colors">
+                <i class="fas fa-grid-2 text-xl"></i>
+                <span class="text-[10px] mt-1 font-bold">More</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // Rakamları sıfırdan başlatıp otomatik artırma simülasyonu
-        let balance = 0.0000000;
-        const counter = document.getElementById('counter');
+        // Gerçekçi Sayaç Simülasyonu
+        let currentBalance = 0.0002435;
+        const counterDisplay = document.getElementById('live-counter');
 
-        setInterval(() => {
-            balance += 0.0000008; // Artış hızı
-            counter.innerText = balance.toFixed(7) + " PI";
-        }, 1000);
+        function updateMining() {
+            // Saniyede rastgele küçük bir artış (mining hissi için)
+            const increment = (Math.random() * 0.0000005) + 0.0000001;
+            currentBalance += increment;
+            counterDisplay.innerText = currentBalance.toFixed(7) + " PI";
+        }
+
+        setInterval(updateMining, 1000);
     </script>
 </body>
 </html>
