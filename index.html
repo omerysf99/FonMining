@@ -6,7 +6,7 @@
     <title>PINIX ULTIMATE PRO - MEGA WEB3 HUB</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE STYLING --- */
+        /* --- PRO CSS ARCHITECTURE --- */
         :root {
             --primary: #8b5cf6; --secondary: #f59e0b; --bg-ultra: #05010d;
             --bg-deep: #0b021a; --glass: rgba(255, 255, 255, 0.06);
@@ -22,60 +22,57 @@
             position: relative; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
         }
 
-        /* --- NOTIFICATION & SHAKE --- */
-        #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 35000; pointer-events: none; width: 90%; max-width: 380px; }
+        /* --- NOTIFICATION ENGINE --- */
+        #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 40000; pointer-events: none; width: 90%; max-width: 380px; }
         .toast {
             padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(-150px); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-160px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px);
         }
         .toast.active { transform: translateY(0); }
-        .toast.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--p-green); color: var(--p-green); }
-        .toast.error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--p-red); color: var(--p-red); }
+        .toast.success { background: rgba(16, 185, 129, 0.25); border: 1px solid var(--p-green); color: var(--p-green); }
+        .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid var(--p-red); color: var(--p-red); }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-12px); } 60% { transform: translateX(12px); } }
         .shake-screen { animation: shake 0.3s ease-in-out 2; }
 
         /* --- OVERLAYS --- */
         .overlay { position: absolute; inset: 0; background: var(--bg-ultra); z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        #ad-screen { background: #000; display: none; }
+        #ad-screen { background: rgba(0,0,0,0.95); display: none; }
 
-        /* --- UI COMPONENTS --- */
+        /* --- DASHBOARD ELEMENTS --- */
         .header { padding: 25px 20px; background: rgba(5, 1, 13, 0.6); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
-        .icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .token-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
         
         .view { display: none; flex: 1; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 110px; }
-        .view.active { display: flex; animation: viewIn 0.4s ease-out; }
-        @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view.active { display: flex; animation: viewEffect 0.5s ease-out; }
+        @keyframes viewEffect { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* --- MINING DASHBOARD --- */
-        .mining-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .mining-fan { width: 220px; height: 220px; border-radius: 50%; border: 6px solid var(--primary); background: url('pinix.jpg') center/cover; animation: rotation 3s linear infinite; box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); margin-bottom: 30px; }
-        @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .balance-main { font-size: 3.2rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
+        /* --- MINING SYSTEM --- */
+        .fan-layer { width: 230px; height: 230px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 2.5s linear infinite; box-shadow: 0 0 60px rgba(139, 92, 246, 0.4); margin-bottom: 35px; }
+        @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .balance-hero { font-size: 3.5rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-shadow: 0 0 30px rgba(245, 158, 11, 0.5); }
 
-        /* --- TASKS --- */
-        .task-box { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .task-box:active { background: rgba(255,255,255,0.1); }
-        .btn-sm { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; }
+        /* --- TASK COMPONENTS --- */
+        .mission-item { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .mission-info b { font-size: 1.1rem; }
+        .mission-reward { color: var(--secondary); font-size: 0.8rem; font-weight: 700; margin-top: 4px; display: block; }
 
-        /* --- WITHDRAW & FORMS --- */
-        .withdraw-ui { display: flex; flex-direction: column; gap: 20px; }
-        .input-wrap { display: flex; flex-direction: column; gap: 8px; position: relative; }
-        .input-label { font-size: 0.75rem; opacity: 0.5; margin-left: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .styled-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 25px; padding: 18px 25px; color: white; font-size: 1rem; outline: none; width: 100%; transition: 0.3s; }
-        .styled-input:focus { box-shadow: 0 0 15px var(--primary); }
-        .max-trigger { position: absolute; right: 25px; top: 43px; color: var(--primary); font-weight: 900; cursor: pointer; font-size: 0.8rem; }
-        
-        .summary-card { background: var(--glass); border-radius: 22px; padding: 22px; border: 1px solid var(--border); }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
-        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 22px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
+        /* --- WITHDRAW & INPUTS --- */
+        .input-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; position: relative; }
+        .input-hint { font-size: 0.7rem; color: rgba(255,255,255,0.4); padding-left: 12px; font-weight: bold; }
+        .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 25px; padding: 20px 25px; color: white; font-size: 1rem; outline: none; transition: 0.3s; }
+        .pro-input:focus { border-color: white; box-shadow: 0 0 20px var(--primary); }
+        .max-tag { position: absolute; right: 25px; top: 48px; color: var(--primary); font-weight: 900; cursor: pointer; }
 
-        /* --- NAV --- */
-        nav { position: absolute; bottom: 0; width: 100%; height: 95px; background: rgba(11, 2, 26, 0.96); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; z-index: 1000; }
-        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; cursor: pointer; transition: 0.3s; flex: 1; }
-        .nav-link.active { color: var(--secondary); transform: translateY(-5px); }
-        .nav-link i { font-size: 1.6rem; display: block; margin-bottom: 5px; }
+        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 22px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        .btn-mega:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* --- NAVIGATION --- */
+        nav { position: absolute; bottom: 0; width: 100%; height: 100px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; }
+        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.7rem; cursor: pointer; transition: 0.3s; flex: 1; }
+        .nav-link.active { color: var(--secondary); }
+        .nav-link i { font-size: 1.8rem; display: block; margin-bottom: 6px; }
     </style>
 </head>
 <body>
@@ -84,102 +81,108 @@
     <div id="notification-box"></div>
 
     <div id="ad-screen" class="overlay">
-        <div id="ad-clock" style="position:absolute; top:40px; right:20px; background:var(--secondary); color:black; padding:8px 20px; border-radius:30px; font-weight:900;">5s</div>
-        <h2 style="font-family:'Orbitron';">CLAIMING...</h2>
-        <div style="width:220px; height:5px; background:#111; margin-top:25px; border-radius:3px; overflow:hidden;">
-            <div id="ad-fill" style="width:0%; height:100%; background:var(--secondary); transition: linear;"></div>
+        <div id="ad-timer" style="position:absolute; top:40px; right:20px; background:var(--secondary); color:black; padding:10px 25px; border-radius:30px; font-weight:900;">5s</div>
+        <div style="font-size: 5rem; margin-bottom: 20px;">⚡</div>
+        <h2 style="font-family:'Orbitron';">SYNCING WITH CHAIN</h2>
+        <div style="width:240px; height:6px; background:#111; margin-top:30px; border-radius:3px; overflow:hidden;">
+            <div id="ad-progress" style="width:0%; height:100%; background:var(--secondary); transition: linear;"></div>
         </div>
     </div>
 
     <div id="onboarding" class="overlay">
-        <div style="font-size: 4rem; margin-bottom: 10px;">🛡️</div>
-        <h1 style="font-family:'Orbitron';">IDENTIFICATION</h1>
-        <p style="opacity:0.6; margin: 15px 0 30px 0;">Referans kodunuz var mı? <br> +100 PNX kazanmak için giriniz.</p>
-        <div class="input-wrap" style="width:100%;">
-            <input type="text" id="ref-join" class="styled-input" style="text-align:center;" placeholder="DAVET KODU">
+        <h1 style="font-family:'Orbitron'; font-size: 2rem;">WELCOME PILOT</h1>
+        <p style="opacity:0.6; margin: 20px 0 40px 0;">Referans kodunuzu girerek <br><b>+100 PNX</b> ödül kazanın.</p>
+        <div class="input-box" style="width:100%;">
+            <input type="text" id="reg-ref" class="pro-input" style="text-align:center;" placeholder="DAVET KODU">
         </div>
-        <button class="btn-mega" onclick="startApp()">SİSTEME BAĞLAN</button>
-        <p style="margin-top:25px; font-size:0.8rem; opacity:0.4; cursor:pointer;" onclick="startApp(true)">Kodum yok, devam et.</p>
+        <button class="btn-mega" onclick="initApp()">BAŞLAT</button>
+        <p style="margin-top:30px; font-size:0.8rem; opacity:0.4; cursor:pointer;" onclick="initApp(true)">Referansım yok, geç.</p>
     </div>
 
     <header class="header">
         <div class="stat-card">
-            <div class="icon-circle" style="background:#4c1d95; color:gold;">π</div>
-            <div><div style="font-size:0.55rem; opacity:0.5;">PI BAL.</div><div class="pi-val" style="font-weight:800; font-size:0.9rem;">0.0000</div></div>
+            <div class="token-circle" style="background:#4c1d95; color:gold;">π</div>
+            <div><div style="font-size:0.6rem; opacity:0.5;">PI TOTAL</div><div class="pi-val" style="font-weight:800;">0.0000</div></div>
         </div>
         <div class="stat-card">
-            <div class="icon-circle" style="background:#1e3a8a; color:white;">🌀</div>
-            <div><div style="font-size:0.55rem; opacity:0.5;">PNX ASSETS</div><div class="pnx-val" style="font-weight:800; font-size:0.9rem;">0.00</div></div>
+            <div class="token-circle" style="background:#1e3a8a; color:white;">🌀</div>
+            <div><div style="font-size:0.6rem; opacity:0.5;">PNX ASSET</div><div class="pnx-val" style="font-weight:800;">0.00</div></div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="mining-wrap">
-            <div class="mining-fan"></div>
-            <div class="balance-main" id="uncl-ui">0.00000</div>
-            <p style="letter-spacing:4px; font-size:0.75rem; opacity:0.4; margin-bottom:30px;">RATE: 0.00001 PI / SEC</p>
-            <button class="btn-mega" onclick="claimProcess()">CLAIM MINING (AD)</button>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div class="fan-layer"></div>
+            <div class="balance-hero" id="uncl-ui">0.00000</div>
+            <p style="letter-spacing:5px; font-size:0.8rem; opacity:0.4; margin-bottom:40px;">MINING ACTIVE</p>
+            <button class="btn-mega" onclick="triggerClaim()">CLAIM REWARDS (AD)</button>
         </div>
     </div>
 
     <div id="v-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; text-align:center;">Daily Missions</h2>
-        <div class="task-box">
-            <div><b>Telegram Group</b><br><small style="color:var(--secondary);">+50 PNX</small></div>
-            <button class="btn-sm" onclick="runTask(this, 50)">Start</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:30px; text-align:center;">Missions</h2>
+        <div class="mission-item">
+            <div class="mission-info">
+                <b>Join Telegram</b>
+                <span class="mission-reward">+50 PNX</span>
+            </div>
+            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem;" onclick="handleTask(this, 50, 'https://t.me/FonixCommunity')">JOIN</button>
         </div>
-        <div class="task-box">
-            <div><b>Follow Twitter</b><br><small style="color:var(--secondary);">+100 PNX</small></div>
-            <button class="btn-sm" onclick="runTask(this, 100)">Start</button>
+        <div class="mission-item">
+            <div class="mission-info">
+                <b>Follow Twitter</b>
+                <span class="mission-reward">+100 PNX</span>
+            </div>
+            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem;" onclick="handleTask(this, 100, '#')">START</button>
         </div>
-        <div class="summary-card" style="margin-top:20px; background:rgba(139,92,246,0.1);">
-            <h3 style="font-size:0.9rem; margin-bottom:10px;">🔄 SWAP PNX TO PI</h3>
-            <input type="number" id="swap-in" class="styled-input" style="padding:12px; font-size:0.8rem;" placeholder="PNX Miktarı">
-            <button class="btn-mega" style="padding:12px; font-size:0.8rem;" onclick="swapPNX()">CONVERT NOW</button>
+        <div class="mission-item" style="background:rgba(245, 158, 11, 0.05); border-color:var(--secondary);">
+            <div class="mission-info">
+                <b>Convert PNX to PI</b>
+                <span class="mission-reward">Rate: 100:1</span>
+            </div>
+            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem; background:var(--secondary);" onclick="tab('v-wallet', document.querySelectorAll('.nav-link')[3])">SWAP</button>
         </div>
     </div>
 
     <div id="v-ref" class="view">
         <h2 style="font-family:'Orbitron'; text-align:center;">Network</h2>
-        <div class="summary-card" style="text-align:center; border:2px dashed var(--primary); margin-top:30px; background:transparent;">
-            <p class="input-label" style="margin-bottom:10px;">SİZE ÖZEL DAVET KODU</p>
-            <h1 id="p-code" style="font-size:2.6rem; color:var(--secondary); margin-bottom:20px; font-family:'Orbitron';">---</h1>
-            <button class="btn-mega" style="padding:15px; font-size:0.8rem;" onclick="copyMyRef()">KODU KOPYALA</button>
+        <div style="background:var(--glass); border:2px dashed var(--primary); padding:40px; border-radius:30px; text-align:center; margin-top:40px;">
+            <p style="font-size:0.8rem; opacity:0.5; margin-bottom:15px;">KİŞİSEL DAVET KODUNUZ</p>
+            <h1 id="p-code" style="font-size:2.8rem; color:var(--secondary); margin-bottom:30px; font-family:'Orbitron';">---</h1>
+            <button class="btn-mega" style="padding:15px; font-size:0.8rem;" onclick="copyCode()">KOPYALA</button>
         </div>
-        <p style="margin-top:30px; text-align:center; font-size:0.8rem; opacity:0.5;">Her davet için anında 100 PNX kazanırsınız.</p>
+        <p style="margin-top:40px; text-align:center; opacity:0.6; line-height:1.6;">Her davet edilen üye için cüzdanınıza anında <b>100 PNX</b> aktarılır.</p>
     </div>
 
     <div id="v-wallet" class="view">
-        <div class="withdraw-ui">
-            <h1 style="text-align:center; font-family:'Orbitron';">Withdraw PI</h1>
-            <p style="text-align:center; opacity:0.5; font-size:0.8rem; margin-bottom:15px;">Minimum: 30 PI</p>
-            
-            <div class="summary-card" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <span style="background:var(--secondary); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">π</span>
-                    <b>PI Mainnet</b>
-                </div>
-                <span>▼</span>
+        <h1 style="text-align:center; font-family:'Orbitron'; margin-bottom:5px;">Withdraw PI</h1>
+        <p style="text-align:center; opacity:0.4; font-size:0.8rem; margin-bottom:30px;">Minimum limit: 30 PI</p>
+        
+        <div class="mission-item" style="margin-bottom:25px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="background:var(--secondary); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:black;">π</span>
+                <b>PI Mainnet Asset</b>
             </div>
-
-            <div class="input-wrap">
-                <label class="input-label">Wallet Address</label>
-                <input type="text" id="w-addr" class="styled-input" placeholder="G0239... (24-56 chars)">
-            </div>
-
-            <div class="input-wrap">
-                <label class="input-label">Amount</label>
-                <input type="number" id="w-amt" class="styled-input" placeholder="0.00" oninput="calcW()">
-                <span class="max-trigger" onclick="setWMax()">MAX</span>
-            </div>
-
-            <div class="summary-card">
-                <div class="summary-row" style="opacity:0.6;"><span>Network Fee:</span><span>1.00 PI</span></div>
-                <div class="summary-row" style="font-weight:800;"><span>Receive:</span><span style="color:var(--p-green);" id="w-rec">0.00 PI</span></div>
-            </div>
-
-            <button class="btn-mega" onclick="submitW()">SEND WITHDRAWAL REQUEST</button>
+            <span style="opacity:0.5;">▼</span>
         </div>
+
+        <div class="input-box">
+            <label class="input-hint">WALLET ADDRESS</label>
+            <input type="text" id="w-addr" class="pro-input" placeholder="G0...">
+        </div>
+
+        <div class="input-box">
+            <label class="input-hint">WITHDRAW AMOUNT</label>
+            <input type="number" id="w-amt" class="pro-input" placeholder="0.00" oninput="calcWithdraw()">
+            <span class="max-tag" onclick="maxWithdraw()">MAX</span>
+        </div>
+
+        <div style="background:var(--glass); border-radius:25px; padding:25px; border:1px solid var(--border); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; opacity:0.6; margin-bottom:12px;"><span>Network Gas Fee:</span><span>1.00 PI</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:900; font-size:1.1rem;"><span>Net Receive:</span><span style="color:var(--p-green);" id="w-res">0.00 PI</span></div>
+        </div>
+
+        <button class="btn-mega" onclick="finalWithdraw()">SEND WITHDRAWAL REQUEST</button>
     </div>
 
     <nav>
@@ -191,141 +194,128 @@
 </div>
 
 <script>
-    // --- DATABASE ---
-    let db = JSON.parse(localStorage.getItem('pinix_mega_v666')) || {
+    // --- APP DATA ---
+    let storage = JSON.parse(localStorage.getItem('pinix_ultimate_v2026')) || {
         pi: 0.0, pnx: 0, uncl: 0.0,
-        myRef: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
-        onboarded: false
+        ref: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        done: false
     };
 
-    function save() { localStorage.setItem('pinix_mega_v666', JSON.stringify(db)); }
+    function updateStorage() { localStorage.setItem('pinix_ultimate_v2026', JSON.stringify(storage)); }
 
-    // --- ANIMATED NOTIFICATIONS ---
-    function notify(msg, type = 'success') {
+    // --- UX ANIMATIONS ---
+    function feedback(msg, mode = 'success') {
         const box = document.getElementById('notification-box');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
-        box.appendChild(toast);
-        setTimeout(() => toast.classList.add('active'), 10);
+        const el = document.createElement('div');
+        el.className = `toast ${mode}`;
+        el.innerHTML = `<span>${mode === 'success' ? '✅' : '❌'}</span> ${msg}`;
+        box.appendChild(el);
+        setTimeout(() => el.classList.add('active'), 10);
         
-        if(type === 'error') {
+        if(mode === 'error') {
             document.getElementById('app').classList.add('shake-screen');
             setTimeout(() => document.getElementById('app').classList.remove('shake-screen'), 500);
         }
 
         setTimeout(() => {
-            toast.classList.remove('active');
-            setTimeout(() => toast.remove(), 500);
+            el.classList.remove('active');
+            setTimeout(() => el.remove(), 600);
         }, 3000);
     }
 
-    // --- ONBOARDING ---
+    // --- LOGIC ---
     window.onload = () => {
-        if(!db.onboarded) document.getElementById('onboarding').style.display = 'flex';
-        sync();
+        if(!storage.done) document.getElementById('onboarding').style.display = 'flex';
+        render();
         setInterval(() => {
-            db.uncl += 0.00001;
-            document.getElementById('uncl-ui').innerText = db.uncl.toFixed(5);
+            storage.uncl += 0.00001;
+            document.getElementById('uncl-ui').innerText = storage.uncl.toFixed(5);
         }, 1000);
     };
 
-    function startApp(skip = false) {
-        const input = document.getElementById('ref-join').value.trim();
+    function initApp(skip = false) {
+        const input = document.getElementById('reg-ref').value.trim();
         if(!skip && input.length >= 4) {
-            db.pnx += 100;
-            notify("Referans bonusu +100 PNX eklendi!");
+            storage.pnx += 100;
+            feedback("Referans ödülü tanımlandı!");
         }
-        db.onboarded = true; save();
+        storage.done = true; updateStorage();
         document.getElementById('onboarding').style.display = 'none';
-        sync();
+        render();
     }
 
-    // --- CORE ACTIONS ---
-    function claimProcess() {
-        if(db.uncl < 0.0001) return notify("Henüz ödül birikmedi!", "error");
+    function triggerClaim() {
+        if(storage.uncl < 0.0001) return feedback("Yetersiz bakiye!", "error");
         
         const ad = document.getElementById('ad-screen');
-        const fill = document.getElementById('ad-fill');
+        const bar = document.getElementById('ad-progress');
         ad.style.display = 'flex';
-        fill.style.width = '0%';
-        setTimeout(() => fill.style.width = '100%', 100);
+        bar.style.width = '100%';
 
-        let sec = 5;
-        const clockIv = setInterval(() => {
-            sec--;
-            document.getElementById('ad-clock').innerText = sec + 's';
-            if(sec <= 0) {
-                clearInterval(clockIv);
+        let time = 5;
+        const clock = setInterval(() => {
+            time--;
+            document.getElementById('ad-timer').innerText = time + 's';
+            if(time <= 0) {
+                clearInterval(clock);
                 ad.style.display = 'none';
-                db.pi += db.uncl; db.uncl = 0;
-                save(); sync();
-                notify("Ödüller cüzdana eklendi.");
+                storage.pi += storage.uncl; storage.uncl = 0;
+                updateStorage(); render();
+                feedback("Ödüller başarıyla claim edildi.");
             }
         }, 1000);
     }
 
-    function runTask(btn, rew) {
-        btn.innerText = "...";
+    function handleTask(btn, rew, url) {
+        if(url !== '#') window.open(url, '_blank');
+        btn.innerText = "CHECKING...";
         btn.disabled = true;
         setTimeout(() => {
-            db.pnx += rew;
-            btn.innerText = "DONE";
+            storage.pnx += rew;
+            btn.innerText = "COMPLETED";
             btn.style.background = "var(--p-green)";
-            save(); sync();
-            notify("Görev tamamlandı! +" + rew + " PNX");
-        }, 2500);
+            updateStorage(); render();
+            feedback("Görev ödülü: +" + rew + " PNX");
+        }, 3000);
     }
 
-    function swapPNX() {
-        const amt = parseFloat(document.getElementById('swap-in').value);
-        if(amt >= 100 && db.pnx >= amt) {
-            db.pnx -= amt;
-            db.pi += (amt / 100);
-            save(); sync();
-            notify("Swap başarılı! PI hesabına eklendi.");
-        } else notify("Yetersiz bakiye (Min 100 PNX)", "error");
+    function calcWithdraw() {
+        const val = parseFloat(document.getElementById('w-amt').value) || 0;
+        document.getElementById('w-res').innerText = Math.max(0, val - 1).toFixed(2) + " PI";
     }
 
-    // --- WALLET ACTIONS ---
-    function calcW() {
-        const a = parseFloat(document.getElementById('w-amt').value) || 0;
-        document.getElementById('w-rec').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
+    function maxWithdraw() {
+        document.getElementById('w-amt').value = storage.pi.toFixed(2);
+        calcWithdraw();
     }
 
-    function setWMax() {
-        document.getElementById('w-amt').value = db.pi.toFixed(2);
-        calcW();
+    function finalWithdraw() {
+        const a = parseFloat(document.getElementById('w-amt').value);
+        const adr = document.getElementById('w-addr').value;
+        if(a < 30) return feedback("Minimum 30 PI gereklidir!", "error");
+        if(a > storage.pi) return feedback("Bakiyeniz yetersiz!", "error");
+        if(adr.length < 10) return feedback("Geçersiz cüzdan adresi!", "error");
+
+        storage.pi -= a; updateStorage(); render();
+        feedback("Çekim talebiniz işleme alındı.", "success");
     }
 
-    function submitW() {
-        const amt = parseFloat(document.getElementById('w-amt').value);
-        const addr = document.getElementById('w-addr').value;
-        if(amt < 30) return notify("Limit 30 PI!", "error");
-        if(amt > db.pi) return notify("Yetersiz bakiye!", "error");
-        if(addr.length < 15) return notify("Geçersiz cüzdan!", "error");
-
-        db.pi -= amt; save(); sync();
-        notify("Çekim talebi başarılı!", "success");
-    }
-
-    // --- SYSTEM UTILS ---
-    function sync() {
-        document.querySelectorAll('.pi-val').forEach(el => el.innerText = db.pi.toFixed(4));
-        document.querySelectorAll('.pnx-val').forEach(el => el.innerText = db.pnx.toFixed(2));
-        document.getElementById('p-code').innerText = db.myRef;
+    function render() {
+        document.querySelectorAll('.pi-val').forEach(e => e.innerText = storage.pi.toFixed(4));
+        document.querySelectorAll('.pnx-val').forEach(e => e.innerText = storage.pnx.toFixed(2));
+        document.getElementById('p-code').innerText = storage.ref;
     }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.nav-link').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
     }
 
-    function copyMyRef() {
-        navigator.clipboard.writeText(db.myRef);
-        notify("Kod kopyalandı!");
+    function copyCode() {
+        navigator.clipboard.writeText(storage.ref);
+        feedback("Kod kopyalandı!");
     }
 </script>
 </body>
