@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX MINING 2026</title>
+    <title>FONIX MINING PRO 2026</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -13,9 +13,8 @@
     <style>
         :root {
             --primary: #8b5cf6; --secondary: #f59e0b; --bg-ultra: #05010d;
-            --bg-deep: #0b021a; --glass: rgba(255, 255, 255, 0.08);
+            --bg-deep: #0b021a; --glass: rgba(255, 255, 255, 0.1);
             --border: rgba(255, 255, 255, 0.12); --p-green: #10b981;
-            --p-red: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
@@ -23,44 +22,42 @@
         
         #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 70%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-        /* 41 SANIYELIK REKLAM BAR */
-        .ad-timer-container { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 9999; }
-        #ad-timer-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
+        /* 41 SANİYE REKLAM BAR */
+        .ad-timer-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.05); z-index: 9999; }
+        #ad-timer-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 15px var(--secondary); transition: linear; }
 
-        /* ÜST STAT BAR */
-        .header { padding: 15px 20px; background: rgba(5, 1, 13, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* HEADER STATS */
+        .header { padding: 15px 20px; background: rgba(5, 1, 13, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: 15px; padding: 10px; display: flex; align-items: center; gap: 10px; }
         .token-circle { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; }
         
-        /* GÖRÜNÜM AYARLARI */
+        /* VIEWS */
         .view { display: none; flex: 1; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 110px; }
-        .view.active { display: flex; animation: viewIn 0.4s ease-out; }
-        @keyframes viewIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .view.active { display: flex; animation: viewFade 0.4s ease; }
+        @keyframes viewFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ANA SAYFA (MADENCİLİK) */
-        .fan-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan-box { width: 220px; height: 220px; border-radius: 50%; border: 6px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 4s linear infinite; box-shadow: 0 0 45px rgba(139, 92, 246, 0.3); margin-bottom: 30px; }
+        /* MINING UI */
+        .fan-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-box { width: 220px; height: 220px; border-radius: 50%; border: 6px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 3s linear infinite; box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); margin-bottom: 25px; }
         @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .balance-hero { font-size: 3.2rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); margin-bottom: 5px; }
+        .balance-hero { font-size: 3.5rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); margin-bottom: 5px; text-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
 
-        /* KART VE BUTONLAR */
-        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; position: relative; }
-        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; border-bottom: 4px solid rgba(0,0,0,0.2); }
-        .btn-mega:active { transform: translateY(2px); border-bottom-width: 2px; }
+        /* CARDS & BUTTONS */
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 18px; border-radius: 18px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
+        .btn-mega:active { transform: scale(0.97); }
+        .pro-input { width: 100%; padding: 16px; border-radius: 12px; border: 2px solid var(--border); background: rgba(0,0,0,0.4); color: white; margin-top: 10px; outline: none; }
 
-        /* ALT NAVİGASYON */
-        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(11, 2, 26, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; z-index: 1000; }
+        /* NAV BAR */
+        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; z-index: 1000; }
         .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; cursor: pointer; transition: 0.3s; flex: 1; }
-        .nav-link.active { color: var(--secondary); font-weight: 800; }
+        .nav-link.active { color: var(--secondary); }
         .nav-link i { font-size: 1.6rem; display: block; margin-bottom: 4px; font-style: normal; }
 
-        /* BİLDİRİMLER */
+        /* TOAST */
         #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; width: 85%; pointer-events: none; }
-        .toast { padding: 16px; border-radius: 12px; background: rgba(139, 92, 246, 0.2); backdrop-filter: blur(15px); color: white; margin-bottom: 10px; text-align: center; font-weight: 600; border: 1px solid var(--primary); transform: translateY(-120px); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast { padding: 15px; border-radius: 12px; background: rgba(139, 92, 246, 0.3); backdrop-filter: blur(15px); color: white; margin-bottom: 10px; text-align: center; font-weight: 600; border: 1px solid var(--primary); transform: translateY(-120px); transition: 0.5s; }
         .toast.active { transform: translateY(0); }
-
-        .pro-input { width: 100%; padding: 16px; border-radius: 15px; border: 2px solid var(--border); background: rgba(0,0,0,0.4); color: white; margin-top: 10px; outline: none; }
-        .pro-input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -82,25 +79,24 @@
     </header>
 
     <div id="v-home" class="view active">
-        <div class="fan-container">
+        <div class="fan-area">
             <div class="fan-box"></div>
             <div class="balance-hero" id="uncl-ui">0.00000</div>
-            <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem; margin-bottom:30px;">ACTIVE MINING ENGINE</p>
-            <button class="btn-mega" onclick="manualClaim()">CLAIM REWARDS (AD)</button>
+            <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem; margin-bottom:30px;">ENGINE SPEED: 0.0001 PI/S</p>
+            <button class="btn-mega" onclick="manualClaim()">CLAIM MINING (AD)</button>
         </div>
     </div>
 
     <div id="v-tasks" class="view">
         <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Missions</h2>
         <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><b>Join Telegram</b><br><span style="color:var(--secondary); font-size:0.75rem;">+50 PNX Rewards</span></div>
-            <button class="btn-mega" style="padding:10px 15px; width:auto; font-size:0.75rem;" onclick="runMission(this, 50, 'https://t.me/FonixCommunity')">JOIN</button>
+            <div><b>Join Telegram</b><br><span style="color:var(--secondary); font-size:0.75rem;">+50 PNX</span></div>
+            <button class="btn-mega" style="padding:10px 15px; width:auto; font-size:0.7rem;" onclick="runMission(this, 50, 'https://t.me/FonixCommunity')">JOIN</button>
         </div>
         <div class="card">
             <h3 style="font-size:0.9rem;">🔄 SWAP PNX TO PI</h3>
-            <p style="font-size:0.7rem; opacity:0.5; margin-bottom:10px;">Rate: 100 PNX = 1 PI</p>
             <input type="number" id="swap-amt" class="pro-input" placeholder="Min 100 PNX">
-            <button class="btn-mega" style="margin-top:15px; padding:12px; font-size:0.8rem;" onclick="swapPNX()">CONVERT NOW</button>
+            <button class="btn-mega" style="margin-top:15px; padding:12px; font-size:0.8rem;" onclick="swapPNX()">CONVERT</button>
         </div>
     </div>
 
@@ -114,21 +110,21 @@
                 <button class="btn-mega" style="font-size:0.7rem; padding:12px; background: #0088cc;" onclick="shareOnTelegram()">PAYLAŞ</button>
             </div>
         </div>
-        <div class="card" style="text-align:center; font-size:0.8rem; opacity:0.7;">
-            Davet ettiğin her kullanıcı için <b>100 PNX</b> kazanırsın.
+        <div class="card" style="text-align:center; font-size:0.75rem; opacity:0.6;">
+            Davet edilen her arkadaş için +100 PNX kazanırsın.
         </div>
     </div>
 
     <div id="v-wallet" class="view">
         <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Wallet</h2>
         <div class="card">
-            <p style="font-size:0.75rem; opacity:0.5;">PI NETWORK MAINNET ADDRESS</p>
+            <p style="font-size:0.75rem; opacity:0.5;">PI MAINNET ADRESİ</p>
             <input type="text" id="w-addr" class="pro-input" placeholder="G0...">
             <div style="margin-top:15px;">
-                <p style="font-size:0.75rem; opacity:0.5;">AMOUNT (MIN 30 PI)</p>
+                <p style="font-size:0.75rem; opacity:0.5;">MİKTAR (MIN 30)</p>
                 <input type="number" id="w-amt" class="pro-input" placeholder="0.00">
             </div>
-            <button class="btn-mega" style="margin-top:20px;" onclick="processWithdraw()">WITHDRAW NOW</button>
+            <button class="btn-mega" style="margin-top:20px;" onclick="processWithdraw()">WITHDRAW PI</button>
         </div>
     </div>
 
@@ -147,83 +143,71 @@
 
     let adexiumWidget;
     document.addEventListener('DOMContentLoaded', () => {
-        // Interstitial Reklam Başlatma
+        // REKLAM ENTEGRASYONU (41 SANİYE)
         adexiumWidget = new AdexiumWidget({
             wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
             adFormat: 'interstitial'
         });
-        startAdSystem();
+        startAdLoop();
     });
 
-    // VERİ KAYIT SİSTEMİ
-    let db = JSON.parse(localStorage.getItem('fonix_final_v1')) || {
+    // DATABASE SİSTEMİ
+    let db = JSON.parse(localStorage.getItem('fonix_final_pro')) || {
         pi: 0.0, pnx: 0, uncl: 0.0,
         refCode: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase()
     };
 
-    function save() { localStorage.setItem('fonix_final_v1', JSON.stringify(db)); }
+    function save() { localStorage.setItem('fonix_final_pro', JSON.stringify(db)); }
 
-    // 41 SANİYE REKLAM DÖNGÜSÜ
-    function startAdSystem() {
-        let seconds = 0;
+    // 41 SANİYE REKLAM MOTORU
+    function startAdLoop() {
+        let sec = 0;
         const bar = document.getElementById('ad-timer-fill');
-        
         setInterval(() => {
-            seconds++;
-            let progress = (seconds / 41) * 100;
-            bar.style.width = progress + '%';
-
-            if (seconds >= 41) {
-                seconds = 0;
-                bar.style.width = '0%';
-                if (adexiumWidget) {
-                    adexiumWidget.autoMode();
-                }
+            sec++;
+            bar.style.width = (sec / 41) * 100 + '%';
+            if (sec >= 41) {
+                sec = 0;
+                if (adexiumWidget) adexiumWidget.autoMode();
             }
         }, 1000);
     }
 
-    // MADENCİLİK MOTORU
+    // MADENCİLİK MOTORU (Saniyede 0.0001 PI)
     setInterval(() => {
-        db.uncl += 0.00001;
+        db.uncl += 0.0001;
         document.getElementById('uncl-ui').innerText = db.uncl.toFixed(5);
     }, 1000);
 
     function manualClaim() {
-        if(db.uncl < 0.0001) return notify("Henüz toplanacak ödül yok!");
+        if(db.uncl < 0.001) return notify("Yetersiz miktar!");
         if(adexiumWidget) adexiumWidget.autoMode();
-        db.pi += db.uncl; db.uncl = 0; 
+        db.pi += db.uncl; db.uncl = 0;
         save(); render();
-        notify("Ödüller cüzdanınıza aktarıldı!");
+        notify("Ödüller cüzdana aktarıldı!");
     }
 
-    // GÖREV SİSTEMİ
     function runMission(btn, rew, url) {
         window.open(url, '_blank');
-        btn.innerText = "WAIT...";
         setTimeout(() => {
             db.pnx += rew;
-            btn.innerText = "DONE";
-            btn.style.opacity = "0.5";
-            btn.disabled = true;
+            btn.disabled = true; btn.style.opacity = "0.5";
             save(); render();
-            notify("Görev tamamlandı: +" + rew + " PNX");
+            notify("Görev tamamlandı!");
         }, 5000);
     }
 
     function swapPNX() {
         const amt = parseFloat(document.getElementById('swap-amt').value);
         if(amt >= 100 && db.pnx >= amt) {
-            db.pnx -= amt;
-            db.pi += (amt / 100);
+            db.pnx -= amt; db.pi += (amt/100);
             save(); render();
-            notify("Başarıyla PI'ye dönüştürüldü!");
+            notify("Swap başarılı!");
         } else {
-            notify("Yetersiz PNX bakiyesi!");
+            notify("Minimum 100 PNX gerekli!");
         }
     }
 
-    // REFERANS PAYLAŞIMI
     function shareOnTelegram() {
         const text = `Fonix Community'de madencilik yapmaya başla! Davet kodum: ${db.refCode}`;
         const link = `https://t.me/FonixMining2026Bot`;
@@ -232,23 +216,19 @@
 
     function copyRef() {
         navigator.clipboard.writeText(db.refCode);
-        notify("Referans kodu kopyalandı!");
+        notify("Kod kopyalandı!");
     }
 
-    // ÇEKİM İŞLEMİ
     function processWithdraw() {
-        const addr = document.getElementById('w-addr').value;
         const amt = parseFloat(document.getElementById('w-amt').value);
-        if(amt < 30) return notify("Minimum çekim 30 PI!");
-        if(amt > db.pi) return notify("Bakiye yetersiz!");
-        if(addr.length < 10) return notify("Geçersiz adres!");
-
-        db.pi -= amt;
-        save(); render();
-        notify("Çekim talebi başarıyla alındı.");
+        if(amt >= 30 && db.pi >= amt) {
+            db.pi -= amt; save(); render();
+            notify("Çekim talebi gönderildi.");
+        } else {
+            notify("Minimum 30 PI ve yeterli bakiye gerekli!");
+        }
     }
 
-    // YARDIMCI ARAÇLAR
     function notify(msg) {
         const box = document.getElementById('notification-box');
         const t = document.createElement('div');
