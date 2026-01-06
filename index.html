@@ -9,192 +9,203 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         body { background-color: #050505; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
-        
-        .app-container {
-            width: 375px; height: 780px;
-            background: #0f0d16;
-            position: relative; overflow: hidden; border-radius: 40px; border: 2px solid #1a1a1a;
-            display: flex; flex-direction: column;
-        }
-
+        .app-container { width: 375px; height: 780px; background: #0f0d16; position: relative; overflow: hidden; border-radius: 40px; border: 2px solid #1a1a1a; display: flex; flex-direction: column; }
         .page { display: none; height: 100%; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
         .page.active { display: flex; }
-
         .glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; }
         .mining-fan { width: 180px; height: 180px; animation: spin 10s linear infinite; border-radius: 50%; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
         .nav-item { cursor: pointer; opacity: 0.5; text-align: center; flex: 1; transition: 0.3s; }
         .nav-item.active { opacity: 1; color: #f97316; }
-        
-        /* Progress & Badges */
-        .empty-state { opacity: 0.4; filter: grayscale(1); }
+        .toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 12px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; width: 80%; text-align: center; }
     </style>
 </head>
 <body>
-
     <div class="app-container">
+        <div id="toast" class="toast"></div>
+
         <div id="home" class="page active">
             <div class="flex justify-center mb-6 mt-4"><h1 class="font-bold text-lg">PINIX App <i class="fas fa-check-circle text-sky-400 text-xs"></i></h1></div>
-            
             <div class="space-y-3 mb-6">
                 <div class="glass-card p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="bg-orange-500 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">π</div>
                         <div><p class="text-[10px] text-gray-500">Balance</p><p id="h-pi" class="text-sm font-bold">0.0000000 PI</p></div>
                     </div>
-                    <i class="fas fa-wallet text-gray-600 text-xs"></i>
                 </div>
                 <div class="glass-card p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <img src="pinix.jpg" class="w-8 h-8 rounded-full">
                         <div><p class="text-[10px] text-gray-500">Balance</p><p id="h-pnx" class="text-sm font-bold">0 PINIX</p></div>
                     </div>
-                    <i class="fas fa-wallet text-gray-600 text-xs"></i>
                 </div>
             </div>
-
             <div class="flex-grow flex flex-col items-center justify-center">
                 <img src="pinix.jpg" class="mining-fan mb-4">
                 <p class="text-gray-500 text-xs italic">Mining...</p>
                 <h2 id="h-mine" class="text-3xl font-black text-yellow-500">0.0000000 PI</h2>
                 <div class="glass-card mt-6 px-8 py-3 flex items-center gap-3">
                     <i class="fas fa-bolt text-yellow-500"></i>
-                    <div><p class="text-[10px] text-gray-500">Mining Power</p><p class="font-bold">5 GH/s</p></div>
+                    <div><p class="text-[10px] text-gray-500">Mining Power</p><p id="h-pwr" class="font-bold">5 GH/s</p></div>
                 </div>
             </div>
-
             <div class="space-y-3 mt-4">
                 <div class="flex gap-2">
-                    <button class="flex-1 bg-[#8b5cf6] py-4 rounded-2xl font-bold active:scale-95">Claim</button>
-                    <button class="flex-1 bg-[#22c55e] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
-                        <i class="fas fa-exchange-alt text-xs"></i> Swap PINIX
-                    </button>
+                    <button onclick="claimPI()" class="flex-1 bg-[#8b5cf6] py-4 rounded-2xl font-bold active:scale-95">Claim</button>
+                    <button onclick="swapPINIX()" class="flex-1 bg-[#22c55e] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-exchange-alt text-xs"></i> Swap</button>
                 </div>
-                <button onclick="switchPage('boost')" class="w-full bg-[#9e7a20] py-4 rounded-2xl font-bold text-black flex items-center justify-center gap-2 active:scale-95">
-                    <i class="fas fa-rocket"></i> BOOST
-                </button>
+                <button onclick="switchPage('boost')" class="w-full bg-[#9e7a20] py-4 rounded-2xl font-bold text-black flex items-center justify-center gap-2 active:scale-95"><i class="fas fa-rocket"></i> BOOST</button>
             </div>
         </div>
 
         <div id="boost" class="page">
-            <p class="text-center text-xs text-gray-400 px-4 mb-6">Here you can rent mining power for 30 days. The more mining power you have, the more PI you can mine.</p>
+            <div class="flex items-center gap-3 mb-6"><i onclick="switchPage('home')" class="fas fa-arrow-left cursor-pointer"></i><h2 class="font-bold">Boost Mining</h2></div>
             <div class="bg-gradient-to-r from-purple-900/20 to-orange-900/20 p-6 rounded-3xl border border-white/10 text-center mb-6">
-                <h3 class="text-3xl font-black mb-1 text-gray-500">0 GH/s <i class="fas fa-bolt"></i></h3>
-                <p class="text-[10px] text-gray-500">1 PI = 1 GH/s Mining Power</p>
+                <h3 id="b-gh-display" class="text-3xl font-black mb-1">100 GH/s <i class="fas fa-bolt text-yellow-500"></i></h3>
+                <p class="text-[10px] text-gray-400">1 PI = 1 GH/s Power</p>
             </div>
-            <div class="bg-white/5 p-4 rounded-2xl mb-8">
-                <div class="flex justify-between text-[10px] text-gray-500 uppercase font-bold mb-4"><span>Profit Breakdown</span></div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/20 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">Investment</p><p class="font-bold text-sm">0 PI</p></div>
-                    <div class="bg-black/20 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">Duration</p><p class="font-bold text-sm">30 days</p></div>
-                </div>
+            <input type="number" id="b-input" value="100" oninput="updateBoostCalc()" class="w-full bg-black/40 border-2 border-purple-600 rounded-2xl py-4 text-center font-bold text-xl outline-none mb-4">
+            <div class="profit-box glass-card p-4 mb-6">
+                <div class="flex justify-between text-xs mb-2"><span>Monthly Profit:</span><span class="text-green-500 font-bold" id="b-profit">+34.30 PI</span></div>
+                <div class="flex justify-between text-xs"><span>Total Return:</span><span class="text-yellow-500 font-bold" id="b-total">134.30 PI</span></div>
             </div>
-            <input type="number" placeholder="0" class="w-full bg-black/40 border-2 border-purple-600 rounded-2xl py-4 text-center font-bold text-xl outline-none mb-4">
-            <p class="text-center text-[10px] text-gray-500 mb-6">Minimum amount: 100 PI</p>
-            <button class="w-full bg-white/5 py-4 rounded-2xl text-gray-500 font-bold">Add</button>
+            <button onclick="buyBoost()" class="w-full bg-white text-black py-4 rounded-2xl font-bold active:scale-95">Upgrade Power</button>
         </div>
 
         <div id="wallet" class="page">
             <h2 class="text-center font-bold text-xl mb-6">Wallet</h2>
-            <div class="space-y-3 mb-6">
-                <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-3"><div class="bg-orange-500 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">π</div>
-                    <div><p class="text-[10px] text-gray-500">Balance</p><p class="text-sm font-bold">0.0000000 PI</p></div></div>
+            <div id="history-list" class="space-y-3">
+                <div class="flex flex-col items-center justify-center py-20 text-gray-600" id="empty-wallet">
+                    <i class="fas fa-receipt text-4xl mb-3 opacity-20"></i>
+                    <p class="text-xs">No history yet.</p>
                 </div>
-                <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-3"><img src="pinix.jpg" class="w-8 h-8 rounded-full">
-                    <div><p class="text-[10px] text-gray-500">Balance</p><p class="text-sm font-bold">0 PINIX</p></div></div>
-                </div>
-            </div>
-            <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-bold mb-8 opacity-50 cursor-not-allowed"> <i class="fas fa-arrow-up rotate-45 mr-2"></i> Withdraw</button>
-            
-            <div class="flex justify-between items-center mb-4"><span class="font-bold text-sm">Transaction History</span></div>
-            <div class="flex flex-col items-center justify-center py-10 text-gray-600">
-                <i class="fas fa-receipt text-4xl mb-3 opacity-20"></i>
-                <p class="text-xs">No transactions yet.</p>
             </div>
         </div>
 
         <div id="friends" class="page">
-            <p class="text-center text-[10px] text-gray-400 mb-6">UID: 8392479231</p>
+            <h2 class="text-center font-bold text-xl mb-6">Referral</h2>
             <div class="glass-card p-4 mb-4">
                 <p class="text-xs text-gray-500 mb-2">Your referral link</p>
                 <div class="flex gap-2">
-                    <input type="text" value="https://t.me/PINIX_Mining_Bot?..." class="flex-1 bg-black/20 text-[10px] p-2 rounded outline-none" readonly>
-                    <button class="bg-white/10 px-3 rounded"><i class="far fa-copy text-purple-500"></i></button>
+                    <input type="text" id="ref-link" value="https://t.me/PiCoinMining2026?start=user8392" class="flex-1 bg-black/20 text-[10px] p-2 rounded outline-none" readonly>
+                    <button onclick="copyRef()" class="bg-white/10 px-4 rounded active:bg-white/20"><i class="far fa-copy text-purple-500"></i></button>
                 </div>
             </div>
-            <button class="w-full bg-[#8b5cf6] py-4 rounded-2xl font-bold mb-4 flex items-center justify-center gap-2"><i class="fas fa-user-plus"></i> Invite Friend</button>
-            <button class="w-full bg-white/5 py-4 rounded-2xl font-bold mb-8 flex justify-between px-6">Open Friends List (0) <i class="fas fa-chevron-right text-gray-500"></i></button>
-            
-            <h3 class="font-bold mb-4">Referral Rewards</h3>
-            <div class="space-y-3 opacity-60">
-                <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-4"><span class="text-gray-500 font-bold text-xs">Level 1</span><p class="text-purple-500 font-bold text-sm">1000 PINIX</p></div>
-                    <div class="bg-black/40 px-3 py-1 rounded-full text-[10px] font-bold text-yellow-500">9 GH/s <i class="fas fa-bolt"></i></div>
-                </div>
+            <div class="glass-card p-4 flex justify-between items-center mb-4">
+                <span>Total Invited:</span><span class="font-bold text-purple-500">0</span>
             </div>
         </div>
 
         <div id="missions" class="page">
-            <h2 class="text-center font-bold text-xl mb-6">New Missions</h2>
-            <div class="flex bg-black/40 p-1 rounded-xl mb-6">
-                <button class="flex-1 bg-white/10 py-2 rounded-lg text-xs font-bold">Tasks</button>
-                <button class="flex-1 py-2 text-xs text-gray-500">Ref</button>
-                <button class="flex-1 py-2 text-xs text-gray-500">Contest</button>
+            <h2 class="text-center font-bold text-xl mb-6">Tasks</h2>
+            <div class="space-y-3">
+                <div class="glass-card p-4 flex justify-between items-center" id="task-channel">
+                    <div class="flex items-center gap-3">
+                        <i class="fab fa-telegram text-2xl text-sky-500"></i>
+                        <div><p class="text-sm font-bold">Join Official Channel</p><p class="text-[10px] text-yellow-500">+50 PINIX</p></div>
+                    </div>
+                    <button onclick="completeTask()" class="bg-purple-600 px-4 py-2 rounded-xl text-xs font-bold active:scale-95">Join</button>
+                </div>
+                <div class="glass-card p-4 flex justify-between items-center opacity-50">
+                    <div class="flex items-center gap-3"><i class="fab fa-twitter text-2xl text-white"></i><div><p class="text-sm font-bold">Follow X</p><p class="text-[10px] text-yellow-500">+20 PINIX</p></div></div>
+                    <span class="text-[10px]">Soon</span>
+                </div>
             </div>
-            <div class="glass-card p-4 flex justify-between items-center text-gray-400">
-                <div class="flex items-center gap-2"><i class="fas fa-check text-gray-600"></i> <span class="text-sm">Completed (0)</span></div>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-            <div class="mt-10 text-center text-gray-600">
-                <p class="text-xs">New tasks will appear here soon.</p>
-            </div>
+            <div class="mt-6 text-center text-xs text-gray-600" id="task-count">Completed: 0 / 14</div>
         </div>
 
-        <div id="more" class="page">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-orange-500 flex items-center justify-center text-2xl font-bold">U</div>
-                <div><h3 class="font-bold text-lg">User Name</h3><p class="text-xs text-yellow-500">@username</p><p class="text-[10px] text-gray-500">UID: 8392479231 <i class="far fa-copy text-[8px]"></i></p></div>
-            </div>
-            <div class="space-y-2">
-                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-language text-gray-400"></i> <span>Language</span></div> <span class="text-xs text-gray-500">English</span></div>
-                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-users text-gray-400"></i> <span>Invite Friends</span></div> <i class="fas fa-chevron-right text-gray-600 text-xs"></i></div>
-                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-question-circle text-gray-400"></i> <span>Contact Support</span></div> <i class="fas fa-chevron-right text-gray-600 text-xs"></i></div>
-                <div class="glass-card p-4 flex justify-between items-center opacity-50"><div class="flex items-center gap-3"><i class="fas fa-trophy text-yellow-500"></i> <span>Ratings & Leagues</span></div> <span class="text-[9px]">(soon)</span></div>
-            </div>
-        </div>
-
-        <div class="absolute bottom-0 left-0 w-full bg-black/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-4 px-2">
+        <div class="absolute bottom-0 left-0 w-full bg-black/95 border-t border-white/5 flex justify-around items-center py-4 px-2">
             <div onclick="switchPage('wallet')" class="nav-item" id="nav-wallet"><i class="fas fa-wallet text-lg"></i><p class="text-[9px] mt-1">Wallet</p></div>
             <div onclick="switchPage('friends')" class="nav-item" id="nav-friends"><i class="fas fa-users text-lg"></i><p class="text-[9px] mt-1">Friends</p></div>
             <div onclick="switchPage('home')" class="nav-item active" id="nav-home">
-                <div class="bg-gradient-to-br from-purple-500 to-orange-500 w-12 h-12 rounded-full -mt-10 mx-auto flex items-center justify-center border-4 border-[#0f0d16] shadow-xl">
-                    <i class="fas fa-home text-white"></i>
-                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-orange-500 w-12 h-12 rounded-full -mt-10 mx-auto flex items-center justify-center border-4 border-[#0f0d16] shadow-xl"><i class="fas fa-home text-white"></i></div>
                 <p class="text-[9px] mt-1">Home</p>
             </div>
             <div onclick="switchPage('missions')" class="nav-item" id="nav-missions"><i class="fas fa-bullseye text-lg"></i><p class="text-[9px] mt-1">Missions</p></div>
-            <div onclick="switchPage('more')" class="nav-item" id="nav-more"><i class="fas fa-ellipsis-h text-lg"></i><p class="text-[9px] mt-1">More</p></div>
         </div>
     </div>
 
     <script>
+        let pi = 0, pnx = 0, mining = 0, pwr = 5, tasksDone = 0;
+
+        function updateUI() {
+            document.getElementById('h-pi').innerText = pi.toFixed(7) + " PI";
+            document.getElementById('h-pnx').innerText = pnx + " PINIX";
+            document.getElementById('h-mine').innerText = mining.toFixed(7) + " PI";
+            document.getElementById('h-pwr').innerText = pwr + " GH/s";
+        }
+
+        setInterval(() => {
+            mining += (0.0000001 * pwr);
+            updateUI();
+        }, 1000);
+
         function switchPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            const nav = document.getElementById('nav-' + id);
-            if(nav) nav.classList.add('active');
+            document.getElementById('nav-' + id)?.classList.add('active');
         }
 
-        // Simülasyon: Madencilik artışı (Görseldeki başlangıç hızı)
-        let miningVal = 0.0000000;
-        setInterval(() => {
-            miningVal += 0.0000002;
-            document.getElementById('h-mine').innerText = miningVal.toFixed(7) + " PI";
-        }, 1000);
+        function claimPI() {
+            if (mining > 0.001) {
+                pi += mining; mining = 0;
+                showToast("PI Claimed!", "#8b5cf6");
+            } else showToast("Minimum 0.001 PI to claim", "#444");
+        }
+
+        function swapPINIX() {
+            if (pnx >= 100) {
+                let gain = pnx / 100;
+                pi += gain;
+                addHistory("Swap PINIX", `+${gain} PI`, `-${pnx} PNX`);
+                pnx = 0;
+                showToast("Swap Success!", "#22c55e");
+            } else showToast("Min 100 PINIX required!", "#ef4444");
+        }
+
+        function buyBoost() {
+            let val = parseInt(document.getElementById('b-input').value);
+            if (pi >= val && val >= 100) {
+                pi -= val; pwr += val;
+                showToast("Mining Speed Up!", "#d4a017");
+                switchPage('home');
+            } else showToast("Insufficient PI (Min 100)", "#ef4444");
+        }
+
+        function completeTask() {
+            window.open('https://t.me/PiCoinMining2026', '_blank');
+            setTimeout(() => {
+                pnx += 50; tasksDone++;
+                document.getElementById('task-channel').style.display = 'none';
+                document.getElementById('task-count').innerText = `Completed: ${tasksDone} / 14`;
+                showToast("+50 PINIX Reward!", "#22c55e");
+            }, 2000);
+        }
+
+        function copyRef() {
+            let link = document.getElementById('ref-link');
+            link.select();
+            document.execCommand("copy");
+            showToast("Link Copied!", "#8b5cf6");
+        }
+
+        function addHistory(type, main, sub) {
+            const list = document.getElementById('history-list');
+            document.getElementById('empty-wallet').style.display = 'none';
+            const item = `
+                <div class="glass-card p-4 flex justify-between items-center">
+                    <div><p class="font-bold text-sm">${type}</p><p class="text-[10px] text-gray-500">Just now</p></div>
+                    <div class="text-right"><p class="text-green-500 font-bold text-sm">${main}</p><p class="text-[10px] text-gray-500">${sub}</p></div>
+                </div>`;
+            list.innerHTML = item + list.innerHTML;
+        }
+
+        function showToast(m, c) {
+            const t = document.getElementById('toast');
+            t.innerText = m; t.style.background = c; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
     </script>
 </body>
 </html>
