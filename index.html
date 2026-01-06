@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX App - Mining Interface</title>
+    <title>PINIX Mining App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
         body {
             /* Görseldeki derin mor-siyah radyal geçiş */
-            background: radial-gradient(circle at 50% 35%, #2a224a 0%, #151221 45%, #000000 100%);
+            background: radial-gradient(circle at 50% 30%, #2a224a 0%, #151221 40%, #000000 100%);
             color: white;
             font-family: 'Inter', sans-serif;
             height: 100vh;
@@ -29,11 +29,11 @@
 
         /* Pervane Dönüş Efekti */
         .mining-fan {
-            width: 250px;
-            height: 250px;
+            width: 260px;
+            height: 260px;
             object-fit: contain;
-            animation: spin 12s linear infinite;
-            filter: drop-shadow(0 0 25px rgba(123, 97, 255, 0.25));
+            animation: spin 15s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(123, 97, 255, 0.2));
             border-radius: 50%;
         }
 
@@ -42,12 +42,21 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Alt Navigasyon Home Butonu Özel Efekt */
+        .nav-home-btn {
+            background: linear-gradient(135deg, #a855f7 0%, #f97316 100%);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+        }
+
+        /* Boost Butonu Rengi */
         .btn-boost {
             background: linear-gradient(90deg, #9e7a20 0%, #d4a017 100%);
-            box-shadow: 0 4px 20px rgba(158, 122, 32, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            color: black;
             font-weight: 900;
+        }
+
+        .active-scale:active {
+            transform: scale(0.96);
         }
     </style>
 </head>
@@ -55,7 +64,7 @@
 
     <div class="w-full max-w-md h-full flex flex-col p-6 relative">
         
-        <div class="flex justify-between items-center mb-6 px-2">
+        <div class="flex justify-between items-center mb-6">
             <i class="fas fa-times text-xl text-gray-400"></i>
             <h1 class="font-bold text-lg flex items-center gap-1">
                 PINIX App <i class="fas fa-check-circle text-sky-400 text-[10px]"></i>
@@ -64,7 +73,7 @@
         </div>
 
         <div class="space-y-3 mb-8">
-            <div class="glass-card p-4 rounded-[24px] flex justify-between items-center">
+            <div class="glass-card p-4 rounded-3xl flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="bg-orange-500 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white shadow-lg">π</div>
                     <div>
@@ -72,75 +81,80 @@
                         <p class="text-lg font-bold">0.0000000 PI</p>
                     </div>
                 </div>
-                <i class="fas fa-wallet text-gray-600 text-lg"></i>
+                <i class="fas fa-wallet text-gray-600"></i>
             </div>
 
-            <div class="glass-card p-4 rounded-[24px] flex justify-between items-center">
+            <div class="glass-card p-4 rounded-3xl flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <img src="pinix.jpg" class="w-11 h-11 rounded-full border border-purple-500/20 shadow-inner" alt="pinix">
+                    <img src="pinix.jpg" class="w-11 h-11 rounded-full border border-purple-500/20" alt="pinix logo">
                     <div>
                         <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
                         <p class="text-lg font-bold">0 PINIX</p>
                     </div>
                 </div>
-                <i class="fas fa-wallet text-gray-600 text-lg"></i>
+                <i class="fas fa-wallet text-gray-600"></i>
             </div>
         </div>
 
         <div class="flex-grow flex flex-col items-center justify-center">
-            <div class="relative flex items-center justify-center mb-6">
+            <div class="relative flex items-center justify-center mb-4">
                 <img src="pinix.jpg" class="mining-fan" alt="Mining Fan">
                 
-                <div class="absolute w-12 h-12 bg-[#1a1625] rounded-full border-2 border-purple-600 flex items-center justify-center z-10 shadow-2xl">
-                    <span class="text-orange-500 font-black text-sm tracking-tighter">π</span>
+                <div class="absolute w-12 h-12 bg-[#1a1625] rounded-full border-2 border-purple-700/50 flex items-center justify-center z-10 shadow-2xl">
+                    <span class="text-orange-500 font-black text-sm">π</span>
                 </div>
             </div>
 
-            <p class="text-gray-500 text-sm italic tracking-[3px] animate-pulse mb-1">Mining...</p>
-            <h2 id="counter" class="text-4xl font-black text-yellow-500 tracking-tight">0.0000000 PI</h2>
+            <p class="text-gray-500 text-sm italic tracking-widest animate-pulse mb-1">Mining...</p>
+            <h2 id="counter" class="text-4xl font-black text-yellow-500 tracking-tighter">0.0000000 PI</h2>
 
-            <div class="glass-card mt-8 px-10 py-4 rounded-[20px] flex items-center gap-4">
-                <i class="fas fa-bolt text-yellow-400 text-2xl"></i>
+            <div class="glass-card mt-6 px-10 py-3 rounded-2xl flex items-center gap-4">
+                <i class="fas fa-bolt text-yellow-500 text-2xl"></i>
                 <div class="text-left">
                     <p class="text-[10px] text-gray-500 font-bold uppercase">Mining Power</p>
-                    <p class="font-extrabold text-xl leading-tight">5 GH/s</p>
+                    <p class="font-black text-xl leading-tight">5 GH/s</p>
                 </div>
             </div>
         </div>
 
         <div class="mt-auto space-y-4 pb-24">
             <div class="flex gap-4">
-                <button class="flex-1 bg-purple-700 hover:bg-purple-800 py-4 rounded-[20px] font-bold transition-all active:scale-95 shadow-lg shadow-purple-900/20">Claim</button>
-                <button class="flex-1 bg-[#10b981] hover:bg-[#059669] py-4 rounded-[20px] font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-green-900/20">
+                <button class="flex-1 bg-purple-700 py-4 rounded-3xl font-bold active-scale transition shadow-lg shadow-purple-900/20">Claim</button>
+                <button class="flex-1 bg-[#10b981] py-4 rounded-3xl font-bold flex items-center justify-center gap-2 active-scale transition shadow-lg shadow-green-900/20">
                     <i class="fas fa-exchange-alt"></i> Swap PINIX
                 </button>
             </div>
-            <button class="w-full btn-boost py-4 rounded-[20px] text-black transition-all active:scale-[0.98]">
-                <i class="fas fa-rocket mr-2"></i> BOOST
+            <button class="w-full btn-boost py-4 rounded-3xl active-scale transition flex items-center justify-center gap-2 uppercase tracking-[0.2em] font-black">
+                <i class="fas fa-rocket"></i> Boost
             </button>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-5 text-gray-500 shadow-2xl">
-            <div class="flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-[10px] mt-1">Wallet</span></div>
-            <div class="flex flex-col items-center"><i class="fas fa-users text-xl"></i><span class="text-[10px] mt-1">Friends</span></div>
-            <div class="flex flex-col items-center text-orange-500">
-                <div class="bg-orange-500/10 p-3 rounded-full -mt-6 mb-1 border border-orange-500/20 shadow-xl"><i class="fas fa-home text-2xl"></i></div>
+        <div class="fixed bottom-0 left-0 w-full bg-[#080808] border-t border-white/5 flex justify-around items-center py-4 text-gray-500 shadow-2xl">
+            <div class="flex flex-col items-center opacity-60"><i class="fas fa-wallet text-xl"></i><span class="text-[9px] mt-1">Wallet</span></div>
+            <div class="flex flex-col items-center opacity-60"><i class="fas fa-users text-xl"></i><span class="text-[9px] mt-1">Friends</span></div>
+            
+            <div class="flex flex-col items-center text-orange-500 relative -top-3">
+                <div class="nav-home-btn p-3 rounded-full mb-1">
+                    <i class="fas fa-home text-2xl text-white"></i>
+                </div>
                 <span class="text-[10px] font-bold">Home</span>
             </div>
-            <div class="flex flex-col items-center"><i class="fas fa-bullseye text-xl"></i><span class="text-[10px] mt-1">Missions</span></div>
-            <div class="flex flex-col items-center"><i class="fas fa-ellipsis-h text-xl"></i><span class="text-[10px] mt-1">More</span></div>
+            
+            <div class="flex flex-col items-center opacity-60"><i class="fas fa-bullseye text-xl"></i><span class="text-[9px] mt-1">Missions</span></div>
+            <div class="flex flex-col items-center opacity-60"><i class="fas fa-ellipsis-h text-xl"></i><span class="text-[9px] mt-1">More</span></div>
         </div>
     </div>
 
     <script>
-        // Madencilik Sayacı Simülasyonu
-        let bakiye = 0.0000000;
-        const counter = document.getElementById('counter');
+        // Rakamları sıfırdan başlatıp otomatik artırma simülasyonu
+        let balance = 0.0000000;
+        const counterElement = document.getElementById('counter');
 
         setInterval(() => {
-            bakiye += 0.0000009; // Artış hızı
-            counter.innerText = bakiye.toFixed(7) + " PI";
+            balance += 0.0000007; 
+            counterElement.innerText = balance.toFixed(7) + " PI";
         }, 1000);
     </script>
+
 </body>
 </html>
