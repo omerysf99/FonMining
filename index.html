@@ -7,213 +7,196 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Site Boyutu 9:16 Simülasyonu */
         body { 
-            background: #0b0714; 
+            background: #050308; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            min-height: 100vh; 
+            height: 100vh; 
             margin: 0;
             color: white;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .app-container {
             width: 100%;
-            max-width: 414px; /* Standart Mobil Genişliği */
-            height: 100vh;
-            background: radial-gradient(circle at top, #1e1333 0%, #0b0714 100%);
+            max-width: 390px; /* iPhone 13-14-15 Pro genişliği */
+            height: 844px; /* 9:19.5 oranı */
+            background: radial-gradient(circle at top, #1a0f2e 0%, #050308 100%);
             position: relative;
             overflow: hidden;
             display: flex;
-            flex-grow: 1;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 120px; }
-        .active-tab { display: block; animation: fadeIn 0.3s ease; }
-        
+        /* Sekme İçerikleri */
+        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 110px; }
+        .active-tab { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Kart Tasarımları */
         .glass-card { 
-            background: rgba(255, 255, 255, 0.03); 
+            background: rgba(255, 255, 255, 0.04); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 18px; 
+            border-radius: 14px; 
         }
 
         /* Mining Fan Animasyonu */
-        .mining-fan-container {
+        .fan-container {
             position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 20px auto;
+            width: 240px;
+            height: 240px;
+            margin: 15px auto;
         }
 
         .fan-image {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            animation: spin 6s linear infinite;
+            animation: spin 8s linear infinite;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        #walletModal { 
-            display: none; 
-            position: absolute; 
-            inset: 0; 
-            background: rgba(0,0,0,0.92); 
-            z-index: 100; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px; 
+        /* Alt Navigasyon (Küçültülmüş) */
+        nav {
+            background: rgba(15, 10, 20, 0.98);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            height: 75px;
         }
 
-        /* Alt Navigasyon */
-        nav {
-            background: rgba(15, 10, 26, 0.95);
-            backdrop-filter: blur(10px);
-        }
+        .nav-text { font-size: 9px; font-weight: 500; text-transform: uppercase; margin-top: 2px; }
+        .nav-icon { font-size: 16px; }
+
+        /* Butonlar */
+        .btn-action { border-radius: 20px; font-weight: 700; transition: transform 0.1s; }
+        .btn-action:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         
-        <div id="walletModal">
-            <div class="glass-card w-full p-8 text-center border-purple-500/30">
-                <h3 class="text-xl font-bold mb-6 italic tracking-widest text-purple-400">CONNECT ADDRESS</h3>
-                <input type="text" id="walletInput" placeholder="Enter Address" 
-                    class="w-full bg-black/50 border border-purple-900 rounded-xl p-4 mb-6 text-center text-sm outline-none focus:border-purple-500">
-                <button onclick="processWallet()" class="w-full bg-purple-600 py-4 rounded-2xl font-black tracking-widest hover:bg-purple-500 transition">CONNECT</button>
-                <button onclick="closeModal()" class="mt-6 text-gray-500 text-xs uppercase tracking-widest">Cancel</button>
-            </div>
-        </div>
-
-        <main class="flex-grow p-6 overflow-y-auto pb-32">
+        <main class="flex-grow p-4 overflow-y-auto">
             
             <section id="home" class="tab-content active-tab">
-                <div class="space-y-3 mb-6">
-                    <div class="glass-card p-4 flex justify-between items-center">
+                <div class="space-y-2 mb-4">
+                    <div class="glass-card p-3 flex justify-between items-center px-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-purple-900/50 rounded-full flex items-center justify-center border border-purple-500/30">
-                                <i class="fas fa-p text-purple-400"></i>
-                            </div>
+                            <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6" alt="pi">
                             <div class="text-left">
-                                <p class="text-[10px] text-gray-500 uppercase font-bold">Balance</p>
-                                <p class="text-lg font-black tracking-tight">0.00000000 PI</p>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold tracking-tighter">Balance</p>
+                                <p class="text-sm font-bold">0.000000 PI</p>
                             </div>
                         </div>
-                        <i class="fas fa-copy text-gray-600 text-sm"></i>
+                        <i class="fas fa-copy text-gray-700 text-[10px]"></i>
                     </div>
 
-                    <div class="glass-card p-4 flex justify-between items-center">
+                    <div class="glass-card p-3 flex justify-between items-center px-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center border border-slate-600">
-                                <i class="fas fa-bolt text-slate-400"></i>
+                            <div class="w-6 h-6 bg-purple-900/40 rounded-full flex items-center justify-center border border-purple-500/20">
+                                <span class="text-[10px] text-purple-400 font-bold">P</span>
                             </div>
                             <div class="text-left">
-                                <p class="text-[10px] text-gray-500 uppercase font-bold">Balance</p>
-                                <p id="pinixDisplay" class="text-lg font-black tracking-tight text-gray-300">0 PINIX</p>
+                                <p class="text-[8px] text-gray-500 uppercase font-bold tracking-tighter">Balance</p>
+                                <p class="text-sm font-bold text-gray-300">0 PINIX</p>
                             </div>
                         </div>
-                        <i class="fas fa-copy text-gray-600 text-sm"></i>
+                        <i class="fas fa-copy text-gray-700 text-[10px]"></i>
                     </div>
                 </div>
 
-                <div class="mining-fan-container">
+                <div class="fan-container">
                     <img src="pinix.jpg" class="fan-image" alt="Pinix Mining">
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="w-12 h-12 bg-[#5d3fd3] rounded-full flex items-center justify-center border-4 border-[#1e1333] shadow-[0_0_20px_rgba(93,63,211,0.5)]">
-                            <i class="fas fa-pi text-white text-xl"></i>
+                        <div class="w-10 h-10 bg-[#4e36cc] rounded-full flex items-center justify-center border-[3px] border-[#0b0714] shadow-lg">
+                            <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-5 h-5 brightness-150" alt="pi-inner">
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center mt-2">
-                    <p class="text-gray-500 text-sm italic mb-1">Mining...</p>
-                    <h2 class="text-4xl font-black text-[#facc15] tracking-tighter mb-8">0.00000000 PI</h2>
+                <div class="text-center">
+                    <p class="text-gray-500 text-[11px] italic mb-1">Mining...</p>
+                    <h2 class="text-3xl font-black text-[#facc15] tracking-tight mb-6">0.000000 PI</h2>
 
-                    <div class="inline-flex items-center gap-3 bg-slate-900/60 border border-slate-800 px-6 py-3 rounded-2xl mb-8">
-                        <i class="fas fa-bolt text-yellow-500"></i>
+                    <div class="inline-flex items-center gap-2 bg-slate-900/60 border border-slate-800/50 px-5 py-2 rounded-xl mb-6">
+                        <i class="fas fa-bolt text-yellow-500 text-xs"></i>
                         <div class="text-left">
-                            <p class="text-[10px] text-gray-500 uppercase">Mining Power</p>
-                            <p class="font-black text-sm text-gray-200">0 GH/s</p>
+                            <p class="text-[7px] text-gray-500 uppercase font-bold">Mining Power</p>
+                            <p class="font-bold text-[11px] text-gray-200 leading-none">0 GH/s</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 mb-3">
-                        <button class="bg-[#5d3fd3] py-4 rounded-[2rem] font-bold text-lg shadow-lg shadow-purple-950/20">Claim</button>
-                        <button class="bg-[#10b981] py-4 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-2">
-                            <i class="fas fa-sync-alt text-sm"></i> Swap PINIX
+                        <button class="btn-action bg-[#5d3fd3] py-3 text-sm">Claim</button>
+                        <button class="btn-action bg-[#10b981] py-3 text-sm flex items-center justify-center gap-2">
+                             <i class="fas fa-sync-alt text-[10px]"></i> Swap
                         </button>
                     </div>
-                    <button class="w-full bg-[#f59e0b] py-5 rounded-[2rem] font-black text-xl text-black flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                    <button class="btn-action w-full bg-[#f59e0b] py-4 text-lg text-black flex items-center justify-center gap-2 uppercase tracking-tighter italic">
                         <i class="fas fa-rocket"></i> BOOST
                     </button>
                 </div>
             </section>
 
             <section id="wallet" class="tab-content">
-                <h2 class="text-2xl font-black italic mb-6">WALLET</h2>
-                <div id="walletUI" class="glass-card p-10 text-center border-dashed border-2 border-gray-800">
-                    <i class="fas fa-wallet text-4xl text-gray-700 mb-4 block"></i>
-                    <p class="text-gray-500 text-sm mb-6 uppercase tracking-widest">No wallet connected</p>
-                    <button onclick="openModal()" class="w-full bg-white text-black py-4 rounded-2xl font-bold">CONNECT NOW</button>
-                </div>
-            </section>
-
-            <section id="missions" class="tab-content">
-                <h2 class="text-2xl font-black italic mb-6 uppercase">Missions</h2>
-                <div class="glass-card p-5 flex items-center justify-between border-l-4 border-l-blue-500">
-                    <div class="flex items-center gap-4">
-                        <i class="fab fa-telegram text-3xl text-blue-500"></i>
-                        <div class="text-left">
-                            <p class="font-bold text-sm">Join Channel</p>
-                            <p class="text-xs text-blue-400 font-bold">+0 PINIX</p>
-                        </div>
-                    </div>
-                    <a href="https://t.me/FonixCommunity" class="bg-blue-600 px-5 py-2 rounded-xl text-xs font-bold uppercase">Go</a>
+                <h2 class="text-lg font-bold italic mb-4">WALLET</h2>
+                <div class="glass-card p-8 text-center border-dashed border-2 border-slate-800">
+                    <p class="text-xs text-gray-600 mb-4 uppercase">Address not linked</p>
+                    <button class="bg-white text-black text-xs px-6 py-2 rounded-full font-bold">CONNECT</button>
                 </div>
             </section>
 
             <section id="friends" class="tab-content">
-                <h2 class="text-2xl font-black italic mb-6 uppercase">Friends</h2>
-                <div class="glass-card p-6">
-                    <p class="text-xs text-gray-500 uppercase mb-3">Your Referral Link</p>
-                    <div class="bg-black/50 p-4 rounded-xl border border-purple-900/50 flex justify-between items-center">
-                        <code id="refCode" class="text-purple-400 font-bold">REF-000000</code>
-                        <button onclick="copyRef()"><i class="fas fa-copy text-gray-400"></i></button>
+                <h2 class="text-lg font-bold italic mb-4 uppercase">Friends</h2>
+                <div class="glass-card p-4">
+                    <p class="text-[9px] text-gray-500 uppercase mb-2">My Referral</p>
+                    <div class="bg-black/40 p-3 rounded-lg flex justify-between items-center text-xs">
+                        <span class="text-purple-400 font-mono">REF-000000</span>
+                        <i class="fas fa-copy text-gray-600"></i>
                     </div>
+                </div>
+            </section>
+
+            <section id="missions" class="tab-content">
+                <h2 class="text-lg font-bold italic mb-4 uppercase">Missions</h2>
+                <div class="glass-card p-3 flex items-center justify-between border-l-2 border-blue-500">
+                    <div class="flex items-center gap-3">
+                        <i class="fab fa-telegram text-2xl text-blue-500"></i>
+                        <div class="text-left">
+                            <p class="font-bold text-[11px]">Join Telegram</p>
+                            <p class="text-[9px] text-blue-400 font-bold">+0 PINIX</p>
+                        </div>
+                    </div>
+                    <button class="bg-blue-600 px-3 py-1 rounded-md text-[9px] font-bold">GO</button>
                 </div>
             </section>
 
         </main>
 
-        <nav class="absolute bottom-0 left-0 right-0 h-24 flex justify-around items-center px-2 border-t border-white/5">
+        <nav class="absolute bottom-0 left-0 right-0 flex justify-around items-center px-1">
             <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-wallet text-xl mb-1"></i>
-                <span class="text-[10px] uppercase font-bold">Wallet</span>
+                <i class="fas fa-wallet nav-icon"></i>
+                <span class="nav-text">Wallet</span>
             </button>
             <button onclick="showTab('friends')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-user-friends text-xl mb-1"></i>
-                <span class="text-[10px] uppercase font-bold">Friends</span>
+                <i class="fas fa-user-friends nav-icon"></i>
+                <span class="nav-text">Friends</span>
             </button>
             <button onclick="showTab('home')" class="nav-btn flex flex-col items-center flex-1 text-white">
-                <div class="bg-gradient-to-b from-purple-500 to-orange-400 w-14 h-14 rounded-2xl flex items-center justify-center -mt-8 shadow-xl rotate-45 border-4 border-[#0b0714]">
-                    <i class="fas fa-home -rotate-45 text-xl"></i>
+                <div class="bg-gradient-to-b from-purple-500 to-orange-400 w-11 h-11 rounded-xl flex items-center justify-center -mt-8 shadow-lg rotate-45 border-[3px] border-[#050308]">
+                    <i class="fas fa-home -rotate-45 text-sm"></i>
                 </div>
-                <span class="text-[10px] uppercase font-bold mt-1">Home</span>
+                <span class="nav-text" style="margin-top: 6px;">Home</span>
             </button>
             <button onclick="showTab('missions')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-bullseye text-xl mb-1"></i>
-                <span class="text-[10px] uppercase font-bold">Missions</span>
+                <i class="fas fa-bullseye nav-icon"></i>
+                <span class="nav-text">Tasks</span>
             </button>
             <button class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-th-large text-xl mb-1"></i>
-                <span class="text-[10px] uppercase font-bold">More</span>
+                <i class="fas fa-th-large nav-icon"></i>
+                <span class="nav-text">More</span>
             </button>
         </nav>
 
@@ -226,33 +209,6 @@
             
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-white', 'text-gray-600'));
             event.currentTarget.classList.replace('text-gray-600', 'text-white');
-        }
-
-        function openModal() { document.getElementById('walletModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('walletModal').style.display = 'none'; }
-
-        function processWallet() {
-            const addr = document.getElementById('walletInput').value;
-            if(addr.length < 5) return alert("Invalid Address!");
-            
-            document.getElementById('walletUI').innerHTML = `
-                <div class="text-left">
-                    <p class="text-[10px] text-purple-400 font-bold uppercase">Verified Address</p>
-                    <p class="text-xs font-mono break-all text-gray-300 mt-1">${addr}</p>
-                    <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center text-xs">
-                        <span class="text-gray-500 uppercase">Network Status:</span>
-                        <span class="text-green-500 font-bold uppercase">Online</span>
-                    </div>
-                </div>
-            `;
-            // Cüzdan bağlanınca bakiyeyi güncellemek istersen:
-            // document.getElementById('pinixDisplay').innerText = '1,500 PINIX';
-            closeModal();
-        }
-
-        function copyRef() {
-            navigator.clipboard.writeText(document.getElementById('refCode').innerText);
-            alert("Referral copied!");
         }
     </script>
 </body>
