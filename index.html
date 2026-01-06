@@ -1,204 +1,197 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pinix & Pico Adventure</title>
-    <style>
-        :root {
-            --primary: #FFD700;
-            --secondary: #ff4757;
-            --bg: #1e272e;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinix & Pico Adventure</title>
+    <style>
+        :root {
+            --primary: #FFD700;
+            --secondary: #ff4757;
+            --bg: #1e272e;
+        }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        /* Skor Paneli */
-        #ui-panel {
-            position: absolute;
-            top: 20px;
-            display: flex;
-            gap: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 2px solid var(--primary);
-            z-index: 10;
-        }
+        /* Skor Paneli */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+        }
 
-        /* Oyun Sahnesi */
-        #game-stage {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            height: 500px;
-            background: linear-gradient(180deg, #2f3542 0%, #1e272e 100%);
-            border-radius: 20px;
-            border: 4px solid #3d464d;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        /* Oyun Sahnesi */
+        #game-stage {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            background: linear-gradient(180deg, #2f3542 0%, #1e272e 100%);
+            border-radius: 20px;
+            border: 4px solid #3d464d;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        /* PINIX - Dönen Pervane (Görsel Eklendi) */
-        #pinix-fan {
-            position: absolute;
-            width: 180px;
-            height: 180px;
-            /* Mevcut yıldız şekli korundu, içine görsel eklendi */
-            background: url('pinix.jpg') center/cover;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            animation: spin 3s linear infinite;
-            z-index: 1;
-            border: 2px solid var(--secondary);
-        }
+        /* PINIX - Dönen Pervane */
+        #pinix-fan {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #ff4757, #ffa502);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: spin 3s linear infinite;
+            z-index: 1;
+        }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-        /* PICO - Karakter (Görsel Eklendi) */
-        #pico {
-            position: absolute;
-            width: 90px;
-            height: 90px;
-            z-index: 2;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
-        }
+        /* PICO - Karakter (Senin Görselin) */
+        #pico {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            z-index: 2;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+        }
 
-        #pico img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 10px; /* Görselin kenarlarını hafif yumuşatır */
-        }
+        #pico img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-        /* Kontroller */
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-        }
+        /* Kontroller */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
 
-        .btn {
-            background-color: var(--primary);
-            color: #000;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 4px 0 #b8860b;
-        }
+        .btn {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 0 #b8860b;
+        }
 
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
 
-        .btn-red { background-color: var(--secondary); color: white; box-shadow: 0 4px 0 #a40e1e; }
+        .btn-red { background-color: var(--secondary); color: white; box-shadow: 0 4px 0 #a40e1e; }
 
-        /* Animasyon Sınıfları */
-        .bounce { animation: bounce 0.5s ease; }
-        @keyframes bounce {
-            0%, 100% { transform: scale(1) translate(var(--x, 0), var(--y, 0)); }
-            50% { transform: scale(1.3) translate(var(--x, 0), var(--y, 0)); }
-        }
-    </style>
+        /* Animasyon Sınıfları */
+        .bounce { animation: bounce 0.5s ease; }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="ui-panel">
-        <div>🌀 Pinix Hızı: <span id="speed-lvl">1</span></div>
-        <div>💰 Puan: <span id="score">0</span></div>
-    </div>
+    <div id="ui-panel">
+        <div>🌀 Pinix Hızı: <span id="speed-lvl">1</span></div>
+        <div>💰 Puan: <span id="score">0</span></div>
+    </div>
 
-    <div id="game-stage">
-        <div id="pinix-fan"></div>
+    <div id="game-stage">
+        <div id="pinix-fan"></div>
 
-        <div id="pico">
-            <img src="pico.jpg" alt="Pico">
-        </div>
-    </div>
+        <div id="pico">
+            <img src="image_6d3bc8.png" alt="Pico">
+        </div>
+    </div>
 
-    <div class="controls">
-        <button class="btn" onclick="boostPinix()">Pinix Hızlandır</button>
-        <button class="btn btn-red" onclick="picoAction()">Pico'ya Bas!</button>
-    </div>
+    <div class="controls">
+        <button class="btn" onclick="boostPinix()">Pinix Hızlandır</button>
+        <button class="btn btn-red" onclick="picoAction()">Pico'ya Bas!</button>
+    </div>
 
-    <script>
-        let score = 0;
-        let speed = 3;
-        let speedLevel = 1;
-        
-        const fan = document.getElementById('pinix-fan');
-        const pico = document.getElementById('pico');
-        const scoreDisplay = document.getElementById('score');
-        const speedDisplay = document.getElementById('speed-lvl');
+    <script>
+        let score = 0;
+        let speed = 3;
+        let speedLevel = 1;
+        
+        const fan = document.getElementById('pinix-fan');
+        const pico = document.getElementById('pico');
+        const scoreDisplay = document.getElementById('score');
+        const speedDisplay = document.getElementById('speed-lvl');
 
-        // Pinix Hızlandırma Fonksiyonu
-        function boostPinix() {
-            if (speed > 0.2) {
-                speed -= 0.3;
-                speedLevel += 1;
-                fan.style.animationDuration = speed + "s";
-                speedDisplay.innerText = speedLevel;
-                
-                // Görsel bir efekt
-                fan.style.filter = `hue-rotate(${speedLevel * 20}deg)`;
-            } else {
-                alert("Pinix Maksimum Hızda! 🚀");
-            }
-        }
+        // Pinix Hızlandırma Fonksiyonu
+        function boostPinix() {
+            if (speed > 0.2) {
+                speed -= 0.3;
+                speedLevel += 1;
+                fan.style.animationDuration = speed + "s";
+                speedDisplay.innerText = speedLevel;
+                
+                // Görsel bir efekt
+                fan.style.filter = `hue-rotate(${speedLevel * 20}deg)`;
+            } else {
+                alert("Pinix Maksimum Hızda! 🚀");
+            }
+        }
 
-        // Pico Etkileşimi
-        function picoAction() {
-            score += 10;
-            scoreDisplay.innerText = score;
-            
-            // Pico'ya basınca rastgele bir yere zıplasın
-            const maxX = 150;
-            const maxY = 150;
-            const randomX = (Math.random() - 0.5) * maxX;
-            const randomY = (Math.random() - 0.5) * maxY;
-            
-            // Konumu CSS değişkeni olarak ata (bounce animasyonuyla çakışmaması için)
-            pico.style.setProperty('--x', `${randomX}px`);
-            pico.style.setProperty('--y', `${randomY}px`);
-            pico.style.transform = `translate(${randomX}px, ${randomY}px)`;
-            
-            // Animasyon ekle
-            pico.classList.add('bounce');
-            setTimeout(() => pico.classList.remove('bounce'), 500);
-        }
+        // Pico Etkileşimi
+        function picoAction() {
+            score += 10;
+            scoreDisplay.innerText = score;
+            
+            // Pico'ya basınca rastgele bir yere zıplasın
+            const maxX = 150;
+            const maxY = 150;
+            const randomX = (Math.random() - 0.5) * maxX;
+            const randomY = (Math.random() - 0.5) * maxY;
+            
+            pico.style.transform = `translate(${randomX}px, ${randomY}px)`;
+            
+            // Animasyon ekle
+            pico.classList.add('bounce');
+            setTimeout(() => pico.classList.remove('bounce'), 500);
+        }
 
-        // Otomatik Dönüş Hızı Kontrolü
-        setInterval(() => {
-            if (speed < 3) {
-                speed += 0.01;
-                fan.style.animationDuration = speed + "s";
-            }
-        }, 1000);
+        // Otomatik Dönüş Hızı Kontrolü (Zamanla yavaşlama gibi)
+        setInterval(() => {
+            if (speed < 3) {
+                speed += 0.01;
+                fan.style.animationDuration = speed + "s";
+            }
+        }, 1000);
 
-    </script>
+    </script>
 </body>
 </html>
