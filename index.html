@@ -2,303 +2,209 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE PRO - MEGA WEB3</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinix & Pico Adventure</title>
     <style>
         :root {
-            --bg-ultra: #05010d; --bg-deep: #0b021a; --p-purple: #8b5cf6;
-            --p-gold: #f59e0b; --p-green: #10b981; --p-pink: #ec4899;
-            --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.12);
+            --primary: #FFD700;
+            --secondary: #ff4757;
+            --bg: #1e272e;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
-        body { background: var(--bg-ultra); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        
-        #app { 
-            width: 100%; max-width: 450px; height: 100vh; 
-            background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 60%); 
-            position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); 
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        /* ÜST PANEL */
-        .header-system { padding: 15px; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .token-card { 
-            background: var(--glass); border: 1px solid var(--border); border-radius: 15px; 
-            padding: 10px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); 
+        /* Üst Skor Paneli */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            z-index: 10;
         }
-        .token-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; }
-        .pi-theme { background: linear-gradient(135deg, #4c1d95, #8b5cf6); border: 1px solid #a78bfa; }
-        .pnx-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; }
-        .token-label { font-size: 0.5rem; text-transform: uppercase; opacity: 0.6; font-weight: 800; }
-        .token-val { font-size: 0.85rem; font-weight: 800; font-family: 'Orbitron'; overflow: hidden; text-overflow: ellipsis; }
 
-        /* LEVEL BAR */
-        .level-container { padding: 0 15px 10px; }
-        .level-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        .level-bar-fill { height: 100%; width: 30%; background: linear-gradient(to right, var(--p-purple), var(--p-pink)); transition: 0.5s; }
-
-        /* VIEWS */
-        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* MINING CORE */
-        .fan-box { position: relative; margin: 40px auto; width: 200px; height: 200px; }
-        .fan-container {
-            width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--p-purple);
-            background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover;
-            animation: spin 5s linear infinite;
+        /* Oyun Sahnesi */
+        #game-stage {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #2f3542 0%, #1e272e 100%);
+            border-radius: 30px;
+            border: 4px solid #3d464d;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .speed-badge { position: absolute; bottom: -10px; background: var(--p-pink); padding: 5px 12px; border-radius: 20px; font-family: 'Orbitron'; font-size: 0.7rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-        /* CARDS & BUTTONS */
-        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; }
-        .btn-main { background: var(--p-purple); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-main:hover { transform: scale(1.02); filter: brightness(1.2); }
-        .btn-main:active { transform: scale(0.95); }
+        /* PINIX - Dönen Pervane Görseli */
+        #pinix-fan {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background-image: url('pinix.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%; /* Görseli yuvarlak yapar */
+            border: 5px solid var(--secondary);
+            animation: spin 3s linear infinite;
+            z-index: 1;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+        }
 
-        /* MARKET ITEMS */
-        .market-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .market-item:last-child { border: none; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-        /* WITHDRAW FORM */
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: white; width: 100%; margin-top: 5px; outline: none; }
-        
-        /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(13, 4, 31, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #666; font-size: 0.6rem; font-weight: 700; text-decoration: none; cursor: pointer; }
-        .nav-item.active { color: var(--p-gold); }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
+        /* PICO - Karakter Görseli */
+        #pico {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            z-index: 2;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.7));
+        }
 
-        /* NOTIFICATION */
-        #toast { position: fixed; top: 20px; background: var(--p-purple); padding: 10px 20px; border-radius: 10px; display: none; animation: slideDown 0.3s; z-index: 1000; }
-        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+        #pico img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Görsel oranını korur */
+            border-radius: 15px;
+        }
+
+        /* Butonlar */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 16px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 0 #b8860b;
+            transition: 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #b8860b;
+        }
+
+        .btn-red { 
+            background-color: var(--secondary); 
+            color: white; 
+            box-shadow: 0 5px 0 #a40e1e; 
+        }
+
+        .btn-red:active { box-shadow: 0 1px 0 #a40e1e; }
+
+        /* Pico Tıklama Efekti */
+        .bounce { animation: bounce 0.4s ease; }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1) translate(var(--tx), var(--ty)); }
+            50% { transform: scale(1.2) translate(var(--tx), var(--ty)); }
+        }
     </style>
 </head>
 <body>
 
-<div id="toast">Message here</div>
+    <div id="ui-panel">
+        <div>🌀 Pinix Hızı: <span id="speed-lvl">1</span></div>
+        <div>💰 Puan: <span id="score">0</span></div>
+    </div>
 
-<div id="app">
-    <div class="header-system">
-        <div class="token-card">
-            <div class="token-icon pi-theme">π</div>
-            <div class="token-data"><div class="token-label">Pi Balance</div><div class="pi-disp" id="pi-val">0.0000</div></div>
-        </div>
-        <div class="token-card">
-            <div class="token-icon pnx-theme">🌀</div>
-            <div class="token-data"><div class="token-label">Pinix Assets</div><div class="pnx-disp" id="pnx-val">100.00</div></div>
+    <div id="game-stage">
+        <div id="pinix-fan"></div>
+
+        <div id="pico">
+            <img src="pico.jpg" alt="Pico">
         </div>
     </div>
 
-    <div class="level-container">
-        <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-weight:800; color:var(--p-pink);">
-            <span>LEVEL <span id="lvl-num">1</span></span>
-            <span id="lvl-exp">0 / 100 XP</span>
-        </div>
-        <div class="level-bar-bg"><div class="level-bar-fill" id="lvl-fill"></div></div>
+    <div class="controls">
+        <button class="btn" onclick="boostPinix()">Hızlandır</button>
+        <button class="btn btn-red" onclick="picoAction()">Pico'yu Yakala!</button>
     </div>
 
-    <div id="view-home" class="view active">
-        <div class="mining-hub">
-            <div class="fan-box">
-                <div class="fan-container" id="main-fan"></div>
-                <div class="speed-badge" id="mult-badge">x1.0 SPEED</div>
-            </div>
-            <div class="mining-amount" id="uncl-text">0.00000000</div>
-            <button class="btn-main" onclick="claimMining()">Collect Pi Network</button>
-            <p style="margin-top:15px; font-size:0.7rem; opacity:0.5;">Auto-mining is active while you sleep...</p>
-        </div>
-    </div>
-
-    <div id="view-market" class="view">
-        <h2 style="font-family:'Orbitron'; color:var(--p-gold);">Upgrades</h2>
-        <div class="card">
-            <div class="market-item">
-                <div><b>Turbo Fan</b><br><small>+0.5x Multiplier</small></div>
-                <button class="btn-action" onclick="buyUpgrade('turbo', 200)">200 PNX</button>
-            </div>
-            <div class="market-item">
-                <div><b>Mining Rig</b><br><small>+1.2x Multiplier</small></div>
-                <button class="btn-action" onclick="buyUpgrade('rig', 500)">500 PNX</button>
-            </div>
-            <div class="market-item">
-                <div><b>AI Optimizer</b><br><small>+3.0x Multiplier</small></div>
-                <button class="btn-action" onclick="buyUpgrade('ai', 1200)">1200 PNX</button>
-            </div>
-        </div>
-
-        <h2 style="font-family:'Orbitron'; color:var(--p-gold); margin-top:10px;">Swap</h2>
-        <div class="card">
-            <input type="number" id="swap-in" class="app-input" placeholder="Amount to Swap (PNX)" oninput="updateSwap()">
-            <div style="margin:10px 0; text-align:center;">⬇</div>
-            <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:900;">
-                <span id="swap-out">0.0000</span> PI
-            </div>
-            <button class="btn-action" style="width:100%; margin-top:10px;" onclick="doSwap()">SWAP ASSETS</button>
-        </div>
-    </div>
-
-    <div id="view-wallet" class="view">
-        <h2 style="font-family:'Orbitron';">My Wallet</h2>
-        <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #000);">
-            <div class="token-label">Available to Withdraw</div>
-            <div style="font-size:2rem; font-family:'Orbitron'; margin:10px 0;" id="w-total">0.0000</div>
-            <div class="token-label">Pi Network (Locked)</div>
-        </div>
-
-        <div class="card">
-            <label class="token-label">Recipient Pi Address</label>
-            <input type="text" class="app-input" placeholder="GAYQ... (Pi Mainnet)">
-            <label class="token-label" style="margin-top:10px; display:block;">Amount</label>
-            <input type="number" class="app-input" placeholder="Min 50 PI">
-            <button class="btn-action" style="width:100%; margin-top:15px; background:var(--p-green);" onclick="alert('Withdrawal request submitted! Processing time: 24-48h')">WITHDRAW NOW</button>
-        </div>
-    </div>
-
-    <div id="view-ref" class="view">
-        <h2 style="font-family:'Orbitron'; text-align:center;">Friends</h2>
-        <div class="card" style="text-align:center;">
-            <p class="token-label">YOUR REFERRAL LINK</p>
-            <p style="font-size:1.2rem; margin:10px 0; font-weight:800; color:var(--p-purple);" id="ref-link-display">pinix.io/?ref=user</p>
-            <button class="btn-action" onclick="toast('Link Copied!')">COPY LINK</button>
-        </div>
+    <script>
+        let score = 0;
+        let speed = 3;
+        let speedLevel = 1;
         
-        <div id="ref-input-zone">
-            <div class="card">
-                <p class="token-label">HAVE A CODE? GET 50 PNX</p>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                    <input type="text" id="r-inp" class="app-input" style="padding:10px;">
-                    <button class="btn-action" onclick="useRef()">CLAIM</button>
-                </div>
-            </div>
-        </div>
-    </div>
+        const fan = document.getElementById('pinix-fan');
+        const pico = document.getElementById('pico');
+        const scoreDisplay = document.getElementById('score');
+        const speedDisplay = document.getElementById('speed-lvl');
 
-    <nav>
-        <div class="nav-item active" onclick="tab('view-home', this)"><i>🏠</i>EARN</div>
-        <div class="nav-item" onclick="tab('view-tasks', this)"><i>⚡</i>MARKET</div>
-        <div class="nav-item" onclick="tab('view-ref', this)"><span>👥</span>FRIENDS</div>
-        <div class="nav-item" onclick="tab('view-wallet', this)"><span>👛</span>WALLET</div>
-    </nav>
-</div>
-
-<script>
-    // --- DATABASE ---
-    let db = JSON.parse(localStorage.getItem('pinix_user')) || {
-        pi: 0.0,
-        pnx: 100.0,
-        uncl: 0.0,
-        xp: 0,
-        lvl: 1,
-        mult: 1.0,
-        usedRef: false,
-        tasks: {}
-    };
-
-    function save() {
-        localStorage.setItem('pinix_user', JSON.stringify(db));
-        updateUI();
-    }
-
-    // --- UI ENGINE ---
-    function updateUI() {
-        document.getElementById('pi-val').innerText = db.pi.toFixed(4);
-        document.getElementById('pnx-val').innerText = db.pnx.toFixed(2);
-        document.getElementById('w-total').innerText = db.pi.toFixed(4);
-        document.getElementById('lvl-num').innerText = db.lvl;
-        document.getElementById('lvl-exp').innerText = `${Math.floor(db.xp)} / ${db.lvl * 100} XP`;
-        document.getElementById('lvl-fill').style.width = (db.xp / (db.lvl * 100) * 100) + "%";
-        document.getElementById('mult-badge').innerText = `x${db.mult.toFixed(1)} SPEED`;
-        
-        if(db.usedRef) {
-            const zone = document.getElementById('ref-input-zone');
-            if(zone) zone.style.display = 'none';
+        // Pinix Hızlandırma
+        function boostPinix() {
+            if (speed > 0.1) {
+                speed -= 0.2;
+                speedLevel += 1;
+                fan.style.animationDuration = speed + "s";
+                speedDisplay.innerText = speedLevel;
+                
+                // Hızlandıkça parlasın
+                fan.style.boxShadow = `0 0 ${speedLevel * 5}px rgba(255, 71, 87, 0.8)`;
+            }
         }
-    }
 
-    function tab(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    // --- CORE LOGIC ---
-    setInterval(() => {
-        let gain = 0.00000045 * db.mult;
-        db.uncl += gain;
-        db.xp += gain * 1000; // XP Kazanımı
-        
-        if(db.xp >= db.lvl * 100) {
-            db.xp = 0;
-            db.lvl++;
-            toast("LEVEL UP! Lvl " + db.lvl);
+        // Pico Etkileşimi
+        function picoAction() {
+            score += 10;
+            scoreDisplay.innerText = score;
+            
+            // Rastgele konum hesapla
+            const range = 180;
+            const randomX = (Math.random() - 0.5) * range;
+            const randomY = (Math.random() - 0.5) * range;
+            
+            // CSS değişkenleri ile animasyonu koru
+            pico.style.setProperty('--tx', `${randomX}px`);
+            pico.style.setProperty('--ty', `${randomY}px`);
+            pico.style.transform = `translate(${randomX}px, ${randomY}px)`;
+            
+            pico.classList.add('bounce');
+            setTimeout(() => pico.classList.remove('bounce'), 400);
         }
-        
-        document.getElementById('uncl-text').innerText = db.uncl.toFixed(8);
-        document.getElementById('main-fan').style.animationDuration = (6 / db.mult) + "s";
-    }, 1000);
 
-    function claimMining() {
-        if(db.uncl > 0) {
-            db.pi += db.uncl;
-            db.uncl = 0;
-            save();
-            toast("Pi Collected!");
-        }
-    }
-
-    function buyUpgrade(type, price) {
-        if(db.pnx >= price) {
-            db.pnx -= price;
-            if(type === 'turbo') db.mult += 0.5;
-            if(type === 'rig') db.mult += 1.2;
-            if(type === 'ai') db.mult += 3.0;
-            save();
-            toast("Upgrade Success!");
-        } else {
-            toast("Not enough PNX!");
-        }
-    }
-
-    function updateSwap() {
-        let input = document.getElementById('swap-in').value;
-        document.getElementById('swap-out').innerText = (input / 100).toFixed(4);
-    }
-
-    function doSwap() {
-        let input = parseFloat(document.getElementById('swap-in').value);
-        if(input >= 10 && db.pnx >= input) {
-            db.pnx -= input;
-            db.pi += (input / 100);
-            save();
-            document.getElementById('swap-in').value = "";
-            updateSwap();
-            toast("Swap Successful!");
-        }
-    }
-
-    function useRef() {
-        if(!db.usedRef) {
-            db.pnx += 50;
-            db.usedRef = true;
-            save();
-            toast("+50 PNX Added!");
-        }
-    }
-
-    function toast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2000);
-    }
-
-    // İlk Çalıştırma
-    updateUI();
-</script>
+        // Otomatik Yavaşlama (Zorluk katmak için)
+        setInterval(() => {
+            if (speed < 3) {
+                speed += 0.02;
+                fan.style.animationDuration = speed + "s";
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
