@@ -1,250 +1,231 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PINIX App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch2Earn - İzle ve Kazan</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #4f46e5;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+        }
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: "Segoe UI", system-ui, sans-serif;
-}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-body{
-    background: radial-gradient(circle at top, #2a163f, #0b0813);
-    color:#fff;
-    min-height:100vh;
-}
+        /* Navigasyon Sekmeleri */
+        .tabs {
+            display: flex;
+            background: var(--dark);
+            width: 100%;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-/* HEADER */
-.header{
-    padding:16px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-weight:700;
-    font-size:20px;
-}
+        .tab-btn {
+            padding: 15px 25px;
+            border: none;
+            background: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
 
-.header span{
-    color:#5fd3ff;
-    margin-left:6px;
-}
+        .tab-btn.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
 
-/* BALANCE BOX */
-.balance-box{
-    margin:12px;
-    padding:14px;
-    border-radius:14px;
-    background:rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
-}
+        /* İçerik Alanları */
+        .content-section {
+            display: none;
+            width: 90%;
+            max-width: 800px;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-.balance-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:8px;
-}
+        .content-section.active {
+            display: block;
+        }
 
-.balance-row:last-child{
-    margin-bottom:0;
-}
+        /* Video Alanı */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: #000;
+        }
 
-.balance-title{
-    font-size:12px;
-    opacity:.7;
-}
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
 
-.balance-value{
-    font-size:16px;
-    font-weight:600;
-}
+        /* Bakiye Kartı */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
 
-/* MINING AREA */
-.mining-area{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    margin-top:20px;
-}
+        .btn-claim {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
 
-.spinner{
-    width:220px;
-    height:220px;
-    border-radius:50%;
-    background:
-        conic-gradient(
-            #caa3ff,
-            #8f5dff,
-            #caa3ff,
-            #8f5dff,
-            #caa3ff
-        );
-    animation:spin 6s linear infinite;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.spinner::after{
-    content:"π";
-    width:70px;
-    height:70px;
-    background:#2b1450;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:32px;
-    font-weight:800;
-}
-
-@keyframes spin{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
-}
-
-.mining-text{
-    margin-top:12px;
-    opacity:.7;
-}
-
-.mining-value{
-    font-size:34px;
-    font-weight:800;
-    color:#ffcf4a;
-    margin-top:4px;
-}
-
-/* POWER */
-.power-box{
-    margin-top:12px;
-    padding:10px 16px;
-    border-radius:12px;
-    background:rgba(255,255,255,0.08);
-}
-
-/* BUTTONS */
-.buttons{
-    display:flex;
-    gap:12px;
-    margin-top:18px;
-}
-
-.btn{
-    padding:14px 22px;
-    border-radius:14px;
-    font-weight:700;
-    border:none;
-    cursor:pointer;
-}
-
-.claim{
-    background:linear-gradient(135deg,#7c3aed,#a855f7);
-    color:#fff;
-}
-
-.swap{
-    background:linear-gradient(135deg,#22c55e,#4ade80);
-    color:#000;
-}
-
-/* BOOST */
-.boost{
-    margin:20px 12px;
-    padding:16px;
-    border-radius:14px;
-    background:linear-gradient(135deg,#a16207,#facc15);
-    color:#000;
-    text-align:center;
-    font-weight:800;
-}
-
-/* NAVBAR */
-.navbar{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#120a20;
-    display:flex;
-    justify-content:space-around;
-    padding:10px 0;
-}
-
-.nav-item{
-    text-align:center;
-    font-size:12px;
-    opacity:.6;
-}
-
-.nav-item.active{
-    opacity:1;
-    color:#facc15;
-}
-</style>
+        /* Referans Bölümü */
+        .ref-box {
+            background: #e5e7eb;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
-    PINIX App <span>✔</span>
-</div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'watch')">📺 İzle</button>
+        <button class="tab-btn" onclick="openTab(event, 'referral')">👥 Referans</button>
+        <button class="tab-btn" onclick="openTab(event, 'wallet')">💰 Cüzdan</button>
+    </div>
 
-<div class="balance-box">
-    <div class="balance-row">
-        <div>
-            <div class="balance-title">Balance</div>
-            <div class="balance-value">0.0000000 PI</div>
+    <div id="watch" class="content-section active">
+        <div class="stats">
+            <div>Bakiye: <span id="balance">0.00</span> TL</div>
+            <div>İzlenen: <span id="watched-count">0</span></div>
         </div>
-    </div>
-
-    <div class="balance-row">
-        <div>
-            <div class="balance-title">Balance</div>
-            <div class="balance-value">0 PINIX</div>
+        
+        <h3>Reklam Videosu</h3>
+        <div class="video-container">
+            <iframe id="video-player" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
         </div>
-    </div>
-</div>
-
-<div class="mining-area">
-    <div class="spinner"></div>
-    <div class="mining-text">Mining...</div>
-    <div class="mining-value" id="pi">0.0002435 PI</div>
-
-    <div class="power-box">
-        ⚡ 5 GH/s
+        
+        <button class="btn-claim" id="reward-btn" onclick="claimReward()">Ödülü Al (Süre Dolunca Aktif Olur)</button>
+        <p id="timer-text" style="text-align:center; color: #666;">Videoyu başlatın ve 15 saniye bekleyin.</p>
     </div>
 
-    <div class="buttons">
-        <button class="btn claim">Claim</button>
-        <button class="btn swap">Swap PINIX</button>
+    <div id="referral" class="content-section">
+        <h2>Arkadaşlarını Davet Et</h2>
+        <p>Her aktif referans için 1.00 TL kazanın!</p>
+        <div class="ref-box">
+            https://watch2earn.com/join?ref=<span id="ref-code">USER123</span>
+        </div>
+        <button onclick="copyRef()" class="btn-claim" style="background: var(--dark);">Linki Kopyala</button>
+        
+        <h3>Referanslarım</h3>
+        <ul id="ref-list">
+            <li>Henüz referansınız yok.</li>
+        </ul>
     </div>
-</div>
 
-<div class="boost">
-    🚀 BOOST
-</div>
+    <div id="wallet" class="content-section">
+        <h2>Cüzdanım</h2>
+        <div class="stats" style="background: #1f2937;">
+            <h1><span id="wallet-balance">0.00</span> TL</h1>
+        </div>
+        <p>Minimum çekim tutarı: 50.00 TL</p>
+        <button class="btn-claim" disabled style="background: #9ca3af;">Para Çek (Yetersiz Bakiye)</button>
+    </div>
 
-<div class="navbar">
-    <div class="nav-item">Wallet</div>
-    <div class="nav-item">Friends</div>
-    <div class="nav-item active">Home</div>
-    <div class="nav-item">Missions</div>
-    <div class="nav-item">More</div>
-</div>
+    <script>
+        let balance = 0;
+        let watchedCount = 0;
+        let canClaim = false;
 
-<script>
-let pi = 0.0002435;
-setInterval(()=>{
-    pi += 0.0000003;
-    document.getElementById("pi").innerText = pi.toFixed(7)+" PI";
-},1000);
-</script>
+        // Sekme Değiştirme Fonksiyonu
+        function openTab(evt, tabName) {
+            let i, content, tabLinks;
+            content = document.getElementsByClassName("content-section");
+            for (i = 0; i < content.length; i++) {
+                content[i].classList.remove("active");
+            }
+            tabLinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
 
+        // Ödül Kazanma Sistemi (Simüle Edilmiş)
+        function startTimer() {
+            let timeLeft = 15;
+            const timerText = document.getElementById('timer-text');
+            const btn = document.getElementById('reward-btn');
+
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = `Ödül için kalan süre: ${timeLeft} saniye`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timerText.innerText = "Ödülünüz hazır!";
+                    btn.style.background = "#10b981";
+                    canClaim = true;
+                }
+            }, 1000);
+        }
+
+        function claimReward() {
+            if (canClaim) {
+                balance += 0.50; // Her izleme 50 kuruş
+                watchedCount += 1;
+                updateDisplay();
+                canClaim = false;
+                document.getElementById('reward-btn').style.background = "#9ca3af";
+                document.getElementById('timer-text').innerText = "Sıradaki video hazırlanıyor...";
+                
+                // 3 saniye sonra yeni video "başlar"
+                setTimeout(() => {
+                    startTimer();
+                }, 3000);
+            } else {
+                alert("Lütfen videonun bitmesini bekleyin!");
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('wallet-balance').innerText = balance.toFixed(2);
+            document.getElementById('watched-count').innerText = watchedCount;
+        }
+
+        function copyRef() {
+            alert("Referans linki kopyalandı!");
+        }
+
+        // Sayfa yüklendiğinde sayacı başlat
+        window.onload = startTimer;
+    </script>
 </body>
 </html>
