@@ -3,361 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX PRO - Ultimate Mining Infrastructure</title>
+    <title>PINIX v99 - Ultra Mining OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=JetBrains+Mono:wght@500;800&display=swap');
 
-        /* --- GLOBAL CSS VARIABLES --- */
         :root {
-            --primary: #a855f7;
-            --secondary: #7c3aed;
-            --accent: #facc15;
-            --bg-deep: #060608;
-            --bg-card: rgba(20, 20, 26, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
+            --v99-purple: #8b5cf6;
+            --v99-gold: #facc15;
+            --v99-bg: #030305;
+            --v99-card: rgba(18, 18, 24, 0.85);
+            --v99-neon: 0 0 25px rgba(139, 92, 246, 0.4);
         }
 
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            background-color: var(--bg-deep); 
-            color: var(--text-main); 
-            font-family: 'Space Grotesk', sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
+            background: var(--v99-bg); 
+            color: white; 
+            font-family: 'Outfit', sans-serif;
+            height: 100vh; overflow: hidden;
+            display: flex; justify-content: center;
         }
 
-        /* 9:16 Format Container */
-        .app-shell {
-            width: 100%; max-width: 480px; height: 100vh;
-            background: radial-gradient(circle at top right, #1a1033 0%, #060608 60%);
+        .v99-shell {
+            width: 100%; max-width: 450px; height: 100vh;
+            background: radial-gradient(circle at 50% -20%, #2e1065 0%, #030305 70%);
             position: relative; display: flex; flex-direction: column;
-            box-shadow: 0 0 100px rgba(0,0,0,1);
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes spin-fan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes pulse-glow { 0%, 100% { opacity: 0.5; box-shadow: 0 0 20px var(--primary); } 50% { opacity: 1; box-shadow: 0 0 40px var(--primary); } }
-        @keyframes slide-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- v99 ÖZEL ANİMASYONLAR --- */
+        @keyframes reactor-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes neon-pulse { 0%, 100% { filter: drop-shadow(0 0 5px var(--v99-purple)); } 50% { filter: drop-shadow(0 0 20px var(--v99-purple)); } }
+        @keyframes float-ui { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-        /* --- REUSABLE COMPONENTS --- */
-        .glass-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(12px); }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .gradient-text { background: linear-gradient(135deg, #fff 30%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* --- UI COMPONENTLER --- */
+        .v99-card { background: var(--v99-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; backdrop-filter: blur(20px); }
+        .v99-mono { font-family: 'JetBrains Mono', monospace; }
+        .v99-btn-gold { background: linear-gradient(135deg, #facc15, #eab308); color: black; font-weight: 900; }
         
-        /* Page Control */
-        .page { display: none; height: 100%; overflow-y: auto; padding: 20px; padding-bottom: 120px; scrollbar-width: none; }
+        .page { display: none; height: 100%; overflow-y: auto; padding: 20px 20px 140px 20px; scrollbar-width: none; }
         .page::-webkit-scrollbar { display: none; }
-        .page.active { display: block; animation: slide-in 0.3s ease-out forwards; }
+        .page.active { display: block; animation: v99-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes v99-fade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* Mining Fan Design */
-        .mining-orb {
-            position: relative; width: 280px; height: 280px; margin: 30px auto;
+        /* CORE REACTOR (pinix.jpg) */
+        .reactor-container {
+            position: relative; width: 300px; height: 300px; margin: 20px auto;
             display: flex; justify-content: center; align-items: center;
         }
-        .fan-main {
-            width: 100%; height: 100%; border-radius: 50%;
-            object-fit: cover; animation: spin-fan 8s linear infinite;
-            border: 2px solid rgba(168, 85, 247, 0.2); padding: 10px;
+        .reactor-ring {
+            position: absolute; inset: 0; border: 2px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 50%; animation: reactor-spin 15s linear infinite;
         }
-        .orb-core {
-            position: absolute; width: 60px; height: 60px; background: var(--bg-deep);
-            border-radius: 20px; border: 2px solid var(--primary);
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 30px var(--primary); z-index: 5;
+        .pinix-core {
+            width: 180px; height: 180px; border-radius: 50%; object-fit: cover;
+            animation: reactor-spin 10s linear infinite;
+            border: 4px solid var(--v99-purple); box-shadow: var(--v99-neon);
+            z-index: 10;
+        }
+        .energy-aura {
+            position: absolute; width: 220px; height: 220px;
+            background: var(--v99-purple); border-radius: 50%;
+            filter: blur(60px); opacity: 0.15; animation: neon-pulse 3s infinite;
         }
 
-        /* --- NAVIGATION --- */
-        .nav-dock {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 95px;
-            background: rgba(10, 10, 15, 0.95); border-top: 1px solid var(--glass-border);
+        /* BOTTOM DOCK v99 */
+        .v99-dock {
+            position: absolute; bottom: 25px; left: 20px; right: 20px;
+            height: 80px; background: rgba(15, 15, 20, 0.9);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
             display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: 20px; z-index: 1000;
+            z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); cursor: pointer; transition: 0.3s; flex: 1; }
-        .nav-btn.active { color: var(--accent); }
-        .nav-btn i { font-size: 22px; margin-bottom: 4px; }
-        .nav-btn span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dock-item { display: flex; flex-direction: column; align-items: center; color: #4b5563; transition: 0.3s; }
+        .dock-item.active { color: var(--v99-gold); transform: translateY(-5px); }
+        .dock-item i { font-size: 20px; margin-bottom: 4px; }
+        .dock-item span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
         
-        .main-btn-outer { margin-top: -50px; }
-        .main-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex; justify-content: center; align-items: center;
-            border: 5px solid var(--bg-deep); box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            color: white !important; font-size: 24px;
+        .dock-main {
+            width: 65px; height: 65px; background: var(--v99-purple);
+            border-radius: 50%; margin-top: -50px; border: 6px solid var(--v99-bg);
+            color: white !important; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.5);
         }
-
-        /* UI Elements */
-        .badge-pending { background: rgba(250, 204, 21, 0.1); color: var(--accent); border: 1px solid rgba(250, 204, 21, 0.2); }
-        .badge-verified { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
-    <div class="content-viewport">
-
-        <div id="home" class="page active">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-3">
-                    <img src="pinix.jpg" class="w-8 h-8 rounded-lg border border-primary/30">
-                    <h1 class="font-black text-lg tracking-tighter">PINIX MINER</h1>
-                </div>
-                <div class="badge-verified px-3 py-1 rounded-full text-[10px] font-bold">● NODE ACTIVE</div>
+<div class="v99-shell">
+    
+    <div id="home" class="page active">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="v99-mono text-[10px] font-bold text-gray-400">NETWORK_UP: PI_MAINNET</span>
             </div>
-
-            <div class="glass-card p-5 mb-8 flex justify-between items-center overflow-hidden relative">
-                <div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-2xl"></div>
-                <div>
-                    <p class="text-[10px] text-text-dim font-bold uppercase tracking-widest mb-1">Total Balance</p>
-                    <h2 class="text-3xl font-black tracking-tight mono">0.0000000</h2>
-                    <p class="text-[9px] text-primary font-bold mt-1">WALLET ASSETS: PI NETWORK</p>
-                </div>
-                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-                    <i class="fas fa-wallet text-xl text-gray-500"></i>
-                </div>
-            </div>
-
-            <div class="mining-orb">
-                <div class="absolute inset-0 border-2 border-primary/20 rounded-full animate-ping" style="animation-duration: 3s;"></div>
-                <img src="pinix.jpg" class="fan-main">
-                <div class="orb-core">
-                    <span class="text-2xl font-black italic text-white">π</span>
-                </div>
-            </div>
-
-            <div class="text-center mt-6">
-                <p class="text-text-dim text-xs font-bold uppercase tracking-[4px] mb-2">Mining Process</p>
-                <h3 class="text-5xl font-black gradient-text mono tracking-tighter">0.0000000</h3>
-                
-                <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 mt-6">
-                    <i class="fas fa-bolt text-accent animate-pulse"></i>
-                    <span class="font-bold text-sm">Power: <span class="text-white">0 GH/s</span></span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mt-10">
-                <button class="glass-card py-4 font-black text-sm hover:bg-white/5 transition active:scale-95">CLAIM</button>
-                <button class="bg-gradient-to-r from-green-600 to-emerald-700 py-4 rounded-2xl font-black text-sm shadow-lg shadow-green-500/10 active:scale-95 transition">SWAP ASSETS</button>
-            </div>
-            
-            <button onclick="switchPage('boost')" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-5 rounded-2xl font-black mt-4 shadow-xl active:scale-95 transition tracking-widest text-sm">
-                UPGRADE MINING POWER
-            </button>
+            <div class="v99-card px-3 py-1 text-[10px] font-black text-v99-purple">v99 PRO</div>
         </div>
 
-        <div id="wallet" class="page">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-black">MY ASSETS</h2>
-                <p class="text-xs text-text-dim">Manage your blockchain rewards</p>
-            </div>
+        <div class="v99-card p-6 mb-8 text-center relative overflow-hidden">
+            <p class="text-[10px] text-gray-500 font-black tracking-[4px] uppercase mb-1">Available Assets</p>
+            <h2 id="balance" class="text-4xl font-black v99-mono tracking-tighter">0.0000000</h2>
+            <p class="text-[9px] text-v99-purple font-bold mt-2">PINIX UTILITY OPERATIONAL</p>
+        </div>
 
-            <div class="glass-card p-6 mb-4 border-l-4 border-orange-500">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-black italic text-white">π</div>
-                        <span class="font-bold">PI NETWORK</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-gray-500">MAINNET</span>
-                </div>
-                <h3 class="text-3xl font-black mono">0.0000000</h3>
-                <div class="flex justify-between mt-4">
-                    <p class="text-[10px] text-text-dim">≈ $0.00 USD</p>
-                    <p class="text-[10px] text-green-500 font-bold">+0.00% (24h)</p>
-                </div>
-            </div>
-
-            <div class="glass-card p-6 mb-8 border-l-4 border-purple-500">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-3">
-                        <img src="pinix.jpg" class="w-10 h-10 rounded-xl">
-                        <span class="font-bold">PINIX TOKEN</span>
-                    </div>
-                    <span class="text-[10px] font-bold text-purple-500">APP UTILITY</span>
-                </div>
-                <h3 class="text-3xl font-black mono">0</h3>
-                <button class="mt-4 text-[10px] font-bold text-purple-400 uppercase underline tracking-widest">Swap to Pi (100:1)</button>
-            </div>
-
-            <div class="glass-card p-4">
-                <button class="w-full bg-white text-black py-4 rounded-xl font-black text-sm mb-3 active:scale-95 transition">SEND / WITHDRAW</button>
-                <button class="w-full bg-white/5 border border-white/10 py-4 rounded-xl font-black text-sm text-white active:scale-95 transition">RECEIVE</button>
-                <p class="text-center text-[9px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Withdrawals processed within 24 hours</p>
+        <div class="reactor-container">
+            <div class="reactor-ring"></div>
+            <div class="energy-aura"></div>
+            <img src="pinix.jpg" class="pinix-core" alt="Core">
+            <div class="absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-2xl backdrop-blur-md border border-white/10">
+                <span class="text-2xl italic font-black text-v99-gold">π</span>
             </div>
         </div>
 
-        <div id="boost" class="page text-center">
-            <h2 class="text-2xl font-black mb-2">POWER UP</h2>
-            <p class="text-xs text-text-dim mb-8">Increase your mining hash rate effectively</p>
-
-            <div class="glass-card p-10 mb-6 bg-gradient-to-b from-primary/10 to-transparent relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                <h4 class="text-5xl font-black italic tracking-tighter mb-2">100 <span class="text-xl">GH/s</span></h4>
-                <p class="text-[10px] text-primary font-bold uppercase tracking-[3px]">Mining Speed</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mb-8 text-left">
-                <div class="glass-card p-4">
-                    <p class="text-[9px] text-text-dim font-bold uppercase">Price</p>
-                    <p class="text-lg font-bold">100 PI</p>
-                </div>
-                <div class="glass-card p-4">
-                    <p class="text-[9px] text-text-dim font-bold uppercase">Duration</p>
-                    <p class="text-lg font-bold">30 Days</p>
-                </div>
-                <div class="glass-card p-4 border-b-2 border-green-500/30">
-                    <p class="text-[9px] text-text-dim font-bold uppercase">Daily Profit</p>
-                    <p class="text-lg font-bold text-green-500">+1.14 PI</p>
-                </div>
-                <div class="glass-card p-4 border-b-2 border-accent/30">
-                    <p class="text-[9px] text-text-dim font-bold uppercase">Total ROI</p>
-                    <p class="text-lg font-bold text-accent">+34.33 PI</p>
-                </div>
-            </div>
-
-            <div class="px-2 mb-10">
-                <input type="range" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" min="100" max="10000" step="100" value="100">
-                <div class="flex justify-between mt-3 text-[10px] font-bold text-gray-600 mono">
-                    <span>100 PI</span>
-                    <span>10,000 PI</span>
-                </div>
-            </div>
-
-            <button class="w-full bg-white text-black py-5 rounded-2xl font-black text-sm tracking-[2px] active:scale-95 transition">ACTIVATE MINING POWER</button>
-        </div>
-
-        <div id="friends" class="page">
-            <h2 class="text-2xl font-black text-center mb-6 uppercase">Referral Hub</h2>
-
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="glass-card p-4 text-center">
-                    <p class="text-[9px] text-text-dim font-bold uppercase mb-1">Invited</p>
-                    <p class="text-2xl font-black">0</p>
-                </div>
-                <div class="glass-card p-4 text-center">
-                    <p class="text-[9px] text-text-dim font-bold uppercase mb-1">Bonus Speed</p>
-                    <p class="text-2xl font-black text-primary">+0 GH/s</p>
-                </div>
-            </div>
-
-            <div class="glass-card p-5 mb-8 bg-gradient-to-r from-primary/5 to-transparent">
-                <p class="text-[10px] text-text-dim font-black mb-3 uppercase tracking-widest">Share Your Invite Link</p>
-                <div class="flex gap-2 bg-black/40 p-2 rounded-xl border border-white/5">
-                    <input type="text" value="https://t.me/PINIX_Bot?start=r83924" class="flex-1 bg-transparent text-[10px] mono text-gray-500 outline-none" readonly>
-                    <button class="bg-primary px-4 py-2 rounded-lg text-xs"><i class="far fa-copy"></i></button>
-                </div>
-            </div>
-
-            <h3 class="text-xs font-black text-gray-500 mb-4 uppercase tracking-[3px] ml-2">Referral Levels</h3>
-            <div class="space-y-3">
-                <div class="glass-card p-4 flex items-center justify-between border-l-4 border-primary">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-black">1</div>
-                        <div><p class="text-xs font-black">Direct Referrals</p><p class="text-[9px] text-text-dim">1000 PNX + 10% Hashrate</p></div>
-                    </div>
-                    <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
-                </div>
-                <div class="glass-card p-4 flex items-center justify-between border-l-4 border-gray-700 opacity-60">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-gray-500 font-black">2</div>
-                        <div><p class="text-xs font-black">Secondary Tier</p><p class="text-[9px] text-text-dim">500 PNX + 3% Hashrate</p></div>
-                    </div>
-                    <i class="fas fa-lock text-gray-800 text-xs"></i>
-                </div>
+        <div class="text-center mt-6">
+            <p class="text-[10px] text-gray-600 font-bold uppercase tracking-[5px]">Mining Speed</p>
+            <div class="flex justify-center items-baseline gap-2 mt-1">
+                <span class="text-5xl font-black v99-mono tracking-tighter">0.00</span>
+                <span class="text-xl font-bold text-v99-purple">GH/s</span>
             </div>
         </div>
 
-        <div id="more" class="page">
-            <div class="glass-card p-6 mb-8 flex items-center gap-5 border-t-2 border-primary relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
-                <div class="relative">
-                    <img src="pinix.jpg" class="w-20 h-20 rounded-3xl object-cover border-2 border-primary shadow-2xl">
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-bg-deep rounded-full"></div>
-                </div>
-                <div class="z-10">
-                    <h3 class="font-black text-xl tracking-tighter">Elite Miner</h3>
-                    <div class="badge-verified inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase mb-1 tracking-widest">Premium Account</div>
-                    <p class="text-[9px] text-gray-600 font-bold mono">UID: 8392479231 <i class="far fa-copy ml-1"></i></p>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <section>
-                    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[4px] mb-3 ml-2">Security & Verification</p>
-                    <div class="glass-card divide-y divide-white/5">
-                        <div class="p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-4"><i class="fas fa-id-card text-gray-600 w-5"></i><span class="text-xs font-bold">Identity KYC</span></div>
-                            <span class="text-[9px] text-accent font-black uppercase">Pending</span>
-                        </div>
-                        <div class="p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-4"><i class="fas fa-shield-alt text-gray-600 w-5"></i><span class="text-xs font-bold">Two-Factor Auth</span></div>
-                            <div class="w-8 h-4 bg-gray-800 rounded-full relative"><div class="absolute left-1 top-1 w-2 h-2 bg-gray-600 rounded-full"></div></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section>
-                    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[4px] mb-3 ml-2">Project Info</p>
-                    <div class="glass-card divide-y divide-white/5">
-                        <div class="p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-4"><i class="fas fa-file-invoice text-gray-600 w-5"></i><span class="text-xs font-bold">Whitepaper v2.4</span></div>
-                            <i class="fas fa-external-link-alt text-[10px] text-gray-800"></i>
-                        </div>
-                        <div class="p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-4"><i class="fab fa-telegram-plane text-gray-600 w-5"></i><span class="text-xs font-bold">Official Channel</span></div>
-                            <i class="fas fa-chevron-right text-[10px] text-gray-800"></i>
-                        </div>
-                    </div>
-                </section>
-                
-                <button class="w-full bg-red-500/10 border border-red-500/20 py-4 rounded-xl text-red-500 font-black text-xs uppercase tracking-widest mt-10 active:scale-95 transition">
-                    Logout Session
-                </button>
-            </div>
-
-            <div class="mt-12 text-center pb-10">
-                <p class="text-[9px] text-gray-800 font-black tracking-[8px] uppercase">Pinix Network</p>
-                <p class="text-[8px] text-gray-900 font-bold mt-1">Core Version 4.0.1-PRO (2026)</p>
-            </div>
+        <div class="grid grid-cols-2 gap-4 mt-12">
+            <button onclick="haptic()" class="v99-card py-5 font-black text-xs tracking-widest hover:bg-white/5 active:scale-95 transition">HARVEST PI</button>
+            <button onclick="haptic()" class="v99-btn-gold py-5 rounded-[24px] text-xs tracking-widest shadow-xl shadow-yellow-500/10 active:scale-95 transition">SWAP PNX</button>
         </div>
-
     </div>
 
-    <nav class="nav-dock">
-        <div class="nav-btn" onclick="switchPage('wallet')" id="n-wallet"><i class="fas fa-wallet"></i><span>Assets</span></div>
-        <div class="nav-btn" onclick="switchPage('friends')" id="n-friends"><i class="fas fa-user-friends"></i><span>Friends</span></div>
-        <div class="nav-btn active main-btn-outer" onclick="switchPage('home')" id="n-home">
-            <div class="main-btn"><i class="fas fa-bolt"></i></div>
-            <span class="mt-1">Mining</span>
+    <div id="wallet" class="page">
+        <h2 class="text-3xl font-black mb-8 text-center">FINANCE</h2>
+        
+        <div class="v99-card p-6 mb-4 border-l-4 border-v99-gold">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-v99-gold rounded-full flex items-center justify-center font-black italic text-black">π</div>
+                    <span class="font-black text-sm uppercase">Pi Network</span>
+                </div>
+                <span class="v99-mono text-[10px] text-gray-500">PI/USD</span>
+            </div>
+            <h3 class="text-3xl font-black v99-mono">0.0000000</h3>
         </div>
-        <div class="nav-btn" onclick="switchPage('missions')" id="n-missions"><i class="fas fa-tasks"></i><span>Tasks</span></div>
-        <div class="nav-btn" onclick="switchPage('more')" id="n-more"><i class="fas fa-cog"></i><span>More</span></div>
+
+        <div class="v99-card p-6 mb-8 border-l-4 border-v99-purple">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <img src="pinix.jpg" class="w-10 h-10 rounded-xl object-cover">
+                    <span class="font-black text-sm uppercase">Pinix Token</span>
+                </div>
+            </div>
+            <h3 class="text-3xl font-black v99-mono">0 <span class="text-sm text-v99-purple font-bold">PNX</span></h3>
+        </div>
+
+        <button class="w-full bg-white text-black py-5 rounded-[24px] font-black text-sm tracking-widest active:scale-95 transition">WITHDRAW TO MAINNET</button>
+    </div>
+
+    <div id="friends" class="page">
+        <h2 class="text-3xl font-black mb-2 text-center">NETWORK</h2>
+        <p class="text-center text-xs text-gray-500 mb-10">Expand your mining cluster</p>
+
+        <div class="v99-card p-6 mb-8 text-center bg-gradient-to-br from-v99-purple/10 to-transparent">
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[4px] mb-4">Your Referral ID</p>
+            <div class="flex items-center gap-3 bg-black/40 p-4 rounded-2xl border border-white/5">
+                <span class="flex-1 v99-mono text-sm text-v99-purple">PNX-839247</span>
+                <i class="far fa-copy text-gray-500 cursor-pointer" onclick="haptic()"></i>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="v99-card p-5 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center"><i class="fas fa-users text-v99-purple"></i></div>
+                    <div><p class="text-sm font-black">Cluster Rank #1</p><p class="text-[10px] text-gray-500 uppercase font-bold">+10% Speed Share</p></div>
+                </div>
+                <span class="v99-mono text-xs font-bold text-v99-gold">0 Users</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="more" class="page">
+        <div class="v99-card p-8 mb-8 flex flex-col items-center border-t-4 border-v99-purple">
+            <img src="pinix.jpg" class="w-24 h-24 rounded-[40px] border-4 border-v99-purple shadow-2xl mb-4">
+            <h3 class="text-2xl font-black tracking-tighter">Elite Miner #8392</h3>
+            <p class="text-[10px] text-v99-purple font-black uppercase tracking-[3px] mt-2">Level 99 Verified</p>
+        </div>
+
+        <div class="space-y-3">
+            <div class="v99-card p-5 flex justify-between items-center cursor-pointer hover:bg-white/5 transition">
+                <div class="flex items-center gap-4"><i class="fas fa-fingerprint text-gray-500"></i><span class="text-sm font-bold">Biometric Access</span></div>
+                <div class="w-10 h-5 bg-v99-purple rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+            </div>
+            <div class="v99-card p-5 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i class="fas fa-globe text-gray-500"></i><span class="text-sm font-bold">Language</span></div>
+                <span class="text-xs font-black text-gray-500">ENGLISH (US)</span>
+            </div>
+            <div class="v99-card p-5 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i class="fas fa-shield-halved text-gray-500"></i><span class="text-sm font-bold">Privacy Protocol</span></div>
+                <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
+            </div>
+        </div>
+        
+        <p class="text-center text-[8px] text-gray-800 font-black mt-12 tracking-[10px] uppercase">Pinix Ultra OS</p>
+    </div>
+
+    <nav class="v99-dock">
+        <div class="dock-item" onclick="nav('wallet')" id="n-wallet"><i class="fas fa-chart-pie"></i><span>Assets</span></div>
+        <div class="dock-item" onclick="nav('friends')" id="n-friends"><i class="fas fa-atom"></i><span>Network</span></div>
+        <div class="dock-item active dock-main" onclick="nav('home')" id="n-home"><i class="fas fa-bolt-lightning text-2xl"></i></div>
+        <div class="dock-item" onclick="nav('missions')" id="n-missions"><i class="fas fa-dna"></i><span>Missions</span></div>
+        <div class="dock-item" onclick="nav('more')" id="n-more"><i class="fas fa-microchip"></i><span>System</span></div>
     </nav>
 
-    <div class="bot-signature text-[8px] text-gray-900 absolute bottom-2 w-full text-center font-bold tracking-[3px]">@PINIX_MINING_INFRA</div>
 </div>
 
 <script>
-    function switchPage(pageId) {
-        // Hide all pages
+    function nav(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        // Show target page
-        document.getElementById(pageId).classList.add('active');
+        document.getElementById(id).classList.add('active');
         
-        // Update Nav UI
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        const activeNav = document.getElementById('n-' + pageId);
-        if(activeNav) activeNav.classList.add('active');
-
-        // Haptic Feedback Simulation
-        if(window.navigator.vibrate) window.navigator.vibrate(12);
+        document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+        document.getElementById('n-' + id).classList.add('active');
+        
+        haptic();
     }
+
+    function haptic() {
+        if(window.navigator.vibrate) window.navigator.vibrate(20);
+    }
+
+    // v99 Dynamic Mining Logic (Simulation)
+    let bal = 0.0000000;
+    setInterval(() => {
+        // Mining value increment simulation
+        // Real logic would be linked to GH/s
+    }, 1000);
 </script>
 
 </body>
