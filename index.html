@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX PRO - Fixed Edition</title>
+    <title>PINIX PRO v2.0</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -20,110 +20,114 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
         body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
-        #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e0d3d 0%, var(--bg) 80%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e0d3d 0%, var(--bg) 85%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-        /* AD BAR */
-        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 9999; }
-        #ad-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
+        /* AD TIMER BAR */
+        .ad-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.05); z-index: 1000; }
+        #ad-progress { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 12px var(--secondary); transition: linear; }
 
-        /* HEADER STATS */
-        .header { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
-        .coin-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary); }
+        /* HEADER */
+        .header { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(5px); }
+        .coin-icon-small { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
 
-        /* MINING */
-        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* MINING SECTION */
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
+        .view.active { display: flex; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .fan-container { width: 230px; height: 230px; margin: 30px auto; position: relative; }
-        .fan-main { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid var(--primary); animation: spin 3s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
-        .fan-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border-radius: 50%; background: url('pico.jpg') center/cover; border: 2px solid white; z-index: 10; }
+        .mining-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-glow { width: 250px; height: 250px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(139, 92, 246, 0.1); box-shadow: 0 0 60px rgba(139, 92, 246, 0.2); }
+        .fan-img { width: 220px; height: 220px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 4px solid var(--primary); animation: spin 4s linear infinite; }
+        .core-img { position: absolute; width: 55px; height: 55px; border-radius: 50%; background: url('pico.jpg') center/cover; border: 3px solid white; z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .balance-hero { text-align: center; margin-bottom: 20px; }
-        .uncl-pi { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); }
+        .mining-stats { text-align: center; margin-top: 25px; }
+        .uncl-val { font-size: 3rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); letter-spacing: -1px; }
 
         /* BUTTONS */
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-        .btn { padding: 16px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; font-size: 0.9rem; text-transform: uppercase; }
-        .btn-p { background: var(--primary); color: white; }
-        .btn-s { background: var(--green); color: white; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
+        .main-btn { padding: 18px; border-radius: 22px; border: none; font-weight: 900; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: transform 0.2s; }
+        .main-btn:active { transform: scale(0.96); }
+        .btn-purple { background: var(--primary); color: white; box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3); }
+        .btn-green { background: var(--green); color: white; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #0b021a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 10px; }
-        .nav-link { color: rgba(255,255,255,0.3); font-size: 0.65rem; text-align: center; cursor: pointer; flex: 1; }
-        .nav-link.active { color: var(--secondary); }
-        .nav-link i { display: block; font-size: 1.5rem; margin-bottom: 3px; font-style: normal; }
+        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: rgba(13, 6, 23, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 15px; }
+        .nav-item { color: rgba(255,255,255,0.3); font-size: 0.65rem; text-align: center; cursor: pointer; flex: 1; transition: 0.3s; }
+        .nav-item.active { color: var(--secondary); font-weight: 700; }
+        .nav-item i { display: block; font-size: 1.6rem; margin-bottom: 4px; font-style: normal; }
 
-        .admin-label { position: absolute; top: 10px; right: 10px; background: #ef4444; font-size: 0.6rem; padding: 4px 8px; border-radius: 8px; display: none; z-index: 1000; cursor: pointer; }
+        /* ADMIN */
+        .admin-btn { position: absolute; top: 12px; right: 12px; background: #ef4444; font-size: 0.6rem; padding: 4px 10px; border-radius: 10px; display: none; z-index: 2000; font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="ad-timer"><div id="ad-fill"></div></div>
-    <div class="admin-label" id="adm-tag" onclick="tab('v-admin')">ADMIN</div>
+    <div class="ad-container"><div id="ad-progress"></div></div>
+    <div class="admin-btn" id="adm-trigger" onclick="tab('v-admin')">ADMIN</div>
 
     <header class="header">
-        <div class="stat-box">
-            <img src="pico.jpg" class="coin-img">
-            <div><p style="font-size:0.6rem; opacity:0.5;">PI BALANCE</p><p id="pi-top" style="font-weight:800; font-family:'Orbitron';">0.0000</p></div>
+        <div class="stat-card">
+            <img src="pico.jpg" class="coin-icon-small">
+            <div><p style="font-size:0.55rem; opacity:0.5;">PI BALANCE</p><p id="pi-top" style="font-family:'Orbitron'; font-weight:800;">0.0000</p></div>
         </div>
-        <div class="stat-box">
-            <div class="coin-img" style="background:#1e1b4b; display:flex; align-items:center; justify-content:center; color:white;">🌀</div>
-            <div><p style="font-size:0.6rem; opacity:0.5;">PNX ASSET</p><p id="pnx-top" style="font-weight:800; font-family:'Orbitron';">0</p></div>
+        <div class="stat-card">
+            <div class="coin-icon-small" style="background:#1e1b4b; display:flex; align-items:center; justify-content:center; color:white; border-color:#3730a3;">🌀</div>
+            <div><p style="font-size:0.55rem; opacity:0.5;">PNX ASSET</p><p id="pnx-top" style="font-family:'Orbitron'; font-weight:800;">0</p></div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="fan-container">
-            <div class="fan-main"></div>
-            <div class="fan-core"></div>
+        <div class="mining-wrap">
+            <div class="fan-glow">
+                <div class="fan-img"></div>
+                <div class="core-img"></div>
+            </div>
+            <div class="mining-stats">
+                <p style="opacity:0.4; font-size:0.75rem; letter-spacing:3px;">CLOUD MINING V2</p>
+                <div class="uncl-val" id="pi-mining">0.00000000</div>
+                <div style="background:rgba(255,255,255,0.06); padding:6px 18px; border-radius:30px; border:1px solid var(--border); font-size:0.85rem; margin-top:10px;">⚡ 5.0 GH/s Power</div>
+            </div>
+            <div class="action-grid">
+                <button class="main-btn btn-purple" onclick="claimRewards()">Claim</button>
+                <button class="main-btn btn-green" onclick="tab('v-swap')">Swap</button>
+            </div>
+            <button class="main-btn" style="width:100%; margin-top:15px; background:linear-gradient(90deg, #f59e0b, #fbbf24); color:#000;" onclick="showAd()">🚀 SPEED BOOST</button>
         </div>
-        <div class="balance-hero">
-            <p style="opacity:0.4; font-size:0.7rem; letter-spacing:2px;">MINING ENGINE</p>
-            <div class="uncl-pi" id="pi-uncl">0.00000000</div>
-            <div style="background:rgba(255,255,255,0.05); padding:5px 15px; border-radius:20px; display:inline-block; font-size:0.8rem; margin-top:10px;">⚡ 5 GH/s</div>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-p" onclick="claimPi()">Claim</button>
-            <button class="btn btn-s" onclick="tab('v-swap')">Swap</button>
-        </div>
-        <button class="btn" style="width:100%; margin-top:12px; background:linear-gradient(90deg, #f59e0b, #fbbf24); color:black;" onclick="triggerAd()">🚀 BOOST SPEED</button>
     </div>
 
     <div id="v-swap" class="view">
-        <h2 style="margin-bottom:20px;">Swap Assets</h2>
-        <div style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--border);">
-            <p style="font-size:0.7rem; opacity:0.5;">FROM (PINIX)</p>
-            <input type="number" id="sw-in" style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); padding:15px; border-radius:12px; color:white; margin:10px 0;" placeholder="100" oninput="calcSw(this.value)">
-            <p style="text-align:center; font-size:1.5rem;">↓</p>
-            <p style="font-size:0.7rem; opacity:0.5;">TO (PI)</p>
-            <input type="text" id="sw-out" style="width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); padding:15px; border-radius:12px; color:white; margin:10px 0;" placeholder="1.0000" readonly>
-            <button class="btn btn-s" style="width:100%; margin-top:10px;" onclick="doSw()">Confirm Swap</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Swap Center</h2>
+        <div style="background:var(--card); padding:25px; border-radius:25px; border:1px solid var(--border);">
+            <label style="font-size:0.65rem; opacity:0.5;">SELL (PINIX)</label>
+            <input type="number" id="sw-val" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); padding:18px; border-radius:15px; color:white; margin:10px 0; font-size:1.2rem; font-weight:700;" placeholder="0" oninput="calcSwap(this.value)">
+            <div style="text-align:center; color:var(--primary); font-size:1.5rem;">⇅</div>
+            <label style="font-size:0.65rem; opacity:0.5;">BUY (PI)</label>
+            <input type="text" id="sw-res" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); padding:18px; border-radius:15px; color:white; margin:10px 0; font-size:1.2rem;" placeholder="0.0000" readonly>
+            <button class="main-btn btn-green" style="width:100%; margin-top:15px;" onclick="executeSwap()">Execute Swap</button>
         </div>
     </div>
 
     <div id="v-ref" class="view">
-        <h2 style="margin-bottom:20px;">Network</h2>
-        <div style="background:var(--card); padding:30px; border-radius:20px; border:1px solid var(--border); text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.5;">YOUR REFERRAL CODE</p>
-            <h1 id="ref-code-ui" style="color:var(--secondary); font-size:2.2rem; margin:15px 0; font-family:'Orbitron';">---</h1>
-            <button class="btn btn-p" style="width:100%;" onclick="shareRef()">Share Link</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Network</h2>
+        <div style="background:var(--card); padding:30px; border-radius:25px; border:1px solid var(--border); text-align:center;">
+            <p style="font-size:0.7rem; opacity:0.5;">YOUR INVITE CODE</p>
+            <h1 id="ref-display" style="color:var(--secondary); font-size:2.5rem; margin:15px 0; font-family:'Orbitron';">---</h1>
+            <button class="main-btn btn-purple" style="width:100%;" onclick="shareRef()">Invite Friend</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:#ef4444;">Admin Console</h2>
-        <div id="adm-list" style="margin-top:20px;">Loading...</div>
-        <button class="btn" style="background:#333; margin-top:20px; width:100%;" onclick="tab('v-home')">Exit</button>
+        <h2 style="color:#ef4444; font-family:'Orbitron';">Global Dashboard</h2>
+        <div id="adm-users" style="margin-top:20px; display:grid; gap:10px;">Loading users...</div>
     </div>
 
     <nav>
-        <div class="nav-link active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
-        <div class="nav-link" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
-        <div class="nav-link" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
+        <div class="nav-item active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
+        <div class="nav-item" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
+        <div class="nav-item" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
     </nav>
 </div>
 
@@ -139,104 +143,106 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    const ADMIN_ID = "8392479231";
+    const MY_ADMIN = "8392479231";
 
-    let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "user_gen_" + Math.floor(Math.random()*9999);
-    let userData = { pi: 0, pnx: 0, uncl: 0, refCode: "PNX-" + realUid.substring(0,6) };
-    let adWidget;
+    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "user_preview";
+    let uData = { pi: 0, pnx: 0, uncl: 0, ref: "PNX-" + uid.substring(0,6) };
+    let ad;
 
-    async function start() {
-        const doc = await db.collection("users").doc(realUid).get();
-        if(doc.exists) {
-            const data = doc.data();
-            userData.pi = Number(data.pi) || 0;
-            userData.pnx = Number(data.pnx) || 0;
-            userData.refCode = data.refCode || ("PNX-" + realUid.substring(0,6));
-        } else {
-            await db.collection("users").doc(realUid).set(userData);
-        }
-        render();
+    // REAL-TIME DATA LISTENER
+    function initData() {
+        db.collection("users").doc(uid).onSnapshot((doc) => {
+            if (doc.exists) {
+                const d = doc.data();
+                uData.pi = Number(d.pi) || 0;
+                uData.pnx = Number(d.pnx) || 0;
+                uData.ref = d.ref || ("PNX-" + uid.substring(0,6));
+                updateUI();
+            } else {
+                db.collection("users").doc(uid).set(uData);
+            }
+        });
     }
 
-    async function sync() { await db.collection("users").doc(realUid).update({ pi: userData.pi, pnx: userData.pnx }); }
+    // MINING ENGINE
+    setInterval(() => {
+        uData.uncl += 0.0001;
+        document.getElementById('pi-mining').innerText = uData.uncl.toFixed(8);
+    }, 1000);
 
-    // AD ENGINE
-    function runAds() {
-        let t = 0;
+    // ADS
+    function startAds() {
+        let p = 0;
         setInterval(() => {
-            t++;
-            document.getElementById('ad-fill').style.width = (t/41)*100 + '%';
-            if(t >= 41) { t = 0; triggerAd(); }
+            p++;
+            document.getElementById('ad-progress').style.width = (p/41)*100 + '%';
+            if(p >= 41) { p = 0; showAd(); }
         }, 1000);
     }
 
-    function triggerAd() {
-        if(adWidget) { adWidget.autoMode(); userData.pnx += 2; render(); sync(); }
+    function showAd() {
+        if(ad) { ad.autoMode(); uData.pnx += 5; save(); }
     }
 
-    // MINING
-    setInterval(() => {
-        userData.uncl += 0.0001;
-        document.getElementById('pi-uncl').innerText = userData.uncl.toFixed(8);
-    }, 1000);
+    async function save() { await db.collection("users").doc(uid).update({ pi: uData.pi, pnx: uData.pnx }); }
 
-    function claimPi() {
-        if(userData.uncl < 0.001) return alert("Min 0.001 PI");
-        triggerAd();
-        userData.pi += userData.uncl;
-        userData.uncl = 0;
-        render(); sync();
+    function claimRewards() {
+        if(uData.uncl < 0.001) return alert("Min 0.001 PI required!");
+        showAd();
+        uData.pi += uData.uncl;
+        uData.uncl = 0;
+        save();
     }
 
-    // SWAP & REF
-    function calcSw(v) { document.getElementById('sw-out').value = (v/100).toFixed(4); }
-    function doSw() {
-        const a = parseFloat(document.getElementById('sw-in').value);
-        if(a >= 100 && userData.pnx >= a) {
-            userData.pnx -= a; userData.pi += (a/100);
-            render(); sync(); alert("Swap Success!");
-        } else alert("Insufficient PNX!");
+    function calcSwap(v) { document.getElementById('sw-res').value = (v / 100).toFixed(4); }
+
+    function executeSwap() {
+        const amt = parseFloat(document.getElementById('sw-val').value);
+        if(amt >= 100 && uData.pnx >= amt) {
+            uData.pnx -= amt; uData.pi += (amt/100);
+            save(); alert("Swap Success!");
+        } else alert("Insufficient PINIX!");
     }
 
     function shareRef() {
-        const link = `https://t.me/FonixMining2026Bot?start=${userData.refCode}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Start Mining PI!`);
+        const link = `https://t.me/FonixMining2026Bot?start=${uData.ref}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Join PI Mining!`);
     }
 
-    function render() {
-        document.getElementById('pi-top').innerText = userData.pi.toFixed(4);
-        document.getElementById('pnx-top').innerText = Math.floor(userData.pnx);
-        document.getElementById('ref-code-ui').innerText = userData.refCode;
+    function updateUI() {
+        document.getElementById('pi-top').innerText = uData.pi.toFixed(4);
+        document.getElementById('pnx-top').innerText = Math.floor(uData.pnx);
+        document.getElementById('ref-display').innerText = uData.ref;
     }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(el) {
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
-        if(id === 'v-admin') loadAdm();
+        if(id === 'v-admin') loadAdmin();
     }
 
-    async function loadAdm() {
-        const l = document.getElementById('adm-list');
-        l.innerHTML = "Fetching...";
-        const s = await db.collection("users").get();
-        l.innerHTML = "";
-        s.forEach(doc => {
+    async function loadAdmin() {
+        const box = document.getElementById('adm-users');
+        box.innerHTML = "Accessing...";
+        const snap = await db.collection("users").get();
+        box.innerHTML = "";
+        snap.forEach(doc => {
             const d = doc.data();
-            l.innerHTML += `<div style="background:#1c132a; padding:10px; margin-bottom:5px; border-radius:10px; font-size:0.7rem;">
-                ID: ${doc.id}<br>PI: ${Number(d.pi).toFixed(4)} | PNX: ${d.pnx}
+            box.innerHTML += `<div style="background:var(--card); padding:15px; border-radius:15px; font-size:0.75rem; border:1px solid var(--border)">
+                <b>ID: ${doc.id}</b><br>PI: ${Number(d.pi).toFixed(4)} | PNX: ${d.pnx}
             </div>`;
         });
     }
 
     window.onload = () => {
-        if(realUid === ADMIN_ID) document.getElementById('adm-tag').style.display = 'block';
-        adWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-        start();
-        runAds();
+        if(uid === MY_ADMIN) document.getElementById('adm-trigger').style.display = 'block';
+        ad = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+        initData();
+        startAds();
     };
 </script>
 </body>
