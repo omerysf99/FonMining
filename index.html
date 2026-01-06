@@ -3,189 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fonix Community</title>
+    <title>Fonix Mining App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b0f1a; color: white; font-family: 'Inter', sans-serif; }
+        body { background: radial-gradient(circle at top, #1e1333 0%, #0b0714 100%); color: white; font-family: 'Inter', sans-serif; }
         .tab-content { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.3s ease; }
-        .nav-item.active { color: #38bdf8; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .active-tab { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
-        /* Modal Stili */
-        #walletModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50; align-items: center; justify-content: center; padding: 20px; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .mining-fan { animation: spin 4s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        #walletModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
     <div id="walletModal">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm p-6 rounded-3xl shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                <i class="fas fa-link text-sky-400"></i> Cüzdan Bağla
-            </h3>
-            <p class="text-gray-400 text-sm mb-6">Lütfen alıcı adresinizi (TON veya SOL) giriniz.</p>
-            <input type="text" id="walletInput" placeholder="0x... veya Adres girin" 
-                class="w-full bg-slate-800 border border-slate-600 rounded-xl p-4 mb-6 focus:outline-none focus:border-sky-500 text-sm font-mono">
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 py-3 text-gray-400 font-bold">Vazgeç</button>
-                <button onclick="processWallet()" class="flex-2 bg-sky-500 px-6 py-3 rounded-xl font-bold hover:bg-sky-400 transition">Bağla</button>
-            </div>
+        <div class="glass-card w-full max-w-sm p-8 text-center">
+            <h3 class="text-xl font-bold mb-4 italic">CONNECT WALLET</h3>
+            <input type="text" id="walletInput" placeholder="Adresinizi buraya yapıştırın" 
+                class="w-full bg-black/40 border border-purple-500/50 rounded-xl p-4 mb-6 text-center text-sm focus:border-purple-400 outline-none">
+            <button onclick="processWallet()" class="w-full bg-purple-600 py-3 rounded-xl font-bold hover:bg-purple-500">BAĞLA</button>
+            <button onclick="closeModal()" class="mt-4 text-gray-500 text-sm">Kapat</button>
         </div>
     </div>
 
-    <header class="p-4 flex justify-between items-center border-b border-slate-800">
-        <span class="font-black text-sky-500 tracking-tighter text-xl">FONIX</span>
-        <div id="statusBadge" class="text-[10px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full border border-red-500/30 font-bold uppercase">Bağlı Değil</div>
-    </header>
-
-    <main class="flex-grow overflow-y-auto p-6 pb-24">
+    <main class="flex-grow overflow-y-auto p-5 pb-28">
         
-        <section id="home" class="tab-content active-tab">
-            <div class="text-center mt-6">
-                <div class="w-24 h-24 bg-sky-500/10 rounded-3xl mx-auto mb-6 flex items-center justify-center border border-sky-500/30">
-                    <i class="fas fa-gem text-4xl text-sky-400"></i>
+        <section id="home" class="tab-content active-tab text-center">
+            <div class="space-y-3 mb-8">
+                <div class="glass-card p-3 flex justify-between items-center px-5">
+                    <div class="flex items-center gap-3">
+                        <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-8 h-8" alt="pi">
+                        <div class="text-left">
+                            <p class="text-[10px] text-gray-400 uppercase leading-none">Balance</p>
+                            <p class="text-lg font-bold leading-tight">14.000000 PI</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-wallet text-gray-500"></i>
                 </div>
-                <h1 class="text-2xl font-bold">Hoş Geldin!</h1>
-                
-                <div class="mt-8 glass p-10 rounded-[2rem]">
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-widest">Fonix Bakiyen</p>
-                    <div id="balanceDisplay" class="text-5xl font-black mt-2 text-slate-700">--</div>
-                    <p class="text-sky-500 font-bold mt-1">FNX TOKEN</p>
+                <div class="glass-card p-3 flex justify-between items-center px-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center font-bold italic">F</div>
+                        <div class="text-left">
+                            <p class="text-[10px] text-gray-400 uppercase leading-none">Balance</p>
+                            <p id="fonixBalance" class="text-lg font-bold leading-tight">0 FONIX</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-wallet text-gray-500"></i>
+                </div>
+            </div>
+
+            <div class="relative w-64 h-64 mx-auto my-10">
+                <img src="https://i.ibb.co/L5hYfTf/fan-purple.png" class="w-full h-full mining-fan opacity-80" style="filter: hue-rotate(280deg);" alt="fan">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center border-4 border-purple-900 shadow-lg shadow-orange-500/50">
+                        <i class="fas fa-pi text-2xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-gray-400 text-sm mb-1 italic">Mining...</p>
+            <h2 class="text-4xl font-black text-yellow-500 tracking-wider mb-6">0.0994718 PI</h2>
+
+            <div class="bg-purple-950/40 border border-purple-500/30 inline-flex items-center gap-3 px-8 py-3 rounded-2xl mb-8">
+                <i class="fas fa-bolt text-yellow-400 text-xl"></i>
+                <div class="text-left">
+                    <p class="text-[10px] text-gray-400 uppercase">Mining Power</p>
+                    <p class="font-bold">5 GH/s</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <button class="bg-[#7c3aed] py-4 rounded-3xl font-bold text-lg hover:brightness-110 active:scale-95 transition">Claim</button>
+                <button class="bg-[#10b981] py-4 rounded-3xl font-bold text-lg hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-sync-alt text-sm"></i> Swap
+                </button>
+            </div>
+            <button class="w-full bg-[#f59e0b] py-4 rounded-3xl font-black text-xl text-black flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition">
+                <i class="fas fa-rocket"></i> BOOST
+            </button>
+        </section>
+
+        <section id="missions" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6 italic">MISSIONS</h2>
+            <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-4 border-l-blue-500">
+                <div class="flex items-center gap-4">
+                    <i class="fab fa-telegram text-3xl text-blue-400"></i>
+                    <div>
+                        <p class="font-bold">Join Community</p>
+                        <p class="text-xs text-blue-400">+500 FONIX</p>
+                    </div>
+                </div>
+                <a href="https://t.me/FonixCommunity" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">JOIN</a>
+            </div>
+        </section>
+
+        <section id="friends" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6 italic">FRIENDS</h2>
+            <div class="glass-card p-6 text-center">
+                <p class="text-gray-400 text-sm mb-4">Referral Linkinizi Kopyalayın</p>
+                <div class="bg-black/40 p-4 rounded-xl border border-dashed border-purple-500 flex justify-between items-center">
+                    <span id="refCode" class="font-mono text-purple-400 font-bold tracking-widest text-lg">---</span>
+                    <button onclick="copyRef()" class="text-white"><i class="fas fa-copy text-xl"></i></button>
                 </div>
             </div>
         </section>
 
         <section id="wallet" class="tab-content">
-            <h2 class="text-2xl font-bold mb-6">Cüzdan</h2>
-            <div id="walletCard" class="glass p-6 rounded-3xl mb-6 min-h-[140px] flex flex-col justify-center border-dashed border-2 border-slate-700">
-                <div id="walletStatusText" class="text-center text-gray-500">
-                    <i class="fas fa-wallet text-3xl mb-3 block"></i>
-                    Henüz bir cüzdan bağlanmadı.
-                </div>
-            </div>
-
-            <button id="connectBtn" onclick="openModal()" class="w-full bg-white text-black font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-200 transition">
-                <i class="fas fa-plug"></i>
-                <span>Cüzdanı Bağla</span>
-            </button>
-        </section>
-
-        <section id="tasks" class="tab-content">
-            <h2 class="text-2xl font-bold mb-6">Görevler</h2>
-            <div class="glass p-5 rounded-2xl flex items-center justify-between border-slate-800">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-sky-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/20">
-                        <i class="fab fa-telegram-plane text-2xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm">Topluluğa Katıl</h4>
-                        <p class="text-xs text-sky-400 font-bold">+500 FNX</p>
-                    </div>
-                </div>
-                <a href="https://t.me/FonixCommunity" target="_blank" class="bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-bold">GİT</a>
+            <h2 class="text-2xl font-bold mb-6 italic">WALLET</h2>
+            <div id="walletDisplay" class="glass-card p-8 text-center border-dashed border-2 border-gray-700">
+                <p class="text-gray-500 mb-4 text-sm">No wallet connected.</p>
+                <button onclick="openModal()" class="bg-white text-black px-8 py-3 rounded-full font-bold">Connect Wallet</button>
             </div>
         </section>
 
-        <section id="referral" class="tab-content">
-            <h2 class="text-2xl font-bold mb-6">Referans</h2>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                <p class="text-xs text-gray-500 mb-2 uppercase">Özel Davet Kodun</p>
-                <div class="flex items-center justify-between bg-black/20 p-4 rounded-xl border border-white/5">
-                    <span id="refCode" class="text-xl font-mono font-bold text-sky-400">---</span>
-                    <button onclick="copyRef()" class="text-sky-500"><i class="fas fa-copy"></i></button>
-                </div>
-            </div>
-        </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around items-center h-20">
-        <button onclick="showTab('home')" class="nav-item active flex flex-col items-center flex-1"><i class="fas fa-home mb-1"></i><span class="text-[10px]">Ana Sayfa</span></button>
-        <button onclick="showTab('tasks')" class="nav-item flex flex-col items-center flex-1"><i class="fas fa-tasks mb-1"></i><span class="text-[10px]">Görevler</span></button>
-        <button onclick="showTab('referral')" class="nav-item flex flex-col items-center flex-1"><i class="fas fa-users mb-1"></i><span class="text-[10px]">Davet</span></button>
-        <button onclick="showTab('wallet')" class="nav-item flex flex-col items-center flex-1"><i class="fas fa-wallet mb-1"></i><span class="text-[10px]">Cüzdan</span></button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0f0a1a] border-t border-purple-900/50 h-24 flex justify-around items-center px-2 pb-2">
+        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center flex-1 text-gray-500">
+            <i class="fas fa-wallet text-xl mb-1"></i>
+            <span class="text-[10px]">Wallet</span>
+        </button>
+        <button onclick="showTab('friends')" class="nav-btn flex flex-col items-center flex-1 text-gray-500">
+            <i class="fas fa-users text-xl mb-1"></i>
+            <span class="text-[10px]">Friends</span>
+        </button>
+        <button onclick="showTab('home')" class="nav-btn flex flex-col items-center flex-1 text-white">
+            <div class="bg-gradient-to-t from-purple-600 to-orange-400 w-12 h-12 rounded-full flex items-center justify-center mb-1 shadow-lg shadow-purple-500/20">
+                <i class="fas fa-home text-xl"></i>
+            </div>
+            <span class="text-[10px]">Home</span>
+        </button>
+        <button onclick="showTab('missions')" class="nav-btn flex flex-col items-center flex-1 text-gray-500">
+            <i class="fas fa-bullseye text-xl mb-1"></i>
+            <span class="text-[10px]">Missions</span>
+        </button>
+        <button class="nav-btn flex flex-col items-center flex-1 text-gray-500">
+            <i class="fas fa-ellipsis-h text-xl mb-1"></i>
+            <span class="text-[10px]">More</span>
+        </button>
     </nav>
 
     <script>
-        let isConnected = false;
-
         function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
             document.getElementById(tabId).classList.add('active-tab');
-            event.currentTarget.classList.add('active');
+            
+            // Icon renkleri
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-white', 'text-gray-500'));
+            event.currentTarget.classList.replace('text-gray-500', 'text-white');
         }
 
-        function openModal() {
-            if(!isConnected) document.getElementById('walletModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('walletModal').style.display = 'none';
-        }
+        function openModal() { document.getElementById('walletModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('walletModal').style.display = 'none'; }
 
         function processWallet() {
-            const address = document.getElementById('walletInput').value;
-            if (address.length < 10) {
-                alert("Lütfen geçerli bir adres girin!");
-                return;
-            }
-
-            // Bağlantı Simülasyonu
-            const btn = event.currentTarget;
-            btn.innerText = "Doğrulanıyor...";
-            btn.disabled = true;
-
-            setTimeout(() => {
-                isConnected = true;
-                closeModal();
-                updateUI(address);
-            }, 1200);
-        }
-
-        function updateUI(addr) {
-            const statusBadge = document.getElementById('statusBadge');
-            const balanceDisplay = document.getElementById('balanceDisplay');
-            const walletCard = document.getElementById('walletCard');
-            const connectBtn = document.getElementById('connectBtn');
-
-            statusBadge.innerText = "BAĞLI";
-            statusBadge.classList.replace('text-red-500', 'text-green-500');
-            statusBadge.classList.replace('bg-red-500/10', 'bg-green-500/10');
-            statusBadge.classList.replace('border-red-500/30', 'border-green-500/30');
-
-            balanceDisplay.innerText = "1,500"; // Başlangıç bakiyesi
-            balanceDisplay.classList.replace('text-slate-700', 'text-white');
-
-            walletCard.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
-                        <i class="fas fa-check-circle text-2xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold">Bağlı Adres</p>
-                        <p class="text-sm font-mono text-sky-400 break-all">${addr}</p>
+            const addr = document.getElementById('walletInput').value;
+            if(addr.length < 5) return alert("Geçerli bir adres gir!");
+            
+            document.getElementById('walletDisplay').innerHTML = `
+                <div class="text-left">
+                    <p class="text-xs text-purple-400 font-bold uppercase">Connected Address</p>
+                    <p class="text-sm font-mono break-all">${addr}</p>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex justify-between">
+                        <span>Status:</span> <span class="text-green-500 font-bold">VERIFIED</span>
                     </div>
                 </div>
             `;
-            walletCard.style.borderStyle = "solid";
-
-            connectBtn.innerHTML = '<i class="fas fa-check"></i> Cüzdan Hazır';
-            connectBtn.classList.replace('bg-white', 'bg-slate-800');
-            connectBtn.classList.replace('text-black', 'text-green-500');
+            document.getElementById('fonixBalance').innerText = '1,500 FONIX';
+            closeModal();
         }
 
-        function generateRefCode() {
+        function generateRef() {
             document.getElementById('refCode').innerText = 'FNX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         function copyRef() {
             navigator.clipboard.writeText(document.getElementById('refCode').innerText);
-            alert("Referans kodun kopyalandı!");
+            alert("Referans linki kopyalandı!");
         }
 
-        window.onload = generateRefCode;
+        window.onload = generateRef;
     </script>
 </body>
 </html>
