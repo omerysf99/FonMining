@@ -3,237 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamPro - İzle Kazan Sistemi</title>
+    <title>StreamKazan - Ana Sayfa & Shorts</title>
     <style>
         :root {
-            --bg: #0a0a0a;
+            --bg: #0f0f0f;
+            --surface: #1e1e1e;
             --accent: #ff0000;
-            --success: #00ff88;
-            --surface: #1a1a1a;
             --text: #ffffff;
+            --gray: #aaa;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding-bottom: 70px; /* Mobil menü için */
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Video Oynatıcı Alanı */
-        .video-main {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #333;
-        }
-
-        #player {
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 10px;
-            background: #000;
-        }
-
-        /* Yan Panel */
-        .sidebar {
+        /* Üst Bar */
+        header {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #222;
         }
 
-        .card {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid #333;
-        }
-
-        .balance-value {
-            font-size: 2.5rem;
-            color: var(--success);
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        /* İlerleme Çubuğu */
-        .progress-container {
-            width: 100%;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--success);
-            transition: 0.3s;
-        }
-
-        .status-badge {
-            display: inline-block;
+        .logo { color: var(--accent); font-size: 22px; font-weight: bold; }
+        .balance-pill {
+            background: #272727;
             padding: 5px 15px;
             border-radius: 20px;
-            font-size: 0.8rem;
-            background: #333;
-        }
-
-        .btn-claim {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 10px;
+            color: #4ade80;
             font-weight: bold;
-            cursor: not-allowed;
-            opacity: 0.5;
-            transition: 0.3s;
         }
 
-        .btn-claim.ready {
-            cursor: pointer;
-            opacity: 1;
-            box-shadow: 0 0 15px var(--accent);
+        /* Ana İçerik Alanları */
+        .page { display: none; padding: 15px; }
+        .page.active { display: block; }
+
+        /* Video Kartları (Ana Sayfa) */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card { cursor: pointer; }
+        .thumb-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .thumb-container img { width: 100%; height: 100%; object-fit: cover; }
+        .reward-badge {
+            position: absolute; bottom: 8px; right: 8px;
+            background: rgba(0,0,0,0.8); color: #4ade80;
+            padding: 2px 8px; border-radius: 4px; font-size: 12px;
+        }
+
+        /* Shorts Tasarımı */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .short-card {
+            aspect-ratio: 9/16;
+            background: #222;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+        .short-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+        .short-info {
+            position: absolute; bottom: 10px; left: 10px;
+            font-size: 14px; font-weight: bold;
+        }
+
+        /* Alt Navigasyon (Mobil Uyumlu) */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%;
+            background: #0f0f0f;
+            display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: 1px solid #222;
+        }
+        .nav-item {
+            text-align: center; font-size: 12px; color: var(--gray);
+            cursor: pointer; flex: 1;
+        }
+        .nav-item.active { color: white; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        /* Video Oynatıcı Modalı */
+        .player-modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: #000;
+            z-index: 2000;
         }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="video-main">
-        <h2 id="video-title">Yükleniyor...</h2>
-        <div id="player"></div>
-        <div class="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        <p id="timer-info">Videoyu başlatın (Gereken süre: 30sn)</p>
+    <header>
+        <div class="logo">StreamKazan</div>
+        <div class="balance-pill" id="total-balance">0.00 ₺</div>
+    </header>
+
+    <div id="home-page" class="page active">
+        <h3>🎬 Önerilenler</h3>
+        <div class="video-grid" id="home-grid">
+            </div>
     </div>
 
-    <div class="sidebar">
-        <div class="card">
-            <div>Toplam Kazanç</div>
-            <div class="balance-value" id="balance">0.00 ₺</div>
-            <div class="status-badge" id="status">Bekleniyor...</div>
-        </div>
+    <div id="shorts-page" class="page">
+        <h3>🩳 Shorts</h3>
+        <div class="shorts-grid" id="shorts-grid">
+            </div>
+    </div>
 
-        <div class="card">
-            <h3>Ödül Topla</h3>
-            <p>Video bittiğinde ödülünüz aktifleşir.</p>
-            <button class="btn-claim" id="claim-btn" onclick="claimMoney()">Bakiyeye Ekle</button>
-        </div>
-
-        <div class="card" style="background: #121212;">
-            <p>Ref: <strong style="color:var(--accent)">PRO99</strong></p>
-            <small>Arkadaşlarını davet et, %10 komisyon kazan!</small>
+    <div id="wallet-page" class="page">
+        <h3>💰 Cüzdanım</h3>
+        <div style="background: var(--surface); padding: 20px; border-radius: 15px; text-align: center;">
+            <p>Mevcut Bakiye</p>
+            <h1 style="color: #4ade80;" id="wallet-amount">0.00 ₺</h1>
+            <button style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: not-allowed;">Para Çek (Min. 100 ₺)</button>
         </div>
     </div>
-</div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchPage('home-page', this)">
+            <span class="nav-icon">🏠</span> Ana Sayfa
+        </div>
+        <div class="nav-item" onclick="switchPage('shorts-page', this)">
+            <span class="nav-icon">🩳</span> Shorts
+        </div>
+        <div class="nav-item" onclick="switchPage('wallet-page', this)">
+            <span class="nav-icon">💰</span> Cüzdan
+        </div>
+    </nav>
 
-<script>
-    let player;
-    let balance = 0.00;
-    let secondsWatched = 0;
-    const requiredSeconds = 30; // Ödül için gereken izleme süresi
-    let timerInterval;
+    <script>
+        let balance = 0.00;
 
-    // 1. YouTube Player Başlatma
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            height: '360',
-            width: '640',
-            videoId: '7wtfhZwyrcc', // Örnek Türkçe Video (Ruhi Çenet vb.)
-            playerVars: {
-                'rel': 0,
-                'modestbranding': 1
-            },
-            events: {
-                'onStateChange': onPlayerStateChange,
-                'onReady': onPlayerReady
-            }
-        });
-    }
+        const videoData = [
+            { id: '7wtfhZwyrcc', title: 'Dünyanın En İlginç Yerleri', reward: 0.50, author: 'Ruhi Çenet' },
+            { id: 'dQw4w9WgXcQ', title: 'Yeni Başlayanlar İçin Kodlama', reward: 0.75, author: 'Tekno Rehber' },
+            { id: 'Vv-BfVoq4g', title: 'Barış Özcan ile Gelecek', reward: 0.60, author: 'Barış Özcan' }
+        ];
 
-    function onPlayerReady(event) {
-        document.getElementById('video-title').innerText = event.target.getVideoData().title;
-    }
+        const shortsData = [
+            { id: 's1', title: 'Mutfak Sırları', views: '1.2M', reward: 0.15 },
+            { id: 's2', title: 'Komik Anlar', views: '800B', reward: 0.15 },
+            { id: 's3', title: 'Hızlı İpucu', views: '500B', reward: 0.15 },
+            { id: 's4', title: 'Spor Motivasyon', views: '2M', reward: 0.15 }
+        ];
 
-    // 2. İzleme Kontrolü
-    function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING) {
-            startTracking();
-            document.getElementById('status').innerText = "İzleniyor... ✅";
-            document.getElementById('status').style.color = "#00ff88";
-        } else {
-            stopTracking();
-            document.getElementById('status').innerText = "Durduruldu ⚠️";
-            document.getElementById('status').style.color = "#ffaa00";
+        function init() {
+            // Ana Sayfa Videolarını Yükle
+            const homeGrid = document.getElementById('home-grid');
+            videoData.forEach(v => {
+                homeGrid.innerHTML += `
+                    <div class="video-card" onclick="playVideo(${v.reward})">
+                        <div class="thumb-container">
+                            <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg">
+                            <div class="reward-badge">+${v.reward.toFixed(2)} ₺</div>
+                        </div>
+                        <div style="padding:10px 0;">
+                            <div style="font-weight:bold;">${v.title}</div>
+                            <div style="color:var(--gray); font-size:13px; margin-top:4px;">${v.author}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Shorts Yükle
+            const shortsGrid = document.getElementById('shorts-grid');
+            shortsData.forEach(s => {
+                shortsGrid.innerHTML += `
+                    <div class="short-card" onclick="playVideo(${s.reward})">
+                        <img src="https://picsum.photos/seed/${s.id}/400/700">
+                        <div class="short-info">
+                            <div>${s.title}</div>
+                            <div style="font-size:11px; color:#4ade80;">Kazanç: ${s.reward} ₺</div>
+                        </div>
+                    </div>
+                `;
+            });
         }
-    }
 
-    function startTracking() {
-        timerInterval = setInterval(() => {
-            if (secondsWatched < requiredSeconds) {
-                secondsWatched++;
-                updateUI();
-            } else {
-                completeTarget();
-            }
-        }, 1000);
-    }
-
-    function stopTracking() {
-        clearInterval(timerInterval);
-    }
-
-    function updateUI() {
-        const progress = (secondsWatched / requiredSeconds) * 100;
-        document.getElementById('progress-bar').style.width = progress + "%";
-        document.getElementById('timer-info').innerText = `Kalan Süre: ${requiredSeconds - secondsWatched} saniye`;
-    }
-
-    function completeTarget() {
-        stopTracking();
-        const btn = document.getElementById('claim-btn');
-        btn.classList.add('ready');
-        btn.innerText = "ÖDÜLÜ AL (1.50 ₺)";
-        document.getElementById('timer-info').innerText = "Hedef tamamlandı! Ödülü toplayabilirsiniz.";
-    }
-
-    // 3. Para Ekleme
-    function claimMoney() {
-        const btn = document.getElementById('claim-btn');
-        if (btn.classList.contains('ready')) {
-            balance += 1.50;
-            document.getElementById('balance').innerText = balance.toFixed(2) + " ₺";
+        function switchPage(pageId, element) {
+            // Tüm sayfaları gizle
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Seçilen sayfayı göster
+            document.getElementById(pageId).classList.add('active');
             
-            // Sıfırla
-            secondsWatched = 0;
-            btn.classList.remove('ready');
-            btn.innerText = "Bekleniyor...";
-            updateUI();
-            alert("Harika! 1.50 ₺ hesabınıza eklendi.");
-            
-            // Sıradaki videoya geç (Örnek ID)
-            player.loadVideoById("dQw4w9WgXcQ");
+            // Menü renklerini güncelle
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
         }
-    }
-</script>
 
+        function playVideo(amount) {
+            alert("Video açılıyor... İzleme sonunda " + amount + " ₺ eklenecek.");
+            setTimeout(() => {
+                balance += amount;
+                updateBalance();
+            }, 3000); // Test için 3 saniye
+        }
+
+        function updateBalance() {
+            document.getElementById('total-balance').innerText = balance.toFixed(2) + " ₺";
+            document.getElementById('wallet-amount').innerText = balance.toFixed(2) + " ₺";
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
