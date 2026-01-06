@@ -3,221 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video İzleme Platformu</title>
+    <title>YouTube Clone - Dark Mode</title>
     <style>
-        /* Genel Stiller */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f9f9;
+        /* Genel Temizleme ve Renkler */
+        * {
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto", Arial, sans-serif;
         }
 
+        body {
+            background-color: #0f0f0f;
+            color: white;
+        }
+
+        /* Üst Menü / Navbar */
         header {
-            background-color: #fff;
-            width: 100%;
-            padding: 15px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-weight: bold;
-            font-size: 20px;
-            color: red;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            height: 56px;
             position: sticky;
             top: 0;
+            background-color: #0f0f0f;
             z-index: 100;
         }
 
-        .container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            max-width: 1200px;
-            width: 95%;
-            margin-top: 20px;
-        }
-
-        /* Video Alanı */
-        .main-content video {
-            width: 100%;
-            border-radius: 12px;
-            background-color: #000;
-            aspect-ratio: 16 / 9;
-        }
-
-        .video-title {
-            font-size: 22px;
-            margin: 15px 0 10px 0;
-            font-weight: 600;
-        }
-
-        /* Sekme Sistemi */
-        .tabs {
+        .search-container {
             display: flex;
-            border-bottom: 2px solid #e5e5e5;
-            margin-top: 20px;
+            align-items: center;
+            width: 40%;
         }
 
-        .tab-btn {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-weight: bold;
-            color: #606060;
+        .search-box {
+            background-color: #121212;
+            border: 1px solid #333;
+            border-radius: 40px 0 0 40px;
+            padding: 8px 16px;
+            width: 100%;
+            color: white;
             outline: none;
         }
 
-        .tab-btn.active {
-            color: #000;
-            border-bottom: 3px solid #000;
+        .search-btn {
+            background-color: #222;
+            border: 1px solid #333;
+            border-left: none;
+            border-radius: 0 40px 40px 0;
+            padding: 8px 20px;
+            cursor: pointer;
         }
 
-        .tab-content {
-            display: none;
-            padding: 15px;
-            background: white;
-            border-radius: 0 0 8px 8px;
-            line-height: 1.6;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Yan Panel (Referans Videolar) */
-        .sidebar {
+        /* Kategori Butonları */
+        .categories {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            padding: 12px 16px;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
-        .ref-card {
-            display: flex;
-            gap: 10px;
-            text-decoration: none;
-            color: black;
+        .category-item {
+            background-color: #272727;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
             transition: 0.2s;
         }
 
-        .ref-card:hover {
-            background-color: #f0f0f0;
+        .category-item.active {
+            background-color: white;
+            color: black;
+        }
+
+        .category-item:hover {
+            background-color: #3f3f3f;
+        }
+
+        /* Video Grid Alanı */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .video-card {
+            width: 100%;
+            cursor: pointer;
         }
 
         .thumbnail {
-            width: 120px;
-            height: 68px;
-            background-color: #ddd;
-            border-radius: 8px;
-            flex-shrink: 0;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #333;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 12px;
         }
 
-        .ref-info h4 {
-            margin: 0;
+        .video-info {
+            display: flex;
+            gap: 12px;
+        }
+
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #444;
+            border-radius: 50%;
+        }
+
+        .video-details h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-details p {
             font-size: 14px;
+            color: #aaa;
         }
 
-        .ref-info p {
-            margin: 5px 0 0;
-            font-size: 12px;
-            color: #606060;
+        /* Sponsorlu Özel Kart (Binance Örneği) */
+        .sponsored {
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #1e1e1e, #0f0f0f);
         }
 
-        /* Mobil Uyumluluk */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
 
-<header>MyVideoTube</header>
-
-<div class="container">
-    <div class="main-content">
-        <video controls poster="https://via.placeholder.com/800x450?text=Video+Yukleniyor">
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            Tarayıcınız video etiketini desteklemiyor.
-        </video>
-
-        <h1 class="video-title">HTML5 ve CSS ile Modern Video Arayüzü Yapımı</h1>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="openTab(event, 'description')">Açıklama</button>
-            <button class="tab-btn" onclick="openTab(event, 'comments')">Yorumlar</button>
-            <button class="tab-btn" onclick="openTab(event, 'references')">Kaynaklar</button>
+    <header>
+        <div class="logo" style="font-weight: bold; font-size: 20px;">YouTube</div>
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Ara">
+            <button class="search-btn">🔍</button>
         </div>
+        <div class="user-icons">🔔 👤</div>
+    </header>
 
-        <div id="description" class="tab-content active">
-            <p>Bu video, tek bir HTML dosyası kullanarak nasıl gelişmiş bir video izleme sayfası oluşturulacağını gösterir. CSS Grid ve Flexbox kullanılmıştır.</p>
-        </div>
-
-        <div id="comments" class="tab-content">
-            <p><strong>Ahmet:</strong> Harika bir şablon, teşekkürler!</p>
-            <p><strong>Ayşe:</strong> Çok temiz bir kod yapısı olmuş.</p>
-        </div>
-
-        <div id="references" class="tab-content">
-            <p>Bu projede kullanılan referanslar:</p>
-            <ul>
-                <li>MDN Web Docs - HTML5 Video</li>
-                <li>W3Schools - CSS Tabs</li>
-            </ul>
-        </div>
+    <div class="categories">
+        <div class="category-item active">Tümü</div>
+        <div class="category-item">Müzik</div>
+        <div class="category-item">Oyun</div>
+        <div class="category-item">Mix'ler</div>
+        <div class="category-item">Canlı</div>
+        <div class="category-item">Roblox</div>
+        <div class="category-item">Animasyon</div>
     </div>
 
-    <div class="sidebar">
-        <h3>Önerilen Videolar</h3>
+    <main class="video-grid">
         
-        <a href="#" class="ref-card">
-            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
-            <div class="ref-info">
-                <h4>Sıfırdan CSS Eğitimi</h4>
-                <p>Web Tasarım • 1.2M İzlenme</p>
+        <div class="video-card sponsored">
+            <div class="thumbnail" style="background: #fbcc14; display:flex; align-items:center; justify-content:center; color:black; font-weight:bold;">
+                BINANCE AD
             </div>
-        </a>
-
-        <a href="#" class="ref-card">
-            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
-            <div class="ref-info">
-                <h4>JavaScript Nedir?</h4>
-                <p>Yazılım Dünyası • 850K İzlenme</p>
+            <div class="video-info">
+                <div class="video-details">
+                    <h3>Desktop New Year Staking APR 2026%</h3>
+                    <p>Sponsorlu • PixelNest</p>
+                </div>
             </div>
-        </a>
+        </div>
 
-        <a href="#" class="ref-card">
-            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
-            <div class="ref-info">
-                <h4>Responsive Tasarım İpuçları</h4>
-                <p>Tasarım Rehberi • 200K İzlenme</p>
+        <div class="video-card">
+            <img class="thumbnail" src="https://via.placeholder.com/320x180/222/fff?text=Roblox+Video" alt="thumbnail">
+            <div class="video-info">
+                <div class="channel-icon"></div>
+                <div class="video-details">
+                    <h3>BRAINROTLARI TSUNAMİDEN KAÇARAK KURTAR! - Roblox</h3>
+                    <p>solitaktak</p>
+                    <p>4,8 B görüntüleme • 1 saat önce</p>
+                </div>
             </div>
-        </a>
-    </div>
-</div>
+        </div>
 
-<script>
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        
-        // Tüm içerikleri gizle
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
+        <div class="video-card">
+            <img class="thumbnail" src="https://via.placeholder.com/320x180/111/fff?text=Müzik+Mix" alt="thumbnail">
+            <div class="video-info">
+                <div class="channel-icon"></div>
+                <div class="video-details">
+                    <h3>Mix - Lvbel C5 - yıldızlar şahit aşkıma</h3>
+                    <p>Lvbel C5, Blok3 ve daha fazlası</p>
+                </div>
+            </div>
+        </div>
 
-        // Tüm butonlardan "active" sınıfını kaldır
-        tablinks = document.getElementsByClassName("tab-btn");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
+        <div class="video-card">
+            <img class="thumbnail" src="https://via.placeholder.com/320x180/333/fff?text=Yeni+Video" alt="thumbnail">
+            <div class="video-info">
+                <div class="channel-icon"></div>
+                <div class="video-details">
+                    <h3>YouTube Arayüz Tasarımı Nasıl Yapılır?</h3>
+                    <p>Tasarım Kanalı</p>
+                    <p>100 B görüntüleme • 2 gün önce</p>
+                </div>
+            </div>
+        </div>
 
-        // Seçilen sekmeyi göster ve butonu aktif yap
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-    }
-</script>
+    </main>
 
 </body>
 </html>
