@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX Ecosystem - Free 1 GH/s</title>
+    <title>FONIX Mining 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -15,24 +15,30 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 20px; }
         .digital { font-family: 'Orbitron', sans-serif; }
-        .fan-anim { animation: spin 4s linear infinite; filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.3)); }
+        .fan-anim { animation: spin 4s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         nav { background: rgba(10, 8, 15, 0.98); height: 85px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-around; align-items: center; position: absolute; bottom: 0; width: 100%; z-index: 50; }
-        .nav-item { color: #555; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; transition: 0.2s; }
+        .nav-item { color: #555; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; }
         .nav-item.active { color: #facc15; }
-        .home-center { background: linear-gradient(135deg, #a855f7 0%, #f59e0b 100%); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -40px; border: 4px solid #050308; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: white; }
-        #adModal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+        .home-center { background: linear-gradient(135deg, #a855f7 0%, #f59e0b 100%); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -40px; border: 4px solid #050308; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        
+        /* Withdraw Modal */
+        #withdrawModal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div id="adModal">
-            <div class="text-center p-8">
-                <div class="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                <h3 class="text-xl font-bold text-yellow-500 uppercase">Reklam İzleniyor</h3>
-                <p id="adTimer" class="text-4xl font-black mt-4 digital">5</p>
-                <p class="text-xs text-gray-400 mt-2 italic">Kazım gücün artıyor...</p>
+        <div id="withdrawModal">
+            <div class="glass w-full p-6 text-center border-purple-500/30">
+                <i class="fas fa-university text-4xl text-purple-500 mb-4"></i>
+                <h3 class="text-xl font-black mb-2 uppercase">PI ÇEKİM TALEBİ</h3>
+                <p class="text-[10px] text-gray-500 mb-6 uppercase">Minimum Çekim: 100 PI</p>
+                <input type="text" id="walletAddr" placeholder="Cüzdan Adresinizi Girin" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl mb-4 outline-none text-xs digital">
+                <div class="flex flex-col gap-3">
+                    <button onclick="processWithdraw()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">ONAYLA</button>
+                    <button onclick="closeWithdraw()" class="w-full bg-white/5 py-3 rounded-xl font-bold">İPTAL</button>
+                </div>
             </div>
         </div>
 
@@ -43,12 +49,9 @@
                     <div class="flex items-center gap-3">
                         <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6">
                         <div>
-                            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Total Balance</p>
+                            <p class="text-[9px] text-gray-500 font-bold uppercase">Balance</p>
                             <p id="totalBal" class="text-lg font-bold digital">0.00000000</p>
                         </div>
-                    </div>
-                    <div class="bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
-                        <span class="text-[8px] text-green-500 font-black uppercase tracking-tighter animate-pulse">Live Mining</span>
                     </div>
                 </div>
 
@@ -56,84 +59,53 @@
                     <div class="relative mb-4">
                         <img src="pinix.jpg" class="w-64 h-64 fan-anim rounded-full" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="w-14 h-14 bg-purple-900 rounded-full border-2 border-purple-500 flex items-center justify-center shadow-2xl">
+                            <div class="w-14 h-14 bg-purple-900 rounded-full border-2 border-purple-500 flex items-center justify-center">
                                 <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-7 h-7">
                             </div>
                         </div>
                     </div>
-                    <p class="text-gray-500 text-[10px] font-bold tracking-widest uppercase mb-1">Current Session</p>
                     <h2 id="miningCount" class="text-5xl font-black text-yellow-400 digital mb-6">0.00000000</h2>
-                    
                     <div class="glass px-8 py-3 flex items-center gap-4 mb-8">
-                        <i class="fas fa-bolt text-yellow-500 text-2xl"></i>
+                        <i class="fas fa-bolt text-yellow-500 text-xl"></i>
                         <div class="text-left">
-                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Mining Power</p>
-                            <p id="powerStat" class="font-bold text-xl digital">1.00 GH/s</p>
+                            <p class="text-[9px] text-gray-400 uppercase font-bold">Hash Rate</p>
+                            <p id="powerStat" class="font-bold text-lg digital">1.00 GH/s</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <button onclick="claim()" class="w-full bg-purple-600 py-4 rounded-2xl font-black text-lg shadow-lg shadow-purple-900/20 active:scale-95 transition">CLAIM PI</button>
-                    <button onclick="startAd()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg shadow-yellow-900/20 active:scale-95 transition">
-                        <i class="fas fa-play-circle"></i> WATCH AD (+0.01 GH/s)
-                    </button>
-                </div>
-            </section>
-
-            <section id="tab-wallet" class="tab-content">
-                <h2 class="text-xl font-black mb-6 italic tracking-tighter">WALLET</h2>
-                <div class="glass p-6 mb-4 text-center">
-                    <p class="text-gray-500 text-[10px] font-bold uppercase mb-2">Estimated Value</p>
-                    <h3 id="valUSD" class="text-3xl font-black digital text-green-400">$0.00</h3>
-                </div>
-                <div class="space-y-3">
-                    <div class="glass p-4 flex justify-between items-center opacity-60">
-                        <span class="font-bold text-sm uppercase">Withdrawal</span>
-                        <span class="text-[10px] bg-white/5 px-2 py-1 rounded">Min. 100 PI</span>
-                    </div>
-                    <div class="glass p-4 flex justify-between items-center text-purple-400 font-bold text-sm uppercase">
-                        <span>Swap PI to PINIX</span>
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
+                    <button onclick="claim()" class="w-full bg-purple-600 py-4 rounded-2xl font-black text-lg active:scale-95 transition">CLAIM PI</button>
+                    <button onclick="openWithdraw()" class="w-full bg-green-600 py-4 rounded-2xl font-black text-lg active:scale-95 transition">WITHDRAW (ÇEKİM)</button>
                 </div>
             </section>
 
             <section id="tab-friends" class="tab-content text-center">
                 <i class="fas fa-users text-5xl text-purple-500 mt-10 mb-4"></i>
-                <h2 class="text-2xl font-black italic tracking-tighter">NETWORK</h2>
-                <p class="text-gray-400 text-sm mb-8 px-6">Arkadaşlarını davet et, her biri için kalıcı <b class="text-yellow-500">+0.05 GH/s</b> kazan!</p>
-                <div class="glass p-6 mb-6">
-                    <p class="text-[10px] text-gray-500 mb-2 uppercase font-black tracking-widest">Invite Link</p>
-                    <p class="text-lg font-black tracking-widest text-purple-400 select-all">PINIX.APP/REF-777</p>
+                <h2 class="text-2xl font-black italic">REFERANS SİSTEMİ</h2>
+                <p class="text-gray-400 text-sm mb-8">Davet ettiğin her kişi için kalıcı <b class="text-yellow-500">+0.05 GH/s</b> kazan!</p>
+                
+                <div class="glass p-6 mb-8">
+                    <p class="text-[10px] text-gray-500 mb-2 uppercase font-black">Senin Davet Linkin</p>
+                    <p id="refLink" class="text-sm font-black text-purple-400 digital mb-4">t.me/FonixMining2026Bot?start=ref777</p>
+                    
+                    <button onclick="shareOnTelegram()" class="w-full bg-blue-500 py-4 rounded-xl font-black flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fab fa-telegram"></i> REFERANS BUL (PAYLAŞ)
+                    </button>
                 </div>
-                <button onclick="inviteFriend()" class="w-full bg-blue-600 py-4 rounded-2xl font-black active:scale-95 transition uppercase text-sm tracking-widest">Add Friend (Sim)</button>
-                <div id="friendList" class="mt-6 space-y-2"></div>
+
+                <div class="text-left">
+                    <h4 class="text-xs font-bold text-gray-500 mb-3 uppercase">Davet Edilenler (0)</h4>
+                    <div id="friendList" class="space-y-2">
+                        <p class="text-[10px] text-gray-600 italic">Henüz kimseyi davet etmedin.</p>
+                    </div>
+                </div>
             </section>
 
-            <section id="tab-missions" class="tab-content">
-                <h2 class="text-xl font-black mb-6 italic tracking-tighter">MISSIONS</h2>
-                <div class="space-y-3">
-                    <div id="m1" class="glass p-5 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <i class="fab fa-telegram text-2xl text-blue-400"></i>
-                            <div>
-                                <p class="font-bold text-sm uppercase">Join Telegram</p>
-                                <p class="text-blue-400 text-[10px] font-bold">+0.10 GH/s Power</p>
-                            </div>
-                        </div>
-                        <button onclick="doMission('m1', 0.10)" class="bg-white text-black px-4 py-2 rounded-xl font-black text-[10px]">DO</button>
-                    </div>
-                    <div id="m2" class="glass p-5 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <i class="fab fa-twitter text-2xl text-sky-400"></i>
-                            <div>
-                                <p class="font-bold text-sm uppercase">Follow Twitter</p>
-                                <p class="text-blue-400 text-[10px] font-bold">+0.05 GH/s Power</p>
-                            </div>
-                        </div>
-                        <button onclick="doMission('m2', 0.05)" class="bg-white text-black px-4 py-2 rounded-xl font-black text-[10px]">DO</button>
-                    </div>
+            <section id="tab-wallet" class="tab-content">
+                <h2 class="text-xl font-black mb-6">CÜZDAN</h2>
+                <div class="glass p-6 text-center border-dashed border border-gray-700">
+                    <p class="text-xs text-gray-500">Cüzdan sistemi yakında aktif olacak.</p>
                 </div>
             </section>
 
@@ -152,7 +124,7 @@
                 </div>
                 Home
             </div>
-            <div onclick="switchTab('missions', this)" class="nav-item">
+            <div class="nav-item">
                 <i class="fas fa-bullseye text-xl mb-1"></i><br>Missions
             </div>
             <div class="nav-item">
@@ -162,22 +134,18 @@
     </div>
 
     <script>
-        // GLOBAL STATE
         let mining = 0.00000000;
         let total = 0.00000000;
-        let power = 1.00; // HERKESE ÜCRETSİZ 1 GH/s
-        let piPrice = 0.35; // Simüle edilmiş fiyat
+        let power = 1.00; // Başlangıç gücü ücretsiz 1 GH/s
+        const botUsername = "FonixMining2026Bot";
 
-        // OTOMATİK KAZIM (BAŞLANGIÇTAN İTİBAREN ÇALIŞIR)
+        // Kazım Başlat
         setInterval(() => {
-            if(power > 0) {
-                // Saniyede 0.00002 PI üretimi (1 GH/s için)
-                mining += (power * 0.00002);
-                document.getElementById('miningCount').innerText = mining.toFixed(8);
-            }
+            mining += (power * 0.00002);
+            document.getElementById('miningCount').innerText = mining.toFixed(8);
         }, 1000);
 
-        // SEKME YÖNETİMİ
+        // Sekme Değiştir
         function switchTab(tab, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
             document.getElementById('tab-' + tab).classList.add('active-tab');
@@ -185,60 +153,40 @@
             if(el.classList.contains('nav-item')) el.classList.add('active');
         }
 
-        // REKLAM SİSTEMİ
-        function startAd() {
-            const modal = document.getElementById('adModal');
-            const timer = document.getElementById('adTimer');
-            let count = 5;
-            modal.style.display = 'flex';
-            
-            let itv = setInterval(() => {
-                count--;
-                timer.innerText = count;
-                if(count <= 0) {
-                    clearInterval(itv);
-                    modal.style.display = 'none';
-                    updatePower(0.01); // Reklam başı +0.01 GH/s
-                    timer.innerText = "5";
-                }
-            }, 1000);
-        }
-
-        // GÜÇ GÜNCELLEME
-        function updatePower(val) {
-            power += val;
-            document.getElementById('powerStat').innerText = power.toFixed(2) + " GH/s";
-        }
-
-        // CLAIM (BAKİYEYE EKLEME)
+        // Claim
         function claim() {
             if(mining > 0) {
                 total += mining;
                 mining = 0;
                 document.getElementById('totalBal').innerText = total.toFixed(8);
                 document.getElementById('miningCount').innerText = "0.00000000";
-                document.getElementById('valUSD').innerText = "$" + (total * piPrice).toFixed(2);
             }
         }
 
-        // ARKADAŞ EKLEME
-        function inviteFriend() {
-            updatePower(0.05); // Arkadaş başı +0.05 GH/s
-            const list = document.getElementById('friendList');
-            const user = "User_" + Math.floor(Math.random()*8999+1000);
-            const item = document.createElement('div');
-            item.className = "glass p-3 text-[10px] flex justify-between items-center";
-            item.innerHTML = `<span class='font-bold'>${user} joined!</span> <span class="text-yellow-500 font-black">+0.05 GH/s</span>`;
-            list.prepend(item);
+        // Withdraw Fonksiyonları
+        function openWithdraw() { document.getElementById('withdrawModal').style.display = 'flex'; }
+        function closeWithdraw() { document.getElementById('withdrawModal').style.display = 'none'; }
+        
+        function processWithdraw() {
+            const addr = document.getElementById('walletAddr').value;
+            if(total < 100) {
+                alert("Yetersiz Bakiye! Minimum 100 PI çekebilirsiniz.");
+            } else if(addr.length < 10) {
+                alert("Lütfen geçerli bir cüzdan adresi girin.");
+            } else {
+                alert("Çekim talebiniz alındı! İnceleme sonrası gönderilecektir.");
+                total = 0;
+                document.getElementById('totalBal').innerText = total.toFixed(8);
+                closeWithdraw();
+            }
         }
 
-        // GÖREVLER
-        function doMission(id, val) {
-            const m = document.getElementById(id);
-            m.style.opacity = "0.4";
-            m.querySelector('button').innerText = "DONE";
-            m.querySelector('button').disabled = true;
-            updatePower(val);
+        // Telegram Paylaşım (Referans Bul)
+        function shareOnTelegram() {
+            const userId = Math.floor(Math.random() * 99999); // Simüle kullanıcı ID
+            const text = encodeURIComponent(`🚀 FONIX Mining'de PI kazmaya başladım!\n\n🎁 Hemen katıl, anında ÜCRETSİZ 1 GH/s kazım gücü al!\n\n🔗 Bot Linki: t.me/${botUsername}?start=ref${userId}`);
+            const url = `https://t.me/share/url?url=&text=${text}`;
+            window.open(url, '_blank');
         }
     </script>
 </body>
