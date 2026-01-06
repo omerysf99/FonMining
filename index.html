@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Mining Admin Pro</title>
+    <title>Fonix Watch to Earn</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,104 +28,109 @@
         const tg = window.Telegram.WebApp;
 
         const ADMIN_ID = "8392479231";
+        const AD_REWARD = 0.0005;
+        const DAILY_LIMIT = 250;
+
         let myId = tg.initDataUnsafe?.user?.id?.toString() || "test_user";
         let myUser = tg.initDataUnsafe?.user?.username || "Anonim";
         
-        // Oyun Değişkenleri
-        let targetId = myId;
         let balance = 0.0;
-        let currentMining = 0.0;
+        let todayAds = 0;
         let totalAds = 0;
-        let isMiningActive = false;
-        let adCounter = 0;
+        let lastAdDate = "";
 
         const adWidget = new AdexiumWidget({ wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial' });
 
-        // VERİ YÜKLEME (Normal veya Spy)
-        async function loadData(uid) {
-            const snap = await getDoc(doc(db, "users", uid));
+        // VERİ YÜKLEME
+        async function loadData() {
+            const snap = await getDoc(doc(db, "users", myId));
+            const today = new Date().toLocaleDateString('tr-TR');
+
             if (snap.exists()) {
                 const data = snap.data();
                 balance = data.balance || 0;
-                currentMining = data.currentMining || 0;
                 totalAds = data.totalAdsWatched || 0;
-            } else if (uid === myId) {
+                
+                // Günlük sınır kontrolü (Tarih değiştiyse sıfırla)
+                if (data.lastAdDate === today) {
+                    todayAds = data.todayAds || 0;
+                } else {
+                    todayAds = 0;
+                }
+                lastAdDate = today;
+            } else {
                 await setDoc(doc(db, "users", myId), { 
-                    balance: 0, 
-                    currentMining: 0, 
-                    totalAdsWatched: 0, 
-                    username: "@" + myUser,
-                    joinDate: serverTimestamp() 
+                    balance: 0, totalAdsWatched: 0, todayAds: 0, 
+                    username: "@" + myUser, lastAdDate: today 
                 });
             }
             updateUI();
-            if (uid === myId) isMiningActive = true;
         }
 
-        // KAYDETME
-        async function saveData() {
-            if (targetId !== myId) return;
-            await updateDoc(doc(db, "users", myId), {
-                balance: balance,
-                currentMining: currentMining,
-                totalAdsWatched: totalAds,
-                username: "@" + myUser,
-                lastSeen: serverTimestamp()
-            });
-        }
+        // REKLAM İZLE VE KAZAN
+        window.watchAd = async () => {
+            if (todayAds >= DAILY_LIMIT) {
+                tg.showAlert("Günlük 250 reklam sınırına ulaştınız! Yarın tekrar gelin.");
+                return;
+            }
 
-        // ADMIN PANELİ GÜNCELLEME
+            // Reklamı Başlat
+            tg.HapticFeedback.impactOccurred('medium');
+            adWidget.autoMode();
+
+            // Reklam bittikten sonra (Simüle edilen bekleme süresi 3 saniye)
+            setTimeout(async () => {
+                balance += AD_REWARD;
+                todayAds += 1;
+                totalAds += 1;
+                
+                await updateDoc(doc(db, "users", myId), {
+                    balance: balance,
+                    todayAds: todayAds,
+                    totalAdsWatched: totalAds,
+                    lastAdDate: new Date().toLocaleDateString('tr-TR'),
+                    lastSeen: serverTimestamp()
+                });
+
+                updateUI();
+                tg.showPopup({ message: "Tebrikler! 0.0005 TON kazandınız." });
+            }, 3500);
+        };
+
+        // ADMIN: LİSTEYİ YÜKLE
         window.loadAdminList = async () => {
             const snap = await getDocs(collection(db, "users"));
             const list = document.getElementById('adminUserList');
             list.innerHTML = "";
-            
             snap.forEach((userDoc) => {
                 const u = userDoc.data();
                 const card = document.createElement('div');
-                card.onclick = () => window.spyUser(userDoc.id, u.username);
-                card.className = "bg-[#161b22] p-4 rounded-2xl border border-[#30363d] flex justify-between items-center active:scale-95 transition cursor-pointer mb-2 hover:border-blue-500";
+                card.className = "bg-[#161b22] p-4 rounded-2xl border border-[#30363d] mb-2";
                 card.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="text-blue-400 font-bold">${u.username || "@Bilinmiyor"}</span>
-                        <span class="text-[10px] text-gray-500">ID: ${userDoc.id}</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-white font-black">${u.balance?.toFixed(4)} <span class="text-[10px] text-gray-400">TON</span></div>
-                        <div class="text-[10px] text-green-500 font-bold">${u.totalAdsWatched || 0} REKLAM</div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-400 font-bold">${u.username || "@Bilinmiyor"}</p>
+                            <p class="text-[10px] text-gray-500">Bugün: ${u.todayAds || 0}/${DAILY_LIMIT}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-white">${u.balance?.toFixed(4)} TON</p>
+                            <p class="text-[9px] text-green-500">Toplam Reklam: ${u.totalAdsWatched || 0}</p>
+                        </div>
                     </div>
                 `;
                 list.appendChild(card);
             });
         };
 
-        window.spyUser = (uid, username) => {
-            targetId = uid;
-            isMiningActive = false; // Spy modunda mining'i durdur (sadece izle)
-            loadData(uid);
-            window.switchTab('tab-mining');
-            tg.showAlert(username + " ekranına bağlanıldı. (Canlı İzleme)");
-        };
+        function updateUI() {
+            document.getElementById('mainBal').innerText = balance.toFixed(4) + " TON";
+            document.getElementById('adCountText').innerText = todayAds + " / " + DAILY_LIMIT;
+            
+            // Progress Bar Güncelleme
+            const percent = (todayAds / DAILY_LIMIT) * 100;
+            document.getElementById('progressBar').style.width = percent + "%";
+        }
 
-        // ANA MOTOR
-        setInterval(() => {
-            if (isMiningActive && targetId === myId) {
-                currentMining += 0.000005;
-                adCounter++;
-                document.getElementById('miningVal').innerText = currentMining.toFixed(8);
-                
-                if (adCounter >= 25) {
-                    adCounter = 0;
-                    totalAds++;
-                    isMiningActive = false;
-                    adWidget.autoMode();
-                    setTimeout(() => { isMiningActive = true; saveData(); }, 3000);
-                }
-                if (adCounter % 15 === 0) saveData();
-            }
-        }, 1000);
-
-        // UI KONTROLLERİ
         window.switchTab = (id, btn) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
@@ -136,70 +141,77 @@
             }
         };
 
-        function updateUI() {
-            document.getElementById('topBal').innerText = balance.toFixed(4) + " TON";
-            document.getElementById('miningVal').innerText = currentMining.toFixed(8);
-        }
-
-        // BAŞLAT
         if (myId === ADMIN_ID) document.getElementById('adminNav').classList.remove('hidden');
-        loadData(myId);
+        loadData();
     </script>
 
     <style>
-        body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .tab-content { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); }
-        .gem-glow { filter: drop-shadow(0 0 20px rgba(0, 136, 204, 0.4)); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; }
+        .watch-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); transition: all 0.3s; }
+        .watch-btn:active { transform: scale(0.95); opacity: 0.9; }
+        .glass-card { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(48, 54, 61, 1); }
     </style>
 </head>
 <body class="flex justify-center min-h-screen">
     <div class="w-full max-w-md bg-[#0d1117] flex flex-col relative border-x border-[#30363d]">
         
-        <div class="p-4 border-b border-[#30363d] flex justify-between items-center bg-[#0b0e14] sticky top-0 z-50">
-            <div class="flex flex-col">
-                <span id="topBal" class="text-xl font-black text-blue-500">0.0000 TON</span>
-                <span class="text-[9px] text-gray-500 font-bold tracking-tighter uppercase">Fonix Mining System</span>
-            </div>
-            <button onclick="location.reload()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
+        <div class="p-6 text-center">
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[3px] mb-2">Mevcut Bakiyeniz</p>
+            <h1 id="mainBal" class="text-5xl font-black text-white tracking-tighter">0.0000 TON</h1>
         </div>
 
-        <main class="flex-grow p-5 pb-24 overflow-y-auto">
+        <main class="flex-grow p-6 pb-24">
             
-            <section id="tab-mining" class="tab-content text-center">
-                <div class="py-16"><i class="fa-solid fa-gem text-8xl text-blue-500 gem-glow"></i></div>
-                <h1 id="miningVal" class="text-6xl font-black mb-10 tracking-tighter">0.00000000</h1>
-                <button onclick="window.collect()" class="w-full ton-btn py-5 rounded-3xl font-black text-lg shadow-xl active:scale-95 transition">BAKİYEYE AKTAR</button>
-                <p class="mt-4 text-[10px] text-gray-600 font-bold uppercase tracking-widest">Canlı Bulut Madenciliği</p>
+            <section id="tab-main" class="tab-content space-y-8">
+                
+                <div class="glass-card p-6 rounded-3xl text-center space-y-4">
+                    <div class="py-4">
+                        <i class="fa-solid fa-play-circle text-7xl text-blue-500 drop-shadow-[0_0_15px_rgba(0,136,204,0.4)]"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Reklam İzle Kazan</h2>
+                        <p class="text-sm text-gray-400">Her reklam başına <span class="text-blue-400 font-bold">0.0005 TON</span> kazanırsınız.</p>
+                    </div>
+                    
+                    <button onclick="window.watchAd()" class="w-full watch-btn py-5 rounded-2xl font-black text-lg shadow-2xl">
+                        VİDEO İZLE
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 px-1">
+                        <span>Günlük Sınır</span>
+                        <span id="adCountText">0 / 250</span>
+                    </div>
+                    <div class="w-full h-3 bg-gray-800 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
             </section>
 
             <section id="tab-admin" class="tab-content hidden">
-                <div class="flex items-center gap-3 mb-6">
-                    <i class="fa-solid fa-user-shield text-2xl text-red-500"></i>
-                    <h2 class="text-2xl font-black italic uppercase">Üye Yönetimi</h2>
-                </div>
-                
+                <h2 class="text-2xl font-black mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Yönetici Paneli
+                </h2>
                 <div id="adminUserList" class="space-y-3">
-                    <p class="text-center text-gray-500 py-10">Veriler taranıyor...</p>
+                    <p class="text-center text-gray-500 py-10">Kullanıcılar yükleniyor...</p>
                 </div>
             </section>
 
         </main>
 
-        <nav class="fixed bottom-0 w-full max-w-md bg-[#0b0e14]/90 backdrop-blur-md border-t border-[#30363d] p-4 flex justify-around">
-            <button onclick="switchTab('tab-mining', this)" class="nav-btn text-blue-500 flex flex-col items-center flex-1">
-                <i class="fa-solid fa-hammer text-lg mb-1"></i>
-                <span class="text-[9px] font-bold">KAZIM</span>
+        <nav class="fixed bottom-0 w-full max-w-md bg-[#0b0e14] border-t border-[#30363d] p-4 flex justify-around">
+            <button onclick="switchTab('tab-main', this)" class="nav-btn text-blue-500 flex flex-col items-center flex-1">
+                <i class="fa-solid fa-clapperboard text-lg mb-1"></i>
+                <span class="text-[9px] font-bold uppercase">Kazan</span>
             </button>
             <button id="adminNav" onclick="switchTab('tab-admin', this)" class="nav-btn hidden text-gray-500 flex flex-col items-center flex-1">
                 <i class="fa-solid fa-users-gear text-lg mb-1"></i>
-                <span class="text-[9px] font-bold">ADMİN</span>
+                <span class="text-[9px] font-bold uppercase">Admin</span>
             </button>
         </nav>
+
     </div>
 </body>
 </html>
