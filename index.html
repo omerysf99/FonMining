@@ -3,106 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Dashboard</title>
+    <title>Pinix Mining App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            background: radial-gradient(circle at top, #2d1b4d 0%, #120c1d 100%);
+            background: radial-gradient(circle at top, #2d1b4d 0%, #0d0915 100%);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* 9:16 Ekran Boyutu Konteyneri */
+        .app-container {
+            width: 375px; /* Standart Mobil Genişliği */
+            height: 667px; /* 9:16 Yaklaşık Yükseklik */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .mining-animation {
-            animation: rotate 10s linear infinite;
+        .mining-fan {
+            animation: rotate 8s linear infinite;
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
         }
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        .nav-item:hover { color: #a855f7; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen max-w-md mx-auto p-4">
+<body>
 
-    <div class="space-y-3 mt-4">
-        <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-purple-600 rounded-full p-2"><i class="fa-solid fa-p"></i></div>
-                <div>
-                    <p class="text-gray-400 text-xs">Balance</p>
-                    <p class="font-bold text-lg">14.0000000 PI</p>
+    <div class="app-container">
+        
+        <div class="space-y-3 mt-2">
+            <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-600 rounded-full w-8 h-8 flex items-center justify-center text-xs">PI</div>
+                    <div>
+                        <p class="text-gray-400 text-[10px] leading-none">Balance</p>
+                        <p class="font-bold text-sm">0.0000000 PI</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-wallet text-gray-500 text-sm"></i>
+            </div>
+
+            <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-900 rounded-full w-8 h-8 flex items-center justify-center text-xs">PX</div>
+                    <div>
+                        <p class="text-gray-400 text-[10px] leading-none">Balance</p>
+                        <p class="font-bold text-sm">0 PINIX</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-wallet text-gray-500 text-sm"></i>
+            </div>
+        </div>
+
+        <div class="flex-grow flex flex-col items-center justify-center">
+            <div class="relative w-52 h-52 flex items-center justify-center mb-4">
+                <div class="absolute inset-0 bg-purple-600 rounded-full blur-[60px] opacity-20"></div>
+                
+                <img src="pinix.jpg" alt="Pinix Fan" class="mining-fan w-48 h-48 rounded-full border-2 border-purple-500/20 object-cover">
+                
+                <div class="absolute bg-purple-900 border-2 border-yellow-500 rounded-full p-2 shadow-xl">
+                    <i class="fa-solid fa-p text-yellow-500 text-xl"></i>
                 </div>
             </div>
-            <i class="fa-solid fa-wallet text-gray-400"></i>
-        </div>
 
-        <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-indigo-900 rounded-full p-2"><i class="fa-solid fa-fan"></i></div>
+            <p class="text-gray-400 text-xs italic mb-1">Mining...</p>
+            <h2 class="text-3xl font-black text-yellow-500 mb-6 tracking-tighter">0.0000000 <span class="text-white text-xl">PI</span></h2>
+
+            <div class="glass-card rounded-2xl px-6 py-2 flex items-center gap-3">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
                 <div>
-                    <p class="text-gray-400 text-xs">Balance</p>
-                    <p class="font-bold text-lg">0 PINIX</p>
+                    <p class="text-[9px] text-gray-400 uppercase font-bold">Mining Power</p>
+                    <p class="font-bold text-sm">5 GH/s</p>
                 </div>
             </div>
-            <i class="fa-solid fa-wallet text-gray-400"></i>
         </div>
-    </div>
 
-    <div class="flex-grow flex flex-col items-center justify-center py-8">
-        <div class="relative w-48 h-48 mb-6">
-            <div class="absolute inset-0 bg-purple-500 rounded-full blur-3xl opacity-20"></div>
-            <div class="mining-animation w-full h-full rounded-full border-4 border-purple-500/30 flex items-center justify-center" style="background: url('https://via.placeholder.com/200/4c1d95/ffffff?text=FAN') center/cover;">
-                 <div class="bg-purple-900 rounded-full p-4 border-2 border-yellow-500">
-                    <i class="fa-solid fa-p text-2xl text-yellow-500"></i>
-                 </div>
+        <div class="space-y-3 mb-4">
+            <div class="grid grid-cols-2 gap-3">
+                <button class="bg-purple-600 py-3 rounded-xl font-bold text-sm active:scale-95 transition">Claim</button>
+                <button class="bg-[#22c55e] py-3 rounded-xl font-bold text-sm text-black flex items-center justify-center gap-2 active:scale-95 transition">
+                    <i class="fa-solid fa-right-left"></i> Swap PINIX
+                </button>
+            </div>
+            
+            <button class="w-full bg-yellow-600 py-3.5 rounded-xl font-extrabold text-base flex items-center justify-center gap-2 shadow-lg shadow-yellow-900/20 active:scale-[0.98] transition">
+                <i class="fa-solid fa-rocket"></i> BOOST
+            </button>
+        </div>
+
+        <div class="glass-card rounded-3xl p-3 flex justify-around items-center mb-2">
+            <div class="flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-wallet text-sm"></i><span class="text-[9px]">Wallet</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-users text-sm"></i><span class="text-[9px]">Friends</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 text-yellow-500">
+                <div class="bg-yellow-500/10 p-1.5 rounded-full"><i class="fa-solid fa-house"></i></div>
+                <span class="text-[9px]">Home</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-bullseye text-sm"></i><span class="text-[9px]">Missions</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-ellipsis text-sm"></i><span class="text-[9px]">More</span>
             </div>
         </div>
 
-        <p class="text-gray-400 text-sm italic mb-2">Mining...</p>
-        <h2 class="text-4xl font-bold text-yellow-500 mb-6">0.0107114 <span class="text-white">PI</span></h2>
-
-        <div class="glass-card rounded-xl px-8 py-3 flex items-center gap-3">
-            <i class="fa-solid fa-bolt text-yellow-500"></i>
-            <div class="text-left">
-                <p class="text-[10px] text-gray-400 uppercase">Mining Power</p>
-                <p class="font-bold">5 GH/s</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-4">
-        <button class="bg-purple-600 hover:bg-purple-700 py-4 rounded-2xl font-bold transition">Claim</button>
-        <button class="bg-green-500 hover:bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition text-black">
-            <i class="fa-solid fa-right-left"></i> Swap PINIX
-        </button>
-    </div>
-
-    <button class="w-full bg-yellow-600 hover:bg-yellow-700 py-4 rounded-2xl font-bold text-lg mb-8 transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-rocket"></i> BOOST
-    </button>
-
-    <div class="glass-card rounded-3xl p-4 flex justify-around items-center mb-4">
-        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
-            <i class="fa-solid fa-wallet"></i><span class="text-[10px]">Wallet</span>
-        </div>
-        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
-            <i class="fa-solid fa-users"></i><span class="text-[10px]">Friends</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-yellow-500">
-            <div class="bg-yellow-500/20 p-2 rounded-full"><i class="fa-solid fa-house"></i></div>
-            <span class="text-[10px]">Home</span>
-        </div>
-        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
-            <i class="fa-solid fa-bullseye"></i><span class="text-[10px]">Missions</span>
-        </div>
-        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
-            <i class="fa-solid fa-ellipsis"></i><span class="text-[10px]">More</span>
-        </div>
     </div>
 
 </body>
