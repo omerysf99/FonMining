@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE PRO - MEGA WEB3 HUB</title>
+    <title>FONIX COMMUNITY WEB3</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* --- PRO CSS ARCHITECTURE --- */
         :root {
             --primary: #8b5cf6; --secondary: #f59e0b; --bg-ultra: #05010d;
-            --bg-deep: #0b021a; --glass: rgba(255, 255, 255, 0.06);
+            --bg-deep: #0b021a; --glass: rgba(255, 255, 255, 0.08);
             --border: rgba(255, 255, 255, 0.12); --p-green: #10b981;
             --p-red: #ef4444; --input-bg: #1a1625; --input-border: #8b5cf6;
         }
@@ -23,80 +25,56 @@
         }
 
         /* --- NOTIFICATION ENGINE --- */
-        #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 40000; pointer-events: none; width: 90%; max-width: 380px; }
-        .toast {
-            padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-160px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px);
-        }
+        #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 50000; pointer-events: none; width: 90%; }
+        .toast { padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-160px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px); }
         .toast.active { transform: translateY(0); }
-        .toast.success { background: rgba(16, 185, 129, 0.25); border: 1px solid var(--p-green); color: var(--p-green); }
-        .toast.error { background: rgba(239, 68, 68, 0.25); border: 1px solid var(--p-red); color: var(--p-red); }
-
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-12px); } 60% { transform: translateX(12px); } }
+        .toast.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--p-green); color: var(--p-green); }
+        .toast.error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--p-red); color: var(--p-red); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 60% { transform: translateX(10px); } }
         .shake-screen { animation: shake 0.3s ease-in-out 2; }
 
-        /* --- OVERLAYS --- */
-        .overlay { position: absolute; inset: 0; background: var(--bg-ultra); z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        #ad-screen { background: rgba(0,0,0,0.95); display: none; }
-
-        /* --- DASHBOARD ELEMENTS --- */
-        .header { padding: 25px 20px; background: rgba(5, 1, 13, 0.6); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* --- UI COMPONENTS --- */
+        .header { padding: 25px 20px; background: rgba(5, 1, 13, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
         .token-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
         
         .view { display: none; flex: 1; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 110px; }
-        .view.active { display: flex; animation: viewEffect 0.5s ease-out; }
-        @keyframes viewEffect { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .view.active { display: flex; animation: viewIn 0.4s ease-out; }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 
-        /* --- MINING SYSTEM --- */
-        .fan-layer { width: 230px; height: 230px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 2.5s linear infinite; box-shadow: 0 0 60px rgba(139, 92, 246, 0.4); margin-bottom: 35px; }
+        /* --- MINING DASHBOARD --- */
+        .mining-fan { width: 230px; height: 230px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 3s linear infinite; box-shadow: 0 0 60px rgba(139, 92, 246, 0.3); margin: 40px auto; }
         @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .balance-hero { font-size: 3.5rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-shadow: 0 0 30px rgba(245, 158, 11, 0.5); }
+        .balance-hero { font-size: 3.5rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-align: center; margin-bottom: 10px; }
 
-        /* --- TASK COMPONENTS --- */
-        .mission-item { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .mission-info b { font-size: 1.1rem; }
-        .mission-reward { color: var(--secondary); font-size: 0.8rem; font-weight: 700; margin-top: 4px; display: block; }
+        /* --- AD INFO BAR --- */
+        .ad-timer-bar { position: absolute; top: 0; left: 0; height: 4px; background: var(--secondary); width: 0%; transition: linear; z-index: 100; }
 
-        /* --- WITHDRAW & INPUTS --- */
-        .input-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; position: relative; }
-        .input-hint { font-size: 0.7rem; color: rgba(255,255,255,0.4); padding-left: 12px; font-weight: bold; }
-        .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 25px; padding: 20px 25px; color: white; font-size: 1rem; outline: none; transition: 0.3s; }
-        .pro-input:focus { border-color: white; box-shadow: 0 0 20px var(--primary); }
-        .max-tag { position: absolute; right: 25px; top: 48px; color: var(--primary); font-weight: 900; cursor: pointer; }
+        /* --- MISSION & WALLET --- */
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; }
+        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 20px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; }
+        .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 20px; padding: 18px 20px; color: white; width: 100%; outline: none; margin-top: 10px; }
 
-        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 22px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
-        .btn-mega:active { transform: scale(0.96); opacity: 0.9; }
-
-        /* --- NAVIGATION --- */
-        nav { position: absolute; bottom: 0; width: 100%; height: 100px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px; }
+        /* --- NAV --- */
+        nav { position: absolute; bottom: 0; width: 100%; height: 95px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; }
         .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.7rem; cursor: pointer; transition: 0.3s; flex: 1; }
         .nav-link.active { color: var(--secondary); }
-        .nav-link i { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+        .nav-link i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+
+        .overlay { position: absolute; inset: 0; background: var(--bg-ultra); z-index: 40000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div id="notification-box"></div>
-
-    <div id="ad-screen" class="overlay">
-        <div id="ad-timer" style="position:absolute; top:40px; right:20px; background:var(--secondary); color:black; padding:10px 25px; border-radius:30px; font-weight:900;">5s</div>
-        <div style="font-size: 5rem; margin-bottom: 20px;">⚡</div>
-        <h2 style="font-family:'Orbitron';">SYNCING WITH CHAIN</h2>
-        <div style="width:240px; height:6px; background:#111; margin-top:30px; border-radius:3px; overflow:hidden;">
-            <div id="ad-progress" style="width:0%; height:100%; background:var(--secondary); transition: linear;"></div>
-        </div>
-    </div>
+    <div id="ad-progress-top" class="ad-timer-bar"></div>
 
     <div id="onboarding" class="overlay">
-        <h1 style="font-family:'Orbitron'; font-size: 2rem;">WELCOME PILOT</h1>
-        <p style="opacity:0.6; margin: 20px 0 40px 0;">Referans kodunuzu girerek <br><b>+100 PNX</b> ödül kazanın.</p>
-        <div class="input-box" style="width:100%;">
-            <input type="text" id="reg-ref" class="pro-input" style="text-align:center;" placeholder="DAVET KODU">
-        </div>
-        <button class="btn-mega" onclick="initApp()">BAŞLAT</button>
-        <p style="margin-top:30px; font-size:0.8rem; opacity:0.4; cursor:pointer;" onclick="initApp(true)">Referansım yok, geç.</p>
+        <h1 style="font-family:'Orbitron';">FONIX HUB</h1>
+        <p style="opacity:0.6; margin: 20px 0;">Referans kodunuzu girerek 100 PNX kazanın.</p>
+        <input type="text" id="reg-ref" class="pro-input" style="text-align:center; margin-bottom:20px;" placeholder="DAVET KODU">
+        <button class="btn-mega" onclick="initApp()">SİSTEMİ BAŞLAT</button>
     </div>
 
     <header class="header">
@@ -111,199 +89,142 @@
     </header>
 
     <div id="v-home" class="view active">
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <div class="fan-layer"></div>
-            <div class="balance-hero" id="uncl-ui">0.00000</div>
-            <p style="letter-spacing:5px; font-size:0.8rem; opacity:0.4; margin-bottom:40px;">MINING ACTIVE</p>
-            <button class="btn-mega" onclick="triggerClaim()">CLAIM REWARDS (AD)</button>
+        <div class="mining-fan"></div>
+        <div class="balance-hero" id="uncl-ui">0.00000</div>
+        <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem;">MINING ENGINE ACTIVE</p>
+        <div style="margin-top:auto;">
+             <button class="btn-mega" onclick="manualAdClaim()">CLAIM REWARDS (AD)</button>
+             <p style="text-align:center; font-size:0.6rem; margin-top:10px; opacity:0.3;">Reklamlar her 30 saniyede bir otomatik yüklenir.</p>
         </div>
     </div>
 
     <div id="v-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:30px; text-align:center;">Missions</h2>
-        <div class="mission-item">
-            <div class="mission-info">
-                <b>Join Telegram</b>
-                <span class="mission-reward">+50 PNX</span>
-            </div>
-            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem;" onclick="handleTask(this, 50, 'https://t.me/FonixCommunity')">JOIN</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px; text-align:center;">Missions</h2>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><b>Join Telegram</b><br><span style="color:var(--secondary); font-size:0.8rem;">+50 PNX</span></div>
+            <button class="btn-mega" style="padding:10px 20px; width:auto;" onclick="window.open('https://t.me/FonixCommunity', '_blank')">JOIN</button>
         </div>
-        <div class="mission-item">
-            <div class="mission-info">
-                <b>Follow Twitter</b>
-                <span class="mission-reward">+100 PNX</span>
-            </div>
-            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem;" onclick="handleTask(this, 100, '#')">START</button>
+        <div class="card">
+            <h3 style="font-size:0.9rem; margin-bottom:10px;">🔄 PNX SWAP (100:1)</h3>
+            <input type="number" id="swap-amt" class="pro-input" placeholder="Min 100 PNX">
+            <button class="btn-mega" style="margin-top:15px; padding:12px;" onclick="swapAsset()">SWAP NOW</button>
         </div>
-        <div class="mission-item" style="background:rgba(245, 158, 11, 0.05); border-color:var(--secondary);">
-            <div class="mission-info">
-                <b>Convert PNX to PI</b>
-                <span class="mission-reward">Rate: 100:1</span>
-            </div>
-            <button class="btn-mega" style="padding:12px 25px; width:auto; font-size:0.8rem; background:var(--secondary);" onclick="tab('v-wallet', document.querySelectorAll('.nav-link')[3])">SWAP</button>
-        </div>
-    </div>
-
-    <div id="v-ref" class="view">
-        <h2 style="font-family:'Orbitron'; text-align:center;">Network</h2>
-        <div style="background:var(--glass); border:2px dashed var(--primary); padding:40px; border-radius:30px; text-align:center; margin-top:40px;">
-            <p style="font-size:0.8rem; opacity:0.5; margin-bottom:15px;">KİŞİSEL DAVET KODUNUZ</p>
-            <h1 id="p-code" style="font-size:2.8rem; color:var(--secondary); margin-bottom:30px; font-family:'Orbitron';">---</h1>
-            <button class="btn-mega" style="padding:15px; font-size:0.8rem;" onclick="copyCode()">KOPYALA</button>
-        </div>
-        <p style="margin-top:40px; text-align:center; opacity:0.6; line-height:1.6;">Her davet edilen üye için cüzdanınıza anında <b>100 PNX</b> aktarılır.</p>
     </div>
 
     <div id="v-wallet" class="view">
-        <h1 style="text-align:center; font-family:'Orbitron'; margin-bottom:5px;">Withdraw PI</h1>
-        <p style="text-align:center; opacity:0.4; font-size:0.8rem; margin-bottom:30px;">Minimum limit: 30 PI</p>
-        
-        <div class="mission-item" style="margin-bottom:25px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <span style="background:var(--secondary); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:black;">π</span>
-                <b>PI Mainnet Asset</b>
-            </div>
-            <span style="opacity:0.5;">▼</span>
-        </div>
-
-        <div class="input-box">
-            <label class="input-hint">WALLET ADDRESS</label>
+        <h2 style="font-family:'Orbitron'; text-align:center;">Withdraw</h2>
+        <div class="card" style="margin-top:20px;">
+            <label style="font-size:0.7rem; opacity:0.5;">PI WALLET ADDRESS</label>
             <input type="text" id="w-addr" class="pro-input" placeholder="G0...">
+            <div style="margin-top:20px;">
+                <label style="font-size:0.7rem; opacity:0.5;">WITHDRAW AMOUNT</label>
+                <div style="position:relative;">
+                    <input type="number" id="w-amt" class="pro-input" oninput="calcW()">
+                    <span style="position:absolute; right:15px; top:28px; color:var(--primary); font-weight:900;" onclick="maxW()">MAX</span>
+                </div>
+            </div>
+            <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>Fee:</span><span>1.00 PI</span></div>
+                <div style="display:flex; justify-content:space-between; font-weight:800; margin-top:10px; color:var(--p-green);"><span>Receive:</span><span id="w-res">0.00 PI</span></div>
+            </div>
         </div>
-
-        <div class="input-box">
-            <label class="input-hint">WITHDRAW AMOUNT</label>
-            <input type="number" id="w-amt" class="pro-input" placeholder="0.00" oninput="calcWithdraw()">
-            <span class="max-tag" onclick="maxWithdraw()">MAX</span>
-        </div>
-
-        <div style="background:var(--glass); border-radius:25px; padding:25px; border:1px solid var(--border); margin-bottom:20px;">
-            <div style="display:flex; justify-content:space-between; opacity:0.6; margin-bottom:12px;"><span>Network Gas Fee:</span><span>1.00 PI</span></div>
-            <div style="display:flex; justify-content:space-between; font-weight:900; font-size:1.1rem;"><span>Net Receive:</span><span style="color:var(--p-green);" id="w-res">0.00 PI</span></div>
-        </div>
-
-        <button class="btn-mega" onclick="finalWithdraw()">SEND WITHDRAWAL REQUEST</button>
+        <button class="btn-mega" onclick="requestWithdraw()">SEND REQUEST</button>
     </div>
 
     <nav>
         <div class="nav-link active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
         <div class="nav-link" onclick="tab('v-tasks', this)"><i>🎯</i>Tasks</div>
-        <div class="nav-link" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
         <div class="nav-link" onclick="tab('v-wallet', this)"><i>👛</i>Wallet</div>
     </nav>
 </div>
 
 <script>
-    // --- APP DATA ---
-    let storage = JSON.parse(localStorage.getItem('pinix_ultimate_v2026')) || {
-        pi: 0.0, pnx: 0, uncl: 0.0,
-        ref: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
-        done: false
+    // --- TELEGRAM & AD INITIALIZATION ---
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    let adWidget;
+    document.addEventListener('DOMContentLoaded', () => {
+        adWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+        startAdLoop();
+    });
+
+    // --- APP STATE ---
+    let db = JSON.parse(localStorage.getItem('fonix_v7_data')) || {
+        pi: 0.0, pnx: 0, uncl: 0.0, done: false
     };
 
-    function updateStorage() { localStorage.setItem('pinix_ultimate_v2026', JSON.stringify(storage)); }
+    function save() { localStorage.setItem('fonix_v7_data', JSON.stringify(db)); }
 
-    // --- UX ANIMATIONS ---
-    function feedback(msg, mode = 'success') {
-        const box = document.getElementById('notification-box');
-        const el = document.createElement('div');
-        el.className = `toast ${mode}`;
-        el.innerHTML = `<span>${mode === 'success' ? '✅' : '❌'}</span> ${msg}`;
-        box.appendChild(el);
-        setTimeout(() => el.classList.add('active'), 10);
-        
-        if(mode === 'error') {
-            document.getElementById('app').classList.add('shake-screen');
-            setTimeout(() => document.getElementById('app').classList.remove('shake-screen'), 500);
-        }
+    // --- AUTOMATIC AD LOOP (30 SECONDS) ---
+    function startAdLoop() {
+        let progress = 0;
+        const interval = 1000; // Her saniye
+        const bar = document.getElementById('ad-progress-top');
 
-        setTimeout(() => {
-            el.classList.remove('active');
-            setTimeout(() => el.remove(), 600);
-        }, 3000);
+        setInterval(() => {
+            progress += (100 / 30);
+            bar.style.width = progress + '%';
+
+            if (progress >= 100) {
+                progress = 0;
+                bar.style.width = '0%';
+                showAd(); // Reklamı göster
+            }
+        }, interval);
     }
 
-    // --- LOGIC ---
-    window.onload = () => {
-        if(!storage.done) document.getElementById('onboarding').style.display = 'flex';
-        render();
-        setInterval(() => {
-            storage.uncl += 0.00001;
-            document.getElementById('uncl-ui').innerText = storage.uncl.toFixed(5);
-        }, 1000);
-    };
-
-    function initApp(skip = false) {
-        const input = document.getElementById('reg-ref').value.trim();
-        if(!skip && input.length >= 4) {
-            storage.pnx += 100;
-            feedback("Referans ödülü tanımlandı!");
+    function showAd() {
+        if (adWidget) {
+            adWidget.autoMode();
+            console.log("30sn Reklam Tetiklendi.");
         }
-        storage.done = true; updateStorage();
+    }
+
+    // --- CORE LOGIC ---
+    function initApp() {
+        const r = document.getElementById('reg-ref').value;
+        if(r.length > 3) db.pnx += 100;
+        db.done = true; save();
         document.getElementById('onboarding').style.display = 'none';
         render();
     }
 
-    function triggerClaim() {
-        if(storage.uncl < 0.0001) return feedback("Yetersiz bakiye!", "error");
-        
-        const ad = document.getElementById('ad-screen');
-        const bar = document.getElementById('ad-progress');
-        ad.style.display = 'flex';
-        bar.style.width = '100%';
-
-        let time = 5;
-        const clock = setInterval(() => {
-            time--;
-            document.getElementById('ad-timer').innerText = time + 's';
-            if(time <= 0) {
-                clearInterval(clock);
-                ad.style.display = 'none';
-                storage.pi += storage.uncl; storage.uncl = 0;
-                updateStorage(); render();
-                feedback("Ödüller başarıyla claim edildi.");
-            }
+    window.onload = () => {
+        if(db.done) document.getElementById('onboarding').style.display = 'none';
+        render();
+        setInterval(() => {
+            db.uncl += 0.00001;
+            document.getElementById('uncl-ui').innerText = db.uncl.toFixed(5);
         }, 1000);
+    };
+
+    function manualAdClaim() {
+        if(db.uncl < 0.0001) return notify("Yetersiz bakiye!", "error");
+        showAd(); // Claim butonuna basınca da reklam çıkar
+        db.pi += db.uncl; db.uncl = 0;
+        save(); render();
+        notify("Ödüller eklendi!");
     }
 
-    function handleTask(btn, rew, url) {
-        if(url !== '#') window.open(url, '_blank');
-        btn.innerText = "CHECKING...";
-        btn.disabled = true;
-        setTimeout(() => {
-            storage.pnx += rew;
-            btn.innerText = "COMPLETED";
-            btn.style.background = "var(--p-green)";
-            updateStorage(); render();
-            feedback("Görev ödülü: +" + rew + " PNX");
-        }, 3000);
-    }
-
-    function calcWithdraw() {
-        const val = parseFloat(document.getElementById('w-amt').value) || 0;
-        document.getElementById('w-res').innerText = Math.max(0, val - 1).toFixed(2) + " PI";
-    }
-
-    function maxWithdraw() {
-        document.getElementById('w-amt').value = storage.pi.toFixed(2);
-        calcWithdraw();
-    }
-
-    function finalWithdraw() {
-        const a = parseFloat(document.getElementById('w-amt').value);
-        const adr = document.getElementById('w-addr').value;
-        if(a < 30) return feedback("Minimum 30 PI gereklidir!", "error");
-        if(a > storage.pi) return feedback("Bakiyeniz yetersiz!", "error");
-        if(adr.length < 10) return feedback("Geçersiz cüzdan adresi!", "error");
-
-        storage.pi -= a; updateStorage(); render();
-        feedback("Çekim talebiniz işleme alındı.", "success");
+    function notify(msg, type = 'success') {
+        const box = document.getElementById('notification-box');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+        box.appendChild(t);
+        setTimeout(() => t.classList.add('active'), 10);
+        if(type === 'error') {
+            document.getElementById('app').classList.add('shake-screen');
+            setTimeout(() => document.getElementById('app').classList.remove('shake-screen'), 500);
+        }
+        setTimeout(() => { t.classList.remove('active'); setTimeout(() => t.remove(), 600); }, 3000);
     }
 
     function render() {
-        document.querySelectorAll('.pi-val').forEach(e => e.innerText = storage.pi.toFixed(4));
-        document.querySelectorAll('.pnx-val').forEach(e => e.innerText = storage.pnx.toFixed(2));
-        document.getElementById('p-code').innerText = storage.ref;
+        document.querySelectorAll('.pi-val').forEach(e => e.innerText = db.pi.toFixed(4));
+        document.querySelectorAll('.pnx-val').forEach(e => e.innerText = db.pnx.toFixed(2));
     }
 
     function tab(id, el) {
@@ -313,9 +234,26 @@
         el.classList.add('active');
     }
 
-    function copyCode() {
-        navigator.clipboard.writeText(storage.ref);
-        feedback("Kod kopyalandı!");
+    function calcW() {
+        const a = parseFloat(document.getElementById('w-amt').value) || 0;
+        document.getElementById('w-res').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
+    }
+
+    function maxW() { document.getElementById('w-amt').value = db.pi.toFixed(2); calcW(); }
+
+    function requestWithdraw() {
+        const a = parseFloat(document.getElementById('w-amt').value);
+        if(a < 30 || a > db.pi) return notify("Hatalı miktar!", "error");
+        db.pi -= a; save(); render();
+        notify("Çekim talebi alındı.");
+    }
+
+    function swapAsset() {
+        const s = parseFloat(document.getElementById('swap-amt').value);
+        if(s >= 100 && db.pnx >= s) {
+            db.pnx -= s; db.pi += (s/100);
+            save(); render(); notify("Swap başarılı!");
+        } else notify("Yetersiz PNX!", "error");
     }
 </script>
 </body>
