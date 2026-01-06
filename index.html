@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX Wallet & Mining</title>
+    <title>PINIX Mining & Wallet</title>
     <style>
         :root {
             --bg: #0b021a;
@@ -40,19 +40,12 @@
             overflow: hidden;
         }
 
-        /* --- SAYFA YÖNETİMİ --- */
-        .page {
-            display: none;
-            flex-direction: column;
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
+        /* --- SAYFALAR --- */
+        .page { display: none; flex-direction: column; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
         .page.active { display: flex; }
 
-        /* --- HOME PAGE STYLE --- */
-        .header-top { text-align: center; font-weight: bold; font-size: 1.3rem; margin-bottom: 20px; }
+        /* --- HOME & WALLET SHARED --- */
+        .header-top { text-align: center; font-weight: bold; font-size: 1.3rem; margin-bottom: 15px; }
         .verified-icon { color: #38bdf8; margin-left: 5px; }
 
         .balance-card {
@@ -60,37 +53,40 @@
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 15px;
+            padding: 12px 15px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 10px;
         }
 
         .coin-img { width: 35px; height: 35px; border-radius: 50%; }
+        .balance-info { flex: 1; }
+        .balance-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; }
+        .balance-val { font-size: 1rem; font-weight: 700; }
+        .wallet-mini-icon { font-size: 1.2rem; opacity: 0.8; }
+
+        /* --- MINING ALANI --- */
         .mining-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .turbine { width: 200px; height: 200px; border-radius: 50%; background: url('pinix.jpg') center/cover; animation: rotate 10s linear infinite; box-shadow: 0 0 40px rgba(168,85,247,0.3); }
+        .turbine { width: 180px; height: 180px; border-radius: 50%; background: url('pinix.jpg') center/cover; animation: rotate 10s linear infinite; box-shadow: 0 0 40px rgba(168,85,247,0.3); }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .counter { font-size: 2.5rem; font-weight: 800; color: var(--neon-gold); margin: 10px 0; }
-        .action-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 20px; }
+        .counter { font-size: 2.2rem; font-weight: 800; color: var(--neon-gold); margin: 10px 0; }
+        .power-badge { background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; display: flex; gap: 5px; align-items: center; }
 
-        /* --- WALLET PAGE STYLE --- */
-        .wallet-title { text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 25px; }
-        .btn-withdraw { 
-            background: #16a34a; color: white; border: none; padding: 18px; border-radius: 20px; 
-            font-weight: 800; font-size: 1rem; margin: 20px 0; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .empty-history { text-align: center; opacity: 0.5; padding: 40px 0; border: 1px dashed rgba(255,255,255,0.1); border-radius: 20px; }
-
-        /* --- SHARED BUTTONS --- */
-        .btn { border: none; padding: 16px; border-radius: 18px; font-weight: 800; color: #fff; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        /* --- BUTONLAR --- */
+        .action-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .btn { border: none; padding: 15px; border-radius: 18px; font-weight: 800; color: #fff; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; transition: 0.2s; }
         .btn:active { transform: scale(0.95); }
         .btn-claim { background: #8b5cf6; }
         .btn-swap { background: #22c55e; }
+        .btn-withdraw { background: #22c55e; width: 100%; margin: 15px 0; padding: 18px; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        /* --- TRANSACTION HISTORY --- */
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
+        .empty-history { text-align: center; opacity: 0.4; padding: 30px 0; border: 1px dashed rgba(255,255,255,0.1); border-radius: 20px; font-size: 0.9rem; }
 
         /* --- BOTTOM NAV --- */
-        .bottom-nav { background: var(--nav-bg); height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--nav-bg); height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 10; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.7rem; flex: 1; }
         .nav-item.active { color: var(--neon-gold); }
         .nav-icon { font-size: 1.5rem; }
@@ -102,46 +98,59 @@
     
     <div id="home-page" class="page active">
         <div class="header-top">PINIX App <span class="verified-icon">✔</span></div>
+        
         <div class="balance-card">
             <img src="pico.jpg" class="coin-img">
-            <div>
-                <div style="font-size: 0.7rem; opacity: 0.6;">MAIN BALANCE (PI)</div>
-                <div class="balance-val" id="home-pi-display">0.00000000</div>
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-val pi-text">0.00000000 PI</div>
             </div>
+            <span class="wallet-mini-icon">👛</span>
         </div>
+        <div class="balance-card">
+            <img src="pinix.jpg" class="coin-img">
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-val pnx-text">0 PINIX</div>
+            </div>
+            <span class="wallet-mini-icon">👛</span>
+        </div>
+
         <div class="mining-section">
             <div class="turbine"></div>
             <div style="margin-top:20px; letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem;">MINING...</div>
             <div class="counter" id="unclaimed-display">0.00000000</div>
-            <div style="background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem;">⚡ 1.0 GH/s</div>
+            <div class="power-badge">⚡ <span>5 GH/s</span></div>
         </div>
+
         <div class="action-area">
-            <button class="btn btn-claim" onclick="claim()">Claim PI</button>
-            <button class="btn btn-swap" onclick="switchPage('wallet-page')">Swap PI</button>
+            <button class="btn btn-claim" onclick="claim()">Claim</button>
+            <button class="btn btn-swap" onclick="switchPage('wallet-page')">Swap PINIX</button>
         </div>
     </div>
 
     <div id="wallet-page" class="page">
-        <div class="wallet-title">Wallet</div>
+        <div class="wallet-title" style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">Wallet</div>
+        
         <div class="balance-card">
             <img src="pico.jpg" class="coin-img">
-            <div style="flex:1">
-                <div style="font-size: 0.7rem; opacity: 0.6;">Balance</div>
-                <div class="balance-val" id="wallet-pi-display" style="font-size: 1.2rem;">0.00000000 PI</div>
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-val pi-text" style="font-size: 1.2rem;">0.00000000 PI</div>
             </div>
-            <span>👛</span>
+            <span class="wallet-mini-icon">👛</span>
         </div>
         <div class="balance-card">
             <img src="pinix.jpg" class="coin-img">
-            <div style="flex:1">
-                <div style="font-size: 0.7rem; opacity: 0.6;">Balance</div>
-                <div class="balance-val" style="font-size: 1.2rem;">0 PINIX</div>
+            <div class="balance-info">
+                <div class="balance-label">Balance</div>
+                <div class="balance-val pnx-text" style="font-size: 1.2rem;">0 PINIX</div>
             </div>
-            <span>👛</span>
+            <span class="wallet-mini-icon">👛</span>
         </div>
 
-        <button class="btn-withdraw">
-            <span style="transform: rotate(-45deg); font-size: 1.2rem;">⬆</span> Withdraw
+        <button class="btn btn-withdraw" onclick="handleWithdraw()">
+            <span style="transform: rotate(-45deg);">⬆</span> Withdraw
         </button>
 
         <div class="history-header">
@@ -149,20 +158,19 @@
             <span style="color: var(--neon-purple); font-size: 0.8rem;">View All</span>
         </div>
 
-        <div class="empty-history">
-            <div style="font-size: 2rem; margin-bottom: 10px;">📄</div>
-            <div>No transactions yet</div>
+        <div class="empty-history" id="history-list">
+            📄 No transactions yet
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item" onclick="switchPage('wallet-page', this)">
+        <div class="nav-item" id="nav-wallet" onclick="switchPage('wallet-page')">
             <span class="nav-icon">👛</span><span>Wallet</span>
         </div>
         <div class="nav-item">
             <span class="nav-icon">👥</span><span>Friends</span>
         </div>
-        <div class="nav-item active" onclick="switchPage('home-page', this)">
+        <div class="nav-item active" id="nav-home" onclick="switchPage('home-page')">
             <span class="nav-icon">🏠</span><span>Home</span>
         </div>
         <div class="nav-item">
@@ -175,41 +183,99 @@
 </div>
 
 <script>
+    // --- OYUN VERİLERİ ---
     let state = {
-        pi: 0,
-        unclaimed: 0
+        pi: 0.00000000,
+        pnx: 0,
+        unclaimed: 0.00000000
     };
 
-    function switchPage(pageId, navEl) {
-        // Sayfa Değiştir
+    // --- SAYFA GEÇİŞİ ---
+    function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         
-        // Navigasyon Işığını Değiştir
-        if(navEl) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            navEl.classList.add('active');
-        }
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(pageId === 'home-page') document.getElementById('nav-home').classList.add('active');
+        if(pageId === 'wallet-page') document.getElementById('nav-wallet').classList.add('active');
     }
 
-    function claim() {
-        state.pi += state.unclaimed;
-        state.unclaimed = 0;
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('home-pi-display').innerText = state.pi.toFixed(8);
-        document.getElementById('wallet-pi-display').innerText = state.pi.toFixed(8) + " PI";
-        document.getElementById('unclaimed-display').innerText = state.unclaimed.toFixed(8);
-    }
-
-    // Mining Simülasyonu
+    // --- MİNİNG MANTIĞI ---
     setInterval(() => {
-        state.unclaimed += 0.00000002;
+        state.unclaimed += 0.00000005; // 5 GH/s hızı temsili
         document.getElementById('unclaimed-display').innerText = state.unclaimed.toFixed(8);
     }, 1000);
 
+    function claim() {
+        if(state.unclaimed > 0) {
+            state.pi += state.unclaimed;
+            state.unclaimed = 0;
+            updateUI();
+        }
+    }
+
+    // --- ÇEKİM (WITHDRAW) MANTIĞI ---
+    function handleWithdraw() {
+        const minLimit = 51;
+        const fee = 1;
+
+        // 1. Soru: Miktar
+        const amountInput = prompt(`Kaç PI çekmek istiyorsunuz?\n(Minimum: ${minLimit} PI, Fee: ${fee} PI)`);
+        
+        if (amountInput === null) return; // İptal edildi
+        
+        const amount = parseFloat(amountInput);
+
+        if (isNaN(amount) || amount < minLimit) {
+            alert(`Hata: Minimum çekim miktarı ${minLimit} PI olmalıdır.`);
+            return;
+        }
+
+        if (amount > state.pi) {
+            alert(`Hata: Yetersiz bakiye. Mevcut bakiyeniz: ${state.pi.toFixed(2)} PI`);
+            return;
+        }
+
+        // 2. Soru: Adres
+        const address = prompt("Lütfen çekim yapacağınız Pi Network adresinizi girin:");
+
+        if (!address || address.trim().length < 10) {
+            alert("Hata: Geçersiz adres girdiniz.");
+            return;
+        }
+
+        // Onay ve İşlem
+        const confirmResult = confirm(`Çekim Özeti:\nMiktar: ${amount} PI\nFee: ${fee} PI\nAlınacak: ${amount - fee} PI\nAdres: ${address}\n\nOnaylıyor musunuz?`);
+
+        if (confirmResult) {
+            state.pi -= amount;
+            alert("Çekim talebiniz alındı! İşleminiz kontrol edildikten sonra cüzdanınıza yansıtılacaktır.");
+            
+            // Geçmişe ekle (Basit görsel simülasyon)
+            const history = document.getElementById('history-list');
+            history.innerHTML = `<div style="text-align:left; font-size:0.8rem; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; border-left:4px solid #f59e0b">
+                <b>Withdraw Pending</b><br>
+                Amount: ${amount} PI | Address: ${address.substring(0,8)}...
+            </div>`;
+            
+            updateUI();
+        }
+    }
+
+    // --- UI GÜNCELLEME ---
+    function updateUI() {
+        // Tüm sayfalardaki PI bakiye yazılarını güncelle
+        document.querySelectorAll('.pi-text').forEach(el => {
+            el.innerText = state.pi.toFixed(8) + " PI";
+        });
+        // Tüm sayfalardaki PNX bakiye yazılarını güncelle
+        document.querySelectorAll('.pnx-text').forEach(el => {
+            el.innerText = state.pnx + " PINIX";
+        });
+        document.getElementById('unclaimed-display').innerText = state.unclaimed.toFixed(8);
+    }
+
+    // İlk yükleme
     updateUI();
 </script>
 </body>
