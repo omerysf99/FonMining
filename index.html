@@ -3,99 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shorts Kaydırma ve Sekmeler</title>
+    <title>Video İzleme Platformu</title>
     <style>
-        /* GENEL TASARIM */
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100%; overflow: hidden; background-color: #000; }
-        
-        /* ÜST MENÜ (SEKMELER) */
-        .header-tabs {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            display: flex; justify-content: center; background: rgba(0,0,0,0.8);
-            border-bottom: 1px solid #333;
+        /* Genel Stiller */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
+        header {
+            background-color: #fff;
+            width: 100%;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+            font-size: 20px;
+            color: red;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            width: 95%;
+            margin-top: 20px;
+        }
+
+        /* Video Alanı */
+        .main-content video {
+            width: 100%;
+            border-radius: 12px;
+            background-color: #000;
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-title {
+            font-size: 22px;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+
+        /* Sekme Sistemi */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e5e5;
+            margin-top: 20px;
+        }
+
         .tab-btn {
-            background: none; border: none; color: white; padding: 15px 20px;
-            cursor: pointer; font-size: 16px; transition: 0.3s;
-        }
-        .tab-btn.active { border-bottom: 3px solid #ff0000; color: #ff0000; font-weight: bold; }
-
-        /* SHORTS KAYDIRMA ALANI */
-        .shorts-container {
-            height: 100vh; overflow-y: scroll;
-            scroll-snap-type: y mandatory; /* Dikeyde mıknatıs özelliği */
-        }
-        .short-video-box {
-            height: 100vh; width: 100%;
-            scroll-snap-align: start; /* Her kutuya tam odaklan */
-            display: flex; align-items: center; justify-content: center;
-            position: relative; color: white;
-            border-bottom: 1px solid #222;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: bold;
+            color: #606060;
+            outline: none;
         }
 
-        /* VİDEO TEMSİLİ ALAN */
-        .video-placeholder {
-            width: 90%; max-width: 400px; height: 80%;
-            background: #1a1a1a; border-radius: 15px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; border: 2px solid #333;
+        .tab-btn.active {
+            color: #000;
+            border-bottom: 3px solid #000;
         }
-        .video-placeholder h2 { margin-bottom: 10px; }
-        .video-placeholder p { font-size: 14px; color: #aaa; }
 
-        /* REFERANS BUTONU */
-        .ref-link {
-            display: inline-block; margin-top: 15px; padding: 10px 20px;
-            background: #ff0000; color: white; text-decoration: none; border-radius: 5px;
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            line-height: 1.6;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Yan Panel (Referans Videolar) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ref-card {
+            display: flex;
+            gap: 10px;
+            text-decoration: none;
+            color: black;
+            transition: 0.2s;
+        }
+
+        .ref-card:hover {
+            background-color: #f0f0f0;
+        }
+
+        .thumbnail {
+            width: 120px;
+            height: 68px;
+            background-color: #ddd;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .ref-info h4 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .ref-info p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: #606060;
+        }
+
+        /* Mobil Uyumluluk */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-tabs">
-        <button class="tab-btn active">Keşfet</button>
-        <button class="tab-btn">Takip Edilenler</button>
-        <button class="tab-btn">Referanslar</button>
+<header>MyVideoTube</header>
+
+<div class="container">
+    <div class="main-content">
+        <video controls poster="https://via.placeholder.com/800x450?text=Video+Yukleniyor">
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            Tarayıcınız video etiketini desteklemiyor.
+        </video>
+
+        <h1 class="video-title">HTML5 ve CSS ile Modern Video Arayüzü Yapımı</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'description')">Açıklama</button>
+            <button class="tab-btn" onclick="openTab(event, 'comments')">Yorumlar</button>
+            <button class="tab-btn" onclick="openTab(event, 'references')">Kaynaklar</button>
+        </div>
+
+        <div id="description" class="tab-content active">
+            <p>Bu video, tek bir HTML dosyası kullanarak nasıl gelişmiş bir video izleme sayfası oluşturulacağını gösterir. CSS Grid ve Flexbox kullanılmıştır.</p>
+        </div>
+
+        <div id="comments" class="tab-content">
+            <p><strong>Ahmet:</strong> Harika bir şablon, teşekkürler!</p>
+            <p><strong>Ayşe:</strong> Çok temiz bir kod yapısı olmuş.</p>
+        </div>
+
+        <div id="references" class="tab-content">
+            <p>Bu projede kullanılan referanslar:</p>
+            <ul>
+                <li>MDN Web Docs - HTML5 Video</li>
+                <li>W3Schools - CSS Tabs</li>
+            </ul>
+        </div>
     </div>
 
-    <div class="shorts-container">
+    <div class="sidebar">
+        <h3>Önerilen Videolar</h3>
         
-        <div class="short-video-box">
-            <div class="video-placeholder">
-                <h2>Video #1</h2>
-                <p>Aşağı doğru kaydırarak diğer videolara geçebilirsiniz.</p>
-                <a href="https://www.youtube.com/shorts" target="_blank" class="ref-link">Shorts'a Git</a>
+        <a href="#" class="ref-card">
+            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
+            <div class="ref-info">
+                <h4>Sıfırdan CSS Eğitimi</h4>
+                <p>Web Tasarım • 1.2M İzlenme</p>
             </div>
-        </div>
+        </a>
 
-        <div class="short-video-box" style="background-color: #0a0a0a;">
-            <div class="video-placeholder">
-                <h2>Video #2</h2>
-                <p>Bu alan Scroll Snap özelliğiyle tam oturur.</p>
-                <span>İzlemek için kaydırın...</span>
+        <a href="#" class="ref-card">
+            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
+            <div class="ref-info">
+                <h4>JavaScript Nedir?</h4>
+                <p>Yazılım Dünyası • 850K İzlenme</p>
             </div>
-        </div>
+        </a>
 
-        <div class="short-video-box">
-            <div class="video-placeholder">
-                <h2>Video #3</h2>
-                <p>Referanslar sekmesine buradan da ulaşabilirsiniz.</p>
-                <a href="#" class="ref-link">Detayları Gör</a>
+        <a href="#" class="ref-card">
+            <div class="thumbnail" style="background: url('https://via.placeholder.com/120x68') center/cover;"></div>
+            <div class="ref-info">
+                <h4>Responsive Tasarım İpuçları</h4>
+                <p>Tasarım Rehberi • 200K İzlenme</p>
             </div>
-        </div>
-
+        </a>
     </div>
+</div>
 
-    <script>
-        // Sekme değiştirme mantığı (Basit Görsel Etki)
-        const buttons = document.querySelectorAll('.tab-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-    </script>
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        
+        // Tüm içerikleri gizle
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Tüm butonlardan "active" sınıfını kaldır
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Seçilen sekmeyi göster ve butonu aktif yap
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
 
 </body>
 </html>
