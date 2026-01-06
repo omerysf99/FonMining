@@ -22,107 +22,134 @@
         body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
         #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e0d3d 0%, var(--bg) 80%); }
 
-        /* REKLAM BAR (30 SN AYARLI) */
+        /* 30 SN REKLAM BAR */
         .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.05); z-index: 9999; }
         #ad-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
 
-        /* STATS */
-        .top-nav { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
-        .coin-icon { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        /* HEADER STATS */
+        .top-nav { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
+        .coin-icon { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
 
-        /* MINING VIEW */
+        /* VIEWS */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: fadeIn 0.4s ease; }
-        
-        .fan-container { width: 240px; height: 240px; position: relative; margin: 30px auto; display: flex; align-items: center; justify-content: center; }
-        .mining-fan { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 6px solid var(--primary); animation: spin 2.5s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
-        .fan-core { position: absolute; width: 55px; height: 55px; border-radius: 50%; background: url('pico.jpg') center/cover; border: 3px solid white; z-index: 10; }
-        
+        .view.active { display: flex; animation: viewFade 0.4s ease; }
+        @keyframes viewFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+
+        /* MINING ENGINE (pinix.jpg + pico.jpg) */
+        .mining-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-box { width: 250px; height: 250px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .mining-fan { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid var(--primary); animation: spin 2.5s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
+        .fan-center { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: url('pico.jpg') center/cover; border: 3px solid white; z-index: 10; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
 
-        .pi-uncl { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); text-align: center; }
+        .mining-display { margin-top: 25px; text-align: center; }
+        .uncl-pi { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); text-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
 
-        /* BUTTONS */
-        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 25px; }
-        .action-btn { padding: 16px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-claim { background: var(--primary); color: white; }
-        .btn-swap { background: var(--green); color: white; }
+        /* BUTTONS & INPUTS */
+        .glass-box { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; }
+        .btn { padding: 16px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; width: 100%; font-size: 0.85rem; }
+        .btn-p { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+        .btn-s { background: var(--green); color: white; }
+        .input-f { background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 15px; border-radius: 14px; color: white; width: 100%; margin: 10px 0; outline: none; font-weight: 600; }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: rgba(21, 13, 33, 0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 12px; }
-        .nav-item { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.7rem; cursor: pointer; flex: 1; }
-        .nav-item.active { color: var(--secondary); }
+        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: rgba(13, 6, 23, 0.98); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 15px; }
+        .nav-item { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.7rem; cursor: pointer; flex: 1; transition: 0.2s; }
+        .nav-item.active { color: var(--secondary); font-weight: 700; }
         .nav-item i { display: block; font-size: 1.6rem; margin-bottom: 4px; font-style: normal; }
 
-        #admin-tag { position: absolute; top: 12px; right: 12px; background: #ef4444; font-size: 0.6rem; padding: 4px 10px; border-radius: 8px; display: none; z-index: 10000; font-weight: 900; }
+        .admin-badge { position: absolute; top: 12px; right: 12px; background: #ef4444; font-size: 0.6rem; padding: 4px 10px; border-radius: 8px; display: none; z-index: 1000; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="ad-timer"><div id="ad-fill"></div></div>
-    <div id="admin-tag" onclick="tab('v-admin')">ADMIN</div>
+    <div class="admin-badge" id="adm-tag" onclick="tab('v-admin')">ADMIN</div>
 
     <header class="top-nav">
         <div class="stat-card">
             <img src="pico.jpg" class="coin-icon">
             <div style="display:flex; flex-direction:column;">
-                <span style="font-size:0.6rem; opacity:0.5;">PI BALANCE</span>
-                <span id="pi-balance" style="font-weight:800; font-family:'Orbitron';">0.0000</span>
+                <span style="font-size:0.55rem; opacity:0.5;">PI WALLET</span>
+                <span id="pi-top" style="font-weight:800; font-family:'Orbitron';">0.0000</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="coin-icon" style="background:#1e1b4b; display:flex; align-items:center; justify-content:center; border-color:#3730a3;">🌀</div>
+            <img src="pinix.jpg" class="coin-icon">
             <div style="display:flex; flex-direction:column;">
-                <span style="font-size:0.6rem; opacity:0.5;">PNX ASSET</span>
-                <span id="pnx-balance" style="font-weight:800; font-family:'Orbitron';">0</span>
+                <span style="font-size:0.55rem; opacity:0.5;">PINIX ASSET</span>
+                <span id="pnx-top" style="font-weight:800; font-family:'Orbitron';">0</span>
             </div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="fan-container">
-            <div class="mining-fan"></div>
-            <div class="fan-core"></div>
+        <div class="mining-area">
+            <div class="fan-box">
+                <div class="mining-fan"></div>
+                <div class="fan-center"></div>
+            </div>
+            <div class="mining-display">
+                <p style="opacity:0.4; font-size:0.75rem; letter-spacing:3px;">MINING IN PROGRESS</p>
+                <div class="uncl-pi" id="uncl-pi-live">0.00000000</div>
+                <div style="background:rgba(255,255,255,0.05); padding:6px 15px; border-radius:30px; border:1px solid var(--border); font-size:0.8rem; margin-top:10px;">⚡ 5.0 GH/s Power</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; margin-top:25px;">
+                <button class="btn btn-p" onclick="doClaim()">Claim</button>
+                <button class="btn btn-s" onclick="tab('v-swap')">Swap</button>
+            </div>
+            <button class="btn" style="width:100%; margin-top:15px; background:linear-gradient(90deg, #f59e0b, #fbbf24); color:#000;" onclick="showAd()">🚀 BOOST SPEED (+5 PNX)</button>
         </div>
-        <div class="pi-uncl" id="uncl-pi">0.00000000</div>
-        <p style="text-align:center; opacity:0.5; font-size:0.8rem; margin-top:5px;">⚡ 5 GH/s Power</p>
-        <div class="btn-row">
-            <button class="action-btn btn-claim" onclick="handleClaim()">Claim</button>
-            <button class="action-btn btn-swap" onclick="tab('v-swap')">Swap</button>
-        </div>
-        <button class="action-btn" style="width:100%; margin-top:15px; background:linear-gradient(90deg, #f59e0b, #fbbf24); color:#000;" onclick="triggerAd()">🚀 BOOST SPEED</button>
     </div>
 
     <div id="v-swap" class="view">
-        <h2>Swap Center</h2>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Swap Center</h2>
+        <div class="glass-box">
+            <p style="font-size:0.7rem; opacity:0.5;">PAY (PINIX)</p>
+            <input type="number" id="sw-in" class="input-f" placeholder="100" oninput="document.getElementById('sw-out').value = (this.value/100).toFixed(4)">
+            <p style="text-align:center; font-size:1.5rem; color:var(--primary);">⇅</p>
+            <p style="font-size:0.7rem; opacity:0.5;">RECEIVE (PI)</p>
+            <input type="text" id="sw-out" class="input-f" placeholder="1.0000" readonly>
+            <button class="btn btn-s" style="margin-top:10px;" onclick="executeSwap()">Execute Swap</button>
         </div>
+    </div>
 
     <div id="v-ref" class="view">
-        <h2>Affiliate</h2>
-        <div class="stat-card" style="margin-top:20px; flex-direction:column; padding:30px;">
-            <p style="font-size:0.8rem; opacity:0.5;">INVITE CODE</p>
-            <h1 id="ref-code-ui" style="color:var(--secondary); font-size:2rem; margin:10px 0;">---</h1>
-            <button class="action-btn btn-claim" style="width:100%;" onclick="shareRef()">Share</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Network</h2>
+        <div class="glass-box" style="text-align:center;">
+            <p style="font-size:0.7rem; opacity:0.5;">REFERRAL CODE</p>
+            <h1 id="ref-code-ui" style="color:var(--secondary); font-size:2.5rem; margin:15px 0; font-family:'Orbitron';">---</h1>
+            <button class="btn btn-p" onclick="shareRef()">Share Link</button>
+        </div>
+    </div>
+
+    <div id="v-wallet" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Wallet</h2>
+        <div class="glass-box">
+            <p style="font-size:0.7rem; opacity:0.5;">PI ADDRESS (MAINNET)</p>
+            <input type="text" id="w-addr" class="input-f" placeholder="GD7X...">
+            <p style="font-size:0.7rem; opacity:0.5; margin-top:10px;">AMOUNT (MIN 30)</p>
+            <input type="number" id="w-amt" class="input-f" placeholder="30.00">
+            <button class="btn btn-p" style="margin-top:10px;" onclick="requestWithdraw()">Withdraw PI</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:#ef4444;">Admin Panel</h2>
-        <div id="admin-list" style="margin-top:20px;"></div>
+        <h2 style="color:#ef4444; font-family:'Orbitron';">Console</h2>
+        <div id="adm-user-list" style="margin-top:20px; display:grid; gap:10px;"></div>
     </div>
 
     <nav>
         <div class="nav-item active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
         <div class="nav-item" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
         <div class="nav-item" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
+        <div class="nav-item" onclick="tab('v-wallet', this)"><i>👛</i>Wallet</div>
     </nav>
 </div>
 
 <script>
-    // --- FIREBASE KONFİGÜRASYONU ---
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -136,85 +163,121 @@
     const tg = window.Telegram.WebApp;
     const MY_ADMIN = "8392479231";
 
-    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "test_user_88";
+    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "user_debug_01";
     let userData = { pi: 0, pnx: 0, uncl: 0, ref: "PX-" + uid.substring(0,5) };
     let ad;
 
-    // --- FIREBASE SECURITY RULES UYUMLU BAĞLANTI ---
-    function initUser() {
+    // --- REALTIME DATA (Security Rules Compatible) ---
+    function init() {
         db.collection("users").doc(uid).onSnapshot((doc) => {
             if (doc.exists) {
                 const d = doc.data();
                 userData.pi = Number(d.pi) || 0;
                 userData.pnx = Number(d.pnx) || 0;
                 userData.ref = d.ref || ("PX-" + uid.substring(0,5));
-                updateUI();
+                render();
             } else {
                 db.collection("users").doc(uid).set(userData);
             }
         });
+        startAds();
+        startMining();
     }
 
-    // --- REKLAM MOTORU (30 SANİYE) ---
-    function startAdEngine() {
-        let timer = 0;
+    // --- ADS ENGINE (30 SECONDS) ---
+    function startAds() {
+        let t = 0;
         setInterval(() => {
-            timer++;
-            // 30 saniyeye göre progress bar doldurma
-            document.getElementById('ad-fill').style.width = (timer / 30) * 100 + '%';
-            
-            if (timer >= 30) {
-                timer = 0;
-                triggerAd();
-            }
+            t++;
+            document.getElementById('ad-fill').style.width = (t/30)*100 + '%';
+            if(t >= 30) { t = 0; showAd(); }
         }, 1000);
     }
 
-    function triggerAd() {
-        if (ad) {
-            ad.autoMode();
-            // Reklam izleyince 5 PNX bonus
-            db.collection("users").doc(uid).update({
-                pnx: firebase.firestore.FieldValue.increment(5)
+    function showAd() {
+        if(ad) { 
+            ad.autoMode(); 
+            db.collection("users").doc(uid).update({ 
+                pnx: firebase.firestore.FieldValue.increment(5) 
             });
         }
     }
 
     // --- MINING ---
-    setInterval(() => {
-        userData.uncl += 0.0001;
-        document.getElementById('uncl-pi').innerText = userData.uncl.toFixed(8);
-    }, 1000);
+    function startMining() {
+        setInterval(() => {
+            userData.uncl += 0.0001;
+            document.getElementById('uncl-pi-live').innerText = userData.uncl.toFixed(8);
+        }, 1000);
+    }
 
-    function handleClaim() {
-        if (userData.uncl < 0.001) return alert("Min 0.001 PI!");
-        triggerAd();
-        db.collection("users").doc(uid).update({
-            pi: firebase.firestore.FieldValue.increment(userData.uncl)
+    function doClaim() {
+        if(userData.uncl < 0.001) return alert("Min 0.001 PI!");
+        showAd();
+        db.collection("users").doc(uid).update({ 
+            pi: firebase.firestore.FieldValue.increment(userData.uncl) 
         });
         userData.uncl = 0;
     }
 
-    function updateUI() {
-        document.getElementById('pi-balance').innerText = userData.pi.toFixed(4);
-        document.getElementById('pnx-balance').innerText = Math.floor(userData.pnx);
+    // --- LOGIC ---
+    async function executeSwap() {
+        const amt = parseFloat(document.getElementById('sw-in').value);
+        if(amt >= 100 && userData.pnx >= amt) {
+            await db.collection("users").doc(uid).update({
+                pnx: firebase.firestore.FieldValue.increment(-amt),
+                pi: firebase.firestore.FieldValue.increment(amt/100)
+            });
+            alert("Swap Completed!");
+        } else alert("Insufficient PINIX (Min 100)");
+    }
+
+    async function requestWithdraw() {
+        const addr = document.getElementById('w-addr').value;
+        const amt = parseFloat(document.getElementById('w-amt').value);
+        if(amt >= 30 && userData.pi >= amt) {
+            await db.collection("withdrawals").add({ uid, addr, amt, date: new Date().toISOString() });
+            await db.collection("users").doc(uid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
+            alert("Withdrawal Requested!");
+        } else alert("Min 30 PI Required!");
+    }
+
+    function shareRef() {
+        const txt = `Mine PI on your phone! My code: ${userData.ref}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(txt)}`);
+    }
+
+    function render() {
+        document.getElementById('pi-top').innerText = userData.pi.toFixed(4);
+        document.getElementById('pnx-top').innerText = Math.floor(userData.pnx);
         document.getElementById('ref-code-ui').innerText = userData.ref;
     }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if (el) {
+        if(el) {
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
+        if(id === 'v-admin') loadAdmin();
+    }
+
+    async function loadAdmin() {
+        const box = document.getElementById('adm-user-list');
+        box.innerHTML = "Fetching...";
+        const snap = await db.collection("users").get();
+        box.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            box.innerHTML += `<div class="stat-card" style="font-size:0.7rem;">ID: ${doc.id}<br>PI: ${Number(d.pi).toFixed(4)} | PNX: ${d.pnx}</div>`;
+        });
     }
 
     window.onload = () => {
-        if (uid === MY_ADMIN) document.getElementById('admin-tag').style.display = 'block';
+        if(uid === MY_ADMIN) document.getElementById('adm-tag').style.display = 'block';
         ad = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-        initUser();
-        startAdEngine();
+        init();
     };
 </script>
 </body>
