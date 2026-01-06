@@ -3,229 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch2Earn - İzle ve Kazan</title>
+    <title>StreamKazan - Video Platformu</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #4f46e5;
-            --dark: #1f2937;
-            --light: #f3f4f6;
+            --bg: #0f0f0f;
+            --card-bg: #1e1e1e;
+            --text: #ffffff;
+            --primary: #ff0000; /* YouTube Kırmızısı */
+            --accent: #3ea6ff;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--light);
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            height: 100vh;
         }
 
-        /* Navigasyon Sekmeleri */
-        .tabs {
+        /* Üst Menü */
+        header {
+            height: 60px;
             display: flex;
-            background: var(--dark);
-            width: 100%;
-            justify-content: center;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: var(--bg);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
-        .tab-btn {
-            padding: 15px 25px;
-            border: none;
-            background: none;
+        .logo { color: var(--primary); font-size: 24px; font-weight: bold; text-decoration: none; }
+        
+        .search-bar {
+            background: #121212;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 8px 20px;
+            width: 40%;
             color: white;
+        }
+
+        /* Ana Panel Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sol Sidebar */
+        nav {
+            width: 240px;
+            padding: 10px;
+            background: var(--bg);
+        }
+
+        nav ul { list-style: none; padding: 0; }
+        nav li {
+            padding: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-
-        .tab-btn.active {
-            border-bottom: 3px solid var(--primary);
-            color: var(--primary);
-        }
-
-        /* İçerik Alanları */
-        .content-section {
-            display: none;
-            width: 90%;
-            max-width: 800px;
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .content-section.active {
-            display: block;
-        }
+        nav li:hover { background: #272727; }
 
         /* Video Alanı */
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            background: #000;
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
         }
 
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Bakiye Kartı */
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .btn-claim {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+        .video-card {
+            background: none;
             cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
         }
 
-        /* Referans Bölümü */
-        .ref-box {
-            background: #e5e7eb;
-            padding: 10px;
-            border-radius: 5px;
-            word-break: break-all;
-            margin: 10px 0;
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #333;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+
+        .video-info {
+            display: flex;
+            margin-top: 10px;
+            gap: 12px;
+        }
+
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            background: #555;
+            border-radius: 50%;
+        }
+
+        .video-text h3 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-text p {
+            font-size: 12px;
+            color: #aaa;
+            margin: 0;
+        }
+
+        /* Kazanç Paneli */
+        .earning-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.8);
+            color: #00ff00;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Alt Cüzdan Barı */
+        .wallet-bar {
+            background: var(--card-bg);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #333;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab(event, 'watch')">📺 İzle</button>
-        <button class="tab-btn" onclick="openTab(event, 'referral')">👥 Referans</button>
-        <button class="tab-btn" onclick="openTab(event, 'wallet')">💰 Cüzdan</button>
+    <header>
+        <a href="#" class="logo">StreamKazan</a>
+        <input type="text" class="search-bar" placeholder="Video ara...">
+        <div class="user-info">
+            <span id="user-balance" style="color: #00ff00; font-weight: bold;">Bakiye: 0.00 ₺</span>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav>
+            <ul>
+                <li onclick="alert('Ana Sayfa')">🏠 Ana Sayfa</li>
+                <li onclick="alert('Shorts')">🩳 Shorts</li>
+                <li onclick="alert('Abonelikler')">🔔 Abonelikler</li>
+                <hr style="border-color: #333;">
+                <li onclick="alert('Cüzdan')">💰 Cüzdanım</li>
+                <li onclick="alert('Referans')">👥 Referanslar</li>
+                <li onclick="alert('Ayarlar')">⚙️ Ayarlar</li>
+            </ul>
+        </nav>
+
+        <main class="content" id="video-grid">
+            </main>
     </div>
 
-    <div id="watch" class="content-section active">
-        <div class="stats">
-            <div>Bakiye: <span id="balance">0.00</span> TL</div>
-            <div>İzlenen: <span id="watched-count">0</span></div>
-        </div>
-        
-        <h3>Reklam Videosu</h3>
-        <div class="video-container">
-            <iframe id="video-player" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
-        </div>
-        
-        <button class="btn-claim" id="reward-btn" onclick="claimReward()">Ödülü Al (Süre Dolunca Aktif Olur)</button>
-        <p id="timer-text" style="text-align:center; color: #666;">Videoyu başlatın ve 15 saniye bekleyin.</p>
-    </div>
-
-    <div id="referral" class="content-section">
-        <h2>Arkadaşlarını Davet Et</h2>
-        <p>Her aktif referans için 1.00 TL kazanın!</p>
-        <div class="ref-box">
-            https://watch2earn.com/join?ref=<span id="ref-code">USER123</span>
-        </div>
-        <button onclick="copyRef()" class="btn-claim" style="background: var(--dark);">Linki Kopyala</button>
-        
-        <h3>Referanslarım</h3>
-        <ul id="ref-list">
-            <li>Henüz referansınız yok.</li>
-        </ul>
-    </div>
-
-    <div id="wallet" class="content-section">
-        <h2>Cüzdanım</h2>
-        <div class="stats" style="background: #1f2937;">
-            <h1><span id="wallet-balance">0.00</span> TL</h1>
-        </div>
-        <p>Minimum çekim tutarı: 50.00 TL</p>
-        <button class="btn-claim" disabled style="background: #9ca3af;">Para Çek (Yetersiz Bakiye)</button>
+    <div class="wallet-bar">
+        <div><strong>Durum:</strong> İzlemeye hazır 🟢</div>
+        <button onclick="addRef()" style="background: var(--accent); border: none; padding: 8px 15px; border-radius: 5px; color: white; cursor: pointer;">Referans Linki Al</button>
     </div>
 
     <script>
-        let balance = 0;
-        let watchedCount = 0;
-        let canClaim = false;
+        // Örnek Video Veritabanı
+        const videos = [
+            { id: 'dQw4w9WgXcQ', title: 'Nasıl Daha Çok Kazanılır?', author: 'Eğitim Devri', views: '1.2M', reward: '0.50 ₺' },
+            { id: '9bZkp7q19f0', title: 'Dünyanın En Hızlı Arabaları', author: 'Hız Tutkusu', views: '800B', reward: '0.45 ₺' },
+            { id: '2Vv-BfVoq4g', title: 'Kodlama Öğreniyoruz', author: 'Yazılım Dünyası', views: '500B', reward: '0.60 ₺' },
+            { id: 'l482T0yNkeo', title: 'Gezilecek En İyi Yerler', author: 'Gezgin', views: '2M', reward: '0.30 ₺' },
+            { id: '7wtfhZwyrcc', title: 'Mutfakta Devrim: 5 Dakika', author: 'Şef Kapında', views: '3M', reward: '0.25 ₺' },
+            { id: 'kJQP7kiw5Fk', title: 'Akıllı Yatırım Stratejileri', author: 'Finans 101', views: '150B', reward: '1.00 ₺' }
+        ];
 
-        // Sekme Değiştirme Fonksiyonu
-        function openTab(evt, tabName) {
-            let i, content, tabLinks;
-            content = document.getElementsByClassName("content-section");
-            for (i = 0; i < content.length; i++) {
-                content[i].classList.remove("active");
-            }
-            tabLinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tabLinks.length; i++) {
-                tabLinks[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
+        const grid = document.getElementById('video-grid');
+        let balance = 0.00;
 
-        // Ödül Kazanma Sistemi (Simüle Edilmiş)
-        function startTimer() {
-            let timeLeft = 15;
-            const timerText = document.getElementById('timer-text');
-            const btn = document.getElementById('reward-btn');
-
-            const countdown = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = `Ödül için kalan süre: ${timeLeft} saniye`;
+        // Videoları Ekrana Bas
+        function loadVideos() {
+            videos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.onclick = () => watchVideo(video.reward);
                 
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerText.innerText = "Ödülünüz hazır!";
-                    btn.style.background = "#10b981";
-                    canClaim = true;
-                }
-            }, 1000);
+                card.innerHTML = `
+                    <div class="thumbnail">
+                        <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" alt="thumbnail">
+                        <div class="earning-badge">+${video.reward}</div>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-icon"></div>
+                        <div class="video-text">
+                            <h3>${video.title}</h3>
+                            <p>${video.author}</p>
+                            <p>${video.views} görüntüleme</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        function claimReward() {
-            if (canClaim) {
-                balance += 0.50; // Her izleme 50 kuruş
-                watchedCount += 1;
-                updateDisplay();
-                canClaim = false;
-                document.getElementById('reward-btn').style.background = "#9ca3af";
-                document.getElementById('timer-text').innerText = "Sıradaki video hazırlanıyor...";
-                
-                // 3 saniye sonra yeni video "başlar"
-                setTimeout(() => {
-                    startTimer();
-                }, 3000);
-            } else {
-                alert("Lütfen videonun bitmesini bekleyin!");
-            }
+        function watchVideo(amount) {
+            const reward = parseFloat(amount.replace(' ₺', '').replace(',', '.'));
+            alert("Video açılıyor... İzleme sonunda " + amount + " bakiyenize eklenecek.");
+            
+            // Simülasyon: 5 saniye sonra bakiye ekle
+            setTimeout(() => {
+                balance += reward;
+                document.getElementById('user-balance').innerText = `Bakiye: ${balance.toFixed(2)} ₺`;
+            }, 5000);
         }
 
-        function updateDisplay() {
-            document.getElementById('balance').innerText = balance.toFixed(2);
-            document.getElementById('wallet-balance').innerText = balance.toFixed(2);
-            document.getElementById('watched-count').innerText = watchedCount;
+        function addRef() {
+            const code = Math.random().toString(36).substring(7).toUpperCase();
+            prompt("Referans Linkiniz:", "https://streamkazan.com/join?ref=" + code);
         }
 
-        function copyRef() {
-            alert("Referans linki kopyalandı!");
-        }
-
-        // Sayfa yüklendiğinde sayacı başlat
-        window.onload = startTimer;
+        window.onload = loadVideos;
     </script>
 </body>
 </html>
