@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Watch to Earn</title>
+    <title>Fonix Watch & Withdraw</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -12,7 +12,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
@@ -31,12 +31,12 @@
         const ADMIN_ID = "8392479231";
         const AD_REWARD = 0.0005;
         const DAILY_LIMIT = 250;
+        const MIN_WITHDRAW = 0.1; // Minimum çekim tutarı
 
         let myId = tg.initDataUnsafe?.user?.id?.toString() || "test_user";
         let myUser = tg.initDataUnsafe?.user?.username ? "@" + tg.initDataUnsafe.user.username : "Anonim";
         let balance = 0.0, todayAds = 0;
 
-        // Widget'ı oluşturuyoruz ama autoMode() çağırmıyoruz! (Sadece butonda çalışacak)
         const widget = new AdexiumWidget({
             wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
             adFormat: 'interstitial'
@@ -55,72 +55,79 @@
             updateUI();
         }
 
-        // --- ASIL DÜZELTME BURADA ---
+        // REKLAM İZLEME (Sadece Butonla)
         window.watchAd = () => {
             if (todayAds >= DAILY_LIMIT) {
-                tg.showAlert("Limit doldu knk!");
+                tg.showAlert("Günlük limit doldu (250/250).");
+                return;
+            }
+            tg.HapticFeedback.impactOccurred('medium');
+            widget.autoMode({
+                onAdCompleted: async () => {
+                    balance += AD_REWARD;
+                    todayAds += 1;
+                    const today = new Date().toLocaleDateString('tr-TR');
+                    await updateDoc(doc(db, "users", myId), {
+                        balance: balance,
+                        todayAds: todayAds,
+                        lastDate: today,
+                        lastSeen: serverTimestamp()
+                    });
+                    updateUI();
+                    tg.showAlert("Başarılı! +0.0005 TON kazandın.");
+                },
+                onAdError: () => tg.showAlert("Reklam yüklenemedi.")
+            });
+        };
+
+        // ÇEKİM TALEBİ GÖNDERME
+        window.requestWithdraw = async () => {
+            const wallet = document.getElementById('walletAddress').value;
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+
+            if (!wallet || wallet.length < 10) {
+                tg.showAlert("Lütfen geçerli bir TON cüzdan adresi girin.");
+                return;
+            }
+            if (amount < MIN_WITHDRAW) {
+                tg.showAlert(`Minimum çekim tutarı ${MIN_WITHDRAW} TON.`);
+                return;
+            }
+            if (amount > balance) {
+                tg.showAlert("Yetersiz bakiye.");
                 return;
             }
 
-            console.log("Reklam başlatılıyor...");
-            tg.HapticFeedback.impactOccurred('medium');
-
-            // autoMode'u sadece burada, butonun içinde çağırıyoruz.
-            widget.autoMode({
-                onAdCompleted: async () => {
-                    await processReward();
-                },
-                onAdError: (err) => {
-                    console.error("Reklam hatası:", err);
-                    tg.showAlert("Reklam şu an hazır değil, az sonra tekrar dene.");
-                }
-            });
+            // Talebi gönder
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: myId,
+                    username: myUser,
+                    wallet: wallet,
+                    amount: amount,
+                    status: "pending",
+                    date: serverTimestamp()
+                });
+                
+                balance -= amount;
+                await updateDoc(doc(db, "users", myId), { balance: balance });
+                updateUI();
+                tg.showAlert("Çekim talebi alındı! 24 saat içinde kontrol edilecektir.");
+            } catch (e) {
+                tg.showAlert("Bir hata oluştu.");
+            }
         };
-
-        async function processReward() {
-            balance += AD_REWARD;
-            todayAds += 1;
-            const today = new Date().toLocaleDateString('tr-TR');
-            
-            await updateDoc(doc(db, "users", myId), {
-                balance: balance,
-                todayAds: todayAds,
-                lastDate: today,
-                lastSeen: serverTimestamp()
-            });
-            updateUI();
-            tg.showPopup({ title: "Başarılı!", message: "0.0005 TON eklendi. (" + todayAds + "/250)" });
-        }
 
         function updateUI() {
             document.getElementById('mainBal').innerText = balance.toFixed(4);
+            document.getElementById('withdrawMax').innerText = balance.toFixed(4);
             document.getElementById('adProgressText').innerText = todayAds + " / " + DAILY_LIMIT;
-            const percent = (todayAds / DAILY_LIMIT) * 100;
-            document.getElementById('bar').style.width = percent + "%";
+            document.getElementById('bar').style.width = (todayAds / DAILY_LIMIT * 100) + "%";
         }
-
-        // Admin Paneli (Kullanıcı Adı ile)
-        window.loadAdmin = async () => {
-            const snap = await getDocs(collection(db, "users"));
-            const list = document.getElementById('adminList');
-            list.innerHTML = "";
-            snap.forEach((userDoc) => {
-                const u = userDoc.data();
-                const div = document.createElement('div');
-                div.className = "bg-[#161b22] p-4 rounded-xl border border-[#30363d] mb-2 flex justify-between";
-                div.innerHTML = `
-                    <span>${u.username}</span>
-                    <span class="text-blue-400 font-bold">${u.balance?.toFixed(4)} TON</span>
-                    <span class="text-xs text-gray-500">${u.todayAds || 0}/250</span>
-                `;
-                list.appendChild(div);
-            });
-        };
 
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'tab-admin') window.loadAdmin();
         };
 
         if (myId === ADMIN_ID) document.getElementById('adminNav').classList.remove('hidden');
@@ -130,47 +137,63 @@
     <style>
         body { background-color: #0b0e14; color: white; font-family: sans-serif; }
         .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); }
+        .input-box { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 12px; width: 100%; color: white; margin-bottom: 12px; }
     </style>
 </head>
 <body class="flex justify-center min-h-screen">
     <div class="w-full max-w-md bg-[#0d1117] flex flex-col border-x border-[#30363d]">
         
-        <div class="p-10 text-center">
-            <h1 id="mainBal" class="text-6xl font-black">0.0000</h1>
-            <p class="text-blue-500 font-bold">TON BALANCE</p>
+        <div class="p-8 text-center border-b border-[#30363d]">
+            <h1 id="mainBal" class="text-5xl font-black">0.0000</h1>
+            <p class="text-blue-500 font-bold text-xs">TOPLAM BAKİYE (TON)</p>
         </div>
 
-        <main class="flex-grow p-6">
+        <main class="flex-grow p-6 pb-24">
             <section id="tab-earn" class="tab-content space-y-6">
-                <div class="bg-[#161b22] p-8 rounded-3xl text-center border border-[#30363d]">
-                    <i class="fa-solid fa-play-circle text-6xl text-blue-500 mb-4"></i>
-                    <button onclick="window.watchAd()" class="w-full ton-btn py-4 rounded-xl font-bold text-lg">REKLAM İZLE</button>
-                    <p class="text-[10px] text-gray-500 mt-4">Reklam bitince ödül otomatik yatar.</p>
+                <div class="bg-[#161b22] p-8 rounded-3xl text-center border border-[#30363d] shadow-lg">
+                    <i class="fa-solid fa-play-circle text-7xl text-blue-500 mb-4"></i>
+                    <button onclick="window.watchAd()" class="w-full ton-btn py-4 rounded-xl font-bold text-lg active:scale-95 transition">REKLAM İZLE</button>
+                    <p class="text-[10px] text-gray-500 mt-4 uppercase font-bold tracking-widest">+0.0005 TON / REKLAM</p>
                 </div>
-
                 <div class="space-y-2">
-                    <div class="flex justify-between text-xs font-bold text-gray-400">
-                        <span>GÜNLÜK LİMİT</span>
+                    <div class="flex justify-between text-[10px] font-bold text-gray-400">
+                        <span>GÜNLÜK SINIR</span>
                         <span id="adProgressText">0 / 250</span>
                     </div>
-                    <div class="w-full h-2 bg-gray-800 rounded-full">
-                        <div id="bar" class="h-full bg-blue-500 rounded-full transition-all" style="width: 0%"></div>
+                    <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                        <div id="bar" class="h-full bg-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                 </div>
             </section>
 
-            <section id="tab-admin" class="tab-content hidden">
-                <h2 class="text-xl font-bold mb-4">Admin Panel</h2>
-                <div id="adminList"></div>
+            <section id="tab-withdraw" class="tab-content hidden space-y-4">
+                <h2 class="text-xl font-black mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-blue-500"></i> Para Çekme
+                </h2>
+                <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl mb-4">
+                    <p class="text-[10px] text-blue-400 font-bold uppercase">Çekilebilir Tutar</p>
+                    <p class="text-lg font-black"><span id="withdrawMax">0.0000</span> TON</p>
+                </div>
+                
+                <input type="text" id="walletAddress" class="input-box" placeholder="TON Cüzdan Adresi (UQ...)">
+                <input type="number" id="withdrawAmount" class="input-box" placeholder="Miktar (TON)">
+                
+                <button onclick="window.requestWithdraw()" class="w-full bg-white text-black py-4 rounded-xl font-bold active:scale-95 transition">
+                    ÇEKİM TALEBİ OLUŞTUR
+                </button>
+                <p class="text-[10px] text-gray-500 text-center">Talepler 24 saat içinde onaylanır. Minimum: 0.1 TON</p>
             </section>
         </main>
 
         <nav class="fixed bottom-0 w-full max-w-md bg-[#0b0e14] border-t border-[#30363d] p-4 flex justify-around">
-            <button onclick="switchTab('tab-earn')" class="flex flex-col items-center">
-                <i class="fa-solid fa-play"></i><span class="text-[10px]">KAZAN</span>
+            <button onclick="switchTab('tab-earn')" class="flex flex-col items-center flex-1">
+                <i class="fa-solid fa-play mb-1"></i><span class="text-[9px] font-bold">KAZAN</span>
             </button>
-            <button id="adminNav" onclick="switchTab('tab-admin')" class="hidden flex flex-col items-center">
-                <i class="fa-solid fa-lock text-red-500"></i><span class="text-[10px]">ADMİN</span>
+            <button onclick="switchTab('tab-withdraw')" class="flex flex-col items-center flex-1 border-x border-[#30363d]">
+                <i class="fa-solid fa-money-bill-transfer mb-1"></i><span class="text-[9px] font-bold">ÇEKİM</span>
+            </button>
+            <button id="adminNav" onclick="switchTab('tab-admin')" class="hidden flex flex-col items-center flex-1">
+                <i class="fa-solid fa-shield-halved mb-1 text-red-500"></i><span class="text-[9px] font-bold">ADMİN</span>
             </button>
         </nav>
     </div>
