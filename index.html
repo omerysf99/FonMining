@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE PRO - WEB3 HUB</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>PINIX ULTIMATE PRO - MEGA WEB3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-ultra: #05010d; --bg-deep: #0b021a; --p-purple: #8b5cf6;
-            --p-gold: #f59e0b; --p-green: #10b981; --text-white: #ffffff;
+            --p-gold: #f59e0b; --p-green: #10b981; --p-pink: #ec4899;
             --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
-        body { background: var(--bg-ultra); color: var(--text-white); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        body { background: var(--bg-ultra); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
         #app { 
             width: 100%; max-width: 450px; height: 100vh; 
@@ -21,297 +21,284 @@
             position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); 
         }
 
-        /* ÜST BAKİYE PANELİ */
-        .header-system { padding: 15px; z-index: 10; }
+        /* ÜST PANEL */
+        .header-system { padding: 15px; z-index: 10; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .token-card { 
-            background: var(--glass); border: 1px solid var(--border); border-radius: 18px; 
-            padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; backdrop-filter: blur(15px); 
+            background: var(--glass); border: 1px solid var(--border); border-radius: 15px; 
+            padding: 10px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); 
         }
-        .token-icon { 
-            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: 800; font-family: 'Orbitron'; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.2);
-        }
-        .pi-theme { background: linear-gradient(135deg, #4c1d95, #8b5cf6); box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
-        .pnx-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        .token-label { font-size: 0.55rem; text-transform: uppercase; opacity: 0.5; font-weight: 800; letter-spacing: 1px; }
-        .token-val { font-size: 1rem; font-weight: 800; font-family: 'Orbitron'; }
+        .token-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; }
+        .pi-theme { background: linear-gradient(135deg, #4c1d95, #8b5cf6); border: 1px solid #a78bfa; }
+        .pnx-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; }
+        .token-label { font-size: 0.5rem; text-transform: uppercase; opacity: 0.6; font-weight: 800; }
+        .token-val { font-size: 0.85rem; font-weight: 800; font-family: 'Orbitron'; overflow: hidden; text-overflow: ellipsis; }
 
-        /* SAYFA YAPISI */
+        /* LEVEL BAR */
+        .level-container { padding: 0 15px 10px; }
+        .level-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .level-bar-fill { height: 100%; width: 30%; background: linear-gradient(to right, var(--p-purple), var(--p-pink)); transition: 0.5s; }
+
+        /* VIEWS */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: pageFade 0.4s ease; }
-        @keyframes pageFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .view.active { display: flex; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* MADENCİLİK (HOME) */
-        .mining-hub { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        /* MINING CORE */
+        .fan-box { position: relative; margin: 40px auto; width: 200px; height: 200px; }
         .fan-container {
-            width: 220px; height: 220px; border-radius: 50%; border: 4px solid var(--p-purple);
+            width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--p-purple);
             background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover;
-            animation: spin 6s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
+            animation: spin 5s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .mining-amount { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--p-gold); margin: 25px 0; }
+        .speed-badge { position: absolute; bottom: -10px; background: var(--p-pink); padding: 5px 12px; border-radius: 20px; font-family: 'Orbitron'; font-size: 0.7rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-        /* TASKS & LISTS */
-        .card-item { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 12px; }
-        .btn-action { background: var(--p-purple); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
-        .btn-action.done { background: var(--p-green); opacity: 0.6; pointer-events: none; }
+        /* CARDS & BUTTONS */
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; }
+        .btn-main { background: var(--p-purple); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-main:hover { transform: scale(1.02); filter: brightness(1.2); }
+        .btn-main:active { transform: scale(0.95); }
 
-        /* WITHDRAW & SWAP INPUTS */
-        .input-group { margin-bottom: 15px; }
-        .app-input { width: 100%; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: 12px; padding: 15px; color: white; outline: none; transition: 0.3s; }
-        .app-input:focus { border-color: var(--p-purple); background: rgba(255,255,255,0.08); }
-        .fee-box { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; font-size: 0.85rem; border: 1px solid var(--border); }
+        /* MARKET ITEMS */
+        .market-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .market-item:last-child { border: none; }
 
-        /* MODAL */
-        #modal-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display:none; z-index: 100; backdrop-filter: blur(5px); }
-        #modal-box { position: absolute; bottom: -100%; left:0; width:100%; height:80%; background: #13062d; border-top: 3px solid var(--p-purple); border-radius: 30px 30px 0 0; z-index: 101; padding: 25px; transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1); }
-        #modal-box.active { bottom: 0; }
+        /* WITHDRAW FORM */
+        .input-box { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: white; width: 100%; margin-top: 5px; outline: none; }
+        
+        /* NAV */
+        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(13, 4, 31, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #666; font-size: 0.6rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+        .nav-item.active { color: var(--p-gold); }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
 
-        /* NAVBAR */
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #0d041f; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-        .nav-link { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.3); font-size: 0.65rem; cursor: pointer; }
-        .nav-link.active { color: var(--p-gold); }
+        /* NOTIFICATION */
+        #toast { position: fixed; top: 20px; background: var(--p-purple); padding: 10px 20px; border-radius: 10px; display: none; animation: slideDown 0.3s; z-index: 1000; }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
     </style>
 </head>
 <body>
+
+<div id="toast">Message here</div>
 
 <div id="app">
     <div class="header-system">
         <div class="token-card">
             <div class="token-icon pi-theme">π</div>
-            <div class="token-data"><div class="token-label">Main Pi Balance</div><div class="pi-disp">0.0000 PI</div></div>
+            <div class="token-data"><div class="token-label">Pi Balance</div><div class="pi-disp" id="pi-val">0.0000</div></div>
         </div>
         <div class="token-card">
             <div class="token-icon pnx-theme">🌀</div>
-            <div class="token-data"><div class="token-label">Pinix Assets</div><div class="pnx-disp">100.00 PNX</div></div>
+            <div class="token-data"><div class="token-label">Pinix Assets</div><div class="pnx-disp" id="pnx-val">100.00</div></div>
         </div>
+    </div>
+
+    <div class="level-container">
+        <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-weight:800; color:var(--p-pink);">
+            <span>LEVEL <span id="lvl-num">1</span></span>
+            <span id="lvl-exp">0 / 100 XP</span>
+        </div>
+        <div class="level-bar-bg"><div class="level-bar-fill" id="lvl-fill"></div></div>
     </div>
 
     <div id="view-home" class="view active">
         <div class="mining-hub">
-            <div class="fan-container"></div>
+            <div class="fan-box">
+                <div class="fan-container" id="main-fan"></div>
+                <div class="speed-badge" id="mult-badge">x1.0 SPEED</div>
+            </div>
             <div class="mining-amount" id="uncl-text">0.00000000</div>
-            <button class="btn-action" style="width:100%; padding:18px; font-size:1rem;" onclick="doClaim()">CLAIM MINING</button>
+            <button class="btn-main" onclick="claimMining()">Collect Pi Network</button>
+            <p style="margin-top:15px; font-size:0.7rem; opacity:0.5;">Auto-mining is active while you sleep...</p>
         </div>
     </div>
 
-    <div id="view-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Missions</h2>
-        <div class="card-item" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><b>Join Community</b><br><small style="color:var(--p-gold)">+50 PNX</small></div>
-            <button class="btn-action" id="t-tg" onclick="completeTask('t-tg', 50, 'https://t.me/FonixCommunity')">Join</button>
-        </div>
-        <div class="card-item" style="background:linear-gradient(to right, rgba(139,92,246,0.1), transparent);">
-            <h3>🔄 Instant Swap</h3>
-            <p style="font-size:0.7rem; opacity:0.6; margin:5px 0 15px 0;">100 PINIX = 1 PI Network</p>
-            <div class="input-group">
-                <input type="number" id="swap-input" class="app-input" placeholder="Amount PNX" oninput="calcSwap()">
+    <div id="view-market" class="view">
+        <h2 style="font-family:'Orbitron'; color:var(--p-gold);">Upgrades</h2>
+        <div class="card">
+            <div class="market-item">
+                <div><b>Turbo Fan</b><br><small>+0.5x Multiplier</small></div>
+                <button class="btn-action" onclick="buyUpgrade('turbo', 200)">200 PNX</button>
             </div>
-            <div style="text-align:center; font-weight:bold; color:var(--p-green); margin-bottom:15px;">You Get: <span id="swap-est">0.00</span> PI</div>
-            <button class="btn-action" style="width:100%; background:var(--p-green);" onclick="executeSwap()">CONFIRM SWAP</button>
+            <div class="market-item">
+                <div><b>Mining Rig</b><br><small>+1.2x Multiplier</small></div>
+                <button class="btn-action" onclick="buyUpgrade('rig', 500)">500 PNX</button>
+            </div>
+            <div class="market-item">
+                <div><b>AI Optimizer</b><br><small>+3.0x Multiplier</small></div>
+                <button class="btn-action" onclick="buyUpgrade('ai', 1200)">1200 PNX</button>
+            </div>
+        </div>
+
+        <h2 style="font-family:'Orbitron'; color:var(--p-gold); margin-top:10px;">Swap</h2>
+        <div class="card">
+            <input type="number" id="swap-in" class="app-input" placeholder="Amount to Swap (PNX)" oninput="updateSwap()">
+            <div style="margin:10px 0; text-align:center;">⬇</div>
+            <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:900;">
+                <span id="swap-out">0.0000</span> PI
+            </div>
+            <button class="btn-action" style="width:100%; margin-top:10px;" onclick="doSwap()">SWAP ASSETS</button>
+        </div>
+    </div>
+
+    <div id="view-wallet" class="view">
+        <h2 style="font-family:'Orbitron';">My Wallet</h2>
+        <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #000);">
+            <div class="token-label">Available to Withdraw</div>
+            <div style="font-size:2rem; font-family:'Orbitron'; margin:10px 0;" id="w-total">0.0000</div>
+            <div class="token-label">Pi Network (Locked)</div>
+        </div>
+
+        <div class="card">
+            <label class="token-label">Recipient Pi Address</label>
+            <input type="text" class="app-input" placeholder="GAYQ... (Pi Mainnet)">
+            <label class="token-label" style="margin-top:10px; display:block;">Amount</label>
+            <input type="number" class="app-input" placeholder="Min 50 PI">
+            <button class="btn-action" style="width:100%; margin-top:15px; background:var(--p-green);" onclick="alert('Withdrawal request submitted! Processing time: 24-48h')">WITHDRAW NOW</button>
         </div>
     </div>
 
     <div id="view-ref" class="view">
-        <h2 style="font-family:'Orbitron'; text-align:center;">Referral</h2>
-        <div class="card-item" style="text-align:center; border:2px dashed var(--p-purple); margin-top:20px;">
-            <div class="token-label">YOUR INVITE CODE</div>
-            <div style="font-size:1.8rem; font-weight:900; color:var(--p-gold); margin:10px 0;" id="my-code">PNX-777</div>
-            <button class="btn-action" style="background:transparent; border:1px solid var(--border);" onclick="copyRef()">Copy Link</button>
-        </div>
-
-        <div id="ref-input-container">
-            <div class="card-item" style="margin-top:20px;">
-                <p class="token-label">ENTER INVITER CODE</p>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                    <input type="text" id="ref-code-input" class="app-input" placeholder="PNX-0000" style="padding:10px;">
-                    <button class="btn-action" onclick="applyRef()">APPLY</button>
-                </div>
-            </div>
+        <h2 style="font-family:'Orbitron'; text-align:center;">Friends</h2>
+        <div class="card" style="text-align:center;">
+            <p class="token-label">YOUR REFERRAL LINK</p>
+            <p style="font-size:1.2rem; margin:10px 0; font-weight:800; color:var(--p-purple);" id="ref-link-display">pinix.io/?ref=user</p>
+            <button class="btn-action" onclick="toast('Link Copied!')">COPY LINK</button>
         </div>
         
-        <button class="btn-action" style="width:100%; background:#0088cc; margin-top:20px;" onclick="shareTG()">SHARE ON TELEGRAM</button>
-    </div>
-
-    <div id="view-wallet" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Safe Wallet</h2>
-        <div class="card-item">
-            <div class="token-label">Total Withdrawals</div>
-            <div style="font-size:1.2rem; font-weight:bold;">0.00 PI</div>
-        </div>
-        <button class="btn-action" style="width:100%; padding:20px; background:#16a34a;" onclick="openWithdraw()">↗ WITHDRAW PI NETWORK</button>
-        <div id="history-log" style="margin-top:20px;">
-            <p style="opacity:0.3; text-align:center;">No transaction history</p>
-        </div>
-    </div>
-
-    <div id="modal-overlay" onclick="closeModal()"></div>
-    <div id="modal-box">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="font-family:'Orbitron';">Withdrawal</h3>
-            <span onclick="closeModal()" style="font-size:1.5rem; cursor:pointer;">&times;</span>
-        </div>
-        <div style="margin-top:20px;">
-            <div class="input-group">
-                <label class="token-label">Pi Network Wallet Address</label>
-                <input type="text" id="w-address" class="app-input" placeholder="G02X...">
-            </div>
-            <div class="input-group">
-                <label class="token-label">Amount (Min 51 PI)</label>
-                <input type="number" id="w-amount" class="app-input" placeholder="0.00" oninput="calcW()">
-            </div>
-            <div class="fee-box">
-                <div style="display:flex; justify-content:space-between; opacity:0.6;"><span>Network Fee</span><span>1.00 PI</span></div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold; color:var(--p-green); font-size:1rem;">
-                    <span>NET RECEIVE</span><span id="w-net">0.00 PI</span>
+        <div id="ref-input-zone">
+            <div class="card">
+                <p class="token-label">HAVE A CODE? GET 50 PNX</p>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <input type="text" id="r-inp" class="app-input" style="padding:10px;">
+                    <button class="btn-action" onclick="useRef()">CLAIM</button>
                 </div>
             </div>
-            <button class="btn-action" style="width:100%; margin-top:25px; padding:18px;" onclick="processWithdraw()">CONFIRM WITHDRAW</button>
         </div>
     </div>
 
     <nav>
-        <div class="nav-link active" onclick="tab('view-home', this)"><span>🏠</span>Home</div>
-        <div class="nav-link" onclick="tab('view-tasks', this)"><span>🎯</span>Tasks</div>
-        <div class="nav-link" onclick="tab('view-ref', this)"><span>👥</span>Friends</div>
-        <div class="nav-link" onclick="tab('view-wallet', this)"><span>👛</span>Wallet</div>
+        <div class="nav-item active" onclick="tab('view-home', this)"><i>🏠</i>EARN</div>
+        <div class="nav-item" onclick="tab('view-tasks', this)"><i>⚡</i>MARKET</div>
+        <div class="nav-item" onclick="tab('view-ref', this)"><span>👥</span>FRIENDS</div>
+        <div class="nav-item" onclick="tab('view-wallet', this)"><span>👛</span>WALLET</div>
     </nav>
 </div>
 
 <script>
-    /* --- APPLICATION STATE --- */
-    let state = {
-        pi: 0.00,
-        pnx: 100.00,
-        uncl: 0.00,
-        myCode: "PNX-" + Math.floor(1000 + Math.random() * 9000),
+    // --- DATABASE ---
+    let db = JSON.parse(localStorage.getItem('pinix_user')) || {
+        pi: 0.0,
+        pnx: 100.0,
+        uncl: 0.0,
+        xp: 0,
+        lvl: 1,
+        mult: 1.0,
         usedRef: false,
-        tasks: { tg: false }
+        tasks: {}
     };
 
-    document.getElementById('my-code').innerText = state.myCode;
-
-    /* --- MINING ENGINE --- */
-    setInterval(() => {
-        state.uncl += 0.00000045;
-        document.getElementById('uncl-text').innerText = state.uncl.toFixed(8);
-    }, 1000);
-
-    function syncUI() {
-        document.querySelectorAll('.pi-disp').forEach(e => e.innerText = state.pi.toFixed(4) + " PI");
-        document.querySelectorAll('.pnx-disp').forEach(e => e.innerText = state.pnx.toFixed(2) + " PNX");
+    function save() {
+        localStorage.setItem('pinix_user', JSON.stringify(db));
+        updateUI();
     }
 
-    /* --- NAVIGATION --- */
+    // --- UI ENGINE ---
+    function updateUI() {
+        document.getElementById('pi-val').innerText = db.pi.toFixed(4);
+        document.getElementById('pnx-val').innerText = db.pnx.toFixed(2);
+        document.getElementById('w-total').innerText = db.pi.toFixed(4);
+        document.getElementById('lvl-num').innerText = db.lvl;
+        document.getElementById('lvl-exp').innerText = `${Math.floor(db.xp)} / ${db.lvl * 100} XP`;
+        document.getElementById('lvl-fill').style.width = (db.xp / (db.lvl * 100) * 100) + "%";
+        document.getElementById('mult-badge').innerText = `x${db.mult.toFixed(1)} SPEED`;
+        
+        if(db.usedRef) {
+            const zone = document.getElementById('ref-input-zone');
+            if(zone) zone.style.display = 'none';
+        }
+    }
+
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
     }
 
-    function doClaim() {
-        if(state.uncl > 0) {
-            state.pi += state.uncl; state.uncl = 0;
-            syncUI();
-            alert("Claim Successful!");
+    // --- CORE LOGIC ---
+    setInterval(() => {
+        let gain = 0.00000045 * db.mult;
+        db.uncl += gain;
+        db.xp += gain * 1000; // XP Kazanımı
+        
+        if(db.xp >= db.lvl * 100) {
+            db.xp = 0;
+            db.lvl++;
+            toast("LEVEL UP! Lvl " + db.lvl);
+        }
+        
+        document.getElementById('uncl-text').innerText = db.uncl.toFixed(8);
+        document.getElementById('main-fan').style.animationDuration = (6 / db.mult) + "s";
+    }, 1000);
+
+    function claimMining() {
+        if(db.uncl > 0) {
+            db.pi += db.uncl;
+            db.uncl = 0;
+            save();
+            toast("Pi Collected!");
         }
     }
 
-    /* --- TASK SYSTEM --- */
-    function completeTask(id, reward, link) {
-        if(state.tasks[id]) return;
-        window.open(link, '_blank');
-        const btn = document.getElementById(id.replace('t-', 't-'));
-        btn.innerText = "Check";
-        btn.onclick = () => {
-            state.pnx += reward;
-            state.tasks[id] = true;
-            btn.innerText = "Done";
-            btn.className = "btn-action done";
-            syncUI();
-        };
-    }
-
-    /* --- SWAP SYSTEM --- */
-    function calcSwap() {
-        let val = parseFloat(document.getElementById('swap-input').value) || 0;
-        document.getElementById('swap-est').innerText = (val / 100).toFixed(2);
-    }
-
-    function executeSwap() {
-        let val = parseFloat(document.getElementById('swap-input').value);
-        if(val < 100 || val > state.pnx) return alert("Min 100 PNX and enough balance required!");
-        state.pnx -= val;
-        state.pi += (val / 100);
-        syncUI();
-        alert("Swap Success!");
-        document.getElementById('swap-input').value = "";
-        calcSwap();
-    }
-
-    /* --- REFERRAL (AUTO-DESTRUCT) --- */
-    function applyRef() {
-        if(state.usedRef) return;
-        let code = document.getElementById('ref-code-input').value;
-        if(code.length > 4) {
-            state.pnx += 50;
-            state.usedRef = true;
-            // Kod girme alanını yok et
-            document.getElementById('ref-input-container').innerHTML = `
-                <div class="card-item" style="border-color:var(--p-green); text-align:center;">
-                    <b style="color:var(--p-green);">✓ Referral Applied (+50 PNX)</b>
-                </div>`;
-            syncUI();
+    function buyUpgrade(type, price) {
+        if(db.pnx >= price) {
+            db.pnx -= price;
+            if(type === 'turbo') db.mult += 0.5;
+            if(type === 'rig') db.mult += 1.2;
+            if(type === 'ai') db.mult += 3.0;
+            save();
+            toast("Upgrade Success!");
+        } else {
+            toast("Not enough PNX!");
         }
     }
 
-    /* --- WITHDRAW SYSTEM --- */
-    function openWithdraw() {
-        document.getElementById('modal-overlay').style.display = 'block';
-        setTimeout(() => document.getElementById('modal-box').classList.add('active'), 10);
+    function updateSwap() {
+        let input = document.getElementById('swap-in').value;
+        document.getElementById('swap-out').innerText = (input / 100).toFixed(4);
     }
 
-    function closeModal() {
-        document.getElementById('modal-box').classList.remove('active');
-        setTimeout(() => document.getElementById('modal-overlay').style.display = 'none', 300);
+    function doSwap() {
+        let input = parseFloat(document.getElementById('swap-in').value);
+        if(input >= 10 && db.pnx >= input) {
+            db.pnx -= input;
+            db.pi += (input / 100);
+            save();
+            document.getElementById('swap-in').value = "";
+            updateSwap();
+            toast("Swap Successful!");
+        }
     }
 
-    function calcW() {
-        let val = parseFloat(document.getElementById('w-amount').value) || 0;
-        document.getElementById('w-net').innerText = Math.max(0, val - 1).toFixed(2) + " PI";
+    function useRef() {
+        if(!db.usedRef) {
+            db.pnx += 50;
+            db.usedRef = true;
+            save();
+            toast("+50 PNX Added!");
+        }
     }
 
-    function processWithdraw() {
-        let amt = parseFloat(document.getElementById('w-amount').value);
-        let adr = document.getElementById('w-address').value;
-        if(amt < 51 || amt > state.pi) return alert("Min 51 PI and enough balance required!");
-        if(adr.length < 10) return alert("Enter valid PI address!");
-
-        state.pi -= amt;
-        syncUI();
-        closeModal();
-        
-        const log = document.getElementById('history-log');
-        if(log.innerText.includes("No history")) log.innerHTML = "";
-        log.innerHTML = `<div class="card-item" style="font-size:0.7rem; border-left:4px solid var(--p-gold);">
-            <b>Pending: ${amt} PI</b><br>${adr.substring(0,15)}...
-        </div>` + log.innerHTML;
-        
-        alert("Withdrawal Request Sent!");
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
     }
 
-    function shareTG() {
-        const text = encodeURIComponent("🚀 Join PINIX Mining! Use my code: " + state.myCode + " and get 100 PNX gift!");
-        window.open(`https://t.me/share/url?url=https://t.me/PinixBot&text=${text}`, '_blank');
-    }
-
-    function copyRef() {
-        navigator.clipboard.writeText(state.myCode);
-        alert("Referral link copied!");
-    }
-
-    syncUI();
+    // İlk Çalıştırma
+    updateUI();
 </script>
 </body>
 </html>
