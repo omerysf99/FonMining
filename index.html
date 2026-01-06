@@ -25,30 +25,29 @@
             overflow: hidden;
         }
 
-        /* Üst Skor Paneli */
+        /* Skor Paneli */
         #ui-panel {
             position: absolute;
             top: 20px;
             display: flex;
             gap: 20px;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            background: rgba(0,0,0,0.7);
-            padding: 12px 25px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
             border-radius: 50px;
             border: 2px solid var(--primary);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
             z-index: 10;
         }
 
         /* Oyun Sahnesi */
         #game-stage {
             position: relative;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             height: 500px;
-            background: radial-gradient(circle, #2f3542 0%, #1e272e 100%);
-            border-radius: 30px;
+            background: linear-gradient(180deg, #2f3542 0%, #1e272e 100%);
+            border-radius: 20px;
             border: 4px solid #3d464d;
             overflow: hidden;
             display: flex;
@@ -56,19 +55,17 @@
             align-items: center;
         }
 
-        /* PINIX - Dönen Pervane Görseli */
+        /* PINIX - Dönen Pervane (Görsel Eklendi) */
         #pinix-fan {
             position: absolute;
             width: 180px;
             height: 180px;
-            background-image: url('pinix.jpg');
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%; /* Görseli yuvarlak yapar */
-            border: 5px solid var(--secondary);
+            /* Mevcut yıldız şekli korundu, içine görsel eklendi */
+            background: url('pinix.jpg') center/cover;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             animation: spin 3s linear infinite;
             z-index: 1;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+            border: 2px solid var(--secondary);
         }
 
         @keyframes spin {
@@ -76,27 +73,27 @@
             to { transform: rotate(360deg); }
         }
 
-        /* PICO - Karakter Görseli */
+        /* PICO - Karakter (Görsel Eklendi) */
         #pico {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             z-index: 2;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
             cursor: pointer;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.7));
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
         }
 
         #pico img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Görsel oranını korur */
-            border-radius: 15px;
+            object-fit: contain;
+            border-radius: 10px; /* Görselin kenarlarını hafif yumuşatır */
         }
 
-        /* Butonlar */
+        /* Kontroller */
         .controls {
-            margin-top: 25px;
+            margin-top: 20px;
             display: flex;
             gap: 15px;
         }
@@ -105,34 +102,26 @@
             background-color: var(--primary);
             color: #000;
             border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-weight: 900;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
             cursor: pointer;
             font-size: 16px;
-            text-transform: uppercase;
-            box-shadow: 0 5px 0 #b8860b;
-            transition: 0.1s;
+            box-shadow: 0 4px 0 #b8860b;
         }
 
         .btn:active {
             transform: translateY(4px);
-            box-shadow: 0 1px 0 #b8860b;
+            box-shadow: none;
         }
 
-        .btn-red { 
-            background-color: var(--secondary); 
-            color: white; 
-            box-shadow: 0 5px 0 #a40e1e; 
-        }
+        .btn-red { background-color: var(--secondary); color: white; box-shadow: 0 4px 0 #a40e1e; }
 
-        .btn-red:active { box-shadow: 0 1px 0 #a40e1e; }
-
-        /* Pico Tıklama Efekti */
-        .bounce { animation: bounce 0.4s ease; }
+        /* Animasyon Sınıfları */
+        .bounce { animation: bounce 0.5s ease; }
         @keyframes bounce {
-            0%, 100% { transform: scale(1) translate(var(--tx), var(--ty)); }
-            50% { transform: scale(1.2) translate(var(--tx), var(--ty)); }
+            0%, 100% { transform: scale(1) translate(var(--x, 0), var(--y, 0)); }
+            50% { transform: scale(1.3) translate(var(--x, 0), var(--y, 0)); }
         }
     </style>
 </head>
@@ -152,8 +141,8 @@
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="boostPinix()">Hızlandır</button>
-        <button class="btn btn-red" onclick="picoAction()">Pico'yu Yakala!</button>
+        <button class="btn" onclick="boostPinix()">Pinix Hızlandır</button>
+        <button class="btn btn-red" onclick="picoAction()">Pico'ya Bas!</button>
     </div>
 
     <script>
@@ -166,16 +155,18 @@
         const scoreDisplay = document.getElementById('score');
         const speedDisplay = document.getElementById('speed-lvl');
 
-        // Pinix Hızlandırma
+        // Pinix Hızlandırma Fonksiyonu
         function boostPinix() {
-            if (speed > 0.1) {
-                speed -= 0.2;
+            if (speed > 0.2) {
+                speed -= 0.3;
                 speedLevel += 1;
                 fan.style.animationDuration = speed + "s";
                 speedDisplay.innerText = speedLevel;
                 
-                // Hızlandıkça parlasın
-                fan.style.boxShadow = `0 0 ${speedLevel * 5}px rgba(255, 71, 87, 0.8)`;
+                // Görsel bir efekt
+                fan.style.filter = `hue-rotate(${speedLevel * 20}deg)`;
+            } else {
+                alert("Pinix Maksimum Hızda! 🚀");
             }
         }
 
@@ -184,27 +175,30 @@
             score += 10;
             scoreDisplay.innerText = score;
             
-            // Rastgele konum hesapla
-            const range = 180;
-            const randomX = (Math.random() - 0.5) * range;
-            const randomY = (Math.random() - 0.5) * range;
+            // Pico'ya basınca rastgele bir yere zıplasın
+            const maxX = 150;
+            const maxY = 150;
+            const randomX = (Math.random() - 0.5) * maxX;
+            const randomY = (Math.random() - 0.5) * maxY;
             
-            // CSS değişkenleri ile animasyonu koru
-            pico.style.setProperty('--tx', `${randomX}px`);
-            pico.style.setProperty('--ty', `${randomY}px`);
+            // Konumu CSS değişkeni olarak ata (bounce animasyonuyla çakışmaması için)
+            pico.style.setProperty('--x', `${randomX}px`);
+            pico.style.setProperty('--y', `${randomY}px`);
             pico.style.transform = `translate(${randomX}px, ${randomY}px)`;
             
+            // Animasyon ekle
             pico.classList.add('bounce');
-            setTimeout(() => pico.classList.remove('bounce'), 400);
+            setTimeout(() => pico.classList.remove('bounce'), 500);
         }
 
-        // Otomatik Yavaşlama (Zorluk katmak için)
+        // Otomatik Dönüş Hızı Kontrolü
         setInterval(() => {
             if (speed < 3) {
-                speed += 0.02;
+                speed += 0.01;
                 fan.style.animationDuration = speed + "s";
             }
         }, 1000);
+
     </script>
 </body>
 </html>
