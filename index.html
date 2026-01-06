@@ -24,12 +24,11 @@
         .mining-fan { width: 180px; height: 180px; animation: spin 10s linear infinite; border-radius: 50%; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .nav-item { cursor: pointer; opacity: 0.5; text-align: center; flex: 1; }
+        .nav-item { cursor: pointer; opacity: 0.5; text-align: center; flex: 1; transition: 0.3s; }
         .nav-item.active { opacity: 1; color: #f97316; }
         
-        /* Boost Özel */
-        .profit-box { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Progress & Badges */
+        .empty-state { opacity: 0.4; filter: grayscale(1); }
     </style>
 </head>
 <body>
@@ -37,6 +36,7 @@
     <div class="app-container">
         <div id="home" class="page active">
             <div class="flex justify-center mb-6 mt-4"><h1 class="font-bold text-lg">PINIX App <i class="fas fa-check-circle text-sky-400 text-xs"></i></h1></div>
+            
             <div class="space-y-3 mb-6">
                 <div class="glass-card p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
@@ -53,23 +53,25 @@
                     <i class="fas fa-wallet text-gray-600 text-xs"></i>
                 </div>
             </div>
+
             <div class="flex-grow flex flex-col items-center justify-center">
                 <img src="pinix.jpg" class="mining-fan mb-4">
                 <p class="text-gray-500 text-xs italic">Mining...</p>
-                <h2 id="h-mine" class="text-3xl font-black text-yellow-500">0.0002435 PI</h2>
+                <h2 id="h-mine" class="text-3xl font-black text-yellow-500">0.0000000 PI</h2>
                 <div class="glass-card mt-6 px-8 py-3 flex items-center gap-3">
                     <i class="fas fa-bolt text-yellow-500"></i>
-                    <div><p class="text-[10px] text-gray-500">Mining Power</p><p id="h-pwr" class="font-bold">5 GH/s</p></div>
+                    <div><p class="text-[10px] text-gray-500">Mining Power</p><p class="font-bold">5 GH/s</p></div>
                 </div>
             </div>
+
             <div class="space-y-3 mt-4">
                 <div class="flex gap-2">
-                    <button onclick="claimPI()" class="flex-1 bg-[#8b5cf6] py-4 rounded-2xl font-bold">Claim</button>
-                    <button onclick="swapPINIX()" class="flex-1 bg-[#22c55e] py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+                    <button class="flex-1 bg-[#8b5cf6] py-4 rounded-2xl font-bold active:scale-95">Claim</button>
+                    <button class="flex-1 bg-[#22c55e] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95">
                         <i class="fas fa-exchange-alt text-xs"></i> Swap PINIX
                     </button>
                 </div>
-                <button onclick="switchPage('boost')" class="w-full bg-[#9e7a20] py-4 rounded-2xl font-bold text-black flex items-center justify-center gap-2">
+                <button onclick="switchPage('boost')" class="w-full bg-[#9e7a20] py-4 rounded-2xl font-bold text-black flex items-center justify-center gap-2 active:scale-95">
                     <i class="fas fa-rocket"></i> BOOST
                 </button>
             </div>
@@ -78,21 +80,17 @@
         <div id="boost" class="page">
             <p class="text-center text-xs text-gray-400 px-4 mb-6">Here you can rent mining power for 30 days. The more mining power you have, the more PI you can mine.</p>
             <div class="bg-gradient-to-r from-purple-900/20 to-orange-900/20 p-6 rounded-3xl border border-white/10 text-center mb-6">
-                <h3 id="b-gh-display" class="text-3xl font-black mb-1">10 GH/s <i class="fas fa-bolt text-yellow-500"></i></h3>
-                <p class="text-[10px] text-gray-400">1 PI = 1 GH/s Mining Power</p>
+                <h3 class="text-3xl font-black mb-1 text-gray-500">0 GH/s <i class="fas fa-bolt"></i></h3>
+                <p class="text-[10px] text-gray-500">1 PI = 1 GH/s Mining Power</p>
             </div>
-            <p class="text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Profit Breakdown</p>
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="profit-box"><p class="text-[9px] text-gray-500 uppercase">Investment</p><p id="b-inv" class="font-bold">10 PI</p></div>
-                <div class="profit-box"><p class="text-[9px] text-gray-500 uppercase">Duration</p><p class="font-bold">30 days</p></div>
-                <div class="profit-box"><p class="text-[9px] text-gray-500 uppercase">Daily profit</p><p class="text-green-500 font-bold">+0.11 PI</p></div>
-                <div class="profit-box"><p class="text-[9px] text-gray-500 uppercase">Total profit</p><p id="b-prof" class="text-yellow-500 font-bold">+3.43 PI</p></div>
+            <div class="bg-white/5 p-4 rounded-2xl mb-8">
+                <div class="flex justify-between text-[10px] text-gray-500 uppercase font-bold mb-4"><span>Profit Breakdown</span></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/20 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">Investment</p><p class="font-bold text-sm">0 PI</p></div>
+                    <div class="bg-black/20 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">Duration</p><p class="font-bold text-sm">30 days</p></div>
+                </div>
             </div>
-            <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6 flex justify-between items-center">
-                <span class="text-xs">Total Receive</span>
-                <span id="b-total" class="text-green-500 font-bold">13.43 PI</span>
-            </div>
-            <input type="number" id="b-input" value="10" oninput="updateBoost()" class="w-full bg-black/40 border-2 border-purple-600 rounded-2xl py-4 text-center font-bold text-xl outline-none mb-4">
+            <input type="number" placeholder="0" class="w-full bg-black/40 border-2 border-purple-600 rounded-2xl py-4 text-center font-bold text-xl outline-none mb-4">
             <p class="text-center text-[10px] text-gray-500 mb-6">Minimum amount: 100 PI</p>
             <button class="w-full bg-white/5 py-4 rounded-2xl text-gray-500 font-bold">Add</button>
         </div>
@@ -102,23 +100,19 @@
             <div class="space-y-3 mb-6">
                 <div class="glass-card p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3"><div class="bg-orange-500 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">π</div>
-                    <div><p class="text-[10px] text-gray-500">Balance</p><p class="text-sm font-bold">14.0000000 PI</p></div></div>
-                    <i class="fas fa-wallet text-gray-600"></i>
+                    <div><p class="text-[10px] text-gray-500">Balance</p><p class="text-sm font-bold">0.0000000 PI</p></div></div>
                 </div>
                 <div class="glass-card p-4 flex justify-between items-center">
                     <div class="flex items-center gap-3"><img src="pinix.jpg" class="w-8 h-8 rounded-full">
                     <div><p class="text-[10px] text-gray-500">Balance</p><p class="text-sm font-bold">0 PINIX</p></div></div>
-                    <i class="fas fa-wallet text-gray-600"></i>
                 </div>
             </div>
-            <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-bold mb-8"> <i class="fas fa-arrow-up rotate-45 mr-2"></i> Withdraw</button>
-            <div class="flex justify-between items-center mb-4"><span class="font-bold">Transaction History</span><span class="text-purple-400 text-xs">View All <i class="fas fa-external-link-alt"></i></span></div>
-            <div class="space-y-3">
-                <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-3"><div class="bg-purple-500/20 w-10 h-10 rounded-xl flex items-center justify-center text-purple-500"><i class="fas fa-arrow-up rotate-45"></i></div>
-                    <div><p class="font-bold text-sm">Swap <span class="bg-green-500/20 text-green-500 text-[8px] px-2 py-0.5 rounded ml-2">Completed</span></p><p class="text-[10px] text-gray-500">12 minutes ago</p></div></div>
-                    <div class="text-right"><p class="text-purple-500 font-bold text-sm">+12.0000000 PI</p><p class="text-[10px] text-gray-500">-1200 PINIX</p></div>
-                </div>
+            <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-bold mb-8 opacity-50 cursor-not-allowed"> <i class="fas fa-arrow-up rotate-45 mr-2"></i> Withdraw</button>
+            
+            <div class="flex justify-between items-center mb-4"><span class="font-bold text-sm">Transaction History</span></div>
+            <div class="flex flex-col items-center justify-center py-10 text-gray-600">
+                <i class="fas fa-receipt text-4xl mb-3 opacity-20"></i>
+                <p class="text-xs">No transactions yet.</p>
             </div>
         </div>
 
@@ -133,11 +127,12 @@
             </div>
             <button class="w-full bg-[#8b5cf6] py-4 rounded-2xl font-bold mb-4 flex items-center justify-center gap-2"><i class="fas fa-user-plus"></i> Invite Friend</button>
             <button class="w-full bg-white/5 py-4 rounded-2xl font-bold mb-8 flex justify-between px-6">Open Friends List (0) <i class="fas fa-chevron-right text-gray-500"></i></button>
+            
             <h3 class="font-bold mb-4">Referral Rewards</h3>
-            <div class="space-y-3">
+            <div class="space-y-3 opacity-60">
                 <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-4"><span class="text-gray-500 font-bold">1</span><div><p class="text-purple-500 font-bold">1000 PINIX</p></div></div>
-                    <div class="bg-black/40 px-3 py-1 rounded-full text-xs font-bold text-yellow-500">9 GH/s <i class="fas fa-bolt"></i></div>
+                    <div class="flex items-center gap-4"><span class="text-gray-500 font-bold text-xs">Level 1</span><p class="text-purple-500 font-bold text-sm">1000 PINIX</p></div>
+                    <div class="bg-black/40 px-3 py-1 rounded-full text-[10px] font-bold text-yellow-500">9 GH/s <i class="fas fa-bolt"></i></div>
                 </div>
             </div>
         </div>
@@ -150,26 +145,28 @@
                 <button class="flex-1 py-2 text-xs text-gray-500">Contest</button>
             </div>
             <div class="glass-card p-4 flex justify-between items-center text-gray-400">
-                <div class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> <span class="text-sm">Completed (14)</span></div>
+                <div class="flex items-center gap-2"><i class="fas fa-check text-gray-600"></i> <span class="text-sm">Completed (0)</span></div>
                 <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="mt-10 text-center text-gray-600">
+                <p class="text-xs">New tasks will appear here soon.</p>
             </div>
         </div>
 
         <div id="more" class="page">
             <div class="flex items-center gap-4 mb-8">
-                <img src="https://i.pravatar.cc/100" class="w-16 h-16 rounded-full border-2 border-purple-500">
-                <div><h3 class="font-bold text-lg">Chalpus Yeniden 🐹</h3><p class="text-xs text-yellow-500">@yenidenchalpus</p><p class="text-[10px] text-gray-500">UID: 8392479231 <i class="far fa-copy"></i></p></div>
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-orange-500 flex items-center justify-center text-2xl font-bold">U</div>
+                <div><h3 class="font-bold text-lg">User Name</h3><p class="text-xs text-yellow-500">@username</p><p class="text-[10px] text-gray-500">UID: 8392479231 <i class="far fa-copy text-[8px]"></i></p></div>
             </div>
             <div class="space-y-2">
-                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-language text-gray-400"></i> <span>Language</span></div> <span class="text-xs text-gray-500">us English</span></div>
+                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-language text-gray-400"></i> <span>Language</span></div> <span class="text-xs text-gray-500">English</span></div>
                 <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-users text-gray-400"></i> <span>Invite Friends</span></div> <i class="fas fa-chevron-right text-gray-600 text-xs"></i></div>
                 <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-question-circle text-gray-400"></i> <span>Contact Support</span></div> <i class="fas fa-chevron-right text-gray-600 text-xs"></i></div>
-                <div class="glass-card p-4 flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-trophy text-yellow-500"></i> <span class="text-yellow-500">Ratings & Leagues</span></div> <span class="text-[9px] text-gray-600">(soon)</span></div>
+                <div class="glass-card p-4 flex justify-between items-center opacity-50"><div class="flex items-center gap-3"><i class="fas fa-trophy text-yellow-500"></i> <span>Ratings & Leagues</span></div> <span class="text-[9px]">(soon)</span></div>
             </div>
-            <p class="text-center text-[10px] text-gray-700 mt-20">@PINIX_Mining_Bot</p>
         </div>
 
-        <div class="absolute bottom-0 left-0 w-full bg-black/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-4 px-2">
+        <div class="absolute bottom-0 left-0 w-full bg-black/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-4 px-2">
             <div onclick="switchPage('wallet')" class="nav-item" id="nav-wallet"><i class="fas fa-wallet text-lg"></i><p class="text-[9px] mt-1">Wallet</p></div>
             <div onclick="switchPage('friends')" class="nav-item" id="nav-friends"><i class="fas fa-users text-lg"></i><p class="text-[9px] mt-1">Friends</p></div>
             <div onclick="switchPage('home')" class="nav-item active" id="nav-home">
@@ -184,8 +181,6 @@
     </div>
 
     <script>
-        let pi = 0, pnx = 0, mining = 0.0002435, pwr = 5;
-
         function switchPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -194,24 +189,12 @@
             if(nav) nav.classList.add('active');
         }
 
-        function updateBoost() {
-            let val = parseFloat(document.getElementById('b-input').value) || 0;
-            document.getElementById('b-gh-display').innerHTML = `${val} GH/s <i class="fas fa-bolt text-yellow-500"></i>`;
-            document.getElementById('b-inv').innerText = val + " PI";
-            let prof = (val * 0.343).toFixed(2);
-            document.getElementById('b-prof').innerText = "+" + prof + " PI";
-            document.getElementById('b-total').innerText = (val + parseFloat(prof)).toFixed(2) + " PI";
-        }
-
+        // Simülasyon: Madencilik artışı (Görseldeki başlangıç hızı)
+        let miningVal = 0.0000000;
         setInterval(() => {
-            mining += (0.0000001 * pwr);
-            document.getElementById('h-mine').innerText = mining.toFixed(7) + " PI";
-            document.getElementById('h-pi').innerText = pi.toFixed(7) + " PI";
-            document.getElementById('h-pnx').innerText = pnx + " PINIX";
+            miningVal += 0.0000002;
+            document.getElementById('h-mine').innerText = miningVal.toFixed(7) + " PI";
         }, 1000);
-
-        function claimPI() { if(mining >= 1) { pi += mining; mining = 0; } }
-        function swapPINIX() { if(pnx >= 100) { pi += (pnx/100); pnx = 0; } }
     </script>
 </body>
 </html>
