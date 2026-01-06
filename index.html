@@ -10,27 +10,26 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         body { background-color: #0c0c0c; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
         
-        /* 9:16 Dikey Mobil Ekran */
+        /* 9:16 Mobil Ekran Konteynırı */
         .app-container {
-            width: 375px; height: 812px;
+            width: 375px; height: 780px;
             background: radial-gradient(circle at 50% 30%, #2a224a 0%, #151221 45%, #000000 100%);
-            position: relative; overflow: hidden; border-radius: 45px; border: 4px solid #1f1f1f;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column;
+            position: relative; overflow: hidden; border-radius: 35px; border: 2px solid #1f1f1f;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); display: flex; flex-direction: column;
         }
 
         .glass-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 20px; }
-        .mining-fan { width: 180px; height: 180px; animation: spin 10s linear infinite; border-radius: 50%; }
+        .mining-fan { width: 190px; height: 190px; animation: spin 10s linear infinite; border-radius: 50%; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .btn-boost-main { background: linear-gradient(90deg, #9e7a20 0%, #d4a017 100%); color: black; font-weight: 800; }
         .active-scale:active { transform: scale(0.95); transition: 0.1s; }
         
-        /* Boost Sayfası Stilleri */
-        #boost-page { display: none; position: absolute; inset: 0; background: #13111c; z-index: 50; padding: 25px; overflow-y: auto; }
-        .profit-box { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 12px; }
+        #boost-page { display: none; position: absolute; inset: 0; background: #0f0d16; z-index: 50; padding: 25px; overflow-y: auto; border-radius: 35px; }
+        .profit-box { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .total-receive-banner { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 15px; padding: 15px; }
         
-        .toast { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 12px; font-size: 13px; display: none; z-index: 1000; font-weight: bold; }
+        .toast { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 12px; font-size: 13px; display: none; z-index: 1000; font-weight: bold; width: 80%; text-align: center; }
     </style>
 </head>
 <body>
@@ -39,149 +38,139 @@
         <div id="toast" class="toast"></div>
 
         <div id="home-page" class="flex flex-col h-full">
-            <div class="flex justify-between items-center text-[10px] text-gray-400 px-8 pt-6">
-                <span>3:28 <i class="far fa-clock ml-0.5"></i></span>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-plane"></i> <i class="fas fa-wifi"></i>
-                    <div class="flex items-center border border-gray-600 rounded px-1">14 <i class="fas fa-battery-half ml-1 text-red-500"></i></div>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center px-6 py-4">
+            
+            <div class="flex justify-between items-center px-6 pt-8 pb-4">
                 <i class="fas fa-times text-lg text-gray-400"></i>
-                <h1 class="font-bold text-[16px]">PINIX App <i class="fas fa-check-circle text-sky-400 text-[10px]"></i></h1>
+                <h1 class="font-bold text-[18px]">PINIX App <i class="fas fa-check-circle text-sky-400 text-[10px]"></i></h1>
                 <i class="fas fa-ellipsis-v text-lg text-gray-400"></i>
             </div>
 
             <div class="px-6 space-y-3">
-                <div class="glass-card p-3 flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-orange-500 w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-lg">π</div>
+                <div class="glass-card p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-orange-500 w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-lg">π</div>
                         <div>
-                            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Main Wallet</p>
-                            <p id="main-wallet" class="text-[15px] font-bold">0.0000000 PI</p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Main Wallet</p>
+                            <p id="main-wallet" class="text-[16px] font-bold text-white">0.0000000 PI</p>
                         </div>
                     </div>
                     <i class="fas fa-wallet text-gray-600"></i>
                 </div>
-                <div class="glass-card p-3 flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <img src="pinix.jpg" class="w-9 h-9 rounded-full" alt="pinix">
+                <div class="glass-card p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <img src="pinix.jpg" class="w-10 h-10 rounded-full" alt="pinix">
                         <div>
-                            <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">PINIX Balance</p>
-                            <p id="pinix-wallet" class="text-[15px] font-bold">250 PINIX</p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">PINIX Balance</p>
+                            <p id="pinix-wallet" class="text-[16px] font-bold text-white">250 PINIX</p>
                         </div>
                     </div>
                     <i class="fas fa-wallet text-gray-600"></i>
                 </div>
             </div>
 
-            <div class="flex-grow flex flex-col items-center justify-center">
+            <div class="flex-grow flex flex-col items-center justify-center -mt-4">
                 <div class="relative flex items-center justify-center mb-4">
                     <img src="pinix.jpg" class="mining-fan" alt="Fan">
-                    <div class="absolute w-9 h-9 bg-[#1a1625] rounded-full border-2 border-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-                        <span class="text-orange-500 font-black text-[10px]">π</span>
+                    <div class="absolute w-10 h-10 bg-[#1a1625] rounded-full border-2 border-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                        <span class="text-orange-500 font-black text-xs">π</span>
                     </div>
                 </div>
-                <p class="text-gray-500 text-[11px] italic tracking-widest animate-pulse">Mining PI...</p>
-                <h2 id="claim-balance" class="text-3xl font-black text-yellow-500 tracking-tighter">0.0000000 PI</h2>
-                <div class="glass-card mt-6 px-8 py-2.5 flex items-center gap-3">
-                    <i class="fas fa-bolt text-yellow-500 text-lg"></i>
+                <p class="text-gray-500 text-[12px] italic tracking-widest animate-pulse mb-1">Mining PI...</p>
+                <h2 id="claim-balance" class="text-4xl font-black text-yellow-500 tracking-tighter">0.0000000 PI</h2>
+                <div class="glass-card mt-8 px-10 py-3 flex items-center gap-4">
+                    <i class="fas fa-bolt text-yellow-500 text-xl"></i>
                     <div>
-                        <p class="text-[8px] text-gray-500 font-bold uppercase">Mining Power</p>
-                        <p id="current-power" class="font-black text-[15px]">5 GH/s</p>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">Mining Power</p>
+                        <p id="current-power" class="font-black text-[17px]">5 GH/s</p>
                     </div>
                 </div>
             </div>
 
-            <div class="px-6 space-y-3 pb-24">
-                <div class="flex gap-3">
+            <div class="px-6 space-y-4 pb-28">
+                <div class="flex gap-4">
                     <button onclick="claimPI()" class="flex-1 bg-purple-700 py-4 rounded-2xl font-bold text-sm active-scale shadow-lg">Claim</button>
                     <button onclick="swapPINIX()" class="flex-1 bg-[#10b981] py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active-scale shadow-lg">
                         <i class="fas fa-exchange-alt"></i> Swap PINIX
                     </button>
                 </div>
-                <button onclick="toggleBoost(true)" class="w-full btn-boost-main py-4 rounded-2xl text-[12px] active-scale flex items-center justify-center gap-2 tracking-[0.2em]">
+                <button onclick="toggleBoost(true)" class="w-full btn-boost-main py-4 rounded-2xl text-[13px] active-scale flex items-center justify-center gap-2 tracking-[0.2em]">
                     <i class="fas fa-rocket"></i> BOOST
                 </button>
             </div>
         </div>
 
         <div id="boost-page">
-            <div class="flex items-center gap-2 mb-4">
-                <i onclick="toggleBoost(false)" class="fas fa-chevron-left text-gray-400 cursor-pointer"></i>
-                <h2 class="text-lg font-bold">Rent Mining Power</h2>
+            <div class="flex items-center gap-3 mb-6 pt-4">
+                <i onclick="toggleBoost(false)" class="fas fa-arrow-left text-gray-400 text-xl cursor-pointer"></i>
+                <h2 class="text-xl font-bold">Rent Mining Power</h2>
             </div>
             
-            <p class="text-xs text-gray-400 mb-6 leading-relaxed">Here you can rent mining power for 30 days. The more mining power you have, the more PI you can mine.</p>
+            <p class="text-[13px] text-gray-400 mb-8 leading-relaxed">Here you can rent mining power for 30 days. The more mining power you have, the more PI you can mine.</p>
             
-            <div class="bg-gradient-to-r from-purple-900/40 to-orange-900/40 p-6 rounded-3xl border border-white/10 text-center mb-6">
-                <h3 id="input-display" class="text-3xl font-black flex items-center justify-center gap-3">10 GH/s <i class="fas fa-bolt text-yellow-500"></i></h3>
-                <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase">1 PI = 1 GH/s Mining Power</p>
-            </div>
-
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">Profit Breakdown</p>
-            
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="profit-box">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Investment</p>
-                    <p id="invest-val" class="font-bold text-sm">10 PI</p>
-                </div>
-                <div class="profit-box">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Duration</p>
-                    <p class="font-bold text-sm">30 days</p>
-                </div>
-                <div class="profit-box">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Daily profit</p>
-                    <p class="text-green-500 font-bold text-sm">+0.11 PI</p>
-                    <p class="text-[8px] text-green-700 font-bold">(4.477%)</p>
-                </div>
-                <div class="profit-box">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Total profit</p>
-                    <p id="profit-val" class="text-yellow-500 font-bold text-sm">+3.43 PI</p>
-                    <p class="text-[8px] text-yellow-700 font-bold">(134.314%)</p>
-                </div>
+            <div class="bg-gradient-to-r from-purple-900/30 to-orange-900/30 p-8 rounded-3xl border border-white/10 text-center mb-8">
+                <h3 id="input-display" class="text-4xl font-black flex items-center justify-center gap-3">10 GH/s <i class="fas fa-bolt text-yellow-500"></i></h3>
+                <p class="text-[11px] text-gray-400 mt-2 font-bold uppercase">1 PI = 1 GH/s Mining Power</p>
             </div>
 
-            <div class="total-receive-banner mb-6">
+            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-4 text-center">Profit Breakdown</p>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="profit-box">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Investment</p>
+                    <p id="invest-val" class="font-bold text-base">10 PI</p>
+                </div>
+                <div class="profit-box">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Duration</p>
+                    <p class="font-bold text-base">30 days</p>
+                </div>
+                <div class="profit-box">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Daily profit</p>
+                    <p class="text-green-500 font-bold text-base">+0.11 PI</p>
+                    <p class="text-[9px] text-green-700 font-bold">(4.477%)</p>
+                </div>
+                <div class="profit-box">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Total profit</p>
+                    <p id="profit-val" class="text-yellow-500 font-bold text-base">+3.43 PI</p>
+                    <p class="text-[9px] text-yellow-700 font-bold">(134.314%)</p>
+                </div>
+            </div>
+
+            <div class="total-receive-banner mb-8">
                 <div class="flex justify-between items-center mb-1">
-                    <span class="text-xs font-bold text-gray-300">Total Receive</span>
-                    <span id="total-val" class="text-green-500 font-black text-lg">13.43 PI</span>
+                    <span class="text-sm font-bold text-gray-300">Total Receive</span>
+                    <span id="total-val" class="text-green-500 font-black text-xl">13.43 PI</span>
                 </div>
-                <p id="calc-text" class="text-[9px] text-gray-500 font-bold">10 + 3.43 = 13.43 PI (134.314%)</p>
+                <p id="calc-text" class="text-[10px] text-gray-500 font-bold tracking-tight">10 + 3.43 = 13.43 PI (134.314%)</p>
             </div>
 
-            <div class="relative mb-8">
-                <input type="number" id="gh-input" value="10" oninput="updateBoostCalc()" class="w-full bg-transparent border-2 border-purple-600 rounded-2xl py-4 px-6 text-center font-black text-xl outline-none focus:shadow-[0_0_15px_rgba(147,51,234,0.3)]">
-                <i class="fas fa-coins absolute right-6 top-1/2 -translate-y-1/2 text-gray-600"></i>
+            <div class="relative mb-6">
+                <input type="number" id="gh-input" value="10" oninput="updateBoostCalc()" class="w-full bg-black/40 border-2 border-purple-600 rounded-2xl py-5 px-6 text-center font-black text-2xl outline-none">
+                <i class="fas fa-bolt absolute right-6 top-1/2 -translate-y-1/2 text-purple-600"></i>
             </div>
 
-            <p class="text-center text-[10px] font-bold text-gray-600 mb-6">Minimum amount: 100 PI</p>
+            <p class="text-center text-[11px] font-bold text-gray-600 mb-8 uppercase tracking-widest">Minimum amount: 100 PI</p>
 
-            <button onclick="buyBoost()" class="w-full bg-gray-800 py-4 rounded-2xl font-black text-sm text-gray-400 active-scale">Add</button>
-            <button onclick="toggleBoost(false)" class="w-full mt-4 py-2 font-bold text-sm text-gray-600">Back</button>
-            
-            <p class="text-center text-[10px] text-gray-700 mt-10">@PINIX_Mining_Bot</p>
+            <button onclick="buyBoost()" class="w-full bg-white/5 border border-white/10 py-5 rounded-2xl font-black text-sm text-gray-400 active-scale hover:bg-white/10 transition">Add Power</button>
+            <p class="text-center text-[11px] text-gray-700 mt-12 font-bold italic">@PINIX_Mining_Bot</p>
         </div>
 
-        <div class="absolute bottom-0 left-0 w-full bg-[#0a0a0a] border-t border-white/5 flex justify-around items-center py-4 text-gray-500">
-            <div class="flex flex-col items-center"><i class="fas fa-wallet text-lg"></i><span class="text-[8px] mt-1">Wallet</span></div>
-            <div class="flex flex-col items-center"><i class="fas fa-users text-lg"></i><span class="text-[8px] mt-1">Friends</span></div>
+        <div class="absolute bottom-0 left-0 w-full bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-5 text-gray-500">
+            <div class="flex flex-col items-center"><i class="fas fa-wallet text-xl"></i><span class="text-[9px] mt-1 font-bold">Wallet</span></div>
+            <div class="flex flex-col items-center"><i class="fas fa-users text-xl"></i><span class="text-[9px] mt-1 font-bold">Friends</span></div>
             <div class="flex flex-col items-center text-orange-500">
-                <div class="bg-gradient-to-br from-purple-500 to-orange-500 p-2 rounded-full -mt-8 border-4 border-black">
-                    <i class="fas fa-home text-xl text-white"></i>
+                <div class="bg-gradient-to-br from-purple-500 to-orange-500 p-2.5 rounded-full -mt-10 border-4 border-[#0c0c0c] shadow-xl">
+                    <i class="fas fa-home text-2xl text-white"></i>
                 </div>
-                <span class="text-[8px] font-bold">Home</span>
+                <span class="text-[10px] font-bold mt-1">Home</span>
             </div>
-            <div class="flex flex-col items-center"><i class="fas fa-bullseye text-lg"></i><span class="text-[8px] mt-1">Missions</span></div>
-            <div class="flex flex-col items-center"><i class="fas fa-ellipsis-h text-lg"></i><span class="text-[8px] mt-1">More</span></div>
+            <div class="flex flex-col items-center"><i class="fas fa-bullseye text-xl"></i><span class="text-[9px] mt-1 font-bold">Missions</span></div>
+            <div class="flex flex-col items-center"><i class="fas fa-ellipsis-h text-xl"></i><span class="text-[9px] mt-1 font-bold">More</span></div>
         </div>
     </div>
 
     <script>
         let mainWallet = 0.0, pinixWallet = 250, claimBalance = 0.0, currentPower = 5;
 
-        // UI Güncelleme
         function updateUI() {
             document.getElementById('main-wallet').innerText = mainWallet.toFixed(7) + " PI";
             document.getElementById('pinix-wallet').innerText = pinixWallet + " PINIX";
@@ -189,16 +178,14 @@
             document.getElementById('current-power').innerText = currentPower + " GH/s";
         }
 
-        // Madencilik (Güce göre artar)
         setInterval(() => {
-            claimBalance += (0.00001 * (currentPower / 5));
+            claimBalance += (0.000012 * (currentPower / 5));
             updateUI();
         }, 1000);
 
-        // Claim ve Swap
         function claimPI() {
-            if (claimBalance >= 1) { mainWallet += claimBalance; claimBalance = 0; showToast("Aktarıldı!", "#10b981"); }
-            else showToast("Minimum 1 PI gerekli!", "#ef4444");
+            if (claimBalance >= 1) { mainWallet += claimBalance; claimBalance = 0; showToast("Bakiyeye Aktarıldı!", "#10b981"); }
+            else showToast("Minimum 1 PI Gerekli!", "#ef4444");
             updateUI();
         }
 
@@ -206,13 +193,12 @@
             if (pinixWallet >= 100) {
                 let piGained = pinixWallet / 100;
                 mainWallet += piGained;
-                showToast(pinixWallet + " PINIX -> " + piGained + " PI", "#10b981");
+                showToast(`${pinixWallet} PINIX -> ${piGained} PI`, "#10b981");
                 pinixWallet = 0;
-            } else showToast("Min 100 PINIX gerekli!", "#ef4444");
+            } else showToast("Min 100 PINIX Gerekli!", "#ef4444");
             updateUI();
         }
 
-        // Boost Sayfası Mantığı
         function toggleBoost(show) { document.getElementById('boost-page').style.display = show ? 'block' : 'none'; }
 
         function updateBoostCalc() {
@@ -229,13 +215,13 @@
 
         function buyBoost() {
             let val = parseFloat(document.getElementById('gh-input').value);
-            if (val < 100) return showToast("Min. 100 PI kiralayabilirsin!", "#ef4444");
-            if (mainWallet < val) return showToast("Yetersiz PI bakiyesi!", "#ef4444");
+            if (val < 100) return showToast("Min. 100 PI Gerekli!", "#ef4444");
+            if (mainWallet < val) return showToast("Yetersiz Bakiye!", "#ef4444");
             
             mainWallet -= val;
             currentPower += val;
             toggleBoost(false);
-            showToast("Hız Artırıldı!", "#10b981");
+            showToast("Mining Hızı Artırıldı!", "#10b981");
             updateUI();
         }
 
