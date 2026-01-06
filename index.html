@@ -20,7 +20,6 @@
             flex-direction: column;
         }
 
-        /* 9:16 Container */
         .app-container {
             width: 100%;
             height: 100%;
@@ -32,7 +31,6 @@
             background: radial-gradient(circle at top, #1c1c2b 0%, #0d0d12 100%);
         }
 
-        /* --- Sayfa Alanı --- */
         .content-area {
             flex: 1;
             overflow-y: auto;
@@ -46,7 +44,6 @@
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* --- Görsel Bileşenler --- */
         .glass-card {
             background: rgba(26, 26, 36, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -69,7 +66,38 @@
             box-shadow: 0 0 15px rgba(245, 132, 31, 0.3);
         }
 
-        /* --- Alt Navigasyon (Görseldeki gibi) --- */
+        /* --- Madencilik Fan Alanı --- */
+        .mining-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fan-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            animation: spin 6s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.4));
+        }
+
+        .fan-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px dashed rgba(168, 85, 247, 0.3);
+            animation: spin-reverse 10s linear infinite;
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
+        /* --- Navigasyon --- */
         .bottom-nav {
             position: absolute;
             bottom: 0;
@@ -81,6 +109,7 @@
             align-items: center;
             padding-bottom: 15px;
             border-top: 1px solid #25252b;
+            z-index: 100;
         }
 
         .nav-item {
@@ -92,10 +121,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            flex: 1;
         }
 
         .nav-item.active { color: #facc15; }
-        .nav-item.active i { color: #facc15; }
 
         .home-circle {
             width: 55px;
@@ -120,7 +149,6 @@
             letter-spacing: 1px;
         }
 
-        /* --- Bildirim Noktası --- */
         .dot {
             width: 6px;
             height: 6px;
@@ -142,82 +170,89 @@
                 <div class="flex items-center gap-3">
                     <div class="pi-icon text-sm">π</div>
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p>
-                        <p class="text-lg font-black">0.0000000 PI</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Pi Balance</p>
+                        <p class="text-lg font-black mono">0.0000000</p>
                     </div>
                 </div>
                 <i class="fas fa-wallet text-gray-700"></i>
             </div>
 
-            <div class="flex flex-col items-center mt-10">
-                <div class="relative w-64 h-64 flex items-center justify-center">
-                    <img src="https://i.ibb.co/L5pYmYV/fan-png.png" class="w-full h-full animate-[spin_4s_linear_infinite]" style="filter: hue-rotate(250deg) brightness(1.2);">
-                    <div class="absolute pi-icon w-12 h-12 text-xl border-4 border-[#0d0d12]">π</div>
+            <div class="mining-container">
+                <div class="fan-overlay"></div>
+                <img src="pinix.jpg" class="fan-image" alt="Mining Fan">
+                <div class="absolute bg-[#0d0d12]/60 p-2 rounded-xl backdrop-blur-sm border border-white/10">
+                    <div class="pi-icon w-10 h-10 text-lg">π</div>
                 </div>
+            </div>
 
-                <p class="text-gray-500 text-sm mt-6 font-semibold">Mining...</p>
-                <h1 class="text-4xl font-black text-yellow-500 tracking-tighter">0.0000000 <span class="text-white text-2xl font-bold ml-1">PI</span></h1>
+            <div class="text-center">
+                <p class="text-gray-500 text-sm font-semibold mb-1 uppercase tracking-widest animate-pulse">Mining...</p>
+                <h1 class="text-5xl font-black text-yellow-500 tracking-tighter">0.0000000</h1>
+                <p class="text-white text-xs font-bold mt-1">PENDING PI REWARDS</p>
 
-                <div class="bg-[#1a1a24] px-6 py-2 rounded-2xl border border-gray-800 flex items-center gap-3 mt-6">
+                <div class="bg-[#1a1a24] px-6 py-2 rounded-2xl border border-gray-800 inline-flex items-center gap-3 mt-8">
                     <i class="fas fa-bolt text-yellow-500"></i>
                     <span class="font-bold text-sm">Mining Power <span class="text-white ml-2">0 GH/s</span></span>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-12">
-                <button class="bg-[#2d1b4d] py-4 rounded-2xl font-black text-sm active:scale-95 transition">Claim</button>
+                <button class="bg-[#2d1b4d] py-4 rounded-2xl font-black text-sm active:scale-95 transition border border-purple-500/20">Claim</button>
                 <button class="bg-[#166534] py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition">
-                    <i class="fas fa-exchange-alt"></i> Swap PINIX
+                    <i class="fas fa-exchange-alt"></i> Swap
                 </button>
             </div>
 
-            <button onclick="showPage('boost')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-black font-black py-4 rounded-2xl mt-4 flex items-center justify-center gap-3 active:scale-95 transition">
-                <i class="fas fa-rocket"></i> BOOST
+            <button onclick="showPage('boost')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-black font-black py-4 rounded-2xl mt-4 flex items-center justify-center gap-3 active:scale-95 transition shadow-lg shadow-orange-500/20">
+                <i class="fas fa-rocket"></i> BOOST MINING POWER
             </button>
         </div>
 
         <div id="wallet" class="page">
-            <h2 class="text-3xl font-black text-center mb-8 mt-4">Wallet</h2>
+            <h2 class="text-3xl font-black text-center mb-8 mt-4">My Assets</h2>
             
-            <div class="glass-card flex justify-between items-center py-6">
+            <div class="glass-card flex justify-between items-center py-6 border-l-4 border-orange-500">
                 <div class="flex items-center gap-4">
                     <div class="pi-icon">π</div>
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase">Main Balance</p>
                         <p class="text-xl font-black">0.0000000 PI</p>
                     </div>
                 </div>
-                <i class="fas fa-copy text-gray-700"></i>
+                <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
             </div>
 
-            <div class="glass-card flex justify-between items-center py-6">
+            <div class="glass-card flex justify-between items-center py-6 border-l-4 border-purple-500">
                 <div class="flex items-center gap-4">
-                    <img src="https://i.ibb.co/m0XpT9D/pinix-logo.png" class="w-9 h-9 rounded-full" alt="Pinix">
+                    <img src="pinix.jpg" class="w-9 h-9 rounded-xl object-cover" alt="Pinix">
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase">Token Balance</p>
                         <p class="text-xl font-black">0 PINIX</p>
                     </div>
                 </div>
-                <i class="fas fa-copy text-gray-700"></i>
+                <button class="text-[10px] bg-purple-500/20 text-purple-400 px-3 py-1 rounded-lg font-bold">SWAP</button>
             </div>
 
-            <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-black mt-6 shadow-xl shadow-green-900/20 active:scale-95 transition">
-                <i class="fas fa-arrow-up mr-2"></i> Withdraw
-            </button>
-
-            <div class="flex justify-between items-center mt-10 mb-4">
-                <h3 class="font-bold text-gray-400">Transaction History</h3>
-                <span class="text-xs text-purple-400 font-bold">View All <i class="fas fa-external-link-alt ml-1"></i></span>
+            <div class="glass-card p-4 mt-4">
+                <p class="text-[10px] text-gray-500 font-bold text-center mb-4 uppercase">Min. Withdraw: 100 PI</p>
+                <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-black text-white shadow-xl shadow-green-900/20 active:scale-95 transition">
+                    <i class="fas fa-paper-plane mr-2"></i> WITHDRAW ASSETS
+                </button>
             </div>
             
-            <div class="text-center py-10 text-gray-600 text-sm font-medium">No transactions found.</div>
+            <div class="flex justify-between items-center mt-10 mb-4 px-2">
+                <h3 class="font-bold text-gray-400 uppercase text-[10px] tracking-widest">History</h3>
+                <span class="text-[10px] text-purple-400 font-bold uppercase">Refresh <i class="fas fa-sync-alt ml-1"></i></span>
+            </div>
+            
+            <div class="text-center py-10 text-gray-700 text-[10px] font-black uppercase tracking-[3px]">No Transactions Yet</div>
         </div>
 
         <div id="missions" class="page">
             <h2 class="text-3xl font-black text-center mb-2">New Missions</h2>
             <p class="text-center text-gray-500 text-xs mb-8">Complete tasks and earn more</p>
 
-            <div class="flex bg-[#15151b] p-1 rounded-2xl mb-8">
+            <div class="flex bg-[#15151b] p-1 rounded-2xl mb-8 border border-white/5">
                 <button class="flex-1 bg-[#25252b] py-3 rounded-xl text-xs font-black">Tasks</button>
                 <button class="flex-1 text-gray-500 text-xs font-bold relative">Ref <span class="dot"></span></button>
                 <button class="flex-1 text-gray-500 text-xs font-bold relative">Contest <span class="dot"></span></button>
@@ -226,7 +261,7 @@
             <div class="glass-card flex justify-between items-center border-l-4 border-green-500">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-check-circle text-green-500"></i>
-                    <span class="font-bold text-sm">Completed (14)</span>
+                    <span class="font-bold text-sm">Completed Tasks (14)</span>
                 </div>
                 <i class="fas fa-chevron-down text-gray-600"></i>
             </div>
@@ -245,9 +280,9 @@
         </div>
         <div class="nav-item active" onclick="showPage('home')" id="nav-home">
             <div class="home-circle">
-                <i class="fas fa-home text-2xl text-white"></i>
+                <i class="fas fa-bolt text-2xl text-white"></i>
             </div>
-            <span class="mt-1">Home</span>
+            <span class="mt-1">Mining</span>
         </div>
         <div class="nav-item" onclick="showPage('missions')" id="nav-missions">
             <i class="fas fa-bullseye mb-1 text-xl"></i>
@@ -264,17 +299,14 @@
 
 <script>
     function showPage(pageId) {
-        // Sayfa Değişimi
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
 
-        // Navigasyon Aktifliği
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         const activeNav = document.getElementById('nav-' + pageId);
         if(activeNav) activeNav.classList.add('active');
 
-        // Hafif titreşim (varsa)
-        if(window.navigator.vibrate) window.navigator.vibrate(15);
+        if(window.navigator.vibrate) window.navigator.vibrate(10);
     }
 </script>
 
