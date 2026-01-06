@@ -3,309 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX PRO - Mining Ecosystem</title>
+    <title>PINIX PRO - Ultimate Mining</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-purple: #7c3aed;
-            --accent-yellow: #facc15;
-            --bg-dark: #050308;
-        }
-
         body { 
-            background: var(--bg-dark); 
+            background: #050308; 
             color: white;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
 
-        /* Dinamik Aura Arka Plan */
         .app-container {
             width: 100%;
             max-width: 414px;
             height: 100%;
-            background: radial-gradient(circle at 50% 20%, #2e1a4d 0%, #050308 80%);
+            background: radial-gradient(circle at 50% 35%, #22143d 0%, #050308 80%);
             position: relative;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 100px rgba(124, 58, 237, 0.2);
         }
 
-        .aura {
-            position: absolute;
-            top: -10%; left: 50%;
-            width: 300px; height: 300px;
-            background: var(--primary-purple);
-            filter: blur(120px);
-            opacity: 0.15;
-            transform: translateX(-50%);
-            animation: pulse 8s infinite alternate;
-            pointer-events: none;
-        }
-
-        @keyframes pulse { from { opacity: 0.1; scale: 1; } to { opacity: 0.3; scale: 1.2; } }
-
-        /* Modern Kartlar */
+        /* Cam Kart Efektleri */
         .glass-card { 
             background: rgba(255, 255, 255, 0.03); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
             backdrop-filter: blur(10px);
-            border-radius: 24px;
-            transition: all 0.3s ease;
+            border-radius: 20px;
         }
-        .glass-card:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.05); }
 
-        /* Fan ve Glow Efekti */
-        .fan-container {
+        /* Gelişmiş Fan Bölümü */
+        .fan-zone {
             position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 20px auto;
+            width: 300px;
+            height: 300px;
+            margin: 10px auto;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .fan-glow {
-            position: absolute;
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%);
-            animation: fanPulse 2s infinite ease-in-out;
-        }
-
         .fan-image {
-            width: 90%; height: 90%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
-            animation: spin 4s linear infinite;
-            filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.5));
+            animation: spin 5s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.4));
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes fanPulse { 0%, 100% { scale: 1; opacity: 0.5; } 50% { scale: 1.1; opacity: 0.8; } }
 
-        /* Sayılar için Dijital Font */
-        .counter-text {
+        /* Sayı Fontu */
+        .digital-font {
             font-family: 'Orbitron', sans-serif;
             letter-spacing: -1px;
         }
 
-        /* Gelişmiş Navigasyon */
+        /* Alt Menü */
         nav {
-            background: rgba(10, 8, 15, 0.95);
-            backdrop-filter: blur(20px);
-            height: 90px;
+            background: rgba(10, 8, 15, 0.98);
+            height: 85px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: 10px;
         }
 
-        .nav-item { 
-            display: flex; flex-direction: column; align-items: center; 
-            color: #555; font-size: 11px; font-weight: 600; 
-            transition: 0.3s;
-        }
-        .nav-item.active { color: var(--accent-yellow); }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item { color: #666; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; }
+        .nav-item.active { color: #facc15; }
 
-        .home-btn {
-            width: 65px; height: 65px;
+        .home-center {
             background: linear-gradient(135deg, #a855f7 0%, #f59e0b 100%);
-            border-radius: 22px;
+            width: 58px; height: 58px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin-top: -45px;
-            border: 5px solid var(--bg-dark);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            color: white;
-            font-size: 24px;
+            margin-top: -35px; border: 4px solid #050308;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            color: white; font-size: 22px;
         }
 
         /* Boost Modal */
-        #boostOverlay {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8);
+        #boostModal {
+            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9);
             z-index: 100; align-items: flex-end; justify-content: center;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
         }
-        .boost-panel {
-            width: 100%; background: #120d1f; border-radius: 32px 32px 0 0;
-            padding: 30px; border-top: 2px solid var(--primary-purple);
-            animation: slideUp 0.4s cubic-bezier(0.17, 0.84, 0.44, 1);
+        .modal-content {
+            width: 100%; background: #110c1d; border-radius: 30px 30px 0 0;
+            padding: 25px; border-top: 2px solid #7c3aed;
+            animation: slideUp 0.3s ease-out;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div class="aura"></div>
-
-        <header class="p-6 flex justify-between items-center">
+        
+        <header class="p-5 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center font-black">P</div>
-                <h1 class="font-bold text-lg tracking-tight">PINIX PRO</h1>
+                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center font-black italic">P</div>
+                <h1 class="font-bold text-lg tracking-tighter">PINIX App</h1>
+                <i class="fas fa-check-circle text-sky-500 text-[10px]"></i>
             </div>
-            <div class="bg-white/5 px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold">LIVE Kazım</span>
+            <div class="text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-400 font-bold uppercase">
+                <span class="text-green-500">●</span> Cloud Mining
             </div>
         </header>
 
         <main class="flex-grow px-5 overflow-y-auto">
-            <div class="space-y-3 mb-6">
+            <div class="space-y-2 mb-6">
                 <div class="glass-card p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-800 rounded-xl flex items-center justify-center shadow-lg">
-                            <i class="fab fa-product-hunt text-xl"></i>
-                        </div>
+                    <div class="flex items-center gap-3">
+                        <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-7 h-7" alt="pi">
                         <div>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Pi Network Balance</p>
-                            <p id="mainBalance" class="text-lg font-black counter-text">14.00000000</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-black">Pi Balance</p>
+                            <p id="totalBalance" class="text-lg font-bold digital-font">0.00000000</p>
                         </div>
                     </div>
-                    <button class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-400">
-                        <i class="fas fa-external-link-alt text-xs"></i>
-                    </button>
+                    <i class="fas fa-copy text-gray-700 text-xs"></i>
+                </div>
+
+                <div class="glass-card p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="pinix.jpg" class="w-7 h-7 rounded-full" onerror="this.src='https://via.placeholder.com/30/purple'">
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black">Pinix Token</p>
+                            <p class="text-lg font-bold digital-font text-gray-400">0</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-copy text-gray-700 text-xs"></i>
                 </div>
             </div>
 
-            <div class="fan-container">
-                <div class="fan-glow"></div>
-                <img src="https://i.ibb.co/L5hYfTf/fan-purple.png" class="fan-image" alt="fan">
+            <div class="fan-zone">
+                <img src="pinix.jpg" class="fan-image" alt="fan" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="w-14 h-14 bg-purple-900/80 rounded-full flex items-center justify-center border-2 border-purple-500 shadow-[0_0_20px_rgba(124,58,237,0.6)]">
-                        <i class="fab fa-product-hunt text-2xl text-white"></i>
+                    <div class="w-12 h-12 bg-purple-900/90 rounded-full flex items-center justify-center border-2 border-purple-500 shadow-xl">
+                        <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6" alt="pi">
                     </div>
                 </div>
             </div>
 
             <div class="text-center mt-2">
-                <p class="text-gray-500 text-xs font-semibold mb-1 animate-pulse italic">Mining process active...</p>
-                <h2 id="miningCounter" class="text-5xl font-black text-yellow-400 counter-text drop-shadow-lg">0.09947180</h2>
-                <p class="text-gray-400 text-sm font-bold mt-1">PI TOKEN</p>
+                <p class="text-gray-500 text-[10px] font-bold italic mb-1 uppercase tracking-widest">Mining...</p>
+                <h2 id="miningVal" class="text-4xl font-black text-yellow-400 digital-font mb-4">0.00000000</h2>
 
-                <div class="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl mt-8">
-                    <div class="w-10 h-10 bg-yellow-400/10 rounded-full flex items-center justify-center">
-                        <i class="fas fa-bolt text-yellow-400"></i>
-                    </div>
+                <div class="inline-flex items-center gap-4 bg-white/5 border border-white/10 px-8 py-3 rounded-2xl mb-8">
+                    <i class="fas fa-bolt text-yellow-500 text-xl"></i>
                     <div class="text-left">
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Mining Hashrate</p>
-                        <p id="hashRate" class="font-black text-lg">5.00 GH/s</p>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold">Mining Power</p>
+                        <p class="font-bold text-lg">1 GH/s</p>
                     </div>
                 </div>
 
-                <div class="mt-8 space-y-4">
-                    <button onclick="claimRewards()" class="w-full bg-gradient-to-r from-purple-600 to-purple-800 py-5 rounded-[24px] font-black text-xl shadow-xl shadow-purple-900/30 active:scale-95 transition">
-                        CLAIM REWARDS
+                <div class="space-y-3">
+                    <button onclick="claim()" class="w-full bg-[#7c3aed] py-4 rounded-[2rem] font-black text-lg shadow-lg shadow-purple-900/20 active:scale-95 transition">
+                        CLAIM
                     </button>
-                    
-                    <button onclick="openBoost()" class="w-full bg-[#facc15] py-5 rounded-[24px] font-black text-xl text-black flex items-center justify-center gap-3 shadow-xl shadow-yellow-900/20 active:scale-95 transition">
-                        <i class="fas fa-rocket animate-bounce"></i> BOOST MINING
+                    <button onclick="openBoost()" class="w-full bg-[#facc15] py-5 rounded-[2rem] font-black text-xl text-black flex items-center justify-center gap-3 shadow-lg shadow-yellow-900/20 active:scale-95 transition">
+                        <i class="fas fa-rocket"></i> BOOST
                     </button>
                 </div>
             </div>
         </main>
 
-        <div id="boostOverlay" onclick="closeBoost(event)">
-            <div class="boost-panel" onclick="event.stopPropagation()">
-                <div class="w-12 h-1.5 bg-gray-800 rounded-full mx-auto mb-6"></div>
-                <h3 class="text-2xl font-black mb-1">UPGRADE POWER</h3>
-                <p class="text-gray-500 text-sm mb-6">Kazım hızınızı katlayarak daha fazla Pi kazanın.</p>
+        <div id="boostModal" onclick="closeBoost()">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="w-12 h-1 bg-gray-800 rounded-full mx-auto mb-6"></div>
+                <h3 class="text-xl font-bold mb-2 uppercase italic">Mining Upgrade</h3>
+                <p class="text-gray-500 text-xs mb-6 font-bold">Kazım hızınızı artırmak için bir paket seçin.</p>
                 
-                <div class="space-y-3">
-                    <div class="glass-card p-4 flex justify-between items-center border-yellow-500/30 bg-yellow-400/5">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center text-black font-black">X2</div>
-                            <div>
-                                <p class="font-bold">Pro Miner</p>
-                                <p class="text-xs text-gray-500">+10 GH/s Power</p>
-                            </div>
+                <div class="glass-card p-4 flex justify-between items-center mb-4 border-yellow-500/20">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center text-black font-black">X5</div>
+                        <div>
+                            <p class="font-bold text-sm">Turbo Pack</p>
+                            <p class="text-[10px] text-gray-500">+5 GH/s Power</p>
                         </div>
-                        <button class="bg-yellow-400 text-black px-4 py-2 rounded-xl font-bold text-xs">AKTİF ET</button>
                     </div>
-                    <div class="glass-card p-4 flex justify-between items-center opacity-60">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center font-black">MAX</div>
-                            <div>
-                                <p class="font-bold">Ultra Titan</p>
-                                <p class="text-xs text-gray-500">+50 GH/s Power</p>
-                            </div>
-                        </div>
-                        <i class="fas fa-lock"></i>
-                    </div>
+                    <button class="bg-yellow-400 text-black px-4 py-2 rounded-lg text-[10px] font-black">AKTİF ET</button>
                 </div>
-                <button onclick="closeBoost()" class="w-full mt-8 py-4 font-bold text-gray-500">Vazgeç</button>
+                <button onclick="closeBoost()" class="w-full py-4 text-gray-600 font-bold text-sm">Kapat</button>
             </div>
         </div>
 
         <nav>
-            <div class="nav-item">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
-            </div>
-            <div class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>Friends</span>
-            </div>
-            <div class="home-btn">
-                <i class="fas fa-home"></i>
-            </div>
+            <div class="nav-item"><i class="fas fa-wallet mb-1"></i><br>Wallet</div>
+            <div class="nav-item"><i class="fas fa-users mb-1"></i><br>Friends</div>
             <div class="nav-item active">
-                <i class="fas fa-bullseye"></i>
-                <span>Mining</span>
+                <div class="home-center"><i class="fas fa-home"></i></div>
+                Home
             </div>
-            <div class="nav-item">
-                <i class="fas fa-ellipsis-h"></i>
-                <span>More</span>
-            </div>
+            <div class="nav-item"><i class="fas fa-tasks mb-1"></i><br>Missions</div>
+            <div class="nav-item"><i class="fas fa-ellipsis-h mb-1"></i><br>More</div>
         </nav>
     </div>
 
     <script>
-        // Madencilik Simülasyonu
-        let miningValue = 0.09947180;
-        let mainBalance = 14.00000000;
-        const miningRate = 0.00002435; // GH/s başına üretim simülasyonu
+        let mining = 0.00000000;
+        let total = 0.00000000;
+        const rate = 0.00002; // Saniyede artış
 
-        function updateCounter() {
-            miningValue += miningRate;
-            document.getElementById('miningCounter').innerText = miningValue.toFixed(8);
-            requestAnimationFrame(() => {
-                setTimeout(updateCounter, 1000);
-            });
-        }
-        updateCounter();
-
-        function claimRewards() {
-            if(miningValue <= 0) return;
-            
-            mainBalance += miningValue;
-            document.getElementById('mainBalance').innerText = mainBalance.toFixed(8);
-            
-            // Animasyon efekti
-            const counter = document.getElementById('miningCounter');
-            counter.classList.add('scale-110', 'text-white');
-            
-            setTimeout(() => {
-                miningValue = 0;
-                counter.innerText = "0.00000000";
-                counter.classList.remove('scale-110', 'text-white');
-            }, 300);
+        // Kazım Döngüsü
+        function startMining() {
+            setInterval(() => {
+                mining += rate;
+                document.getElementById('miningVal').innerText = mining.toFixed(8);
+            }, 1000);
         }
 
-        function openBoost() {
-            document.getElementById('boostOverlay').style.display = 'flex';
+        // Claim Fonksiyonu
+        function claim() {
+            if(mining > 0) {
+                total += mining;
+                mining = 0;
+                document.getElementById('totalBalance').innerText = total.toFixed(8);
+                document.getElementById('miningVal').innerText = "0.00000000";
+            }
         }
 
-        function closeBoost(e) {
-            document.getElementById('boostOverlay').style.display = 'none';
-        }
+        // Modal Kontrolleri
+        function openBoost() { document.getElementById('boostModal').style.display = 'flex'; }
+        function closeBoost() { document.getElementById('boostModal').style.display = 'none'; }
+
+        window.onload = startMining;
     </script>
 </body>
 </html>
