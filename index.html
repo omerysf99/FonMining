@@ -36,7 +36,6 @@
         .balance-row { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px; display: flex; align-items: center; margin-bottom: 12px; }
         .token-thumb { width: 42px; height: 42px; border-radius: 50%; margin-right: 15px; border: 2px solid var(--accent-purple); object-fit: cover; }
         .amount-text { font-size: 20px; font-weight: 700; transition: 0.3s; }
-        .flash-effect { color: #22c55e !important; transform: scale(1.05); }
 
         .mining-core { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .fan-container { position: relative; width: 230px; height: 230px; margin-bottom: 20px; }
@@ -47,16 +46,16 @@
         @keyframes pulse { from { opacity: 0.4; transform: scale(0.9); } to { opacity: 0.8; transform: scale(1.1); } }
 
         .counter-display { font-size: 36px; font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
-        .power-chip { background: rgba(251, 191, 36, 0.1); color: var(--accent-gold); padding: 8px 20px; border-radius: 50px; font-size: 14px; border: 1px solid rgba(251, 191, 36, 0.2); font-weight: 600; }
 
         /* Buttons */
         .btn-claim { height: 56px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; background: var(--accent-purple); color: white; width: 100%; font-size: 16px; margin-bottom: 12px; }
         .btn-boost { height: 56px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; background: linear-gradient(90deg, #fbbf24, #d97706); color: #000; width: 100%; margin-bottom: 20px; box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3); font-size: 16px; }
+        .btn-invite { height: 56px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; background: #0088cc; color: white; width: 100%; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: auto; }
         button:active { transform: scale(0.96); opacity: 0.9; }
 
-        /* Generic List Styles */
+        /* Lists */
         .scrollable { overflow-y: auto; flex: 1; }
-        .list-item { background: var(--glass); border: 1px solid var(--glass-border); padding: 16px; border-radius: 18px; display: flex; align-items: center; margin-bottom: 10px; }
+        .list-item { background: var(--glass); border: 1px solid var(--glass-border); padding: 16px; border-radius: 18px; display: flex; align-items: center; margin-bottom: 10px; text-decoration: none; color: white; }
         .list-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(147, 51, 234, 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); margin-right: 15px; font-size: 18px; }
         .list-content h4 { font-size: 15px; margin-bottom: 4px; }
         .list-content p { font-size: 12px; color: #a1a1aa; }
@@ -67,101 +66,81 @@
         .nav-item.active { color: var(--accent-purple); }
         .nav-item i { font-size: 22px; margin-bottom: 4px; }
         .nav-center { width: 56px; height: 56px; background: var(--accent-purple); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; margin-top: -45px; border: 6px solid #070312; box-shadow: 0 8px 15px rgba(147, 51, 234, 0.4); }
+
+        #ad-overlay { display:none; position:absolute; inset:0; background:black; z-index:100; flex-direction:column; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        
+        <div id="ad-overlay">
+            <h2 style="color:var(--accent-gold)">Watching Ad...</h2>
+            <p id="ad-timer" style="font-size: 40px; margin-top:20px;">5</p>
+        </div>
+
         <div id="home-view" class="view active">
             <div class="balance-row">
                 <img src="pinix.jpg" class="token-thumb" alt="PI">
                 <div>
-                    <span style="font-size: 11px; color: #a1a1aa; letter-spacing: 1px;">TOTAL WALLET</span>
+                    <span style="font-size: 11px; color: #a1a1aa;">WALLET</span>
                     <div class="amount-text" id="walletBal">0.0000000 PI</div>
                 </div>
             </div>
-
             <div class="mining-core">
                 <div class="fan-container">
                     <div class="fan-glow"></div>
                     <img src="pinix.jpg" class="pinix-fan-img" alt="Fan">
                 </div>
                 <div class="mining-info">
-                    <p style="color: #a1a1aa; font-weight: 500; margin-bottom: 8px;">Mining PI...</p>
                     <div class="counter-display" id="miningCount">0.0000000 PI</div>
-                    <div class="power-chip" id="powerDisplay"><i class="fas fa-bolt"></i> 5 GH/s</div>
+                    <div style="background: rgba(251, 191, 36, 0.1); color: var(--accent-gold); padding: 8px 20px; border-radius: 50px; font-size: 14px; border: 1px solid rgba(251, 191, 36, 0.2); font-weight: 600;" id="powerDisplay"><i class="fas fa-bolt"></i> 5 GH/s</div>
                 </div>
             </div>
-
-            <div class="footer-actions">
-                <button class="btn-claim" onclick="claim()">CLAIM EARNINGS</button>
-                <button class="btn-boost" onclick="activateBoost()" id="boostBtn"><i class="fas fa-rocket"></i> BOOST MINING (2X)</button>
-            </div>
-        </div>
-
-        <div id="wallet-view" class="view">
-            <h2 class="view-title">My Wallet</h2>
-            <div class="balance-row" style="padding: 30px; flex-direction: column; text-align: center; border-color: var(--accent-purple);">
-                <span style="color: #a1a1aa; margin-bottom: 8px;">Main Balance</span>
-                <div class="amount-text" id="walletBalLarge" style="font-size: 32px; color: white;">0.0000000 PI</div>
-            </div>
-            <div class="scrollable">
-                <div class="list-item">
-                    <div class="list-icon"><i class="fas fa-history"></i></div>
-                    <div class="list-content"><h4>Last Action</h4><p id="lastClaimTime">No claims yet</p></div>
-                </div>
-                <div class="list-item">
-                    <div class="list-icon" style="color:var(--accent-gold)"><i class="fas fa-trophy"></i></div>
-                    <div class="list-content"><h4>Mining Rank</h4><p>Bronze Miner</p></div>
-                </div>
-            </div>
+            <button class="btn-claim" onclick="claim()">CLAIM EARNINGS</button>
+            <button class="btn-boost" onclick="activateBoost()" id="boostBtn"><i class="fas fa-rocket"></i> BOOST MINING (2X)</button>
         </div>
 
         <div id="friends-view" class="view">
             <h2 class="view-title">Friends</h2>
-            <div class="list-item" style="background: rgba(147, 51, 234, 0.1); border-color: var(--accent-purple);">
+            <div class="list-item" style="background: rgba(147, 51, 234, 0.1); border-color: var(--accent-purple); margin-bottom: 20px;">
                 <div class="list-content" style="text-align:center; width:100%">
-                    <h4 style="color: var(--accent-purple)">Referral Bonus</h4>
+                    <h4 style="color: var(--accent-purple)">Invite Bonus</h4>
                     <p>Earn 10% from every friend's claim!</p>
                 </div>
             </div>
             <div class="scrollable">
                 <div class="list-item">
-                    <div class="list-icon"><i class="fas fa-user"></i></div>
-                    <div class="list-content"><h4>Alex Miner</h4><p>Active</p></div>
+                    <div class="list-icon"><i class="fas fa-user-friends"></i></div>
+                    <div class="list-content"><h4>Your Referrals</h4><p>0 Friends joined</p></div>
                 </div>
             </div>
-            <button class="btn-claim" style="margin-top:auto">INVITE FRIENDS</button>
+            <button class="btn-invite" onclick="inviteViaTelegram()">
+                <i class="fab fa-telegram-plane"></i> INVITE FRIENDS
+            </button>
         </div>
 
         <div id="missions-view" class="view">
             <h2 class="view-title">Missions</h2>
             <div class="scrollable">
-                <div class="list-item">
-                    <div class="list-icon" style="color: #1da1f2;"><i class="fab fa-twitter"></i></div>
-                    <div class="list-content"><h4>Follow us</h4><p>+10.0 PI</p></div>
-                </div>
-                <div class="list-item">
+                <a href="https://t.me/FonixCommunity" target="_blank" class="list-item">
                     <div class="list-icon" style="color: #24a1de;"><i class="fab fa-telegram-plane"></i></div>
-                    <div class="list-content"><h4>Join Community</h4><p>+5.0 PI</p></div>
+                    <div class="list-content"><h4>Join Telegram</h4><p>Fonix Community</p></div>
+                </a>
+                <div class="list-item" onclick="watchAd()" style="cursor:pointer">
+                    <div class="list-icon" style="color: #fbbf24;"><i class="fas fa-play-circle"></i></div>
+                    <div class="list-content"><h4>Watch Ads</h4><p>+0.0001 PI Reward</p></div>
                 </div>
             </div>
         </div>
 
-        <div id="more-view" class="view">
-            <h2 class="view-title">Settings</h2>
-            <div class="scrollable">
-                <div class="list-item"><div class="list-icon"><i class="fas fa-shield-alt"></i></div><div class="list-content"><h4>Security</h4><p>Protect your account</p></div></div>
-                <div class="list-item"><div class="list-icon"><i class="fas fa-cog"></i></div><div class="list-content"><h4>App Settings</h4><p>Sound and Theme</p></div></div>
-            </div>
-        </div>
+        <div id="wallet-view" class="view"><h2 class="view-title">Wallet</h2><div class="balance-row" style="padding:40px; justify-content:center"><div class="amount-text" id="walletBalLarge" style="font-size:32px">0.0000000 PI</div></div></div>
+        <div id="more-view" class="view"><h2 class="view-title">More</h2><div class="list-item"><h4>Settings Coming Soon</h4></div></div>
 
         <nav class="navbar">
             <div class="nav-item" onclick="switchView('wallet')"><i class="fas fa-wallet"></i><span>Wallet</span></div>
             <div class="nav-item" onclick="switchView('friends')"><i class="fas fa-users"></i><span>Friends</span></div>
             <div class="nav-item active" onclick="switchView('home')"><div class="nav-center"><i class="fas fa-home"></i></div><span style="margin-top:4px">Home</span></div>
-            <div class="nav-item" onclick="switchView('missions')"><i class="fas fa-bolt"></i><span>Missions</span></div>
+            <div class="nav-item" onclick="switchView('missions')"><i class="fas fa-tasks"></i><span>Missions</span></div>
             <div class="nav-item" onclick="switchView('more')"><i class="fas fa-ellipsis-h"></i><span>More</span></div>
         </nav>
     </div>
@@ -183,53 +162,66 @@
             miningCounterEl.innerText = currentlyMined.toFixed(7) + " PI";
         }, 100);
 
-        // View Controller
         function switchView(viewName) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             document.getElementById(viewName + '-view').classList.add('active');
-            
             const navItems = document.querySelectorAll('.nav-item');
-            if(viewName === 'home') navItems[2].classList.add('active');
-            else if(viewName === 'wallet') navItems[0].classList.add('active');
-            else if(viewName === 'friends') navItems[1].classList.add('active');
-            else if(viewName === 'missions') navItems[3].classList.add('active');
-            else if(viewName === 'more') navItems[4].classList.add('active');
+            const map = {'wallet':0, 'friends':1, 'home':2, 'missions':3, 'more':4};
+            navItems[map[viewName]].classList.add('active');
         }
 
-        // Claim Logic
         function claim() {
-            if(currentlyMined > 0.000001) {
+            if(currentlyMined > 0) {
                 walletBal += currentlyMined;
                 currentlyMined = 0;
-                
-                walletBalEl.innerText = walletBal.toFixed(7) + " PI";
-                walletBalLargeEl.innerText = walletBal.toFixed(7) + " PI";
-                miningCounterEl.innerText = "0.0000000 PI";
-                
-                document.getElementById('lastClaimTime').innerText = "Claimed " + new Date().toLocaleTimeString();
-                
-                walletBalEl.classList.add('flash-effect');
-                setTimeout(() => walletBalEl.classList.remove('flash-effect'), 500);
+                updateDisplays();
             }
         }
 
-        // Boost Logic
+        function updateDisplays() {
+            walletBalEl.innerText = walletBal.toFixed(7) + " PI";
+            walletBalLargeEl.innerText = walletBal.toFixed(7) + " PI";
+            miningCounterEl.innerText = "0.0000000 PI";
+        }
+
+        // TELEGRAM INVITE FUNCTION
+        function inviteViaTelegram() {
+            const botLink = "https://t.me/FonixMining2026Bot";
+            const message = encodeURIComponent("🚀 Hey! I'm mining PI on Fonix Mining. Join me and start earning! 💰\n\nPlay here: ");
+            const telegramUrl = `https://t.me/share/url?url=${botLink}&text=${message}`;
+            window.open(telegramUrl, '_blank');
+        }
+
+        function watchAd() {
+            const overlay = document.getElementById('ad-overlay');
+            const timerEl = document.getElementById('ad-timer');
+            let timeLeft = 5;
+            overlay.style.display = 'flex';
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(timer);
+                    overlay.style.display = 'none';
+                    walletBal += 0.0001;
+                    updateDisplays();
+                    alert("0.0001 PI Added to Wallet!");
+                }
+            }, 1000);
+        }
+
         function activateBoost() {
             if(!boostActive) {
                 boostActive = true;
                 currentRate = baseRate * 2;
                 document.getElementById('powerDisplay').innerHTML = '<i class="fas fa-bolt"></i> 10 GH/s';
                 document.getElementById('boostBtn').innerText = "BOOST ACTIVE (30S)";
-                document.getElementById('boostBtn').style.filter = "hue-rotate(60deg)";
-                
                 setTimeout(() => {
                     boostActive = false;
                     currentRate = baseRate;
                     document.getElementById('powerDisplay').innerHTML = '<i class="fas fa-bolt"></i> 5 GH/s';
                     document.getElementById('boostBtn').innerText = "BOOST MINING (2X)";
-                    document.getElementById('boostBtn').style.filter = "none";
                 }, 30000);
             }
         }
