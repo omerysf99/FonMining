@@ -21,6 +21,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Inter', sans-serif;
+            user-select: none;
         }
 
         body {
@@ -47,7 +48,7 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* Top Section */
+        /* Top Balance Area */
         .header-stats {
             margin-bottom: 20px;
         }
@@ -64,8 +65,6 @@
             transition: 0.3s;
         }
 
-        .balance-row:hover { background: rgba(255,255,255,0.07); }
-
         .token-thumb {
             width: 38px;
             height: 38px;
@@ -80,13 +79,18 @@
             font-size: 10px;
             color: #a1a1aa;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .amount-text {
             font-size: 18px;
             font-weight: 700;
             color: #fff;
+            transition: transform 0.2s;
+        }
+
+        .flash-effect {
+            color: var(--accent-green) !important;
+            transform: scale(1.1);
         }
 
         /* Mining Center */
@@ -105,7 +109,6 @@
             margin-bottom: 30px;
         }
 
-        /* Neon Glow behind fan */
         .fan-glow {
             position: absolute;
             inset: 0;
@@ -126,15 +129,8 @@
             position: relative;
         }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            from { opacity: 0.4; transform: scale(0.9); }
-            to { opacity: 0.8; transform: scale(1.1); }
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { from { opacity: 0.4; transform: scale(0.9); } to { opacity: 0.8; transform: scale(1.1); } }
 
         .mining-info { text-align: center; }
         .mining-info .status { color: #a1a1aa; font-size: 14px; margin-bottom: 8px; }
@@ -192,9 +188,9 @@
             box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3);
         }
 
-        .u-btn:active { transform: scale(0.96); }
+        .u-btn:active { transform: scale(0.96); opacity: 0.8; }
 
-        /* Bottom Nav */
+        /* Navbar */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -203,29 +199,16 @@
             border-top: 1px solid var(--glass-border);
         }
 
-        .nav-item {
-            color: #52525b;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 10px;
-            flex: 1;
-        }
-
+        .nav-item { color: #52525b; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
         .nav-item.active { color: var(--accent-purple); }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
 
         .active-indicator {
-            width: 54px;
-            height: 54px;
+            width: 54px; height: 54px;
             background: var(--accent-purple);
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            margin-top: -45px;
+            display: flex; justify-content: center; align-items: center;
+            color: white; margin-top: -45px;
             border: 6px solid #070312;
             box-shadow: 0 8px 15px rgba(147, 51, 234, 0.4);
         }
@@ -238,14 +221,14 @@
             <div class="balance-row">
                 <img src="pinix.jpg" class="token-thumb" alt="PI">
                 <div class="label-group">
-                    <span>Current Balance</span>
-                    <div class="amount-text" id="mainBalance">0.0000000 PI</div>
+                    <span>Wallet Balance</span>
+                    <div class="amount-text" id="walletBalance">0.0000000 PI</div>
                 </div>
             </div>
             <div class="balance-row">
-                <img src="pinix.jpg" class="token-thumb" alt="PINIX" style="filter: grayscale(1) brightness(1.5);">
+                <img src="pinix.jpg" class="token-thumb" alt="PINIX" style="filter: grayscale(1) opacity(0.5);">
                 <div class="label-group">
-                    <span>Secondary Token</span>
+                    <span>PINIX Token</span>
                     <div class="amount-text">0 PINIX</div>
                 </div>
             </div>
@@ -259,7 +242,7 @@
 
             <div class="mining-info">
                 <p class="status">Mining...</p>
-                <div class="counter-display" id="liveCounter">0.0000000 PI</div>
+                <div class="counter-display" id="miningCounter">0.0000000 PI</div>
                 <div class="power-chip">
                     <i class="fas fa-bolt"></i> 5 GH/s
                 </div>
@@ -268,7 +251,7 @@
 
         <div class="footer-actions">
             <div class="action-btns">
-                <button class="u-btn btn-claim">Claim</button>
+                <button class="u-btn btn-claim" onclick="claimEarnings()">Claim</button>
                 <button class="u-btn btn-swap"><i class="fas fa-random"></i> Swap</button>
             </div>
             <button class="u-btn btn-boost">
@@ -277,48 +260,50 @@
         </div>
 
         <nav class="navbar">
-            <a href="#" class="nav-item">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>Friends</span>
-            </a>
-            <a href="#" class="nav-item">
-                <div class="active-indicator">
-                    <i class="fas fa-home"></i>
-                </div>
-                <span style="margin-top: 4px;">Home</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-bullseye"></i>
-                <span>Missions</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fas fa-bars"></i>
-                <span>More</span>
-            </a>
+            <a href="#" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+            <a href="#" class="nav-item"><i class="fas fa-users"></i><span>Friends</span></a>
+            <a href="#" class="nav-item"><div class="active-indicator"><i class="fas fa-home"></i></div><span style="margin-top:4px">Home</span></a>
+            <a href="#" class="nav-item"><i class="fas fa-bullseye"></i><span>Missions</span></a>
+            <a href="#" class="nav-item"><i class="fas fa-bars"></i><span>More</span></a>
         </nav>
     </div>
 
     <script>
-        // Başlangıç değerleri
-        let totalMined = 0.0000000;
-        const perSecond = 0.00009; // Saniyede artış miktarı
-        const intervalTime = 100; // 0.1 saniyede bir güncelle (daha akıcı görünüm)
+        let walletBalance = 0.0000000;
+        let currentlyMined = 0.0000000;
+        const perSecond = 0.00009; 
+        const intervalTime = 100; // 0.1 saniye
         const perInterval = perSecond / (1000 / intervalTime);
 
-        const counterEl = document.getElementById('liveCounter');
-        const balanceEl = document.getElementById('mainBalance');
+        const miningCounterEl = document.getElementById('miningCounter');
+        const walletBalanceEl = document.getElementById('walletBalance');
 
-        // Her 100 milisaniyede bir artır
+        // Madencilik döngüsü
         setInterval(() => {
-            totalMined += perInterval;
-            const formatted = totalMined.toFixed(7);
-            counterEl.innerText = formatted + " PI";
-            balanceEl.innerText = formatted + " PI";
+            currentlyMined += perInterval;
+            miningCounterEl.innerText = currentlyMined.toFixed(7) + " PI";
         }, intervalTime);
+
+        // Claim Fonksiyonu
+        function claimEarnings() {
+            if (currentlyMined > 0) {
+                // Bakiyeyi Wallet'a ekle
+                walletBalance += currentlyMined;
+                
+                // Wallet'ı güncelle
+                walletBalanceEl.innerText = walletBalance.toFixed(7) + " PI";
+                
+                // Madencilik sayacını sıfırla
+                currentlyMined = 0;
+                miningCounterEl.innerText = "0.0000000 PI";
+
+                // Görsel geri bildirim (Efekt)
+                walletBalanceEl.classList.add('flash-effect');
+                setTimeout(() => {
+                    walletBalanceEl.classList.remove('flash-effect');
+                }, 500);
+            }
+        }
     </script>
 </body>
 </html>
