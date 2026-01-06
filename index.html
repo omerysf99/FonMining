@@ -2,312 +2,108 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX Mining Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mining Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
         body {
-            background-color: #0f0b1e;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
+            background: radial-gradient(circle at top, #2d1b4d 0%, #120c1d 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        .app-container {
-            width: 100%;
-            height: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-            background: linear-gradient(to bottom, #1a1430 0%, #0f0b1e 100%);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- Sayfa Alanı --- */
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            padding-bottom: 100px;
-            scrollbar-width: none;
-        }
-        .content-area::-webkit-scrollbar { display: none; }
-
-        .page { display: none; }
-        .page.active { display: block; }
-
-        /* --- Kart ve Bileşen Tasarımları --- */
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 14px;
-            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .pi-icon-circle {
-            width: 32px;
-            height: 32px;
-            background: #6a49f2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+        .mining-animation {
+            animation: rotate 10s linear infinite;
         }
-
-        /* --- Pervane Animasyonu --- */
-        .fan-container {
-            position: relative;
-            width: 240px;
-            height: 240px;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        .fan-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            animation: spin 8s linear infinite;
-        }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* --- Alt Navigasyon --- */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 85px;
-            background: #151026;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 10px;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #8e89a5;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        .nav-item.active { color: #facc15; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-
-        .home-center {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #a855f7, #6a49f2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: -45px;
-            border: 5px solid #0f0b1e;
-        }
-
-        .bot-footer {
-            position: absolute;
-            bottom: 2px;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: #4a455e;
-        }
+        .nav-item:hover { color: #a855f7; }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen max-w-md mx-auto p-4">
 
-<div class="app-container">
-    <div class="content-area">
-
-        <div id="home" class="page active">
-            <div class="glass-card flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="pi-icon-circle text-sm">π</div>
-                    <div>
-                        <p class="text-[10px] text-gray-400">Balance</p>
-                        <p class="text-sm font-bold">14.0000000 PI</p>
-                    </div>
-                </div>
-                <i class="fas fa-wallet text-gray-600"></i>
-            </div>
-            <div class="glass-card flex items-center gap-3">
-                <img src="pinix.jpg" class="w-8 h-8 rounded-full">
+    <div class="space-y-3 mt-4">
+        <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-purple-600 rounded-full p-2"><i class="fa-solid fa-p"></i></div>
                 <div>
-                    <p class="text-[10px] text-gray-400">Balance</p>
-                    <p class="text-sm font-bold">0 PINIX</p>
+                    <p class="text-gray-400 text-xs">Balance</p>
+                    <p class="font-bold text-lg">14.0000000 PI</p>
                 </div>
             </div>
-
-            <div class="fan-container">
-                <img src="pinix.jpg" class="fan-img" alt="Pervane">
-                <div class="absolute w-10 h-10 bg-[#6a49f2] rounded-full flex items-center justify-center border-4 border-[#0f0b1e]">
-                    <span class="font-bold">π</span>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <p class="text-gray-400 text-xs">Mining...</p>
-                <h1 class="text-4xl font-extrabold text-[#facc15] tracking-tight">0.0084399 <span class="text-white text-2xl">PI</span></h1>
-                
-                <div class="bg-[#1c1635] px-6 py-2 rounded-2xl border border-white/5 inline-flex items-center gap-3 mt-4">
-                    <i class="fas fa-bolt text-yellow-500"></i>
-                    <span class="text-sm">Mining Power <span class="font-bold ml-1">5 GH/s</span></span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 mt-8">
-                <button class="bg-[#6a49f2] py-4 rounded-2xl font-bold text-sm">Claim</button>
-                <button class="bg-[#22c55e] py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2">
-                    <i class="fas fa-exchange-alt"></i> Swap PINIX
-                </button>
-            </div>
-            <button onclick="showPage('boost')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black py-4 rounded-2xl mt-3 font-bold flex items-center justify-center gap-2">
-                <i class="fas fa-rocket"></i> BOOST
-            </button>
+            <i class="fa-solid fa-wallet text-gray-400"></i>
         </div>
 
-        <div id="wallet" class="page">
-            <h2 class="text-2xl font-bold text-center mb-6">Wallet</h2>
-            <div class="glass-card flex justify-between items-center py-5">
-                <div class="flex items-center gap-3">
-                    <div class="pi-icon-circle">π</div>
-                    <div>
-                        <p class="text-[10px] text-gray-400 uppercase">Balance</p>
-                        <p class="text-lg font-bold">14.0000000 PI</p>
-                    </div>
-                </div>
-            </div>
-            <div class="glass-card flex justify-between items-center py-5">
-                <div class="flex items-center gap-3">
-                    <img src="pinix.jpg" class="w-8 h-8 rounded-full">
-                    <div>
-                        <p class="text-[10px] text-gray-400 uppercase">Balance</p>
-                        <p class="text-lg font-bold">0 PINIX</p>
-                    </div>
-                </div>
-            </div>
-            <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-bold mt-4">↗ Withdraw</button>
-            <div class="flex justify-between mt-8 mb-4">
-                <span class="font-bold">Transaction History</span>
-                <span class="text-purple-400 text-xs">View All ↗</span>
-            </div>
-            <div class="glass-card flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center"><i class="fas fa-arrow-up rotate-45 text-purple-400"></i></div>
-                    <div><p class="text-sm font-bold">Swap</p><p class="text-[10px] text-gray-500">12 minutes ago</p></div>
-                </div>
-                <div class="text-right"><p class="text-sm font-bold text-purple-400">+12.0000000 PI</p><p class="text-[10px] text-gray-500">-1200 PINIX</p></div>
-            </div>
-        </div>
-
-        <div id="friends" class="page">
-            <p class="text-center text-xs text-gray-400 mb-6">UID: 8392479231</p>
-            <div class="glass-card">
-                <p class="text-xs text-gray-400 mb-2">Your referral link</p>
-                <div class="flex gap-2">
-                    <input type="text" value="https://t.me/PINIX_Bot?..." class="flex-1 bg-black/20 p-3 rounded-xl text-xs outline-none" readonly>
-                    <button class="bg-[#6a49f2] p-3 rounded-xl"><i class="far fa-copy"></i></button>
-                </div>
-            </div>
-            <button class="w-full bg-[#6a49f2] py-4 rounded-2xl font-bold mt-4 flex items-center justify-center gap-2">
-                <i class="fas fa-users"></i> Invite Friend
-            </button>
-            <div class="glass-card mt-4 py-4 flex justify-between items-center">
-                <span class="font-bold">Open Friends List (0)</span>
-                <i class="fas fa-chevron-right text-gray-600"></i>
-            </div>
-            <h3 class="mt-8 mb-4 font-bold">Referral Rewards</h3>
-            <div class="glass-card flex justify-between items-center border-l-4 border-purple-500">
-                <div class="flex items-center gap-4">
-                    <span class="text-gray-500 font-bold">1</span>
-                    <span class="font-bold">1000 PINIX</span>
-                </div>
-                <span class="bg-black/20 px-3 py-1 rounded-full text-xs text-yellow-500 font-bold">9 GH/s ⚡</span>
-            </div>
-        </div>
-
-        <div id="missions" class="page">
-            <h2 class="text-2xl font-bold text-center mb-1">New Missions</h2>
-            <p class="text-center text-xs text-gray-500 mb-6">Complete tasks and earn more</p>
-            <div class="flex bg-black/20 p-1 rounded-xl mb-6">
-                <button class="flex-1 bg-white/10 py-2 rounded-lg text-sm font-bold">Tasks</button>
-                <button class="flex-1 py-2 text-sm text-gray-500 relative">Ref <span class="absolute top-1 right-8 w-1.5 h-1.5 bg-red-500 rounded-full"></span></button>
-                <button class="flex-1 py-2 text-sm text-gray-500 relative">Contest <span class="absolute top-1 right-4 w-1.5 h-1.5 bg-red-500 rounded-full"></span></button>
-            </div>
-            <div class="glass-card flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-check-circle text-green-500"></i>
-                    <span class="font-bold">Completed (14)</span>
-                </div>
-                <i class="fas fa-chevron-down text-gray-600"></i>
-            </div>
-        </div>
-
-        <div id="more" class="page">
-            <div class="glass-card flex items-center gap-4 py-6">
-                <img src="pinix.jpg" class="w-16 h-16 rounded-2xl border-2 border-purple-500">
+        <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-900 rounded-full p-2"><i class="fa-solid fa-fan"></i></div>
                 <div>
-                    <h3 class="font-bold">Chalpus Yeniden 🐶</h3>
-                    <p class="text-yellow-500 text-xs">@yenidenchalpus</p>
-                    <p class="text-[10px] text-gray-500">UID: 8392479231 <i class="far fa-copy ml-1"></i></p>
+                    <p class="text-gray-400 text-xs">Balance</p>
+                    <p class="font-bold text-lg">0 PINIX</p>
                 </div>
             </div>
-            <div class="space-y-3">
-                <div class="glass-card flex justify-between items-center">
-                    <div class="flex items-center gap-3"><i class="fas fa-language"></i> Language</div>
-                    <span class="text-xs text-gray-500">us English</span>
-                </div>
-                <div class="glass-card flex items-center gap-3">
-                    <i class="fas fa-user-friends"></i> Invite Friends
-                </div>
-                <div class="glass-card flex items-center gap-3">
-                    <i class="fas fa-question-circle"></i> Contact Support
-                </div>
-                <div class="glass-card flex justify-between items-center">
-                    <div class="flex items-center gap-3"><i class="fas fa-trophy text-yellow-500"></i> Ratings & Leagues</div>
-                    <span class="text-xs text-yellow-500 font-bold">(soon)</span>
-                </div>
-            </div>
+            <i class="fa-solid fa-wallet text-gray-400"></i>
         </div>
-
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item" onclick="showPage('wallet')" id="nav-wallet"><i class="fas fa-wallet"></i><span>Wallet</span></div>
-        <div class="nav-item" onclick="showPage('friends')" id="nav-friends"><i class="fas fa-user-friends"></i><span>Friends</span></div>
-        <div class="nav-item active" onclick="showPage('home')" id="nav-home">
-            <div class="home-center"><i class="fas fa-home text-2xl text-white"></i></div>
-            <span class="mt-1">Home</span>
+    <div class="flex-grow flex flex-col items-center justify-center py-8">
+        <div class="relative w-48 h-48 mb-6">
+            <div class="absolute inset-0 bg-purple-500 rounded-full blur-3xl opacity-20"></div>
+            <div class="mining-animation w-full h-full rounded-full border-4 border-purple-500/30 flex items-center justify-center" style="background: url('https://via.placeholder.com/200/4c1d95/ffffff?text=FAN') center/cover;">
+                 <div class="bg-purple-900 rounded-full p-4 border-2 border-yellow-500">
+                    <i class="fa-solid fa-p text-2xl text-yellow-500"></i>
+                 </div>
+            </div>
         </div>
-        <div class="nav-item" onclick="showPage('missions')" id="nav-missions"><i class="fas fa-bullseye"></i><span>Missions</span></div>
-        <div class="nav-item" onclick="showPage('more')" id="nav-more"><i class="fas fa-ellipsis-h"></i><span>More</span></div>
-    </nav>
 
-    <div class="bot-footer">@PINIX_Mining_Bot</div>
-</div>
+        <p class="text-gray-400 text-sm italic mb-2">Mining...</p>
+        <h2 class="text-4xl font-bold text-yellow-500 mb-6">0.0107114 <span class="text-white">PI</span></h2>
 
-<script>
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
+        <div class="glass-card rounded-xl px-8 py-3 flex items-center gap-3">
+            <i class="fa-solid fa-bolt text-yellow-500"></i>
+            <div class="text-left">
+                <p class="text-[10px] text-gray-400 uppercase">Mining Power</p>
+                <p class="font-bold">5 GH/s</p>
+            </div>
+        </div>
+    </div>
 
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const activeNav = document.getElementById('nav-' + (pageId === 'boost' ? 'home' : pageId));
-        if(activeNav) activeNav.classList.add('active');
-    }
-</script>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <button class="bg-purple-600 hover:bg-purple-700 py-4 rounded-2xl font-bold transition">Claim</button>
+        <button class="bg-green-500 hover:bg-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition text-black">
+            <i class="fa-solid fa-right-left"></i> Swap PINIX
+        </button>
+    </div>
+
+    <button class="w-full bg-yellow-600 hover:bg-yellow-700 py-4 rounded-2xl font-bold text-lg mb-8 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rocket"></i> BOOST
+    </button>
+
+    <div class="glass-card rounded-3xl p-4 flex justify-around items-center mb-4">
+        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa-solid fa-wallet"></i><span class="text-[10px]">Wallet</span>
+        </div>
+        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa-solid fa-users"></i><span class="text-[10px]">Friends</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-yellow-500">
+            <div class="bg-yellow-500/20 p-2 rounded-full"><i class="fa-solid fa-house"></i></div>
+            <span class="text-[10px]">Home</span>
+        </div>
+        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa-solid fa-bullseye"></i><span class="text-[10px]">Missions</span>
+        </div>
+        <div class="nav-item flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa-solid fa-ellipsis"></i><span class="text-[10px]">More</span>
+        </div>
+    </div>
 
 </body>
 </html>
