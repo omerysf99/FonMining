@@ -19,11 +19,12 @@
             overflow: hidden;
         }
 
+        /* Görseldeki Arka Plan Gradyanı */
         .app-container {
             width: 100%;
             max-width: 390px;
             height: 844px;
-            background: radial-gradient(circle at top, #1e1333 0%, #050308 100%);
+            background: radial-gradient(circle at 50% 30%, #251647 0%, #050308 70%);
             position: relative;
             overflow: hidden;
             display: flex;
@@ -43,8 +44,8 @@
         /* Fan Animasyonu */
         .fan-container {
             position: relative;
-            width: 260px;
-            height: 260px;
+            width: 280px;
+            height: 280px;
             margin: 10px auto;
         }
 
@@ -57,9 +58,16 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Alt Navigasyon (Görseldeki gibi) */
+        /* Boost Penceresi (Modal) */
+        #boostModal {
+            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 100; align-items: center; justify-content: center; padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Navigasyon */
         nav {
-            background: #0b0714;
+            background: rgba(11, 7, 20, 0.95);
             height: 85px;
             position: absolute;
             bottom: 0;
@@ -69,29 +77,17 @@
             justify-content: space-around;
             align-items: center;
             padding-bottom: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .nav-item { color: #6b7280; font-size: 10px; font-weight: 500; text-align: center; }
+        .nav-item { color: #6b7280; font-size: 10px; font-weight: 500; text-align: center; cursor: pointer; }
         .nav-item.active { color: #facc15; }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
-
         .home-center {
             background: linear-gradient(to bottom, #a855f7, #f59e0b);
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: -30px;
-            border: 4px solid #050308;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        /* Modal */
-        #walletModal {
-            display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 100; align-items: center; justify-content: center; padding: 20px;
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: -35px; border: 4px solid #050308;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
     </style>
 </head>
@@ -99,39 +95,38 @@
 
     <div class="app-container">
         
-        <header class="p-4 flex justify-center items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight">PINIX App</h1>
-            <i class="fas fa-check-circle text-sky-400 text-sm"></i>
-        </header>
-
-        <div id="walletModal">
-            <div class="glass-card w-full p-6 text-center border-purple-500/50">
-                <h3 class="font-bold mb-4">CÜZDAN ADRESİ</h3>
-                <input type="text" id="walletInput" placeholder="Adresinizi girin" class="w-full bg-black/50 border border-slate-700 rounded-xl p-3 mb-4 outline-none text-sm">
-                <button onclick="saveWallet()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">BAĞLA</button>
+        <div id="boostModal">
+            <div class="glass-card w-full p-6 text-center border-yellow-500/30">
+                <i class="fas fa-rocket text-4xl text-yellow-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">HIZI ARTIR</h3>
+                <p class="text-gray-400 text-sm mb-6">Daha hızlı kazım yapmak için bir üst seviyeye geçin.</p>
+                <div class="space-y-3">
+                    <button class="w-full bg-yellow-500 text-black py-3 rounded-xl font-bold text-sm">UPGRADE (+2 GH/s)</button>
+                    <button onclick="closeBoost()" class="w-full bg-white/10 py-3 rounded-xl font-bold text-sm">KAPAT</button>
+                </div>
             </div>
         </div>
 
         <main class="flex-grow">
             <section id="home" class="tab-content active-tab">
-                <div class="space-y-3 mb-4">
-                    <div class="glass-card p-3 flex justify-between items-center px-5">
+                <div class="space-y-3 mb-6">
+                    <div class="glass-card p-4 flex justify-between items-center px-5">
                         <div class="flex items-center gap-3">
                             <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-7 h-7" alt="pi">
                             <div class="text-left">
-                                <p class="text-[9px] text-gray-500 uppercase font-bold">Balance</p>
-                                <p id="mainBalance" class="text-md font-bold text-white">0.00000000 PI</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Balance</p>
+                                <p id="mainBalance" class="text-lg font-bold">0.00000000 PI</p>
                             </div>
                         </div>
                         <i class="fas fa-wallet text-gray-600"></i>
                     </div>
 
-                    <div class="glass-card p-3 flex justify-between items-center px-5">
+                    <div class="glass-card p-4 flex justify-between items-center px-5">
                         <div class="flex items-center gap-3">
-                            <img src="pinix.jpg" class="w-7 h-7 rounded-full object-cover" onerror="this.src='https://via.placeholder.com/30/purple'">
+                            <img src="pinix.jpg" class="w-7 h-7 rounded-full object-cover" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
                             <div class="text-left">
-                                <p class="text-[9px] text-gray-500 uppercase font-bold">Balance</p>
-                                <p class="text-md font-bold text-gray-300">0 PINIX</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Balance</p>
+                                <p class="text-lg font-bold text-gray-300">0 PINIX</p>
                             </div>
                         </div>
                         <i class="fas fa-wallet text-gray-600"></i>
@@ -141,84 +136,52 @@
                 <div class="fan-container">
                     <img src="pinix.jpg" class="fan-image" alt="fan" onerror="this.src='https://i.ibb.co/L5hYfTf/fan-purple.png'">
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="w-10 h-10 bg-[#4e36cc] rounded-full flex items-center justify-center border-2 border-[#050308] shadow-lg">
-                            <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-5 h-5" alt="pi">
+                        <div class="w-12 h-12 bg-[#4e36cc] rounded-full flex items-center justify-center border-2 border-[#050308] shadow-lg">
+                            <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6" alt="pi">
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center">
-                    <p class="text-gray-500 text-xs italic mb-1">Mining...</p>
-                    <h2 id="miningCounter" class="text-4xl font-black text-[#facc15] tracking-tight mb-4">0.00000000 PI</h2>
+                <div class="text-center mt-4">
+                    <p class="text-gray-500 text-sm italic mb-1">Mining...</p>
+                    <h2 id="miningCounter" class="text-4xl font-black text-[#facc15] tracking-tight mb-6">0.00000000 PI</h2>
 
-                    <div class="inline-flex items-center gap-3 bg-[#0f0a1a] border border-slate-800 px-8 py-3 rounded-2xl mb-6">
-                        <i class="fas fa-bolt text-yellow-500"></i>
+                    <div class="inline-flex items-center gap-3 bg-[#0f0a1a] border border-slate-800 px-8 py-3 rounded-2xl mb-8">
+                        <i class="fas fa-bolt text-yellow-500 text-xl"></i>
                         <div class="text-left">
-                            <p class="text-[9px] text-gray-500 uppercase">Mining Power</p>
-                            <p class="font-bold text-md">1 GH/s</p>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold">Mining Power</p>
+                            <p class="font-bold text-lg">1 GH/s</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <button onclick="claimPi()" class="bg-[#7c3aed] py-4 rounded-[2rem] font-bold text-lg">Claim</button>
-                        <button class="bg-[#10b981] py-4 rounded-[2rem] font-bold text-lg flex items-center justify-center gap-2">
-                             <i class="fas fa-sync-alt text-sm"></i> Swap PINIX
+                    <div class="flex flex-col gap-3">
+                        <button onclick="claimPi()" class="w-full bg-[#7c3aed] py-4 rounded-[2rem] font-bold text-xl shadow-lg shadow-purple-900/20 active:scale-95 transition">Claim</button>
+                        
+                        <button onclick="openBoost()" class="w-full bg-[#f59e0b] py-5 rounded-[2rem] font-black text-2xl text-[#442b05] flex items-center justify-center gap-3 active:scale-95 transition shadow-lg shadow-orange-900/20">
+                            <i class="fas fa-rocket"></i> BOOST
                         </button>
                     </div>
-                    <button class="w-full bg-[#f59e0b] py-5 rounded-[2rem] font-black text-xl text-[#442b05] flex items-center justify-center gap-3 active:scale-95 transition-transform">
-                        <i class="fas fa-rocket"></i> BOOST
-                    </button>
-                </div>
-            </section>
-
-            <section id="wallet" class="tab-content">
-                <h2 class="text-xl font-bold mb-6 italic">WALLET</h2>
-                <div id="walletBox" class="glass-card p-10 text-center border-dashed border-2 border-slate-800">
-                    <p class="text-gray-500 text-sm mb-6">Cüzdan bağlı değil.</p>
-                    <button onclick="document.getElementById('walletModal').style.display='flex'" class="bg-white text-black px-8 py-3 rounded-full font-bold">BAĞLA</button>
-                </div>
-            </section>
-
-            <section id="missions" class="tab-content">
-                <h2 class="text-xl font-bold mb-6 italic">GÖREVLER</h2>
-                <div class="glass-card p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <i class="fab fa-telegram text-2xl text-blue-500"></i>
-                        <p class="font-bold text-sm">Kanala Katıl (+500 PINIX)</p>
-                    </div>
-                    <a href="https://t.me/FonixCommunity" target="_blank" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">GİT</a>
                 </div>
             </section>
         </main>
 
         <nav>
-            <div onclick="showTab('wallet', this)" class="nav-item">
-                <i class="fas fa-wallet nav-icon"></i><br>Wallet
-            </div>
-            <div onclick="showTab('friends', this)" class="nav-item">
-                <i class="fas fa-users nav-icon"></i><br>Friends
-            </div>
-            <div onclick="showTab('home', this)" class="nav-item active">
-                <div class="home-center">
-                    <i class="fas fa-home text-white text-xl"></i>
-                </div>
+            <div class="nav-item"><i class="fas fa-wallet text-xl mb-1"></i><br>Wallet</div>
+            <div class="nav-item"><i class="fas fa-users text-xl mb-1"></i><br>Friends</div>
+            <div class="nav-item active">
+                <div class="home-center"><i class="fas fa-home text-white text-2xl"></i></div>
                 Home
             </div>
-            <div onclick="showTab('missions', this)" class="nav-item">
-                <i class="fas fa-bullseye nav-icon"></i><br>Missions
-            </div>
-            <div class="nav-item">
-                <i class="fas fa-ellipsis-h nav-icon"></i><br>More
-            </div>
+            <div class="nav-item"><i class="fas fa-bullseye text-xl mb-1"></i><br>Missions</div>
+            <div class="nav-item"><i class="fas fa-ellipsis-h text-xl mb-1"></i><br>More</div>
         </nav>
     </div>
 
     <script>
         let miningValue = 0.00000000;
         let balance = 0.00000000;
-        const rate = 0.00002; // Saniyede artış
+        const rate = 0.00002;
 
-        // Sayaç
         setInterval(() => {
             miningValue += rate;
             document.getElementById('miningCounter').innerText = miningValue.toFixed(8) + " PI";
@@ -229,23 +192,16 @@
                 balance += miningValue;
                 miningValue = 0;
                 document.getElementById('mainBalance').innerText = balance.toFixed(8) + " PI";
-                alert("Ödül toplandı!");
+                document.getElementById('miningCounter').innerText = "0.00000000 PI";
             }
         }
 
-        function showTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
-            document.getElementById(tabId).classList.add('active-tab');
-            
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            if(el) el.classList.add('active');
+        function openBoost() {
+            document.getElementById('boostModal').style.display = 'flex';
         }
 
-        function saveWallet() {
-            const val = document.getElementById('walletInput').value;
-            if(val.length < 5) return alert("Geçerli bir adres girin!");
-            document.getElementById('walletBox').innerHTML = `<p class='text-xs font-mono text-sky-400'>${val}</p>`;
-            document.getElementById('walletModal').style.display = 'none';
+        function closeBoost() {
+            document.getElementById('boostModal').style.display = 'none';
         }
     </script>
 </body>
