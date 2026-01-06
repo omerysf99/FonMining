@@ -7,6 +7,7 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
@@ -22,20 +23,21 @@
         
         #app { width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 70%); position: relative; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-        /* REKLAM BAR */
+        /* REKLAM TIMER BAR */
         .ad-timer-container { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.3); z-index: 1000; }
         #ad-timer-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
 
-        /* BİLDİRİM */
+        /* BİLDİRİM SİSTEMİ */
         #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 50000; pointer-events: none; width: 90%; }
         .toast { padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-180px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px); }
         .toast.active { transform: translateY(0); }
         .toast.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--p-green); color: var(--p-green); }
         .toast.error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--p-red); color: var(--p-red); }
+
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
         .shake-screen { animation: shake 0.3s ease-in-out 2; }
 
-        /* HEADER */
+        /* UI ELEMENTS */
         .header { padding: 20px; background: rgba(5, 1, 13, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
         .token-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
@@ -44,18 +46,19 @@
         .view.active { display: flex; animation: viewIn 0.4s ease-out; }
         @keyframes viewIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* DASHBOARD */
+        /* MINING */
         .fan-box { width: 220px; height: 220px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 3s linear infinite; box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); margin: 30px auto; }
         @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .balance-hero { font-size: 3.2rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-align: center; }
 
-        /* CARDS */
+        /* BUTTONS & CARDS */
         .card { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; }
         .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 18px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-mega:active { transform: scale(0.97); }
         .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 20px; padding: 15px 20px; color: white; width: 100%; outline: none; margin-top: 10px; }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; z-index: 1000; }
         .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; cursor: pointer; transition: 0.3s; flex: 1; }
         .nav-link.active { color: var(--secondary); }
         .nav-link i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
@@ -92,7 +95,7 @@
         <div class="fan-box"></div>
         <div class="balance-hero" id="uncl-ui">0.00000</div>
         <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem; margin-bottom:20px;">MINING ENGINE ACTIVE</p>
-        <button class="btn-mega" onclick="manualClaim()">CLAIM MINING (AD)</button>
+        <button class="btn-mega" onclick="manualClaim()">CLAIM REWARDS (AD)</button>
     </div>
 
     <div id="v-tasks" class="view">
@@ -109,7 +112,7 @@
     </div>
 
     <div id="v-ref" class="view">
-        <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Invite & Earn</h2>
+        <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Network</h2>
         <div class="card" style="text-align:center;">
             <p style="font-size:0.8rem; opacity:0.6;">SİZİN DAVET KODUNUZ</p>
             <h1 id="my-ref-display" style="font-size:2.5rem; color:var(--secondary); margin:15px 0; font-family:'Orbitron';">---</h1>
@@ -120,10 +123,9 @@
         </div>
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>Toplam Davet Edilen:</span>
+                <span>Davet Edilenler:</span>
                 <b id="ref-count" style="color:var(--secondary); font-size:1.2rem;">0</b>
             </div>
-            <p style="font-size:0.7rem; opacity:0.4; margin-top:10px;">Her başarılı davet için anında 100 PNX kazanırsınız.</p>
         </div>
     </div>
 
@@ -162,13 +164,13 @@
         startAds();
     });
 
-    let db = JSON.parse(localStorage.getItem('fonix_pro_v9')) || {
+    let db = JSON.parse(localStorage.getItem('fonix_v10')) || {
         pi: 0.0, pnx: 0, uncl: 0.0, done: false,
         refCode: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         refCount: 0
     };
 
-    function save() { localStorage.setItem('fonix_pro_v9', JSON.stringify(db)); }
+    function save() { localStorage.setItem('fonix_v10', JSON.stringify(db)); }
 
     function startAds() {
         let t = 0;
@@ -203,9 +205,24 @@
         notify("Başarılı!");
     }
 
+    // PAYLAŞIM FONKSİYONU - Siteyi Kapatmaz
+    function shareOnTelegram() {
+        const shareText = `Fonix Community'de madencilik yapmaya başla! Davet kodum: ${db.refCode}`;
+        const shareLink = `https://t.me/FonixMining2026Bot`;
+        
+        // Telegram share URL'sini kullanarak paylaşım penceresini açar (Uygulama arka planda açık kalır)
+        const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`;
+        tg.openTelegramLink(fullUrl);
+    }
+
+    function copyRef() {
+        navigator.clipboard.writeText(db.refCode);
+        notify("Kod kopyalandı!");
+    }
+
     function runMission(btn, rew, url) {
         window.open(url, '_blank');
-        setTimeout(() => { db.pnx += rew; save(); render(); notify("Görev Tamam!"); }, 3000);
+        setTimeout(() => { db.pnx += rew; save(); render(); notify("Görev Tamam!"); }, 4000);
     }
 
     function swapPNX() {
@@ -214,19 +231,15 @@
         else notify("Yetersiz!", "error");
     }
 
-    function shareOnTelegram() {
-        const text = `Fonix Community'de madencilik yapmaya başla! Davet kodum: ${db.refCode}\nLink: https://t.me/SeninBotunLink`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(text)}`);
-    }
-
-    function copyRef() {
-        navigator.clipboard.writeText(db.refCode);
-        notify("Kod kopyalandı!");
-    }
-
     function updateW() {
         const a = parseFloat(document.getElementById('w-amt').value) || 0;
         document.getElementById('w-res').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
+    }
+
+    function sendW() {
+        const a = parseFloat(document.getElementById('w-amt').value);
+        if(a < 30 || a > db.pi) return notify("Hata!", "error");
+        db.pi -= a; save(); render(); notify("Talep alındı.");
     }
 
     function notify(msg, type = 'success') {
@@ -237,7 +250,7 @@
         box.appendChild(t);
         setTimeout(() => t.classList.add('active'), 10);
         if(type === 'error') document.getElementById('app').classList.add('shake-screen');
-        setTimeout(() => { t.classList.remove('active'); document.getElementById('app').classList.remove('shake-screen'); }, 3000);
+        setTimeout(() => { t.classList.remove('active'); document.getElementById('app').classList.remove('shake-screen'); t.remove(); }, 3000);
     }
 
     function render() {
