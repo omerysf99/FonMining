@@ -2,426 +2,144 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Block Blast Neon Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonix Community App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --bg: #020617;
-            --panel: #1e293b;
-            --grid-empty: #334155;
-            --accent: #6366f1;
-        }
-
-        body {
-            background-color: #000;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        #game-container {
-            width: 100vw;
-            height: 100vh;
-            max-width: 500px;
-            aspect-ratio: 9/16;
-            background-color: var(--bg);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Skor Animasyonu */
-        .header {
-            height: 20%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-
-        #score {
-            font-size: 4rem;
-            font-weight: 900;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: linear-gradient(to bottom, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .score-bump { transform: scale(1.3); }
-
-        /* Oyun Izgarası */
-        #grid {
-            width: 90%;
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            background-color: var(--panel);
-            padding: 10px;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        .cell {
-            aspect-ratio: 1/1;
-            background-color: var(--grid-empty);
-            border-radius: 6px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        /* Patlama Animasyonu */
-        @keyframes blast {
-            0% { transform: scale(1); filter: brightness(2); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        .blasting { animation: blast 0.4s forwards; }
-
-        /* Yerleşme Animasyonu */
-        @keyframes pop {
-            0% { transform: scale(0.8); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .popping { animation: pop 0.3s ease-out; }
-
-        /* Alt Tepsi */
-        #tray {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            padding-bottom: 20px;
-        }
-
-        .piece {
-            display: grid;
-            gap: 3px;
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .piece-cell {
-            width: 22px;
-            height: 22px;
-            border-radius: 4px;
-        }
-
-        /* Renk Paleti ve Parlama */
-        .c1 { background: #ff4d4d; box-shadow: 0 0 15px #ff4d4d88; }
-        .c2 { background: #fbbf24; box-shadow: 0 0 15px #fbbf2488; }
-        .c3 { background: #34d399; box-shadow: 0 0 15px #34d39988; }
-        .c4 { background: #60a5fa; box-shadow: 0 0 15px #60a5fa88; }
-        .c5 { background: #a78bfa; box-shadow: 0 0 15px #a78bfa88; }
-        .c6 { background: #f472b6; box-shadow: 0 0 15px #f472b688; }
-
-        .preview { background-color: rgba(255, 255, 255, 0.1) !important; border: 1px solid #ffffff33; }
-
-        .dragging {
-            position: fixed;
-            pointer-events: none;
-            z-index: 1000;
-            transform: scale(1.6);
-            opacity: 0.9;
-        }
-
-        #game-over {
-            position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 16px 48px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
-        }
+        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .active-tab { display: block; }
+        .nav-item.active { color: #38bdf8; border-top: 2px solid #38bdf8; }
     </style>
 </head>
-<body>
+<body class="flex flex-col h-screen overflow-hidden">
 
-    <div id="game-container">
-        <div class="header">
-            <div id="score">0</div>
-        </div>
+    <main class="flex-grow overflow-y-auto p-6 pb-24">
+        
+        <section id="home" class="tab-content active-tab animate-fade-in">
+            <div class="text-center mt-10">
+                <div class="w-32 h-32 bg-sky-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg shadow-sky-500/50">
+                    <i class="fas fa-coins text-5xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold">Hoş Geldin!</h1>
+                <p class="text-gray-400 mt-2">Puanlarını toplamak için görevleri tamamla.</p>
+                <div class="mt-8 bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <p class="text-sm text-gray-400 uppercase tracking-widest">Toplam Bakiyen</p>
+                    <p class="text-4xl font-black text-sky-400 mt-1">1,250 <span class="text-lg">FNX</span></p>
+                </div>
+            </div>
+        </section>
 
-        <div id="grid"></div>
+        <section id="referral" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6">Arkadaşlarını Davet Et</h2>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 mb-6">
+                <p class="text-gray-400 text-sm mb-4">Senin özel referans kodun:</p>
+                <div class="flex items-center gap-2 bg-slate-900 p-4 rounded-xl border border-slate-600">
+                    <code id="refCode" class="flex-grow font-mono text-sky-400 font-bold">FONIX-WAIT...</code>
+                    <button onclick="copyRef()" class="text-gray-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                </div>
+                <p class="mt-4 text-xs text-gray-500 italic">* Her başarılı davet için 500 FNX kazanırsın.</p>
+            </div>
+            <div class="space-y-3">
+                <h3 class="font-semibold text-gray-300">Davet Edilenler (0)</h3>
+                <p class="text-center text-gray-600 py-10">Henüz kimseyi davet etmedin.</p>
+            </div>
+        </section>
 
-        <div id="tray"></div>
+        <section id="tasks" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6">Görevler</h2>
+            <div class="space-y-4">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <i class="fab fa-telegram-plane text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">Kanala Katıl</h4>
+                            <p class="text-xs text-sky-400">+500 FNX</p>
+                        </div>
+                    </div>
+                    <a href="https://t.me/FonixCommunity" target="_blank" class="bg-sky-500 hover:bg-sky-600 px-4 py-2 rounded-lg text-sm font-bold transition">Git</a>
+                </div>
+                
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 opacity-50 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-pink-600 rounded-xl flex items-center justify-center">
+                            <i class="fab fa-instagram text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">Takip Et</h4>
+                            <p class="text-xs text-pink-400">Çok Yakında</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <div id="game-over">
-            <h1 style="font-size: 3rem; margin-bottom: 0;">EYVAH!</h1>
-            <p id="final-score" style="font-size: 1.5rem; color: #94a3b8;">Skor: 0</p>
-            <button onclick="resetGame()">YENİDEN BAŞLA</button>
-        </div>
-    </div>
+        <section id="wallet" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6">Cüzdanım</h2>
+            <div class="bg-gradient-to-br from-sky-600 to-indigo-700 p-6 rounded-3xl shadow-xl mb-6">
+                <p class="text-sky-100 text-sm opacity-80">Toplam Değer</p>
+                <p class="text-3xl font-bold">$12.50</p>
+                <p class="mt-4 text-xs font-mono opacity-50 truncate">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p>
+            </div>
+            <button class="w-full bg-white text-black font-bold py-4 rounded-2xl transition hover:bg-gray-200">
+                Cüzdanı Bağla
+            </button>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around items-center h-20 px-2">
+        <button onclick="showTab('home')" class="nav-item active flex flex-col items-center flex-1 py-2">
+            <i class="fas fa-home mb-1"></i>
+            <span class="text-[10px] font-medium">Ana Sayfa</span>
+        </button>
+        <button onclick="showTab('tasks')" class="nav-item flex flex-col items-center flex-1 py-2">
+            <i class="fas fa-tasks mb-1"></i>
+            <span class="text-[10px] font-medium">Görevler</span>
+        </button>
+        <button onclick="showTab('referral')" class="nav-item flex flex-col items-center flex-1 py-2">
+            <i class="fas fa-user-plus mb-1"></i>
+            <span class="text-[10px] font-medium">Referans</span>
+        </button>
+        <button onclick="showTab('wallet')" class="nav-item flex flex-col items-center flex-1 py-2">
+            <i class="fas fa-wallet mb-1"></i>
+            <span class="text-[10px] font-medium">Cüzdan</span>
+        </button>
+    </nav>
 
     <script>
-        const GRID_SIZE = 8;
-        let grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
-        let score = 0;
-
-        const SHAPES = [
-            { s: [[1,1],[1,1]], c: 'c1' }, { s: [[1,1,1,1]], c: 'c2' },
-            { s: [[1],[1],[1],[1]], c: 'c2' }, { s: [[1,1,1]], c: 'c3' },
-            { s: [[1,0],[1,0],[1,1]], c: 'c4' }, { s: [[1,1,1],[0,1,0]], c: 'c5' },
-            { s: [[1]], c: 'c6' }, { s: [[1,1,1],[1,0,0],[1,0,0]], c: 'c1' }
-        ];
-
-        function init() {
-            const gridEl = document.getElementById('grid');
-            gridEl.innerHTML = '';
-            for(let i=0; i<64; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                gridEl.appendChild(cell);
-            }
-            spawnTray();
-        }
-
-        function spawnTray() {
-            const tray = document.getElementById('tray');
-            tray.innerHTML = '';
-            for(let i=0; i<3; i++) {
-                const data = SHAPES[Math.floor(Math.random()*SHAPES.length)];
-                const pEl = createPieceEl(data);
-                tray.appendChild(pEl);
-                attachEvents(pEl, data);
-            }
-        }
-
-        function createPieceEl(data) {
-            const el = document.createElement('div');
-            el.className = 'piece';
-            el.style.gridTemplateColumns = `repeat(${data.s[0].length}, 22px)`;
-            data.s.flat().forEach(v => {
-                const c = document.createElement('div');
-                c.className = 'piece-cell' + (v ? ' ' + data.c : '');
-                if(!v) c.style.opacity = 0;
-                el.appendChild(c);
-            });
-            return el;
-        }
-
-        function attachEvents(el, data) {
-            const start = (e) => {
-                const t = e.touches ? e.touches[0] : e;
-                const clone = el.cloneNode(true);
-                clone.classList.add('dragging');
-                document.body.appendChild(clone);
-
-                const move = (me) => {
-                    const mt = me.touches ? me.touches[0] : me;
-                    clone.style.left = (mt.clientX - clone.offsetWidth/2) + 'px';
-                    clone.style.top = (mt.clientY - 120) + 'px';
-                    
-                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
-                    const target = getTargetCell(mt.clientX, mt.clientY - 120);
-                    if(target && canPlace(data.s, target.r, target.c)) {
-                        showPreview(data.s, target.r, target.c);
-                    }
-                };
-
-                const end = (ee) => {
-                    const et = ee.changedTouches ? ee.changedTouches[0] : ee;
-                    const target = getTargetCell(et.clientX, et.clientY - 120);
-                    
-                    if(target && tryPlace(data, target.r, target.c)) {
-                        el.style.visibility = 'hidden';
-                        if([...document.getElementById('tray').children].every(c => c.style.visibility === 'hidden')) {
-                            setTimeout(spawnTray, 300);
-                        }
-                    }
-                    
-                    clone.remove();
-                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
-                    document.removeEventListener('mousemove', move);
-                    document.removeEventListener('mouseup', end);
-                    document.removeEventListener('touchmove', move);
-                    document.removeEventListener('touchend', end);
-                    checkGameOver();
-                };
-
-                document.addEventListener('mousemove', move);
-                document.addEventListener('mouseup', end);
-                document.addEventListener('touchmove', move, {passive: false});
-                document.addEventListener('touchend', end);
-            };
-            el.addEventListener('mousedown', start);
-            el.addEventListener('touchstart', start, {passive: false});
-        }
-
-        function getTargetCell(x, y) {
-            const gridRect = document.getElementById('grid').getBoundingClientRect();
-            if(x < gridRect.left || x > gridRect.right || y < gridRect.top || y > gridRect.bottom) return null;
-            const cellSize = gridRect.width / 8;
-            return {
-                r: Math.floor((y - gridRect.top) / cellSize),
-                c: Math.floor((x - gridRect.left) / cellSize)
-            };
-        }
-
-        function canPlace(shape, r, c) {
-            for(let y=0; y<shape.length; y++) {
-                for(let x=0; x<shape[y].length; x++) {
-                    if(shape[y][x]) {
-                        if(r+y >= 8 || c+x >= 8 || grid[r+y][c+x] !== 0) return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        function showPreview(shape, r, c) {
-            const cells = document.getElementById('grid').children;
-            for(let y=0; y<shape.length; y++) {
-                for(let x=0; x<shape[y].length; x++) {
-                    if(shape[y][x]) {
-                        cells[(r+y)*8 + (c+x)].classList.add('preview');
-                    }
-                }
-            }
-        }
-
-        function tryPlace(data, r, c) {
-            if(!canPlace(data.s, r, c)) return false;
+        // Sayfa Değiştirme Fonksiyonu
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             
-            const cells = document.getElementById('grid').children;
-            for(let y=0; y<data.s.length; y++) {
-                for(let x=0; x<data.s[y].length; x++) {
-                    if(data.s[y][x]) {
-                        grid[r+y][c+x] = data.c;
-                        const cell = cells[(r+y)*8 + (c+x)];
-                        cell.classList.add('popping');
-                        setTimeout(() => cell.classList.remove('popping'), 300);
-                    }
-                }
+            document.getElementById(tabId).classList.add('active-tab');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Kişiye Özel Referans Kodu Oluşturma
+        function generateRefCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = 'FNX-';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            score += data.s.flat().filter(v => v).length * 10;
-            bumpScore();
-            checkLines();
-            draw();
-            return true;
+            document.getElementById('refCode').innerText = code;
         }
 
-        function checkLines() {
-            let rs = [], cs = [];
-            for(let i=0; i<8; i++) {
-                if(grid[i].every(v => v !== 0)) rs.push(i);
-                if(grid.map(row => row[i]).every(v => v !== 0)) cs.push(i);
-            }
-
-            const cells = document.getElementById('grid').children;
-            
-            rs.forEach(r => {
-                for(let x=0; x<8; x++) {
-                    grid[r][x] = 0;
-                    animateBlast(cells[r*8 + x]);
-                }
-                score += 100;
-            });
-
-            cs.forEach(c => {
-                for(let y=0; y<8; y++) {
-                    if(grid[y][c] !== 0 || rs.includes(y)) { 
-                        grid[y][c] = 0;
-                        animateBlast(cells[y*8 + c]);
-                    }
-                }
-                score += 100;
-            });
-
-            if(rs.length > 0 || cs.length > 0) bumpScore();
+        // Kopyalama Fonksiyonu
+        function copyRef() {
+            const code = document.getElementById('refCode').innerText;
+            navigator.clipboard.writeText(code);
+            alert("Kod kopyalandı: " + code);
         }
 
-        function animateBlast(cell) {
-            cell.classList.add('blasting');
-            setTimeout(() => {
-                cell.classList.remove('blasting');
-                cell.className = 'cell';
-            }, 400);
-        }
-
-        function bumpScore() {
-            const s = document.getElementById('score');
-            s.innerText = score;
-            s.classList.add('score-bump');
-            setTimeout(() => s.classList.remove('score-bump'), 200);
-        }
-
-        function draw() {
-            const cells = document.getElementById('grid').children;
-            for(let i=0; i<64; i++) {
-                const r = Math.floor(i/8), c = i%8;
-                if(!cells[i].classList.contains('blasting')) {
-                    cells[i].className = 'cell' + (grid[r][c] ? ' ' + grid[r][c] : '');
-                }
-            }
-        }
-
-        function checkGameOver() {
-            const trayItems = [...document.getElementById('tray').children];
-            const activePieces = trayItems
-                .filter(p => p.style.visibility !== 'hidden')
-                .map(p => SHAPES.find(s => p.innerHTML.includes(s.c)));
-
-            if(activePieces.length === 0) return;
-
-            let canMove = false;
-            for(const piece of activePieces) {
-                for(let r=0; r<8; r++) {
-                    for(let c=0; c<8; c++) {
-                        if(canPlace(piece.s, r, c)) { canMove = true; break; }
-                    }
-                    if(canMove) break;
-                }
-                if(canMove) break;
-            }
-
-            if(!canMove) {
-                document.getElementById('game-over').style.display = 'flex';
-                document.getElementById('final-score').innerText = "Skor: " + score;
-            }
-        }
-
-        function resetGame() {
-            grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
-            score = 0;
-            document.getElementById('game-over').style.display = 'none';
-            document.getElementById('score').innerText = "0";
-            init();
-        }
-
-        init();
+        // Sayfa yüklendiğinde kod oluştur
+        window.onload = generateRefCode;
     </script>
+
 </body>
 </html>
