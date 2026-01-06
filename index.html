@@ -3,215 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Clone - Dark Mode</title>
+    <title>YouTube Simülasyonu</title>
     <style>
-        /* Genel Temizleme ve Renkler */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Roboto", Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Roboto", sans-serif; }
+        body { background-color: #0f0f0f; color: white; overflow-x: hidden; }
 
-        body {
-            background-color: #0f0f0f;
-            color: white;
-        }
-
-        /* Üst Menü / Navbar */
+        /* HEADER */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 16px;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            background-color: #0f0f0f;
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 16px; height: 56px; position: sticky; top: 0;
+            background-color: #0f0f0f; z-index: 1000;
+        }
+        .search-bar {
+            background: #121212; border: 1px solid #333; border-radius: 40px;
+            padding: 8px 20px; width: 40%; color: white; outline: none;
         }
 
-        .search-container {
-            display: flex;
-            align-items: center;
-            width: 40%;
-        }
-
-        .search-box {
-            background-color: #121212;
-            border: 1px solid #333;
-            border-radius: 40px 0 0 40px;
-            padding: 8px 16px;
-            width: 100%;
-            color: white;
-            outline: none;
-        }
-
-        .search-btn {
-            background-color: #222;
-            border: 1px solid #333;
-            border-left: none;
-            border-radius: 0 40px 40px 0;
-            padding: 8px 20px;
-            cursor: pointer;
-        }
-
-        /* Kategori Butonları */
-        .categories {
-            display: flex;
-            gap: 12px;
-            padding: 12px 16px;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .category-item {
-            background-color: #272727;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .category-item.active {
-            background-color: white;
-            color: black;
-        }
-
-        .category-item:hover {
-            background-color: #3f3f3f;
-        }
-
-        /* Video Grid Alanı */
+        /* ANA SAYFA (GRID) */
+        #home-page { padding: 16px; }
+        .categories { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .cat-item { background: #272727; padding: 6px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+        
         .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 16px;
-            padding: 16px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
         }
+        .video-card { cursor: pointer; transition: transform 0.2s; }
+        .video-card:hover { transform: scale(1.02); }
+        .thumb { width: 100%; aspect-ratio: 16/9; background: #333; border-radius: 12px; margin-bottom: 10px; object-fit: cover; }
+        .info { display: flex; gap: 10px; }
+        .avatar { width: 36px; height: 36px; background: #444; border-radius: 50%; flex-shrink: 0; }
+        .text-placeholder { background: #333; height: 14px; border-radius: 4px; margin-bottom: 6px; }
 
-        .video-card {
-            width: 100%;
-            cursor: pointer;
+        /* VİDEO İZLEME SAYFASI (Görseldeki Düzen) */
+        #watch-page { display: none; padding: 20px; max-width: 1700px; margin: 0 auto; }
+        .watch-container { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
+
+        .main-video-area { width: 100%; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; position: relative; }
+        .video-player img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; }
+        
+        .video-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .channel-info { display: flex; align-items: center; gap: 12px; }
+        .btn-group { display: flex; gap: 8px; }
+        .yt-btn { background: #272727; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; border: none; color: white; }
+        .sub-btn { background: white; color: black; font-weight: bold; }
+
+        /* SAĞ PANEL */
+        .side-panel { display: flex; flex-direction: column; gap: 16px; }
+        .side-ad { background: #1e1e1e; border-radius: 12px; padding: 12px; border: 1px solid #333; }
+        .shorts-shelf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .short-item { background: #222; aspect-ratio: 9/16; border-radius: 8px; position: relative; overflow: hidden; }
+        .short-item img { width: 100%; height: 100%; object-fit: cover; }
+
+        @media (max-width: 1000px) {
+            .watch-container { grid-template-columns: 1fr; }
+            .side-panel { width: 100%; }
         }
-
-        .thumbnail {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-color: #333;
-            border-radius: 12px;
-            object-fit: cover;
-            margin-bottom: 12px;
-        }
-
-        .video-info {
-            display: flex;
-            gap: 12px;
-        }
-
-        .channel-icon {
-            width: 36px;
-            height: 36px;
-            background-color: #444;
-            border-radius: 50%;
-        }
-
-        .video-details h3 {
-            font-size: 16px;
-            margin-bottom: 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .video-details p {
-            font-size: 14px;
-            color: #aaa;
-        }
-
-        /* Sponsorlu Özel Kart (Binance Örneği) */
-        .sponsored {
-            border: 1px solid #333;
-            padding: 10px;
-            border-radius: 12px;
-            background: linear-gradient(145deg, #1e1e1e, #0f0f0f);
-        }
-
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo" style="font-weight: bold; font-size: 20px;">YouTube</div>
-        <div class="search-container">
-            <input type="text" class="search-box" placeholder="Ara">
-            <button class="search-btn">🔍</button>
-        </div>
-        <div class="user-icons">🔔 👤</div>
+        <div style="font-weight: bold; font-size: 20px; cursor: pointer;" onclick="goHome()">YouTube</div>
+        <input type="text" class="search-bar" placeholder="Ara">
+        <div>🔔 👤</div>
     </header>
 
-    <div class="categories">
-        <div class="category-item active">Tümü</div>
-        <div class="category-item">Müzik</div>
-        <div class="category-item">Oyun</div>
-        <div class="category-item">Mix'ler</div>
-        <div class="category-item">Canlı</div>
-        <div class="category-item">Roblox</div>
-        <div class="category-item">Animasyon</div>
+    <div id="home-page">
+        <div class="categories">
+            <div class="cat-item">Tümü</div><div class="cat-item">Oyun</div><div class="cat-item">Müzik</div><div class="cat-item">Canlı</div>
+        </div>
+        <div class="video-grid">
+            <div class="video-card" onclick="openVideo()">
+                <div class="thumb" style="background: linear-gradient(45deg, #222, #444);"></div>
+                <div class="info"><div class="avatar"></div><div style="width:100%"><div class="text-placeholder" style="width:80%"></div><div class="text-placeholder" style="width:40%"></div></div></div>
+            </div>
+            <div class="video-card" onclick="openVideo()"><div class="thumb"></div><div class="info"><div class="avatar"></div><div style="width:100%"><div class="text-placeholder"></div><div class="text-placeholder"></div></div></div></div>
+            <div class="video-card" onclick="openVideo()"><div class="thumb"></div><div class="info"><div class="avatar"></div><div style="width:100%"><div class="text-placeholder"></div><div class="text-placeholder"></div></div></div></div>
+            <div class="video-card" onclick="openVideo()"><div class="thumb"></div><div class="info"><div class="avatar"></div><div style="width:100%"><div class="text-placeholder"></div><div class="text-placeholder"></div></div></div></div>
+        </div>
     </div>
 
-    <main class="video-grid">
-        
-        <div class="video-card sponsored">
-            <div class="thumbnail" style="background: #fbcc14; display:flex; align-items:center; justify-content:center; color:black; font-weight:bold;">
-                BINANCE AD
+    <div id="watch-page">
+        <div class="watch-container">
+            <div class="main-video-area">
+                <div class="video-player">
+                    <img src="https://images.slivcdn.com/wa-static/v2/img/roblox_bg.jpg" alt="video" onerror="this.src='https://via.placeholder.com/1280x720/222/fff?text=Video+Oynatiliyor'">
+                </div>
+                <div class="video-actions">
+                    <div class="channel-info">
+                        <div class="avatar"></div>
+                        <div>
+                            <div style="font-weight: bold;">Kanal Adı</div>
+                            <div style="font-size: 12px; color: #aaa;">100 B abone</div>
+                        </div>
+                        <button class="yt-btn sub-btn" style="margin-left: 10px;">Abone ol</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="yt-btn">👍 178 | 👎</button>
+                        <button class="yt-btn">Paylaş</button>
+                        <button class="yt-btn">Teşekkürler</button>
+                    </div>
+                </div>
             </div>
-            <div class="video-info">
-                <div class="video-details">
-                    <h3>Desktop New Year Staking APR 2026%</h3>
-                    <p>Sponsorlu • PixelNest</p>
+
+            <div class="side-panel">
+                <div class="side-ad">
+                    <p style="font-size: 12px; color: gold; margin-bottom: 5px;">Sponsorlu</p>
+                    <div style="font-weight: bold; margin-bottom: 10px;">Binance - Zero Fees</div>
+                    <button class="yt-btn" style="width: 100%; background: #fbcc14; color: black; font-weight: bold;">Download</button>
+                </div>
+                
+                <div style="font-weight: bold; margin-top: 10px;">Shorts</div>
+                <div class="shorts-shelf">
+                    <div class="short-item"><img src="https://via.placeholder.com/200x350/333/fff?text=Short+1"></div>
+                    <div class="short-item"><img src="https://via.placeholder.com/200x350/444/fff?text=Short+2"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="video-card">
-            <img class="thumbnail" src="https://via.placeholder.com/320x180/222/fff?text=Roblox+Video" alt="thumbnail">
-            <div class="video-info">
-                <div class="channel-icon"></div>
-                <div class="video-details">
-                    <h3>BRAINROTLARI TSUNAMİDEN KAÇARAK KURTAR! - Roblox</h3>
-                    <p>solitaktak</p>
-                    <p>4,8 B görüntüleme • 1 saat önce</p>
-                </div>
-            </div>
-        </div>
+    <script>
+        function openVideo() {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('watch-page').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
 
-        <div class="video-card">
-            <img class="thumbnail" src="https://via.placeholder.com/320x180/111/fff?text=Müzik+Mix" alt="thumbnail">
-            <div class="video-info">
-                <div class="channel-icon"></div>
-                <div class="video-details">
-                    <h3>Mix - Lvbel C5 - yıldızlar şahit aşkıma</h3>
-                    <p>Lvbel C5, Blok3 ve daha fazlası</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="video-card">
-            <img class="thumbnail" src="https://via.placeholder.com/320x180/333/fff?text=Yeni+Video" alt="thumbnail">
-            <div class="video-info">
-                <div class="channel-icon"></div>
-                <div class="video-details">
-                    <h3>YouTube Arayüz Tasarımı Nasıl Yapılır?</h3>
-                    <p>Tasarım Kanalı</p>
-                    <p>100 B görüntüleme • 2 gün önce</p>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
+        function goHome() {
+            document.getElementById('home-page').style.display = 'block';
+            document.getElementById('watch-page').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
