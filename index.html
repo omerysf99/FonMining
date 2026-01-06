@@ -15,34 +15,30 @@
             height: 100vh; 
             margin: 0;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .app-container {
             width: 100%;
-            max-width: 390px; /* iPhone 13-14-15 Pro genişliği */
-            height: 844px; /* 9:19.5 oranı */
+            max-width: 390px;
+            height: 844px;
             background: radial-gradient(circle at top, #1a0f2e 0%, #050308 100%);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Sekme İçerikleri */
         .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 110px; }
         .active-tab { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Kart Tasarımları */
         .glass-card { 
             background: rgba(255, 255, 255, 0.04); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
             border-radius: 14px; 
         }
 
-        /* Mining Fan Animasyonu */
         .fan-container {
             position: relative;
             width: 240px;
@@ -59,7 +55,6 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Alt Navigasyon (Küçültülmüş) */
         nav {
             background: rgba(15, 10, 20, 0.98);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -69,7 +64,6 @@
         .nav-text { font-size: 9px; font-weight: 500; text-transform: uppercase; margin-top: 2px; }
         .nav-icon { font-size: 16px; }
 
-        /* Butonlar */
         .btn-action { border-radius: 20px; font-weight: 700; transition: transform 0.1s; }
         .btn-action:active { transform: scale(0.96); }
     </style>
@@ -87,7 +81,7 @@
                             <img src="https://cryptologos.cc/logos/pi-network-pi-logo.png" class="w-6 h-6" alt="pi">
                             <div class="text-left">
                                 <p class="text-[8px] text-gray-500 uppercase font-bold tracking-tighter">Balance</p>
-                                <p class="text-sm font-bold">0.000000 PI</p>
+                                <p id="mainBalance" class="text-sm font-bold text-white">0.000000 PI</p>
                             </div>
                         </div>
                         <i class="fas fa-copy text-gray-700 text-[10px]"></i>
@@ -118,18 +112,18 @@
 
                 <div class="text-center">
                     <p class="text-gray-500 text-[11px] italic mb-1">Mining...</p>
-                    <h2 class="text-3xl font-black text-[#facc15] tracking-tight mb-6">0.000000 PI</h2>
+                    <h2 id="miningValue" class="text-3xl font-black text-[#facc15] tracking-tight mb-6">0.00000000 PI</h2>
 
                     <div class="inline-flex items-center gap-2 bg-slate-900/60 border border-slate-800/50 px-5 py-2 rounded-xl mb-6">
                         <i class="fas fa-bolt text-yellow-500 text-xs"></i>
                         <div class="text-left">
                             <p class="text-[7px] text-gray-500 uppercase font-bold">Mining Power</p>
-                            <p class="font-bold text-[11px] text-gray-200 leading-none">0 GH/s</p>
+                            <p class="font-bold text-[11px] text-gray-200 leading-none">1 GH/s</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 mb-3">
-                        <button class="btn-action bg-[#5d3fd3] py-3 text-sm">Claim</button>
+                        <button onclick="claimPi()" class="btn-action bg-[#5d3fd3] py-3 text-sm">Claim</button>
                         <button class="btn-action bg-[#10b981] py-3 text-sm flex items-center justify-center gap-2">
                              <i class="fas fa-sync-alt text-[10px]"></i> Swap
                         </button>
@@ -147,32 +141,6 @@
                     <button class="bg-white text-black text-xs px-6 py-2 rounded-full font-bold">CONNECT</button>
                 </div>
             </section>
-
-            <section id="friends" class="tab-content">
-                <h2 class="text-lg font-bold italic mb-4 uppercase">Friends</h2>
-                <div class="glass-card p-4">
-                    <p class="text-[9px] text-gray-500 uppercase mb-2">My Referral</p>
-                    <div class="bg-black/40 p-3 rounded-lg flex justify-between items-center text-xs">
-                        <span class="text-purple-400 font-mono">REF-000000</span>
-                        <i class="fas fa-copy text-gray-600"></i>
-                    </div>
-                </div>
-            </section>
-
-            <section id="missions" class="tab-content">
-                <h2 class="text-lg font-bold italic mb-4 uppercase">Missions</h2>
-                <div class="glass-card p-3 flex items-center justify-between border-l-2 border-blue-500">
-                    <div class="flex items-center gap-3">
-                        <i class="fab fa-telegram text-2xl text-blue-500"></i>
-                        <div class="text-left">
-                            <p class="font-bold text-[11px]">Join Telegram</p>
-                            <p class="text-[9px] text-blue-400 font-bold">+0 PINIX</p>
-                        </div>
-                    </div>
-                    <button class="bg-blue-600 px-3 py-1 rounded-md text-[9px] font-bold">GO</button>
-                </div>
-            </section>
-
         </main>
 
         <nav class="absolute bottom-0 left-0 right-0 flex justify-around items-center px-1">
@@ -180,21 +148,13 @@
                 <i class="fas fa-wallet nav-icon"></i>
                 <span class="nav-text">Wallet</span>
             </button>
-            <button onclick="showTab('friends')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-user-friends nav-icon"></i>
-                <span class="nav-text">Friends</span>
-            </button>
             <button onclick="showTab('home')" class="nav-btn flex flex-col items-center flex-1 text-white">
                 <div class="bg-gradient-to-b from-purple-500 to-orange-400 w-11 h-11 rounded-xl flex items-center justify-center -mt-8 shadow-lg rotate-45 border-[3px] border-[#050308]">
                     <i class="fas fa-home -rotate-45 text-sm"></i>
                 </div>
                 <span class="nav-text" style="margin-top: 6px;">Home</span>
             </button>
-            <button onclick="showTab('missions')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
-                <i class="fas fa-bullseye nav-icon"></i>
-                <span class="nav-text">Tasks</span>
-            </button>
-            <button class="nav-btn flex flex-col items-center flex-1 text-gray-600">
+            <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center flex-1 text-gray-600">
                 <i class="fas fa-th-large nav-icon"></i>
                 <span class="nav-text">More</span>
             </button>
@@ -203,13 +163,38 @@
     </div>
 
     <script>
+        let currentMining = 0.00000000;
+        let mainBalance = 0.000000;
+        const miningRate = 0.00002; // Saniyede artış miktarı
+
+        // Otomatik Kazım Fonksiyonu
+        function startMining() {
+            setInterval(() => {
+                currentMining += miningRate;
+                document.getElementById('miningValue').innerText = currentMining.toFixed(8) + " PI";
+            }, 1000); // Her 1 saniyede bir çalışır
+        }
+
+        // Claim (Topla) Butonu
+        function claimPi() {
+            if (currentMining > 0) {
+                mainBalance += currentMining;
+                currentMining = 0;
+                document.getElementById('mainBalance').innerText = mainBalance.toFixed(6) + " PI";
+                document.getElementById('miningValue').innerText = "0.00000000 PI";
+                alert("Ödüller toplandı!");
+            }
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
             document.getElementById(tabId).classList.add('active-tab');
-            
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-white', 'text-gray-600'));
             event.currentTarget.classList.replace('text-gray-600', 'text-white');
         }
+
+        // Uygulama başladığında kazımı başlat
+        window.onload = startMining;
     </script>
 </body>
 </html>
