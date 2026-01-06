@@ -2,200 +2,114 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Watch & Withdraw</title>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PINIX App Clone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
-            authDomain: "fonix-b4de6.firebaseapp.com",
-            projectId: "fonix-b4de6",
-            storageBucket: "fonix-b4de6.firebasestorage.app",
-            messagingSenderId: "20899545652",
-            appId: "1:20899545652:web:f32ef599f0c8d3deaec061",
-            measurementId: "G-WBYY85RNF5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const tg = window.Telegram.WebApp;
-
-        const ADMIN_ID = "8392479231";
-        const AD_REWARD = 0.0005;
-        const DAILY_LIMIT = 250;
-        const MIN_WITHDRAW = 0.1; // Minimum çekim tutarı
-
-        let myId = tg.initDataUnsafe?.user?.id?.toString() || "test_user";
-        let myUser = tg.initDataUnsafe?.user?.username ? "@" + tg.initDataUnsafe.user.username : "Anonim";
-        let balance = 0.0, todayAds = 0;
-
-        const widget = new AdexiumWidget({
-            wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
-            adFormat: 'interstitial'
-        });
-
-        async function loadData() {
-            const today = new Date().toLocaleDateString('tr-TR');
-            const snap = await getDoc(doc(db, "users", myId));
-            if (snap.exists()) {
-                const data = snap.data();
-                balance = data.balance || 0;
-                todayAds = (data.lastDate === today) ? (data.todayAds || 0) : 0;
-            } else {
-                await setDoc(doc(db, "users", myId), { balance: 0, todayAds: 0, username: myUser, lastDate: today });
-            }
-            updateUI();
-        }
-
-        // REKLAM İZLEME (Sadece Butonla)
-        window.watchAd = () => {
-            if (todayAds >= DAILY_LIMIT) {
-                tg.showAlert("Günlük limit doldu (250/250).");
-                return;
-            }
-            tg.HapticFeedback.impactOccurred('medium');
-            widget.autoMode({
-                onAdCompleted: async () => {
-                    balance += AD_REWARD;
-                    todayAds += 1;
-                    const today = new Date().toLocaleDateString('tr-TR');
-                    await updateDoc(doc(db, "users", myId), {
-                        balance: balance,
-                        todayAds: todayAds,
-                        lastDate: today,
-                        lastSeen: serverTimestamp()
-                    });
-                    updateUI();
-                    tg.showAlert("Başarılı! +0.0005 TON kazandın.");
-                },
-                onAdError: () => tg.showAlert("Reklam yüklenemedi.")
-            });
-        };
-
-        // ÇEKİM TALEBİ GÖNDERME
-        window.requestWithdraw = async () => {
-            const wallet = document.getElementById('walletAddress').value;
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-
-            if (!wallet || wallet.length < 10) {
-                tg.showAlert("Lütfen geçerli bir TON cüzdan adresi girin.");
-                return;
-            }
-            if (amount < MIN_WITHDRAW) {
-                tg.showAlert(`Minimum çekim tutarı ${MIN_WITHDRAW} TON.`);
-                return;
-            }
-            if (amount > balance) {
-                tg.showAlert("Yetersiz bakiye.");
-                return;
-            }
-
-            // Talebi gönder
-            try {
-                await addDoc(collection(db, "withdrawals"), {
-                    userId: myId,
-                    username: myUser,
-                    wallet: wallet,
-                    amount: amount,
-                    status: "pending",
-                    date: serverTimestamp()
-                });
-                
-                balance -= amount;
-                await updateDoc(doc(db, "users", myId), { balance: balance });
-                updateUI();
-                tg.showAlert("Çekim talebi alındı! 24 saat içinde kontrol edilecektir.");
-            } catch (e) {
-                tg.showAlert("Bir hata oluştu.");
-            }
-        };
-
-        function updateUI() {
-            document.getElementById('mainBal').innerText = balance.toFixed(4);
-            document.getElementById('withdrawMax').innerText = balance.toFixed(4);
-            document.getElementById('adProgressText').innerText = todayAds + " / " + DAILY_LIMIT;
-            document.getElementById('bar').style.width = (todayAds / DAILY_LIMIT * 100) + "%";
-        }
-
-        window.switchTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
-
-        if (myId === ADMIN_ID) document.getElementById('adminNav').classList.remove('hidden');
-        loadData();
-    </script>
-
     <style>
-        body { background-color: #0b0e14; color: white; font-family: sans-serif; }
-        .ton-btn { background: linear-gradient(135deg, #0088cc 0%, #004466 100%); }
-        .input-box { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 12px; width: 100%; color: white; margin-bottom: 12px; }
+        body {
+            background: radial-gradient(circle at top, #1e1b2e 0%, #09090b 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .pinix-logo {
+            filter: drop-shadow(0 0 15px #a855f7);
+            animation: spin 10s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body class="flex justify-center min-h-screen">
-    <div class="w-full max-w-md bg-[#0d1117] flex flex-col border-x border-[#30363d]">
-        
-        <div class="p-8 text-center border-b border-[#30363d]">
-            <h1 id="mainBal" class="text-5xl font-black">0.0000</h1>
-            <p class="text-blue-500 font-bold text-xs">TOPLAM BAKİYE (TON)</p>
+<body class="flex flex-col items-center min-h-screen p-4">
+
+    <div class="w-full max-w-md flex justify-between items-center mb-6">
+        <i class="fas fa-times text-xl"></i>
+        <h1 class="text-lg font-bold">PINIX App <i class="fas fa-check-circle text-blue-400 text-sm"></i></h1>
+        <i class="fas fa-ellipsis-v text-xl"></i>
+    </div>
+
+    <div class="w-full max-w-md space-y-3">
+        <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-orange-500 w-10 h-10 rounded-full flex items-center justify-center">
+                    <i class="fab fa-product-hunt text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Balance</p>
+                    <p class="font-bold text-lg">0.0000000 PI</p>
+                </div>
+            </div>
+            <i class="fas fa-wallet text-gray-500"></i>
         </div>
 
-        <main class="flex-grow p-6 pb-24">
-            <section id="tab-earn" class="tab-content space-y-6">
-                <div class="bg-[#161b22] p-8 rounded-3xl text-center border border-[#30363d] shadow-lg">
-                    <i class="fa-solid fa-play-circle text-7xl text-blue-500 mb-4"></i>
-                    <button onclick="window.watchAd()" class="w-full ton-btn py-4 rounded-xl font-bold text-lg active:scale-95 transition">REKLAM İZLE</button>
-                    <p class="text-[10px] text-gray-500 mt-4 uppercase font-bold tracking-widest">+0.0005 TON / REKLAM</p>
+        <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/7075/7075344.png" class="w-10 h-10" alt="PINIX">
+                <div>
+                    <p class="text-xs text-gray-400">Balance</p>
+                    <p class="font-bold text-lg">0 PINIX</p>
                 </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between text-[10px] font-bold text-gray-400">
-                        <span>GÜNLÜK SINIR</span>
-                        <span id="adProgressText">0 / 250</span>
-                    </div>
-                    <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div id="bar" class="h-full bg-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-withdraw" class="tab-content hidden space-y-4">
-                <h2 class="text-xl font-black mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-wallet text-blue-500"></i> Para Çekme
-                </h2>
-                <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl mb-4">
-                    <p class="text-[10px] text-blue-400 font-bold uppercase">Çekilebilir Tutar</p>
-                    <p class="text-lg font-black"><span id="withdrawMax">0.0000</span> TON</p>
-                </div>
-                
-                <input type="text" id="walletAddress" class="input-box" placeholder="TON Cüzdan Adresi (UQ...)">
-                <input type="number" id="withdrawAmount" class="input-box" placeholder="Miktar (TON)">
-                
-                <button onclick="window.requestWithdraw()" class="w-full bg-white text-black py-4 rounded-xl font-bold active:scale-95 transition">
-                    ÇEKİM TALEBİ OLUŞTUR
-                </button>
-                <p class="text-[10px] text-gray-500 text-center">Talepler 24 saat içinde onaylanır. Minimum: 0.1 TON</p>
-            </section>
-        </main>
-
-        <nav class="fixed bottom-0 w-full max-w-md bg-[#0b0e14] border-t border-[#30363d] p-4 flex justify-around">
-            <button onclick="switchTab('tab-earn')" class="flex flex-col items-center flex-1">
-                <i class="fa-solid fa-play mb-1"></i><span class="text-[9px] font-bold">KAZAN</span>
-            </button>
-            <button onclick="switchTab('tab-withdraw')" class="flex flex-col items-center flex-1 border-x border-[#30363d]">
-                <i class="fa-solid fa-money-bill-transfer mb-1"></i><span class="text-[9px] font-bold">ÇEKİM</span>
-            </button>
-            <button id="adminNav" onclick="switchTab('tab-admin')" class="hidden flex flex-col items-center flex-1">
-                <i class="fa-solid fa-shield-halved mb-1 text-red-500"></i><span class="text-[9px] font-bold">ADMİN</span>
-            </button>
-        </nav>
+            </div>
+            <i class="fas fa-wallet text-gray-500"></i>
+        </div>
     </div>
+
+    <div class="flex flex-col items-center my-10">
+        <div class="relative w-48 h-48 flex items-center justify-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/10691/10691854.png" class="pinix-logo w-40 h-40" alt="Main Logo">
+        </div>
+        <p class="text-gray-400 mt-4 text-sm italic">Mining...</p>
+        <h2 class="text-4xl font-black text-yellow-500 mt-1">0.0002435 PI</h2>
+        
+        <div class="glass-card mt-4 px-6 py-2 rounded-xl flex items-center gap-2">
+            <i class="fas fa-bolt text-yellow-400"></i>
+            <span class="text-sm font-semibold">Mining Power <br> <span class="text-lg">5 GH/s</span></span>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md space-y-4 mb-20">
+        <div class="flex gap-4">
+            <button class="flex-1 bg-purple-600 hover:bg-purple-700 py-4 rounded-2xl font-bold shadow-lg transition">Claim</button>
+            <button class="flex-1 bg-emerald-500 hover:bg-emerald-600 py-4 rounded-2xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fas fa-exchange-alt"></i> Swap PINIX
+            </button>
+        </div>
+        <button class="w-full bg-yellow-600 hover:bg-yellow-700 py-4 rounded-2xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fas fa-rocket"></i> BOOST
+        </button>
+    </div>
+
+    <div class="fixed bottom-0 w-full max-w-md bg-[#16161e] border-t border-gray-800 flex justify-around py-4 text-gray-400">
+        <div class="flex flex-col items-center">
+            <i class="fas fa-wallet text-xl"></i>
+            <span class="text-[10px] mt-1">Wallet</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <i class="fas fa-users text-xl"></i>
+            <span class="text-[10px] mt-1">Friends</span>
+        </div>
+        <div class="flex flex-col items-center text-orange-400">
+            <div class="bg-orange-400/20 p-2 rounded-full -mt-6 mb-1">
+                <i class="fas fa-home text-2xl text-orange-500"></i>
+            </div>
+            <span class="text-[10px]">Home</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <i class="fas fa-bullseye text-xl"></i>
+            <span class="text-[10px] mt-1">Missions</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <i class="fas fa-ellipsis-h text-xl"></i>
+            <span class="text-[10px] mt-1">More</span>
+        </div>
+    </div>
+
 </body>
 </html>
