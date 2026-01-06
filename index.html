@@ -3,229 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamKazan - Ana Sayfa & Shorts</title>
+    <title>Sekmeli Tek Dosya Web Sitesi</title>
     <style>
-        :root {
-            --bg: #0f0f0f;
-            --surface: #1e1e1e;
-            --accent: #ff0000;
-            --text: #ffffff;
-            --gray: #aaa;
-        }
+        /* CSS TASARIMI */
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        /* Sekme Butonları */
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 16px; transition: 0.3s; }
+        .tab-btn:hover { background: #eee; }
+        .tab-btn.active { border-bottom: 3px solid #007bff; color: #007bff; font-weight: bold; }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding-bottom: 70px; /* Mobil menü için */
-        }
+        /* Sekme İçerikleri */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        /* Üst Bar */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #222;
-        }
-
-        .logo { color: var(--accent); font-size: 22px; font-weight: bold; }
-        .balance-pill {
-            background: #272727;
-            padding: 5px 15px;
-            border-radius: 20px;
-            color: #4ade80;
-            font-weight: bold;
-        }
-
-        /* Ana İçerik Alanları */
-        .page { display: none; padding: 15px; }
-        .page.active { display: block; }
-
-        /* Video Kartları (Ana Sayfa) */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .video-card { cursor: pointer; }
-        .thumb-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #333;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .thumb-container img { width: 100%; height: 100%; object-fit: cover; }
-        .reward-badge {
-            position: absolute; bottom: 8px; right: 8px;
-            background: rgba(0,0,0,0.8); color: #4ade80;
-            padding: 2px 8px; border-radius: 4px; font-size: 12px;
-        }
-
-        /* Shorts Tasarımı */
-        .shorts-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        .short-card {
-            aspect-ratio: 9/16;
-            background: #222;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #333;
-        }
-        .short-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
-        .short-info {
-            position: absolute; bottom: 10px; left: 10px;
-            font-size: 14px; font-weight: bold;
-        }
-
-        /* Alt Navigasyon (Mobil Uyumlu) */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%;
-            background: #0f0f0f;
-            display: flex; justify-content: space-around;
-            padding: 10px 0; border-top: 1px solid #222;
-        }
-        .nav-item {
-            text-align: center; font-size: 12px; color: var(--gray);
-            cursor: pointer; flex: 1;
-        }
-        .nav-item.active { color: white; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-
-        /* Video Oynatıcı Modalı */
-        .player-modal {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: #000;
-            z-index: 2000;
-        }
+        /* Referans Listesi */
+        .refs { background: #fafafa; padding: 15px; border-left: 5px solid #007bff; margin-top: 20px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">StreamKazan</div>
-        <div class="balance-pill" id="total-balance">0.00 ₺</div>
-    </header>
+<div class="container">
+    <h1>Kişisel Sayfam</h1>
 
-    <div id="home-page" class="page active">
-        <h3>🎬 Önerilenler</h3>
-        <div class="video-grid" id="home-grid">
-            </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'home')">Ana Sayfa</button>
+        <button class="tab-btn" onclick="openTab(event, 'projects')">Projeler</button>
+        <button class="tab-btn" onclick="openTab(event, 'references')">Referanslar</button>
     </div>
 
-    <div id="shorts-page" class="page">
-        <h3>🩳 Shorts</h3>
-        <div class="shorts-grid" id="shorts-grid">
-            </div>
+    <div id="home" class="tab-content active">
+        <h2>Hoş Geldiniz</h2>
+        <p>Bu web sitesi tek bir HTML dosyası kullanılarak oluşturulmuştur. Yukarıdaki sekmeleri kullanarak sayfalar arasında geçiş yapabilirsiniz.</p>
     </div>
 
-    <div id="wallet-page" class="page">
-        <h3>💰 Cüzdanım</h3>
-        <div style="background: var(--surface); padding: 20px; border-radius: 15px; text-align: center;">
-            <p>Mevcut Bakiye</p>
-            <h1 style="color: #4ade80;" id="wallet-amount">0.00 ₺</h1>
-            <button style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: not-allowed;">Para Çek (Min. 100 ₺)</button>
-        </div>
+    <div id="projects" class="tab-content">
+        <h2>Projelerim</h2>
+        <ul>
+            <li>Web Tasarım Çalışmaları</li>
+            <li>Mobil Uygulama Geliştirme</li>
+            <li>Veri Analizi Projeleri</li>
+        </ul>
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchPage('home-page', this)">
-            <span class="nav-icon">🏠</span> Ana Sayfa
+    <div id="references" class="tab-content">
+        <h2>Referanslar ve Kaynaklar</h2>
+        <div class="refs">
+            <p>İnceleyebileceğiniz önemli referans linkleri:</p>
+            <ul>
+                <li><a href="https://www.w3schools.com" target="_blank">W3Schools - Web Eğitimleri</a></li>
+                <li><a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a></li>
+                <li><a href="https://www.youtube.com" target="_blank">YouTube Yazılım Kanalları</a></li>
+            </ul>
         </div>
-        <div class="nav-item" onclick="switchPage('shorts-page', this)">
-            <span class="nav-icon">🩳</span> Shorts
-        </div>
-        <div class="nav-item" onclick="switchPage('wallet-page', this)">
-            <span class="nav-icon">💰</span> Cüzdan
-        </div>
-    </nav>
+    </div>
+</div>
 
-    <script>
-        let balance = 0.00;
-
-        const videoData = [
-            { id: '7wtfhZwyrcc', title: 'Dünyanın En İlginç Yerleri', reward: 0.50, author: 'Ruhi Çenet' },
-            { id: 'dQw4w9WgXcQ', title: 'Yeni Başlayanlar İçin Kodlama', reward: 0.75, author: 'Tekno Rehber' },
-            { id: 'Vv-BfVoq4g', title: 'Barış Özcan ile Gelecek', reward: 0.60, author: 'Barış Özcan' }
-        ];
-
-        const shortsData = [
-            { id: 's1', title: 'Mutfak Sırları', views: '1.2M', reward: 0.15 },
-            { id: 's2', title: 'Komik Anlar', views: '800B', reward: 0.15 },
-            { id: 's3', title: 'Hızlı İpucu', views: '500B', reward: 0.15 },
-            { id: 's4', title: 'Spor Motivasyon', views: '2M', reward: 0.15 }
-        ];
-
-        function init() {
-            // Ana Sayfa Videolarını Yükle
-            const homeGrid = document.getElementById('home-grid');
-            videoData.forEach(v => {
-                homeGrid.innerHTML += `
-                    <div class="video-card" onclick="playVideo(${v.reward})">
-                        <div class="thumb-container">
-                            <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg">
-                            <div class="reward-badge">+${v.reward.toFixed(2)} ₺</div>
-                        </div>
-                        <div style="padding:10px 0;">
-                            <div style="font-weight:bold;">${v.title}</div>
-                            <div style="color:var(--gray); font-size:13px; margin-top:4px;">${v.author}</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Shorts Yükle
-            const shortsGrid = document.getElementById('shorts-grid');
-            shortsData.forEach(s => {
-                shortsGrid.innerHTML += `
-                    <div class="short-card" onclick="playVideo(${s.reward})">
-                        <img src="https://picsum.photos/seed/${s.id}/400/700">
-                        <div class="short-info">
-                            <div>${s.title}</div>
-                            <div style="font-size:11px; color:#4ade80;">Kazanç: ${s.reward} ₺</div>
-                        </div>
-                    </div>
-                `;
-            });
+<script>
+    // SEKMELERİ ÇALIŞTIRAN JAVASCRIPT
+    function openTab(evt, tabName) {
+        var i, tabContent, tabBtns;
+        
+        // Tüm içerikleri gizle
+        tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
         }
 
-        function switchPage(pageId, element) {
-            // Tüm sayfaları gizle
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Seçilen sayfayı göster
-            document.getElementById(pageId).classList.add('active');
-            
-            // Menü renklerini güncelle
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
+        // Tüm butonlardan "active" sınıfını kaldır
+        tabBtns = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].className = tabBtns[i].className.replace(" active", "");
         }
 
-        function playVideo(amount) {
-            alert("Video açılıyor... İzleme sonunda " + amount + " ₺ eklenecek.");
-            setTimeout(() => {
-                balance += amount;
-                updateBalance();
-            }, 3000); // Test için 3 saniye
-        }
+        // Seçilen sekmeyi göster ve butonu aktif yap
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
 
-        function updateBalance() {
-            document.getElementById('total-balance').innerText = balance.toFixed(2) + " ₺";
-            document.getElementById('wallet-amount').innerText = balance.toFixed(2) + " ₺";
-        }
-
-        window.onload = init;
-    </script>
 </body>
 </html>
