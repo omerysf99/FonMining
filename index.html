@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX Mining App</title>
+    <title>PINIX App - Full Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
         body {
             /* Görseldeki derin mor-siyah radyal geçiş */
@@ -27,13 +27,13 @@
             backdrop-filter: blur(20px);
         }
 
-        /* Pervane Dönüş Efekti */
+        /* Pervane Dönüş Animasyonu */
         .mining-fan {
             width: 260px;
             height: 260px;
             object-fit: contain;
             animation: spin 15s linear infinite;
-            filter: drop-shadow(0 0 20px rgba(123, 97, 255, 0.2));
+            filter: drop-shadow(0 0 20px rgba(123, 97, 255, 0.3));
             border-radius: 50%;
         }
 
@@ -42,19 +42,20 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Alt Navigasyon Home Butonu Özel Efekt */
+        /* Alt Navigasyon Home Butonu */
         .nav-home-btn {
             background: linear-gradient(135deg, #a855f7 0%, #f97316 100%);
             box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
         }
 
-        /* Boost Butonu Rengi */
+        /* Boost Butonu (Görseldeki gibi Gold/Sarı Gradyan) */
         .btn-boost {
             background: linear-gradient(90deg, #9e7a20 0%, #d4a017 100%);
             color: black;
             font-weight: 900;
         }
 
+        /* Hover ve Click Efektleri */
         .active-scale:active {
             transform: scale(0.96);
         }
@@ -64,20 +65,32 @@
 
     <div class="w-full max-w-md h-full flex flex-col p-6 relative">
         
+        <div class="flex justify-between items-center text-[12px] text-gray-400 mb-2 px-1">
+            <span>3:28 <i class="far fa-clock ml-1"></i></span>
+            <div class="flex items-center gap-2">
+                <i class="fas fa-plane"></i>
+                <i class="fas fa-wifi"></i>
+                <span class="border border-gray-600 px-1 rounded-[3px] text-[10px]">14</span>
+            </div>
+        </div>
+
         <div class="flex justify-between items-center mb-6">
             <i class="fas fa-times text-xl text-gray-400"></i>
             <h1 class="font-bold text-lg flex items-center gap-1">
                 PINIX App <i class="fas fa-check-circle text-sky-400 text-[10px]"></i>
             </h1>
-            <i class="fas fa-ellipsis-v text-xl text-gray-400"></i>
+            <div class="flex items-center gap-4">
+                <i class="fas fa-chevron-down text-gray-400"></i>
+                <i class="fas fa-ellipsis-v text-gray-400"></i>
+            </div>
         </div>
 
         <div class="space-y-3 mb-8">
             <div class="glass-card p-4 rounded-3xl flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="bg-orange-500 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white shadow-lg">π</div>
+                    <div class="bg-orange-500 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white">π</div>
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Balance</p>
                         <p class="text-lg font-bold">0.0000000 PI</p>
                     </div>
                 </div>
@@ -86,9 +99,9 @@
 
             <div class="glass-card p-4 rounded-3xl flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <img src="pinix.jpg" class="w-11 h-11 rounded-full border border-purple-500/20" alt="pinix logo">
+                    <img src="pinix.jpg" class="w-11 h-11 rounded-full border border-purple-500/20" alt="logo">
                     <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none mb-1">Balance</p>
                         <p class="text-lg font-bold">0 PINIX</p>
                     </div>
                 </div>
@@ -99,7 +112,6 @@
         <div class="flex-grow flex flex-col items-center justify-center">
             <div class="relative flex items-center justify-center mb-4">
                 <img src="pinix.jpg" class="mining-fan" alt="Mining Fan">
-                
                 <div class="absolute w-12 h-12 bg-[#1a1625] rounded-full border-2 border-purple-700/50 flex items-center justify-center z-10 shadow-2xl">
                     <span class="text-orange-500 font-black text-sm">π</span>
                 </div>
@@ -111,7 +123,7 @@
             <div class="glass-card mt-6 px-10 py-3 rounded-2xl flex items-center gap-4">
                 <i class="fas fa-bolt text-yellow-500 text-2xl"></i>
                 <div class="text-left">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">Mining Power</p>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase leading-none mb-1">Mining Power</p>
                     <p class="font-black text-xl leading-tight">5 GH/s</p>
                 </div>
             </div>
@@ -119,40 +131,52 @@
 
         <div class="mt-auto space-y-4 pb-24">
             <div class="flex gap-4">
-                <button class="flex-1 bg-purple-700 py-4 rounded-3xl font-bold active-scale transition shadow-lg shadow-purple-900/20">Claim</button>
-                <button class="flex-1 bg-[#10b981] py-4 rounded-3xl font-bold flex items-center justify-center gap-2 active-scale transition shadow-lg shadow-green-900/20">
-                    <i class="fas fa-exchange-alt"></i> Swap PINIX
+                <button class="flex-1 bg-[#6d28d9] py-4 rounded-3xl font-bold active-scale transition shadow-lg">
+                    Claim
+                </button>
+                <button class="flex-1 bg-[#10b981] py-4 rounded-3xl font-bold flex items-center justify-center gap-2 active-scale transition shadow-lg">
+                    <i class="fas fa-exchange-alt text-sm"></i> Swap PINIX
                 </button>
             </div>
-            <button class="w-full btn-boost py-4 rounded-3xl active-scale transition flex items-center justify-center gap-2 uppercase tracking-[0.2em] font-black">
-                <i class="fas fa-rocket"></i> Boost
+            <button class="w-full btn-boost py-4 rounded-3xl active-scale transition flex items-center justify-center gap-2 uppercase tracking-[0.2em]">
+                <i class="fas fa-rocket"></i> BOOST
             </button>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full bg-[#080808] border-t border-white/5 flex justify-around items-center py-4 text-gray-500 shadow-2xl">
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-wallet text-xl"></i><span class="text-[9px] mt-1">Wallet</span></div>
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-users text-xl"></i><span class="text-[9px] mt-1">Friends</span></div>
-            
+        <div class="fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-md border-t border-white/5 flex justify-around items-center py-4 text-gray-500 shadow-2xl">
+            <div class="flex flex-col items-center opacity-60">
+                <i class="fas fa-wallet text-xl"></i>
+                <span class="text-[9px] mt-1">Wallet</span>
+            </div>
+            <div class="flex flex-col items-center opacity-60">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-[9px] mt-1">Friends</span>
+            </div>
             <div class="flex flex-col items-center text-orange-500 relative -top-3">
                 <div class="nav-home-btn p-3 rounded-full mb-1">
                     <i class="fas fa-home text-2xl text-white"></i>
                 </div>
                 <span class="text-[10px] font-bold">Home</span>
             </div>
-            
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-bullseye text-xl"></i><span class="text-[9px] mt-1">Missions</span></div>
-            <div class="flex flex-col items-center opacity-60"><i class="fas fa-ellipsis-h text-xl"></i><span class="text-[9px] mt-1">More</span></div>
+            <div class="flex flex-col items-center opacity-60">
+                <i class="fas fa-bullseye text-xl"></i>
+                <span class="text-[9px] mt-1">Missions</span>
+            </div>
+            <div class="flex flex-col items-center opacity-60 text-[20px]">
+                <i class="fas fa-ellipsis-h"></i>
+                <span class="text-[9px] mt-1">More</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // Rakamları sıfırdan başlatıp otomatik artırma simülasyonu
-        let balance = 0.0000000;
-        const counterElement = document.getElementById('counter');
+        // Madencilik Sayacı Simülasyonu
+        let bakiye = 0.0000000;
+        const bakiyeElementi = document.getElementById('counter');
 
         setInterval(() => {
-            balance += 0.0000007; 
-            counterElement.innerText = balance.toFixed(7) + " PI";
+            bakiye += 0.0000011; // Artış hızı
+            bakiyeElementi.innerText = bakiye.toFixed(7) + " PI";
         }, 1000);
     </script>
 
