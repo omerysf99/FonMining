@@ -3,338 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PINIX Mining Pro</title>
+    <title>PINIX ULTIMATE MINING</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Modern Renk Paleti ve Değişkenler */
         :root {
-            --bg-gradient: linear-gradient(180deg, #1a0b2e 0%, #05020a 100%);
-            --card-purple: rgba(45, 27, 78, 0.6);
-            --pi-gold: #ffcc00;
-            --pinix-purple: #a855f7;
-            --success-green: #22c55e;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-deep: #05020a;
+            --accent-purple: #8b5cf6;
+            --accent-gold: #f59e0b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-thick: rgba(20, 10, 40, 0.95);
+            --neon-blue: #0ea5e9;
+            --success: #10b981;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            color: white;
-            font-family: 'Inter', sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: 'Rajdhani', sans-serif; 
+            height: 100vh; 
             overflow: hidden;
             display: flex;
             justify-content: center;
         }
 
-        /* Ana Uygulama Çerçevesi */
-        .phone-container {
+        .app-shell {
             width: 100%;
-            max-width: 430px;
-            height: 100vh;
-            background: var(--bg-gradient);
+            max-width: 450px;
+            height: 100%;
+            background: linear-gradient(180deg, #13072e 0%, #000 100%);
+            position: relative;
             display: flex;
             flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Header Bölümü */
-        .app-header {
+        /* Sekme İçerikleri (SPA Yapısı) */
+        .page {
+            display: none;
+            flex: 1;
             padding: 20px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .verified-badge { color: #3b82f6; font-size: 18px; }
-
-        /* Bakiye Kartları */
-        .balance-section { padding: 0 20px; gap: 15px; display: flex; flex-direction: column; }
-
-        .balance-card {
-            background: var(--card-purple);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px 20px;
+        /* Üst Header */
+        header {
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass);
         }
+        .user-status { display: flex; align-items: center; gap: 10px; }
+        .level-badge { background: var(--accent-purple); padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
 
-        .coin-meta { display: flex; align-items: center; gap: 15px; }
-        
-        /* Dinamik İkonlar */
-        .icon-circle {
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            background: #3c1e70;
-            border: 2px solid var(--pi-gold);
-            color: var(--pi-gold);
-        }
-
-        .pinix-icon {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            border: none;
-            color: white;
-            animation: pulse 2s infinite;
-        }
-
-        /* Fan ve Mining Alanı */
-        .mining-core {
-            flex: 1;
+        /* --- HOME SEKİMESİ --- */
+        .mining-display {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin-top: 40px;
+        }
+        .fan-box {
             position: relative;
-        }
-
-        /* Fan Katmanları */
-        .fan-assembly {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .mining-fan {
-            width: 100%;
-            height: 100%;
-            background: url('https://i.ibb.co/LnbmDqC/pinix-fan.png') no-repeat center; /* Görsel yer tutucu */
-            background-size: contain;
-            filter: drop-shadow(0 0 15px var(--pinix-purple));
-            animation: rotateFan 2s linear infinite;
-        }
-
-        .pi-center {
-            position: absolute;
-            width: 70px;
-            height: 70px;
-            background: #2d1b4e;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 3px solid var(--pi-gold);
-            z-index: 5;
-            box-shadow: 0 0 20px var(--pi-gold);
+        }
+        .main-fan {
+            width: 90%;
+            height: 90%;
+            filter: hue-rotate(280deg);
+            animation: rotate 3s linear infinite;
+        }
+        .fan-center-pi {
+            position: absolute;
+            font-size: 40px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px var(--accent-gold);
+            z-index: 10;
         }
 
-        /* Rakamlar */
-        .mining-stats { text-align: center; margin-top: 20px; }
-        .mining-label { color: #94a3b8; font-size: 14px; margin-bottom: 5px; }
-        .pi-value { 
-            font-size: 38px; 
-            font-weight: 900; 
-            color: var(--pi-gold); 
-            text-shadow: 0 0 10px rgba(255,204,0,0.3);
-        }
-
-        /* Güç Paneli */
-        .power-badge {
-            background: rgba(255,255,255,0.05);
-            padding: 10px 25px;
-            border-radius: 50px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid var(--glass-border);
-        }
-
-        /* Butonlar */
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        /* --- WALLET SEKİMESİ --- */
+        .asset-card {
+            background: var(--glass);
+            border-radius: 20px;
             padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--glass);
+        }
+        .tx-history { margin-top: 20px; }
+        .tx-item { 
+            display: flex; justify-content: space-between; padding: 12px; 
+            border-bottom: 1px solid var(--glass); font-size: 14px;
         }
 
-        .btn {
-            padding: 18px;
-            border-radius: 18px;
-            border: none;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
+        /* --- MISSIONS SEKİMESİ --- */
+        .mission-item {
+            background: linear-gradient(90deg, var(--glass), transparent);
+            border-left: 4px solid var(--accent-purple);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .claim-reward { background: var(--success); color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
 
-        .btn-claim { background: #7c3aed; color: white; }
-        .btn-swap { background: #059669; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-boost {
-            grid-column: span 2;
-            background: linear-gradient(90deg, #d97706, #fbbf24);
-            color: #451a03;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* Alt Navigasyon */
-        .bottom-nav {
-            background: #0f071a;
+        /* --- ALT NAVIGASYON --- */
+        nav.bottom-bar {
+            height: 85px;
+            background: var(--glass-thick);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            padding: 15px 10px 30px;
-            border-top: 1px solid var(--glass-border);
+            align-items: center;
+            border-top: 1px solid var(--glass);
+            padding-bottom: 15px;
         }
-
-        .nav-link {
+        .nav-item {
+            color: #666;
             text-decoration: none;
-            color: #64748b;
-            font-size: 11px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
+            transition: 0.3s;
+            cursor: pointer;
         }
-
-        .nav-link.active { color: var(--pi-gold); }
-        .nav-link i { font-size: 22px; }
-
-        .active-home {
-            background: linear-gradient(135deg, var(--pinix-purple), var(--pi-gold));
-            width: 55px; height: 55px;
+        .nav-item.active { color: var(--accent-gold); }
+        .nav-item i { font-size: 22px; }
+        .home-center {
+            width: 60px; height: 60px;
+            background: var(--accent-purple);
             border-radius: 50%;
-            margin-top: -35px;
+            margin-top: -45px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            border: 6px solid #05020a;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
+            border: 5px solid #000;
         }
 
         /* Animasyonlar */
-        @keyframes rotateFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Progress Bar */
+        .progress-container { width: 100%; background: #222; height: 6px; border-radius: 3px; margin-top: 20px; }
+        .progress-fill { height: 100%; background: var(--accent-purple); width: 45%; border-radius: 3px; box-shadow: 0 0 10px var(--accent-purple); }
 
     </style>
 </head>
 <body>
 
-<div class="phone-container">
-    <header class="app-header">
-        PINIX App <i class="fas fa-check-circle verified-badge"></i>
+<div class="app-shell">
+    <header>
+        <div class="user-status">
+            <div style="width: 35px; height: 35px; background: #333; border-radius: 50%;"></div>
+            <div>
+                <p style="font-size: 14px; font-weight: bold;">User_8829 <span class="level-badge">LVL 4</span></p>
+                <p style="font-size: 11px; color: #888;">Online - Mining Active</p>
+            </div>
+        </div>
+        <i class="fas fa-bell"></i>
     </header>
 
-    <div class="balance-section">
-        <div class="balance-card">
-            <div class="coin-meta">
-                <div class="icon-circle">π</div>
-                <div>
-                    <div style="font-size: 12px; color: #94a3b8;">Balance</div>
-                    <div style="font-size: 18px; font-weight: 700;">0.0000000 PI</div>
-                </div>
+    <div id="home" class="page active">
+        <div class="mining-display">
+            <div class="fan-box">
+                <svg class="main-fan" viewBox="0 0 100 100">
+                    <path d="M50 10 A40 40 0 0 1 90 50 L50 50 Z" fill="#8b5cf6" opacity="0.8"/>
+                    <path d="M10 50 A40 40 0 0 1 50 10 L50 50 Z" fill="#8b5cf6" opacity="0.6"/>
+                    <path d="M50 90 A40 40 0 0 1 10 50 L50 50 Z" fill="#8b5cf6" opacity="0.8"/>
+                    <path d="M90 50 A40 40 0 0 1 50 90 L50 50 Z" fill="#8b5cf6" opacity="0.6"/>
+                </svg>
+                <div class="fan-center-pi">π</div>
             </div>
-            <i class="fas fa-wallet" style="color: #64748b;"></i>
-        </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="color: #888; letter-spacing: 2px;">MINING REVENUE</p>
+                <h1 id="pi-counter" style="font-size: 42px; color: var(--accent-gold); font-family: 'Orbitron';">0.0002435</h1>
+                <p style="color: var(--accent-gold); font-weight: bold;">PI COIN</p>
+            </div>
 
-        <div class="balance-card">
-            <div class="coin-meta">
-                <div class="icon-circle pinix-icon"><i class="fas fa-atom"></i></div>
-                <div>
-                    <div style="font-size: 12px; color: #94a3b8;">Balance</div>
-                    <div style="font-size: 18px; font-weight: 700;">0 PINIX</div>
-                </div>
+            <div class="progress-container">
+                <div class="progress-fill"></div>
             </div>
-            <i class="fas fa-wallet" style="color: #64748b;"></i>
+            
+            <div style="display: flex; width: 100%; justify-content: space-between; margin-top: 10px; font-size: 12px; color: #666;">
+                <span>Daily Limit</span>
+                <span>45% / 100%</span>
+            </div>
+
+            <button onclick="boost()" style="width: 100%; margin-top: 30px; background: linear-gradient(90deg, #f59e0b, #d97706); border: none; padding: 18px; border-radius: 15px; color: #2c1a00; font-weight: 800; font-family: 'Orbitron'; cursor: pointer;">
+                <i class="fas fa-rocket"></i> ACTIVATE BOOST
+            </button>
         </div>
     </div>
 
-    <main class="mining-core">
-        <div class="fan-assembly">
-            <div class="mining-fan"></div>
-            <div class="pi-center">
-                <span style="font-size: 35px; color: var(--pi-gold); font-weight: bold;">π</span>
-            </div>
+    <div id="wallet" class="page">
+        <h2 style="margin-bottom: 20px;">My Digital Wallet</h2>
+        <div class="asset-card">
+            <p style="color: #aaa;">Main Balance</p>
+            <h1 style="font-size: 32px; color: var(--accent-gold);">$ 1,420.55</h1>
+            <p style="font-size: 14px; color: var(--success);">+12.4% today</p>
         </div>
-
-        <div class="mining-stats">
-            <div class="mining-label">Mining...</div>
-            <div class="pi-value" id="pi-counter">0.0002435 PI</div>
+        
+        <h3>Recent Transactions</h3>
+        <div class="tx-history">
+            <div class="tx-item"><span>Mining Reward</span> <span style="color: var(--success);">+0.05 PI</span></div>
+            <div class="tx-item"><span>Referral Bonus</span> <span style="color: var(--success);">+10 PINIX</span></div>
+            <div class="tx-item"><span>System Fee</span> <span style="color: #ff4444;">-0.001 PI</span></div>
         </div>
+    </div>
 
-        <div class="power-badge">
-            <i class="fas fa-bolt" style="color: var(--pi-gold); font-size: 20px;"></i>
+    <div id="missions" class="page">
+        <h2 style="margin-bottom: 20px;">Daily Quests</h2>
+        <div class="mission-item">
             <div>
-                <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Mining Power</div>
-                <div style="font-size: 16px; font-weight: 800;">5.00 GH/s</div>
+                <p style="font-weight: bold;">Watch Ad</p>
+                <p style="font-size: 12px; color: #888;">Reward: 5.0 GH/s Boost</p>
             </div>
+            <button class="claim-reward" onclick="completeMission(this)">START</button>
         </div>
-    </main>
-
-    <div class="button-group">
-        <button class="btn btn-claim" onclick="animateClaim(this)">Claim</button>
-        <button class="btn btn-swap"><i class="fas fa-rotate"></i> Swap PINIX</button>
-        <button class="btn btn-boost" onclick="boostSpeed()">🚀 BOOST SPEED</button>
+        <div class="mission-item">
+            <div>
+                <p style="font-weight: bold;">Invite 3 Friends</p>
+                <p style="font-size: 12px; color: #888;">Reward: 50 PINIX</p>
+            </div>
+            <button class="claim-reward" onclick="completeMission(this)">INVITE</button>
+        </div>
     </div>
 
-    <nav class="bottom-nav">
-        <a href="#" class="nav-link"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <a href="#" class="nav-link"><i class="fas fa-users"></i><span>Friends</span></a>
-        <a href="#" class="nav-link active">
-            <div class="active-home"><i class="fas fa-home"></i></div>
+    <nav class="bottom-bar">
+        <div class="nav-item" onclick="showPage('wallet', this)">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </div>
+        <div class="nav-item" onclick="showPage('friends', this)">
+            <i class="fas fa-users"></i>
+            <span>Friends</span>
+        </div>
+        <div class="nav-item active" onclick="showPage('home', this)">
+            <div class="home-center"><i class="fas fa-home"></i></div>
             <span style="margin-top: 5px;">Home</span>
-        </a>
-        <a href="#" class="nav-link"><i class="fas fa-bullseye"></i><span>Missions</span></a>
-        <a href="#" class="nav-link"><i class="fas fa-bars"></i><span>More</span></a>
+        </div>
+        <div class="nav-item" onclick="showPage('missions', this)">
+            <i class="fas fa-trophy"></i>
+            <span>Missions</span>
+        </div>
+        <div class="nav-item" onclick="showPage('more', this)">
+            <i class="fas fa-th-large"></i>
+            <span>More</span>
+        </div>
     </nav>
 </div>
 
 <script>
-    // Dinamik Madencilik Sayacı
-    let currentPi = 0.0002435;
-    let miningSpeed = 0.00000014;
-    const counterDisplay = document.getElementById('pi-counter');
+    // State Yönetimi
+    let piBalance = 0.0002435;
+    let isBoosted = false;
 
-    function startMining() {
-        setInterval(() => {
-            currentPi += miningSpeed;
-            counterDisplay.innerText = currentPi.toFixed(7) + " PI";
-        }, 100);
+    // Sayfa Değiştirme Fonksiyonu
+    function showPage(pageId, element) {
+        // Tüm sayfaları gizle
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        // Hedef sayfayı göster
+        const target = document.getElementById(pageId);
+        if(target) target.classList.add('active');
+
+        // Navigasyon ikonlarını güncelle
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        element.classList.add('active');
     }
+
+    // Madencilik Sayacı
+    setInterval(() => {
+        let increment = isBoosted ? 0.00000085 : 0.00000015;
+        piBalance += increment;
+        document.getElementById('pi-counter').innerText = piBalance.toFixed(7);
+    }, 100);
 
     // Boost Fonksiyonu
-    function boostSpeed() {
-        miningSpeed *= 2;
-        document.querySelector('.mining-fan').style.animationDuration = '0.5s';
-        alert("🚀 BOOST ACTIVATED! Speed Doubled!");
+    function boost() {
+        isBoosted = true;
+        document.querySelector('.main-fan').style.animationDuration = '0.5s';
+        document.querySelector('.fan-box').style.background = 'radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, transparent 70%)';
+        alert("HYPER-BOOST ACTIVE! 🚀");
         setTimeout(() => {
-            miningSpeed /= 2;
-            document.querySelector('.mining-fan').style.animationDuration = '2s';
-        }, 5000);
+            isBoosted = false;
+            document.querySelector('.main-fan').style.animationDuration = '3s';
+            document.querySelector('.fan-box').style.background = 'radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%)';
+        }, 10000);
     }
 
-    // Claim Animasyonu
-    function animateClaim(btn) {
-        btn.innerText = "Claiming...";
-        btn.style.opacity = "0.5";
-        setTimeout(() => {
-            btn.innerText = "Claimed!";
-            btn.style.background = "#22c55e";
-            setTimeout(() => {
-                btn.innerText = "Claim";
-                btn.style.background = "#7c3aed";
-                btn.style.opacity = "1";
-            }, 2000);
-        }, 1000);
+    // Görev Tamamlama
+    function completeMission(btn) {
+        btn.innerText = "DONE!";
+        btn.style.background = "#888";
+        btn.disabled = true;
+        alert("Reward Added to your wallet!");
     }
-
-    window.onload = startMining;
 </script>
 
 </body>
