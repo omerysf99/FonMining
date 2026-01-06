@@ -3,135 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX PRO v2.0</title>
+    <title>PINIX ULTIMATE V3</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #8b5cf6; --secondary: #fbbf24; --bg: #05010d;
-            --card: #130a24; --green: #10b981; --border: rgba(255,255,255,0.1);
+            --primary: #8b5cf6; --primary-glow: rgba(139, 92, 246, 0.4);
+            --secondary: #fbbf24; --bg: #030008; --card: #11081f;
+            --green: #10b981; --red: #ef4444; --border: rgba(255,255,255,0.08);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; scroll-behavior: smooth; }
         body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
-        #app { width: 100%; max-width: 450px; height: 100vh; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e0d3d 0%, var(--bg) 85%); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        #app { width: 100%; max-width: 500px; height: 100vh; position: relative; display: flex; flex-direction: column; 
+               background: radial-gradient(circle at 50% -20%, #2e1065 0%, var(--bg) 70%); }
 
-        /* AD TIMER BAR */
-        .ad-container { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.05); z-index: 1000; }
-        #ad-progress { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 12px var(--secondary); transition: linear; }
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 0; }
 
-        /* HEADER */
-        .header { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(5px); }
-        .coin-icon-small { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        /* UI COMPONENTS */
+        .ad-strip { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 1000; }
+        #ad-progress { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
 
-        /* MINING SECTION */
-        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
-        .view.active { display: flex; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .header { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 10; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 10px 15px; 
+                     display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
+        .coin-thumb { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary); }
 
-        .mining-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan-glow { width: 250px; height: 250px; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; background: rgba(139, 92, 246, 0.1); box-shadow: 0 0 60px rgba(139, 92, 246, 0.2); }
-        .fan-img { width: 220px; height: 220px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 4px solid var(--primary); animation: spin 4s linear infinite; }
-        .core-img { position: absolute; width: 55px; height: 55px; border-radius: 50%; background: url('pico.jpg') center/cover; border: 3px solid white; z-index: 5; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* VIEWS SYSTEM */
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
+        .view.active { display: flex; animation: viewEnter 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
+        @keyframes viewEnter { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        .mining-stats { text-align: center; margin-top: 25px; }
-        .uncl-val { font-size: 3rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); letter-spacing: -1px; }
+        /* MINING ENGINE UI */
+        .mining-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .fan-orbit { width: 260px; height: 260px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                     background: repeating-conic-gradient(from 0deg, transparent 0deg 30deg, rgba(139, 92, 246, 0.05) 30deg 60deg);
+                     animation: pulse 4s ease-in-out infinite; }
+        .fan-main { width: 220px; height: 220px; border-radius: 50%; background: url('pinix.jpg') center/cover;
+                    border: 5px solid var(--primary); animation: fanSpin 2.5s linear infinite; box-shadow: 0 0 50px var(--primary-glow); }
+        .fan-core { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: url('pico.jpg') center/cover;
+                    border: 3px solid white; z-index: 5; box-shadow: 0 0 20px black; }
+        
+        @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* BUTTONS */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
-        .main-btn { padding: 18px; border-radius: 22px; border: none; font-weight: 900; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: transform 0.2s; }
-        .main-btn:active { transform: scale(0.96); }
-        .btn-purple { background: var(--primary); color: white; box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3); }
-        .btn-green { background: var(--green); color: white; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
+        .mining-info { text-align: center; margin-top: 30px; }
+        .pi-val { font-size: 3.2rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); text-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }
+        .power-badge { background: rgba(139, 92, 246, 0.1); border: 1px solid var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; margin-top: 10px; display: inline-block; }
 
-        /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: rgba(13, 6, 23, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 15px; }
-        .nav-item { color: rgba(255,255,255,0.3); font-size: 0.65rem; text-align: center; cursor: pointer; flex: 1; transition: 0.3s; }
-        .nav-item.active { color: var(--secondary); font-weight: 700; }
-        .nav-item i { display: block; font-size: 1.6rem; margin-bottom: 4px; font-style: normal; }
+        /* CARDS & BUTTONS */
+        .glass-box { background: var(--card); border: 1px solid var(--border); border-radius: 25px; padding: 20px; margin-bottom: 15px; }
+        .btn { padding: 18px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.85rem; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-p { background: var(--primary); color: white; box-shadow: 0 5px 15px var(--primary-glow); }
+        .btn-s { background: var(--green); color: white; }
+        .btn-boost { background: linear-gradient(90deg, #f59e0b, #fbbf24); color: black; width: 100%; margin-top: 15px; }
 
-        /* ADMIN */
-        .admin-btn { position: absolute; top: 12px; right: 12px; background: #ef4444; font-size: 0.6rem; padding: 4px 10px; border-radius: 10px; display: none; z-index: 2000; font-weight: 800; cursor: pointer; }
+        /* NAVIGATION */
+        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(10, 5, 20, 0.95); 
+               backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; 
+               border-top: 1px solid var(--border); padding-bottom: 20px; z-index: 100; }
+        .nav-link { color: rgba(255,255,255,0.3); font-size: 0.65rem; text-align: center; flex: 1; transition: 0.3s; }
+        .nav-link.active { color: var(--secondary); }
+        .nav-link i { display: block; font-size: 1.7rem; margin-bottom: 3px; font-style: normal; }
+
+        /* ADMIN PANEL */
+        .admin-trigger { position: absolute; top: 15px; right: 15px; background: var(--red); font-size: 0.6rem; padding: 5px 10px; border-radius: 10px; font-weight: 900; z-index: 1000; cursor: pointer; display: none; }
+        .user-row { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="ad-container"><div id="ad-progress"></div></div>
-    <div class="admin-btn" id="adm-trigger" onclick="tab('v-admin')">ADMIN</div>
+    <div class="ad-strip"><div id="ad-progress"></div></div>
+    <div class="admin-trigger" id="admin-btn" onclick="switchTab('v-admin')">CONSOLE</div>
 
     <header class="header">
         <div class="stat-card">
-            <img src="pico.jpg" class="coin-icon-small">
-            <div><p style="font-size:0.55rem; opacity:0.5;">PI BALANCE</p><p id="pi-top" style="font-family:'Orbitron'; font-weight:800;">0.0000</p></div>
+            <img src="pico.jpg" class="coin-thumb">
+            <div><p style="font-size:0.55rem; opacity:0.5;">PI WALLET</p><p id="pi-val-top" style="font-family:'Orbitron'; font-weight:800;">0.0000</p></div>
         </div>
         <div class="stat-card">
-            <div class="coin-icon-small" style="background:#1e1b4b; display:flex; align-items:center; justify-content:center; color:white; border-color:#3730a3;">🌀</div>
-            <div><p style="font-size:0.55rem; opacity:0.5;">PNX ASSET</p><p id="pnx-top" style="font-family:'Orbitron'; font-weight:800;">0</p></div>
+            <div class="coin-thumb" style="background:#1e1b4b; display:flex; align-items:center; justify-content:center; color:white;">🌀</div>
+            <div><p style="font-size:0.55rem; opacity:0.5;">PINIX ASSET</p><p id="pnx-val-top" style="font-family:'Orbitron'; font-weight:800;">0</p></div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="mining-wrap">
-            <div class="fan-glow">
-                <div class="fan-img"></div>
-                <div class="core-img"></div>
+        <div class="mining-container">
+            <div class="fan-orbit">
+                <div class="fan-main"></div>
+                <div class="fan-core"></div>
             </div>
-            <div class="mining-stats">
-                <p style="opacity:0.4; font-size:0.75rem; letter-spacing:3px;">CLOUD MINING V2</p>
-                <div class="uncl-val" id="pi-mining">0.00000000</div>
-                <div style="background:rgba(255,255,255,0.06); padding:6px 18px; border-radius:30px; border:1px solid var(--border); font-size:0.85rem; margin-top:10px;">⚡ 5.0 GH/s Power</div>
+            <div class="mining-info">
+                <p style="opacity:0.4; font-size:0.8rem; letter-spacing:4px;">QUANTUM MINING</p>
+                <div class="pi-val" id="pi-live">0.00000000</div>
+                <div class="power-badge">⚡ 5.00 GH/s Power</div>
             </div>
-            <div class="action-grid">
-                <button class="main-btn btn-purple" onclick="claimRewards()">Claim</button>
-                <button class="main-btn btn-green" onclick="tab('v-swap')">Swap</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; width:100%; margin-top:30px;">
+                <button class="btn btn-p" onclick="handleClaim()">Claim</button>
+                <button class="btn btn-s" onclick="switchTab('v-swap')">Swap</button>
             </div>
-            <button class="main-btn" style="width:100%; margin-top:15px; background:linear-gradient(90deg, #f59e0b, #fbbf24); color:#000;" onclick="showAd()">🚀 SPEED BOOST</button>
+            <button class="btn btn-boost" onclick="forceAd()">🚀 BOOST ENERGY (+5 PNX)</button>
         </div>
     </div>
 
     <div id="v-swap" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Swap Center</h2>
-        <div style="background:var(--card); padding:25px; border-radius:25px; border:1px solid var(--border);">
-            <label style="font-size:0.65rem; opacity:0.5;">SELL (PINIX)</label>
-            <input type="number" id="sw-val" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); padding:18px; border-radius:15px; color:white; margin:10px 0; font-size:1.2rem; font-weight:700;" placeholder="0" oninput="calcSwap(this.value)">
-            <div style="text-align:center; color:var(--primary); font-size:1.5rem;">⇅</div>
-            <label style="font-size:0.65rem; opacity:0.5;">BUY (PI)</label>
-            <input type="text" id="sw-res" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid var(--border); padding:18px; border-radius:15px; color:white; margin:10px 0; font-size:1.2rem;" placeholder="0.0000" readonly>
-            <button class="main-btn btn-green" style="width:100%; margin-top:15px;" onclick="executeSwap()">Execute Swap</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Swap Engine</h2>
+        <div class="glass-box">
+            <label style="font-size:0.7rem; opacity:0.5;">PAY (PINIX)</label>
+            <input type="number" id="sw-input" class="btn" style="width:100%; background:rgba(0,0,0,0.3); color:white; margin:10px 0; text-align:left;" placeholder="0" oninput="previewSwap(this.value)">
+            <p style="text-align:center; font-size:1.5rem; color:var(--primary);">⇅</p>
+            <label style="font-size:0.7rem; opacity:0.5;">RECEIVE (PI)</label>
+            <input type="text" id="sw-output" class="btn" style="width:100%; background:rgba(0,0,0,0.3); color:white; margin:10px 0; text-align:left;" placeholder="0.0000" readonly>
+            <button class="btn btn-s" style="width:100%; margin-top:15px;" onclick="executeSwap()">Confirm Swap</button>
+            <p style="font-size:0.6rem; opacity:0.4; text-align:center; margin-top:10px;">100 PINIX = 1 PI (No Fee)</p>
         </div>
     </div>
 
     <div id="v-ref" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Network</h2>
-        <div style="background:var(--card); padding:30px; border-radius:25px; border:1px solid var(--border); text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.5;">YOUR INVITE CODE</p>
-            <h1 id="ref-display" style="color:var(--secondary); font-size:2.5rem; margin:15px 0; font-family:'Orbitron';">---</h1>
-            <button class="main-btn btn-purple" style="width:100%;" onclick="shareRef()">Invite Friend</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Affiliate</h2>
+        <div class="glass-box" style="text-align:center;">
+            <p style="font-size:0.75rem; opacity:0.5;">REFERRAL CODE</p>
+            <h1 id="ref-ui" style="color:var(--secondary); font-size:2.5rem; margin:20px 0; font-family:'Orbitron';">---</h1>
+            <button class="btn btn-p" style="width:100%;" onclick="shareSystem()">Invite & Earn 100 PNX</button>
+        </div>
+        <div class="glass-box">
+            <h3>Active Referrals</h3>
+            <p style="opacity:0.5; font-size:0.8rem; margin-top:10px;">Refer friends and get 10% of their mining speed.</p>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:#ef4444; font-family:'Orbitron';">Global Dashboard</h2>
-        <div id="adm-users" style="margin-top:20px; display:grid; gap:10px;">Loading users...</div>
+        <h2 style="color:var(--red); font-family:'Orbitron';">Admin Panel</h2>
+        <div id="admin-user-list" style="margin-top:20px;"></div>
+        <button class="btn" style="background:#333; margin-top:20px; width:100%;" onclick="switchTab('v-home')">Exit Console</button>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
-        <div class="nav-item" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
-        <div class="nav-item" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
+        <div class="nav-link active" onclick="switchTab('v-home', this)"><i>🏠</i>Home</div>
+        <div class="nav-link" onclick="switchTab('v-swap', this)"><i>⇆</i>Swap</div>
+        <div class="nav-link" onclick="switchTab('v-ref', this)"><i>👥</i>Friends</div>
     </nav>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -143,106 +168,128 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    const MY_ADMIN = "8392479231";
+    const ADMIN_UID = "8392479231";
 
-    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "user_preview";
-    let uData = { pi: 0, pnx: 0, uncl: 0, ref: "PNX-" + uid.substring(0,6) };
-    let ad;
+    // --- CORE DATA ---
+    let userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_mode_99";
+    let userData = { pi: 0, pnx: 0, uncl: 0, refCode: "PX-" + userId.substring(0,6) };
+    let adWidget;
 
-    // REAL-TIME DATA LISTENER
-    function initData() {
-        db.collection("users").doc(uid).onSnapshot((doc) => {
+    // --- APP INITIALIZATION ---
+    async function initApp() {
+        tg.expand();
+        // Real-time listener for user data
+        db.collection("users").doc(userId).onSnapshot((doc) => {
             if (doc.exists) {
-                const d = doc.data();
-                uData.pi = Number(d.pi) || 0;
-                uData.pnx = Number(d.pnx) || 0;
-                uData.ref = d.ref || ("PNX-" + uid.substring(0,6));
-                updateUI();
+                const data = doc.data();
+                userData.pi = Number(data.pi) || 0;
+                userData.pnx = Number(data.pnx) || 0;
+                userData.refCode = data.refCode || ("PX-" + userId.substring(0,6));
+                renderUI();
             } else {
-                db.collection("users").doc(uid).set(uData);
+                db.collection("users").doc(userId).set(userData);
             }
         });
+        startMining();
+        startAdLoop();
     }
 
-    // MINING ENGINE
-    setInterval(() => {
-        uData.uncl += 0.0001;
-        document.getElementById('pi-mining').innerText = uData.uncl.toFixed(8);
-    }, 1000);
-
-    // ADS
-    function startAds() {
-        let p = 0;
+    // --- MINING ENGINE (0.0001 PI/s) ---
+    function startMining() {
         setInterval(() => {
-            p++;
-            document.getElementById('ad-progress').style.width = (p/41)*100 + '%';
-            if(p >= 41) { p = 0; showAd(); }
+            userData.uncl += 0.0001;
+            document.getElementById('pi-live').innerText = userData.uncl.toFixed(8);
         }, 1000);
     }
 
-    function showAd() {
-        if(ad) { ad.autoMode(); uData.pnx += 5; save(); }
+    // --- AD SYSTEM ---
+    function startAdLoop() {
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            document.getElementById('ad-progress').style.width = (seconds/41)*100 + '%';
+            if(seconds >= 41) { seconds = 0; forceAd(); }
+        }, 1000);
     }
 
-    async function save() { await db.collection("users").doc(uid).update({ pi: uData.pi, pnx: uData.pnx }); }
-
-    function claimRewards() {
-        if(uData.uncl < 0.001) return alert("Min 0.001 PI required!");
-        showAd();
-        uData.pi += uData.uncl;
-        uData.uncl = 0;
-        save();
+    function forceAd() {
+        if(adWidget) {
+            adWidget.autoMode();
+            db.collection("users").doc(userId).update({
+                pnx: firebase.firestore.FieldValue.increment(5)
+            });
+        }
     }
 
-    function calcSwap(v) { document.getElementById('sw-res').value = (v / 100).toFixed(4); }
+    // --- ACTIONS ---
+    function handleClaim() {
+        if(userData.uncl < 0.001) return alert("Min. 0.001 PI required!");
+        forceAd();
+        const totalPi = userData.pi + userData.uncl;
+        db.collection("users").doc(userId).update({
+            pi: totalPi
+        });
+        userData.uncl = 0;
+    }
 
-    function executeSwap() {
-        const amt = parseFloat(document.getElementById('sw-val').value);
-        if(amt >= 100 && uData.pnx >= amt) {
-            uData.pnx -= amt; uData.pi += (amt/100);
-            save(); alert("Swap Success!");
+    function previewSwap(val) {
+        document.getElementById('sw-output').value = (Number(val) / 100).toFixed(4);
+    }
+
+    async function executeSwap() {
+        const amount = Number(document.getElementById('sw-input').value);
+        if(amount >= 100 && userData.pnx >= amount) {
+            const piGain = amount / 100;
+            await db.collection("users").doc(userId).update({
+                pnx: firebase.firestore.FieldValue.increment(-amount),
+                pi: firebase.firestore.FieldValue.increment(piGain)
+            });
+            alert("Swap Success!");
         } else alert("Insufficient PINIX!");
     }
 
-    function shareRef() {
-        const link = `https://t.me/FonixMining2026Bot?start=${uData.ref}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Join PI Mining!`);
+    function shareSystem() {
+        const text = `Mine PI on your phone! 5 GH/s power active. Code: ${userData.refCode}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(text)}`);
     }
 
-    function updateUI() {
-        document.getElementById('pi-top').innerText = uData.pi.toFixed(4);
-        document.getElementById('pnx-top').innerText = Math.floor(uData.pnx);
-        document.getElementById('ref-display').innerText = uData.ref;
+    // --- UI ENGINE ---
+    function renderUI() {
+        document.getElementById('pi-val-top').innerText = userData.pi.toFixed(4);
+        document.getElementById('pnx-val-top').innerText = Math.floor(userData.pnx);
+        document.getElementById('ref-ui').innerText = userData.refCode;
     }
 
-    function tab(id, el) {
+    function switchTab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(el) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
-        if(id === 'v-admin') loadAdmin();
+        if(id === 'v-admin') loadAdminPanel();
     }
 
-    async function loadAdmin() {
-        const box = document.getElementById('adm-users');
-        box.innerHTML = "Accessing...";
+    // --- ADMIN ENGINE ---
+    async function loadAdminPanel() {
+        const list = document.getElementById('admin-user-list');
+        list.innerHTML = "Accessing Neural Network...";
         const snap = await db.collection("users").get();
-        box.innerHTML = "";
+        list.innerHTML = "";
         snap.forEach(doc => {
             const d = doc.data();
-            box.innerHTML += `<div style="background:var(--card); padding:15px; border-radius:15px; font-size:0.75rem; border:1px solid var(--border)">
-                <b>ID: ${doc.id}</b><br>PI: ${Number(d.pi).toFixed(4)} | PNX: ${d.pnx}
+            list.innerHTML += `<div class="user-row">
+                <b>UID: ${doc.id}</b><br>
+                Balance: ${Number(d.pi).toFixed(4)} PI | Asset: ${d.pnx} PNX
             </div>`;
         });
     }
 
+    // --- BOOT ---
     window.onload = () => {
-        if(uid === MY_ADMIN) document.getElementById('adm-trigger').style.display = 'block';
-        ad = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-        initData();
-        startAds();
+        if(userId === ADMIN_UID) document.getElementById('admin-btn').style.display = 'block';
+        adWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+        initApp();
     };
 </script>
 </body>
