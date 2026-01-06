@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE PRO - WEB3 HUB</title>
+    <title>PINIX ULTIMATE PRO - MEGA WEB3 HUB</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,102 +13,127 @@
             --input-bg: #1a1625; --input-border: #8b5cf6;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg-ultra); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
-        #app { width: 100%; max-width: 450px; height: 100vh; background: #0b021a; position: relative; display: flex; flex-direction: column; }
+        #app { 
+            width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 60%); 
+            position: relative; display: flex; flex-direction: column; border: 1px solid var(--border);
+        }
 
-        /* HEADER */
-        .header-system { padding: 20px; z-index: 10; }
-        .token-card { background: var(--glass); border-radius: 20px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
+        /* --- UI ELEMENTS --- */
+        .header { padding: 20px 15px; z-index: 10; background: rgba(11, 2, 26, 0.8); backdrop-filter: blur(10px); }
+        .token-card { background: var(--glass); border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
         .token-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; font-weight: bold; }
-        .pi-theme { background: #4c1d95; color: #f59e0b; }
+        .pi-theme { background: #4c1d95; color: #f59e0b; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
 
-        /* VIEW SYSTEM */
-        .view { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 120px; }
+        .view.active { display: flex; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* MINING HOME */
+        /* --- HOME / MINING --- */
         .mining-hub { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .fan { width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--primary); background: url('pinix.jpg') center/cover; animation: spin 2s linear infinite; margin-bottom: 20px; }
+        .fan-box { position: relative; width: 220px; height: 220px; margin-bottom: 25px; }
+        .fan { width: 100%; height: 100%; border-radius: 50%; border: 5px solid var(--primary); background: url('pinix.jpg') center/cover; animation: spin 2s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
+        .pico { position: absolute; bottom: -10px; right: -10px; width: 80px; height: 80px; animation: hover 3s ease-in-out infinite; filter: drop-shadow(0 0 10px gold); }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .mining-amount { font-size: 2.5rem; font-family: 'Orbitron'; color: var(--secondary); margin-bottom: 30px; }
+        @keyframes hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .mining-amount { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); margin-bottom: 5px; }
 
-        /* --- YENİ WITHDRAW EKRANI TASARIMI (GÖRSELDEKİ GİBİ) --- */
-        .withdraw-container { display: flex; flex-direction: column; gap: 20px; }
-        .withdraw-title { text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
-        .withdraw-subtitle { text-align: center; font-size: 0.85rem; opacity: 0.8; margin-bottom: 15px; }
-        
-        .custom-select { background: var(--input-bg); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
-        
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        .input-label { font-size: 0.75rem; opacity: 0.6; margin-left: 5px; }
-        .input-field { 
-            background: var(--input-bg); border: 2.5px solid var(--input-border); 
-            border-radius: 25px; padding: 18px 25px; color: white; font-size: 1rem; outline: none;
-            transition: 0.3s;
-        }
-        .amount-container { position: relative; }
-        .max-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #8b5cf6; font-weight: 800; cursor: pointer; font-size: 0.8rem; }
-        
-        .fee-card { background: var(--glass); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
-        .fee-row { display: flex; justify-content: space-between; }
-        .receive-val { color: var(--p-green); font-weight: bold; }
+        /* --- WITHDRAW (GÖRSEL TASARIMI) --- */
+        .withdraw-title { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
+        .withdraw-subtitle { text-align: center; font-size: 0.85rem; opacity: 0.6; margin-bottom: 25px; }
+        .input-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .input-label { font-size: 0.8rem; opacity: 0.5; margin-left: 10px; }
+        .input-field { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 25px; padding: 18px 25px; color: white; font-size: 1rem; outline: none; }
+        .max-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: 800; cursor: pointer; }
+        .fee-card { background: var(--glass); border-radius: 20px; padding: 20px; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
 
-        .btn-send { 
-            background: #8b5cf6; color: white; border: none; padding: 20px; 
-            border-radius: 25px; font-weight: 700; font-size: 1.1rem; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3); margin-top: 10px;
-        }
+        /* --- TASKS --- */
+        .task-card { background: var(--glass); border-radius: 20px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .btn-claim { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* AD OVERLAY */
-        #ad-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .ad-timer { position: absolute; top: 40px; right: 20px; background: var(--secondary); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        /* --- AD SCREEN --- */
+        #ad-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .ad-timer { position: absolute; top: 40px; right: 20px; background: var(--secondary); color: black; padding: 5px 15px; border-radius: 20px; font-weight: 900; }
 
-        /* NAVBAR */
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: rgba(13, 4, 31, 0.9); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { color: rgba(255,255,255,0.4); font-size: 0.7rem; text-align: center; cursor: pointer; }
-        .nav-item.active { color: var(--secondary); }
+        /* --- NAVBAR --- */
+        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: rgba(13, 4, 31, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { color: rgba(255,255,255,0.3); font-size: 0.7rem; text-align: center; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--secondary); transform: translateY(-5px); }
+        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+
+        /* --- UTILS --- */
+        .btn-full { background: var(--primary); color: white; border: none; padding: 20px; border-radius: 25px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 15px; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="ad-box">
+    <div id="ad-overlay">
         <div class="ad-timer" id="ad-sec">5s</div>
         <div style="text-align:center;">
             <div style="font-size: 4rem; margin-bottom: 20px;">🌀</div>
-            <h2 style="font-family:'Orbitron';">ADVERTISING</h2>
-            <p style="opacity:0.6; margin-top:10px;">Claiming your rewards...</p>
+            <h2 style="font-family:'Orbitron';">PINIX ADS</h2>
+            <p style="opacity:0.6; margin-top:10px;">Madencilik ödülleri işleniyor...</p>
         </div>
     </div>
 
-    <div class="header-system">
+    <div class="header">
         <div class="token-card">
             <div class="token-icon pi-theme">π</div>
             <div>
                 <div style="font-size:0.6rem; opacity:0.5; font-weight:bold;">TOTAL BALANCE</div>
-                <div class="pi-display" style="font-family:'Orbitron'; font-weight:800; font-size:1.1rem;">0.0000 PI</div>
+                <div class="pi-val" style="font-family:'Orbitron'; font-weight:800; font-size:1.2rem;">0.0000 PI</div>
             </div>
         </div>
     </div>
 
-    <div id="view-home" class="view active">
+    <div id="v-home" class="view active">
         <div class="mining-hub">
-            <div class="fan" id="main-fan"></div>
-            <div class="mining-amount" id="uncl-text">0.00000</div>
-            <p style="font-size:0.7rem; opacity:0.5; letter-spacing:2px; margin-bottom:20px;">0.00001 PI / SEC</p>
-            <button class="btn-send" style="width:100%;" onclick="runClaim()">CLAIM MINING</button>
+            <div class="fan-box">
+                <div class="fan"></div>
+                <div class="pico"><img src="pico.jpg" style="width:100%;"></div>
+            </div>
+            <div class="mining-amount" id="uncl">0.00000</div>
+            <p style="font-size:0.7rem; opacity:0.5; letter-spacing:2px; margin-bottom:25px;">RATE: 0.00001 PI / SEC ⚡</p>
+            <button class="btn-full" onclick="startClaim()">CLAIM MINING (AD)</button>
         </div>
     </div>
 
-    <div id="view-wallet" class="view">
+    <div id="v-tasks" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Daily Missions</h2>
+        <div class="task-card">
+            <div><b>Join Telegram</b><br><small style="color:var(--secondary)">+50 PNX</small></div>
+            <button class="btn-claim" onclick="doTask(this, 50)">Start</button>
+        </div>
+        <div class="task-card">
+            <div><b>Follow Twitter</b><br><small style="color:var(--secondary)">+100 PNX</small></div>
+            <button class="btn-claim" onclick="doTask(this, 100)">Start</button>
+        </div>
+        <div class="card" style="margin-top:20px; background:var(--glass); border-radius:20px; padding:20px; border:1px solid var(--border);">
+            <h3 style="font-size:0.9rem;">🌀 Swap PNX to PI</h3>
+            <p style="font-size:0.7rem; opacity:0.5; margin-bottom:15px;">Rate: 100 PNX = 1 PI</p>
+            <input type="number" id="swap-in" class="input-field" style="width:100%; padding:12px;" placeholder="Amount PNX">
+            <button class="btn-full" style="padding:12px; font-size:0.8rem;" onclick="runSwap()">Swap Now</button>
+        </div>
+    </div>
+
+    <div id="v-ref" class="view">
+        <h2 style="font-family:'Orbitron'; text-align:center;">My Network</h2>
+        <div class="card" style="text-align:center; border:2px dashed var(--primary); margin-top:30px; border-radius:25px; padding:30px; background:var(--glass);">
+            <p class="input-label">REFERRAL CODE</p>
+            <h1 id="my-code" style="font-size:2.5rem; color:var(--secondary); margin:10px 0;">PNX-0000</h1>
+            <button class="btn-claim" onclick="copyRef()">COPY CODE</button>
+        </div>
+    </div>
+
+    <div id="v-wallet" class="view">
         <div class="withdraw-container">
             <h1 class="withdraw-title">Withdraw PI</h1>
             <p class="withdraw-subtitle">Minimum withdrawal amount: 30 PI</p>
 
-            <div class="custom-select">
+            <div class="custom-select" style="background:var(--input-bg); padding:15px; border-radius:15px; display:flex; justify-content:space-between; margin-bottom:20px;">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span style="background:#f59e0b; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">π</span>
                     <span style="font-weight:bold;">PI</span>
@@ -116,51 +141,56 @@
                 <span>▼</span>
             </div>
 
-            <div class="input-group">
+            <div class="input-box">
                 <label class="input-label">Your PI wallet address</label>
                 <input type="text" id="w-addr" class="input-field" placeholder="Enter PI wallet address">
             </div>
 
-            <div class="input-group">
+            <div class="input-box">
                 <label class="input-label">Amount to withdraw</label>
-                <div class="amount-container">
-                    <input type="number" id="w-amt" class="input-field" style="width:100%;" placeholder="Enter amount" oninput="calcWithdraw()">
+                <div style="position:relative;">
+                    <input type="number" id="w-amt" class="input-field" style="width:100%;" placeholder="Enter amount" oninput="calcW()">
                     <span class="max-btn" onclick="setMax()">MAX</span>
                 </div>
             </div>
 
             <div class="fee-card">
-                <div class="fee-row">
-                    <span style="opacity:0.6;">Network fee:</span>
-                    <span>1 PI</span>
+                <div style="display:flex; justify-content:space-between; opacity:0.6; font-size:0.9rem;">
+                    <span>Network fee:</span><span>1 PI</span>
                 </div>
-                <div class="fee-row">
-                    <span style="opacity:0.6;">Amount to receive:</span>
-                    <span class="receive-val" id="receive-text">0.00 PI</span>
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>Amount to receive:</span><span style="color:var(--p-green);" id="w-rec">0.00 PI</span>
                 </div>
             </div>
 
-            <button class="btn-send" onclick="submitWithdraw()">Send withdrawal request</button>
+            <button class="btn-full" onclick="sendWithdraw()">Send withdrawal request</button>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="tab('view-home', this)">🏠<br>Home</div>
-        <div class="nav-item" onclick="tab('view-wallet', this)">👛<br>Withdraw</div>
+        <div class="nav-item active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
+        <div class="nav-item" onclick="tab('v-tasks', this)"><i>🎯</i>Tasks</div>
+        <div class="nav-item" onclick="tab('v-ref', this)"><i>👥</i>Friends</div>
+        <div class="nav-item" onclick="tab('v-wallet', this)"><i>👛</i>Wallet</div>
     </nav>
 </div>
 
 <script>
-    let state = {
-        pi: 0.00, uncl: 0.00, 
+    // --- DATABASE ---
+    let db = JSON.parse(localStorage.getItem('pinix_pro_db')) || {
+        pi: 0.00, pnx: 100, uncl: 0.00,
+        code: "PNX-" + Math.floor(1000 + Math.random()*8999),
+        tasks: []
     };
+    function save() { localStorage.setItem('pinix_pro_db', JSON.stringify(db)); }
 
-    // Kazanç: Saniyede 0.00001 PI
+    // --- MINING ENGINE ---
     setInterval(() => {
-        state.uncl += 0.00001;
-        document.getElementById('uncl-text').innerText = state.uncl.toFixed(5);
+        db.uncl += 0.00001;
+        document.getElementById('uncl').innerText = db.uncl.toFixed(5);
     }, 1000);
 
+    // --- NAVIGATION ---
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -168,10 +198,10 @@
         el.classList.add('active');
     }
 
-    // Claim Reklamı
-    function runClaim() {
-        if(state.uncl < 0.0001) return alert("Not enough to claim!");
-        const ad = document.getElementById('ad-box');
+    // --- ACTIONS ---
+    function startClaim() {
+        if(db.uncl < 0.0001) return alert("Madende Pi birikmedi!");
+        const ad = document.getElementById('ad-overlay');
         ad.style.display = 'flex';
         let s = 5;
         const iv = setInterval(() => {
@@ -180,46 +210,51 @@
             if(s <= 0) {
                 clearInterval(iv);
                 ad.style.display = 'none';
-                state.pi += state.uncl;
-                state.uncl = 0;
-                updateUI();
+                db.pi += db.uncl; db.uncl = 0;
+                save(); sync();
             }
         }, 1000);
     }
 
-    function updateUI() {
-        document.querySelector('.pi-display').innerText = state.pi.toFixed(4) + " PI";
+    function sync() {
+        document.querySelectorAll('.pi-val').forEach(e => e.innerText = db.pi.toFixed(4) + " PI");
+        document.getElementById('my-code').innerText = db.code;
     }
 
-    // --- WITHDRAW MANTIĞI ---
-    function calcWithdraw() {
-        let val = parseFloat(document.getElementById('w-amt').value) || 0;
-        let receive = Math.max(0, val - 1); // 1 PI Ağ Ücreti
-        document.getElementById('receive-text').innerText = receive.toFixed(2) + " PI";
+    function calcW() {
+        let a = parseFloat(document.getElementById('w-amt').value) || 0;
+        document.getElementById('w-rec').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
     }
 
     function setMax() {
-        document.getElementById('w-amt').value = state.pi.toFixed(2);
-        calcWithdraw();
+        document.getElementById('w-amt').value = db.pi.toFixed(2);
+        calcW();
     }
 
-    function submitWithdraw() {
-        let amt = parseFloat(document.getElementById('w-amt').value);
-        let addr = document.getElementById('w-addr').value;
-
-        if(amt < 30) return alert("Minimum withdrawal is 30 PI!");
-        if(amt > state.pi) return alert("Insufficient balance!");
-        if(addr.length < 10) return alert("Please enter a valid PI wallet address!");
-
-        state.pi -= amt;
-        updateUI();
-        alert("Withdrawal request sent successfully!");
-        document.getElementById('w-amt').value = "";
-        document.getElementById('w-addr').value = "";
-        calcWithdraw();
+    function sendWithdraw() {
+        let a = parseFloat(document.getElementById('w-amt').value);
+        if(a < 30 || a > db.pi) return alert("Limit 30 PI! Bakiyeni kontrol et.");
+        db.pi -= a;
+        save(); sync();
+        alert("Çekim talebi blockchain sırasına alındı!");
     }
 
-    updateUI();
+    function doTask(btn, rew) {
+        btn.innerText = "Checking...";
+        setTimeout(() => {
+            db.pnx += rew;
+            btn.innerText = "Done ✓";
+            btn.disabled = true;
+            save(); sync();
+        }, 3000);
+    }
+
+    function copyRef() {
+        navigator.clipboard.writeText(db.code);
+        alert("Kod kopyalandı!");
+    }
+
+    sync();
 </script>
 </body>
 </html>
