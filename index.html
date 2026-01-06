@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PINIX ULTIMATE MINING</title>
     <style>
-        /* --- PROFESYONEL RENK PALETİ VE DEĞİŞKENLER --- */
         :root {
             --bg-deep: #0b021a;
             --accent-purple: #8b5cf6;
@@ -16,95 +15,47 @@
             --border: rgba(255, 255, 255, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: #000; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #000; color: var(--text-main); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        #app { width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top, #2d135d 0%, var(--bg-deep) 100%); position: relative; display: flex; flex-direction: column; }
 
-        /* Mobil Cihaz Çerçevesi (9:16) */
-        #app {
-            width: 100%; max-width: 450px; height: 100vh;
-            background: radial-gradient(circle at top, #2d135d 0%, var(--bg-deep) 100%);
-            position: relative; display: flex; flex-direction: column; overflow: hidden;
-        }
-
-        /* --- ÜST BAR (HER İKİ BAKİYE) --- */
-        .top-nav-bars { padding: 15px; z-index: 5; }
-        .b-card {
-            background: var(--glass); border: 1px solid var(--border); border-radius: 16px;
-            padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
-            backdrop-filter: blur(10px);
-        }
-        .icon-circle { 
-            width: 36px; height: 36px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; font-weight: bold; border: 1px solid var(--border);
-        }
+        /* ÜST BAR */
+        .top-nav-bars { padding: 15px; }
+        .b-card { background: var(--glass); border: 1px solid var(--border); border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; backdrop-filter: blur(10px); }
+        .icon-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .pi-icon { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
         .pnx-icon { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
         .b-info { flex: 1; }
-        .b-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
-        .b-val { font-size: 1rem; font-weight: 700; font-family: 'Courier New', monospace; }
+        .b-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; }
+        .b-val { font-size: 1rem; font-weight: 700; }
 
-        /* --- SAYFA SİSTEMİ --- */
+        /* SAYFALAR */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view.active { display: flex; }
 
-        /* --- ANA EKRAN (MINING) --- */
+        /* MINING */
         .mining-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan-engine {
-            width: 220px; height: 220px; border-radius: 50%;
-            border: 4px solid var(--accent-purple);
-            background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover;
-            box-shadow: 0 0 50px rgba(139, 92, 246, 0.4);
-            animation: rotateFan 8s linear infinite;
-        }
+        .fan-engine { width: 220px; height: 220px; border-radius: 50%; border: 4px solid var(--accent-purple); background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover; animation: rotateFan 8s linear infinite; box-shadow: 0 0 50px rgba(139, 92, 246, 0.4); }
         @keyframes rotateFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .counter-box { text-align: center; margin: 25px 0; }
-        .counter-main { font-size: 2.8rem; font-weight: 900; color: var(--accent-gold); text-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
-        
+        .counter-main { font-size: 2.8rem; font-weight: 900; color: var(--accent-gold); margin: 20px 0; }
+
+        /* BUTONLAR */
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-        .action-btn { 
-            border: none; padding: 16px; border-radius: 14px; color: white; 
-            font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.2s;
-        }
-        .btn-claim { background: var(--accent-purple); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+        .action-btn { border: none; padding: 16px; border-radius: 14px; color: white; font-weight: 800; cursor: pointer; }
+        .btn-claim { background: var(--accent-purple); }
         .btn-swap { background: var(--success-green); }
-        .action-btn:active { transform: scale(0.95); }
+        .btn-withdraw { background: #16a34a; width: 100%; margin: 20px 0; font-size: 1.1rem; }
 
-        /* --- CÜZDAN & WITHDRAW MODAL --- */
-        .withdraw-card { 
-            background: #16a34a; width: 100%; margin: 20px 0; padding: 18px; 
-            border-radius: 15px; font-weight: bold; display: flex; justify-content: center; gap: 10px;
-        }
-
-        #modal-overlay { 
-            position: absolute; top:0; left:0; width:100%; height:100%; 
-            background: rgba(0,0,0,0.8); display:none; z-index: 100; backdrop-filter: blur(5px);
-        }
-        #modal-box {
-            position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%;
-            background: #150a2e; border-top: 3px solid var(--accent-purple);
-            border-radius: 30px 30px 0 0; z-index: 101; padding: 30px;
-            transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
+        /* MODAL */
+        #modal-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; z-index: 100; }
+        #modal-box { position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; background: #150a2e; border-top: 3px solid var(--accent-purple); border-radius: 30px 30px 0 0; z-index: 101; padding: 30px; transition: 0.4s ease; }
         #modal-box.open { bottom: 0; }
+        .m-input { width: 100%; background: rgba(255,255,255,0.05); border: 2px solid var(--accent-purple); border-radius: 12px; padding: 15px; color: white; margin: 10px 0; outline: none; }
 
-        .m-input {
-            width: 100%; background: rgba(255,255,255,0.05); border: 2px solid var(--accent-purple);
-            border-radius: 12px; padding: 15px; color: white; margin: 10px 0 20px 0; outline: none;
-        }
-        .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-
-        /* --- ALT NAVİGASYON --- */
-        nav {
-            position: absolute; bottom: 0; width: 100%; height: 80px;
-            background: #13062d; border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center; z-index: 10;
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.3); font-size: 0.7rem; cursor: pointer; }
+        /* NAV */
+        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #13062d; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); }
+        .nav-item { color: rgba(255,255,255,0.3); font-size: 0.7rem; text-align: center; cursor: pointer; }
         .nav-item.active { color: var(--accent-gold); }
-        .nav-icon { font-size: 1.5rem; }
     </style>
 </head>
 <body>
@@ -114,177 +65,118 @@
         <div class="top-nav-bars">
             <div class="b-card">
                 <div class="icon-circle pi-icon">π</div>
-                <div class="b-info">
-                    <div class="b-label">Pi Network Balance</div>
-                    <div class="b-val pi-display">0.00000000 PI</div>
-                </div>
-                <span>👛</span>
+                <div class="b-info"><div class="b-label">Pi Balance</div><div class="pi-display">0.0000 PI</div></div>
             </div>
             <div class="b-card">
                 <div class="icon-circle pnx-icon">🌀</div>
-                <div class="b-info">
-                    <div class="b-label">Pinix Asset</div>
-                    <div class="b-val pnx-display">0 PINIX</div>
-                </div>
-                <span>👛</span>
+                <div class="b-info"><div class="b-label">Pinix Asset</div><div class="pnx-display">100 PINIX</div></div>
             </div>
         </div>
 
         <div class="mining-container">
             <div class="fan-engine"></div>
-            <div class="counter-box">
-                <div style="opacity: 0.5; font-size: 0.8rem; letter-spacing: 2px;">MINING IN PROGRESS</div>
-                <div class="counter-main" id="unclaimed-text">0.00000000</div>
-                <div style="background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">⚡ 5.20 GH/s</div>
-            </div>
+            <div class="counter-main" id="unclaimed-text">0.00000000</div>
             <div class="btn-group">
-                <button class="action-btn btn-claim" onclick="handleClaim()">Claim PI</button>
-                <button class="action-btn btn-swap" onclick="switchTab('view-wallet')">Swap</button>
+                <button class="action-btn btn-claim" onclick="handleClaim()">Claim</button>
+                <button class="action-btn btn-swap" onclick="openSwap()">Swap PNX</button>
             </div>
         </div>
     </div>
 
     <div id="view-wallet" class="view">
-        <h2 style="text-align: center; margin: 20px 0;">Digital Wallet</h2>
-        <div class="b-card" style="padding: 20px;">
-            <div class="icon-circle pi-icon" style="width: 45px; height: 45px;">π</div>
-            <div class="b-info">
-                <div class="b-label">Available Balance</div>
-                <div class="b-val pi-display" style="font-size: 1.4rem;">0.00000000 PI</div>
-            </div>
-        </div>
-        
-        <button class="action-btn withdraw-card" onclick="toggleModal(true)">
-            <span>↗</span> Withdraw PI Network
-        </button>
-
-        <div style="margin-top: 30px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                <span style="font-weight: bold;">History</span>
-                <span style="color: var(--accent-purple); font-size: 0.8rem;">Filter</span>
-            </div>
-            <div id="history-box" style="text-align: center; padding: 50px; opacity: 0.3;">
-                📄 No recent transactions
-            </div>
-        </div>
+        <h2 style="text-align: center; margin-bottom: 20px;">Wallet</h2>
+        <div class="b-card"><div class="icon-circle pi-icon">π</div><div class="b-info"><div>Available Pi</div><div class="pi-display">0.00 PI</div></div></div>
+        <div class="b-card"><div class="icon-circle pnx-icon">🌀</div><div class="b-info"><div>Available PNX</div><div class="pnx-display">100 PINIX</div></div></div>
+        <button class="action-btn btn-withdraw" onclick="toggleWithdraw(true)">↗ Withdraw PI</button>
     </div>
 
-    <div id="modal-overlay" onclick="toggleModal(false)"></div>
-    <div id="modal-box">
-        <div class="m-header">
-            <div style="background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px;" class="pi-display">0.00 PI</div>
-            <span style="font-size: 2rem; cursor: pointer;" onclick="toggleModal(false)">&times;</span>
+    <div id="modal-overlay" onclick="closeModals()"></div>
+    <div id="modal-box" class="modal-content">
+        <div id="swap-ui" style="display:none;">
+            <h3>Swap PINIX to PI</h3>
+            <p style="font-size:0.8rem; opacity:0.6; margin-bottom:20px;">Rate: 100 PINIX = 1 PI</p>
+            <label class="b-label">Amount PINIX</label>
+            <input type="number" id="swap-amount" class="m-input" placeholder="Min 100" oninput="calcSwap()">
+            <div style="margin: 15px 0; font-weight: bold; color: var(--success-green);">You will get: <span id="swap-res">0.00</span> PI</div>
+            <button class="action-btn btn-swap" style="width:100%" onclick="executeSwap()">Confirm Swap</button>
         </div>
-        
-        <h2 style="text-align: center;">Withdraw Request</h2>
-        <p style="text-align: center; font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">Min: 51 PI | Fee: 1 PI</p>
 
-        <div style="margin-top: 25px;">
-            <label class="b-label">Recipient PI Address</label>
-            <input type="text" id="inp-addr" class="m-input" placeholder="G02X82... (Pi Network Address)">
-            
-            <label class="b-label">Amount to Send</label>
-            <div style="position: relative;">
-                <input type="number" id="inp-amt" class="m-input" placeholder="0.00" oninput="calcNet()">
-                <span style="position: absolute; right: 15px; top: 25px; color: var(--accent-purple); font-weight: bold; cursor: pointer;" onclick="setMax()">MAX</span>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.7;">
-                    <span>Network Fee</span><span>1.00 PI</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; color: var(--success-green);">
-                    <span>Net Amount</span><span id="net-display">0.00 PI</span>
-                </div>
-            </div>
-
-            <button class="action-btn btn-claim" style="width: 100%; margin-top: 25px; padding: 20px;" onclick="processWithdraw()">Confirm Withdrawal</button>
+        <div id="withdraw-ui" style="display:none;">
+            <h3>Withdraw PI</h3>
+            <p style="font-size:0.8rem; opacity:0.6;">Min: 51 PI | Fee: 1 PI</p>
+            <input type="text" id="w-addr" class="m-input" placeholder="PI Address">
+            <input type="number" id="w-amt" class="m-input" placeholder="Amount">
+            <button class="action-btn btn-claim" style="width:100%" onclick="processWithdraw()">Send Request</button>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item" onclick="switchTab('view-wallet')"><span class="nav-icon">👛</span>Wallet</div>
-        <div class="nav-item active" onclick="switchTab('view-home')"><span class="nav-icon">🏠</span>Home</div>
-        <div class="nav-item"><span class="nav-icon">🎯</span>Missions</div>
-        <div class="nav-item"><span class="nav-icon">☰</span>More</div>
+        <div class="nav-item" onclick="switchTab('view-wallet')"><span>👛</span><br>Wallet</div>
+        <div class="nav-item active" onclick="switchTab('view-home')"><span>🏠</span><br>Home</div>
+        <div class="nav-item" onclick="alert('Soon')"><span>🎯</span><br>Missions</div>
     </nav>
 </div>
 
 <script>
-    // --- VERİ MERKEZİ ---
-    let account = {
-        pi: 0.0,
-        pnx: 0,
-        unclaimed: 0.0
-    };
+    let account = { pi: 0.0, pnx: 100.0, unclaimed: 0.0 }; // Herkese 100 PNX verildi
 
-    // --- MINING MOTORU ---
-    setInterval(() => {
-        account.unclaimed += 0.00000021; // Üretim hızı
-        document.getElementById('unclaimed-text').innerText = account.unclaimed.toFixed(8);
-    }, 1000);
+    setInterval(() => { account.unclaimed += 0.00000021; document.getElementById('unclaimed-text').innerText = account.unclaimed.toFixed(8); }, 1000);
 
-    function handleClaim() {
-        if(account.unclaimed > 0) {
-            account.pi += account.unclaimed;
-            account.unclaimed = 0;
-            refreshUI();
-            alert("Success! PI added to your wallet.");
-        }
+    function refreshUI() {
+        document.querySelectorAll('.pi-display').forEach(el => el.innerText = account.pi.toFixed(4) + " PI");
+        document.querySelectorAll('.pnx-display').forEach(el => el.innerText = account.pnx.toFixed(0) + " PINIX");
     }
 
-    // --- ARA YÜZ YÖNETİMİ ---
+    function handleClaim() { account.pi += account.unclaimed; account.unclaimed = 0; refreshUI(); }
+
     function switchTab(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
     }
 
-    function refreshUI() {
-        document.querySelectorAll('.pi-display').forEach(el => el.innerText = account.pi.toFixed(8) + " PI");
-        document.querySelectorAll('.pnx-display').forEach(el => el.innerText = account.pnx + " PINIX");
+    function openSwap() {
+        document.getElementById('swap-ui').style.display = 'block';
+        document.getElementById('withdraw-ui').style.display = 'none';
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById('modal-box').classList.add('open');
     }
 
-    // --- WITHDRAW MANTIĞI ---
-    function toggleModal(show) {
-        const m = document.getElementById('modal-box');
-        const o = document.getElementById('modal-overlay');
-        if(show) { m.classList.add('open'); o.style.display = 'block'; }
-        else { m.classList.remove('open'); o.style.display = 'none'; }
+    function toggleWithdraw(show) {
+        document.getElementById('swap-ui').style.display = 'none';
+        document.getElementById('withdraw-ui').style.display = 'block';
+        document.getElementById('modal-overlay').style.display = show ? 'block' : 'none';
+        if(show) document.getElementById('modal-box').classList.add('open');
+        else document.getElementById('modal-box').classList.remove('open');
     }
 
-    function calcNet() {
-        let val = parseFloat(document.getElementById('inp-amt').value) || 0;
-        document.getElementById('net-display').innerText = Math.max(0, val - 1).toFixed(2) + " PI";
+    function closeModals() { document.getElementById('modal-box').classList.remove('open'); document.getElementById('modal-overlay').style.display = 'none'; }
+
+    function calcSwap() {
+        let val = parseFloat(document.getElementById('swap-amount').value) || 0;
+        document.getElementById('swap-res').innerText = (val / 100).toFixed(2);
     }
 
-    function setMax() {
-        document.getElementById('inp-amt').value = account.pi.toFixed(2);
-        calcNet();
+    function executeSwap() {
+        let amt = parseFloat(document.getElementById('swap-amount').value);
+        if(amt > account.pnx || amt < 100) return alert("Yetersiz PINIX veya minimum 100!");
+        account.pnx -= amt;
+        account.pi += (amt / 100);
+        alert("Swap Başarılı!");
+        refreshUI();
+        closeModals();
     }
 
     function processWithdraw() {
-        const amt = parseFloat(document.getElementById('inp-amt').value);
-        const addr = document.getElementById('inp-addr').value;
-
-        if (amt < 51) return alert("Minimum withdrawal is 51 PI!");
-        if (amt > account.pi) return alert("Insufficient balance!");
-        if (addr.length < 15) return alert("Invalid PI address!");
-
+        let amt = parseFloat(document.getElementById('w-amt').value);
+        if(amt < 51) return alert("Min 51 PI!");
+        if(amt > account.pi) return alert("Yetersiz bakiye!");
         account.pi -= amt;
-        alert("Withdrawal Request Sent!\nAddress: " + addr + "\nNet: " + (amt-1) + " PI");
-        
-        document.getElementById('history-box').innerHTML = `
-            <div style="text-align:left; background:var(--glass); padding:10px; border-radius:10px; border-left:4px solid var(--accent-gold); margin-bottom:10px;">
-                <b>Withdraw Pending</b><br><small>${amt} PI to ${addr.substring(0,10)}...</small>
-            </div>
-        ` + document.getElementById('history-box').innerHTML;
-
+        alert("Çekim talebi alındı!");
         refreshUI();
-        toggleModal(false);
+        closeModals();
     }
+
+    refreshUI();
 </script>
 </body>
 </html>
