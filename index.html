@@ -2,112 +2,126 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Block Blast Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Block Blast 9:16</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --grid-bg: #1e293b;
-            --cell-empty: #334155;
-            --text: #f8fafc;
+            --bg: #09090b;
+            --panel: #18181b;
+            --grid-empty: #27272a;
+            --accent: #3b82f6;
         }
 
+        /* 9:16 Görüntü Oranı Sabitleme */
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: #000;
+            color: white;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             overflow: hidden;
             touch-action: none;
         }
 
-        .stats {
-            margin: 20px 0;
-            text-align: center;
+        #game-container {
+            width: 100vw;
+            height: calc(100vw * 16 / 9);
+            max-height: 100vh;
+            max-width: calc(100vh * 9 / 16);
+            background-color: var(--bg);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* Skor Alanı */
+        .header {
+            height: 15%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
 
         #score {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(to bottom, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-shadow: 0 4px 10px rgba(59, 130, 246, 0.5);
         }
 
-        /* Ana Oyun Alanı */
+        /* 8x8 Oyun Izgarası */
         #grid {
+            width: 90%;
+            aspect-ratio: 1/1;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
-            background-color: var(--grid-bg);
-            padding: 10px;
+            gap: 4px;
+            background-color: var(--panel);
+            padding: 8px;
             border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-            width: 350px;
-            height: 350px;
         }
 
         .cell {
-            background-color: var(--cell-empty);
+            background-color: var(--grid-empty);
             border-radius: 4px;
-            transition: all 0.2s ease;
+            transition: background-color 0.15s;
         }
 
-        .cell.preview {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-        }
-
-        /* Parça Seçenekleri */
+        /* Alt Panel (Bloklar) */
         #tray {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+            flex: 1;
             width: 100%;
-            max-width: 400px;
-            margin-top: 40px;
-            height: 120px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding-bottom: 20px;
         }
 
         .piece {
             display: grid;
             gap: 2px;
             cursor: grab;
-            transition: transform 0.2s;
         }
 
         .piece-cell {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 3px;
         }
 
-        /* Sürükleme Sırasında Parça */
+        /* Sürükleme Efekti */
         .dragging {
             position: fixed;
             pointer-events: none;
             z-index: 1000;
-            transform: scale(1.4); /* Sürüklerken büyüt ki parmak altında kalsın */
-            opacity: 0.9;
+            transform: scale(1.5);
+            opacity: 0.8;
+        }
+
+        /* Önizleme (Gölge) */
+        .cell.preview {
+            background-color: rgba(255, 255, 255, 0.15) !important;
         }
 
         /* Renkler */
-        .c1 { background: #ef4444; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
-        .c2 { background: #f59e0b; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
-        .c3 { background: #10b981; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
-        .c4 { background: #3b82f6; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
-        .c5 { background: #8b5cf6; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
-        .c6 { background: #ec4899; box-shadow: inset 0 -3px rgba(0,0,0,0.2); }
+        .c1 { background: #f87171; box-shadow: inset 0 -3px #dc2626; }
+        .c2 { background: #fbbf24; box-shadow: inset 0 -3px #d97706; }
+        .c3 { background: #4ade80; box-shadow: inset 0 -3px #16a34a; }
+        .c4 { background: #60a5fa; box-shadow: inset 0 -3px #2563eb; }
+        .c5 { background: #a78bfa; box-shadow: inset 0 -3px #7c3aed; }
+        .c6 { background: #f472b6; box-shadow: inset 0 -3px #db2777; }
 
-        /* Game Over Ekranı */
-        #overlay {
+        #game-over {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
             display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -115,204 +129,199 @@
         }
 
         button {
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            background: #3b82f6;
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="stats">
-        <div id="score">0</div>
-    </div>
+    <div id="game-container">
+        <div class="header">
+            <div style="font-size: 0.9rem; color: #71717a;">PUAN</div>
+            <div id="score">0</div>
+        </div>
 
-    <div id="grid"></div>
+        <div id="grid"></div>
 
-    <div id="tray"></div>
+        <div id="tray"></div>
 
-    <div id="overlay">
-        <h1>Oyun Bitti!</h1>
-        <div id="final-score">Skor: 0</div>
-        <button onclick="resetGame()">Tekrar Dene</button>
+        <div id="game-over">
+            <h2 style="font-size: 2.5rem;">BİTTİ!</h2>
+            <p id="final-score" style="font-size: 1.5rem;">Skor: 0</p>
+            <button onclick="resetGame()">TEKRAR OYNA</button>
+        </div>
     </div>
 
     <script>
         const GRID_SIZE = 8;
-        const gridEl = document.getElementById('grid');
-        const trayEl = document.getElementById('tray');
-        const scoreEl = document.getElementById('score');
-        const overlay = document.getElementById('overlay');
-
         let grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
         let score = 0;
-        let currentPieces = [];
 
         const SHAPES = [
-            { s: [[1,1],[1,1]], c: 'c1' },
-            { s: [[1,1,1,1]], c: 'c2' },
-            { s: [[1],[1],[1],[1]], c: 'c2' },
-            { s: [[1,1,1]], c: 'c3' },
-            { s: [[1,1],[1,0],[1,0]], c: 'c4' },
-            { s: [[1,1,1],[0,1,0]], c: 'c5' },
-            { s: [[1]], c: 'c6' }
+            { s: [[1,1],[1,1]], c: 'c1' }, { s: [[1,1,1,1]], c: 'c2' },
+            { s: [[1],[1],[1],[1]], c: 'c2' }, { s: [[1,1,1]], c: 'c3' },
+            { s: [[1,1],[1,0],[1,0]], c: 'c4' }, { s: [[1,1,1],[0,1,0]], c: 'c5' },
+            { s: [[1]], c: 'c6' }, { s: [[1,1],[0,1],[0,1]], c: 'c1' }
         ];
 
         function init() {
+            const gridEl = document.getElementById('grid');
             gridEl.innerHTML = '';
             for(let i=0; i<64; i++) {
-                const d = document.createElement('div');
-                d.className = 'cell';
-                gridEl.appendChild(d);
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                gridEl.appendChild(cell);
             }
             spawnTray();
         }
 
         function spawnTray() {
-            trayEl.innerHTML = '';
+            const tray = document.getElementById('tray');
+            tray.innerHTML = '';
             for(let i=0; i<3; i++) {
                 const data = SHAPES[Math.floor(Math.random()*SHAPES.length)];
                 const pEl = createPieceEl(data);
-                trayEl.appendChild(pEl);
-                addDragEvents(pEl, data);
+                tray.appendChild(pEl);
+                attachEvents(pEl, data);
             }
         }
 
         function createPieceEl(data) {
             const el = document.createElement('div');
             el.className = 'piece';
-            el.style.gridTemplateColumns = `repeat(${data.s[0].length}, 20px)`;
-            data.s.forEach(row => {
-                row.forEach(v => {
-                    const c = document.createElement('div');
-                    c.className = 'piece-cell' + (v ? ' ' + data.c : '');
-                    if(!v) c.style.opacity = 0;
-                    el.appendChild(c);
-                });
+            el.style.gridTemplateColumns = `repeat(${data.s[0].length}, 18px)`;
+            data.s.flat().forEach(v => {
+                const c = document.createElement('div');
+                c.className = 'piece-cell' + (v ? ' ' + data.c : '');
+                if(!v) c.style.opacity = 0;
+                el.appendChild(c);
             });
             return el;
         }
 
-        function addDragEvents(el, data) {
-            const onStart = (e) => {
-                const touch = e.type === 'touchstart' ? e.touches[0] : e;
+        function attachEvents(el, data) {
+            const start = (e) => {
+                const t = e.touches ? e.touches[0] : e;
                 const clone = el.cloneNode(true);
                 clone.classList.add('dragging');
                 document.body.appendChild(clone);
 
                 const move = (me) => {
-                    const mt = me.type === 'touchmove' ? me.touches[0] : me;
+                    const mt = me.touches ? me.touches[0] : me;
                     clone.style.left = (mt.clientX - clone.offsetWidth/2) + 'px';
-                    clone.style.top = (mt.clientY - clone.offsetHeight - 20) + 'px'; // Parmak üstünde görünsün
+                    clone.style.top = (mt.clientY - 100) + 'px'; // Parmak üstü
                     
-                    // Önizleme (Preview) mantığı buraya eklenebilir
+                    // Önizleme temizle
+                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
+                    
+                    const target = getTargetCell(mt.clientX, mt.clientY - 100);
+                    if(target && canPlace(data.s, target.r, target.c)) {
+                        showPreview(data.s, target.r, target.c);
+                    }
                 };
 
                 const end = (ee) => {
-                    const et = ee.type === 'touchend' ? ee.changedTouches[0] : ee;
+                    const et = ee.changedTouches ? ee.changedTouches[0] : ee;
+                    const target = getTargetCell(et.clientX, et.clientY - 100);
+                    
+                    if(target && tryPlace(data, target.r, target.c)) {
+                        el.style.visibility = 'hidden';
+                        if([...document.getElementById('tray').children].every(c => c.style.visibility === 'hidden')) spawnTray();
+                    }
+                    
+                    clone.remove();
+                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
                     document.removeEventListener('mousemove', move);
                     document.removeEventListener('mouseup', end);
                     document.removeEventListener('touchmove', move);
                     document.removeEventListener('touchend', end);
-
-                    const rect = gridEl.getBoundingClientRect();
-                    const cellSize = rect.width / 8;
-                    const col = Math.floor((et.clientX - rect.left) / cellSize);
-                    const row = Math.floor((et.clientY - rect.top - 50) / cellSize);
-
-                    if(tryPlace(data, row, col)) {
-                        el.style.visibility = 'hidden';
-                        if([...trayEl.children].every(c => c.style.visibility === 'hidden')) spawnTray();
-                        checkGameOver();
-                    }
-                    clone.remove();
                 };
 
                 document.addEventListener('mousemove', move);
                 document.addEventListener('mouseup', end);
                 document.addEventListener('touchmove', move, {passive: false});
                 document.addEventListener('touchend', end);
-                move(e);
             };
-
-            el.addEventListener('mousedown', onStart);
-            el.addEventListener('touchstart', onStart, {passive: false});
+            el.addEventListener('mousedown', start);
+            el.addEventListener('touchstart', start);
         }
 
-        function tryPlace(data, r, c) {
-            if(r < 0 || c < 0) return false;
-            
-            // Sığma kontrolü
-            for(let y=0; y<data.s.length; y++) {
-                for(let x=0; x<data.s[y].length; x++) {
-                    if(data.s[y][x]) {
+        function getTargetCell(x, y) {
+            const gridRect = document.getElementById('grid').getBoundingClientRect();
+            if(x < gridRect.left || x > gridRect.right || y < gridRect.top || y > gridRect.bottom) return null;
+            const cellSize = gridRect.width / 8;
+            return {
+                r: Math.floor((y - gridRect.top) / cellSize),
+                c: Math.floor((x - gridRect.left) / cellSize)
+            };
+        }
+
+        function canPlace(shape, r, c) {
+            for(let y=0; y<shape.length; y++) {
+                for(let x=0; x<shape[y].length; x++) {
+                    if(shape[y][x]) {
                         if(r+y >= 8 || c+x >= 8 || grid[r+y][c+x] !== 0) return false;
                     }
                 }
             }
+            return true;
+        }
 
-            // Yerleştir
-            for(let y=0; y<data.s.length; y++) {
-                for(let x=0; x<data.s[y].length; x++) {
-                    if(data.s[y][x]) {
-                        grid[r+y][c+x] = data.c;
-                        score += 10;
+        function showPreview(shape, r, c) {
+            const cells = document.getElementById('grid').children;
+            for(let y=0; y<shape.length; y++) {
+                for(let x=0; x<shape[y].length; x++) {
+                    if(shape[y][x]) {
+                        cells[(r+y)*8 + (c+x)].classList.add('preview');
                     }
                 }
             }
+        }
+
+        function tryPlace(data, r, c) {
+            if(!canPlace(data.s, r, c)) return false;
             
-            clearLines();
+            for(let y=0; y<data.s.length; y++) {
+                for(let x=0; x<data.s[y].length; x++) {
+                    if(data.s[y][x]) grid[r+y][c+x] = data.c;
+                }
+            }
+            score += 10 * data.s.flat().filter(v => v).length;
+            checkLines();
             draw();
             return true;
         }
 
-        function clearLines() {
-            let fullRows = [];
-            let fullCols = [];
-
+        function checkLines() {
+            let rs = [], cs = [];
             for(let i=0; i<8; i++) {
-                if(grid[i].every(v => v !== 0)) fullRows.push(i);
-                let col = [];
-                for(let j=0; j<8; j++) col.push(grid[j][i]);
-                if(col.every(v => v !== 0)) fullCols.push(i);
+                if(grid[i].every(v => v !== 0)) rs.push(i);
+                if(grid.map(row => row[i]).every(v => v !== 0)) cs.push(i);
             }
-
-            fullRows.forEach(r => {
-                for(let x=0; x<8; x++) grid[r][x] = 0;
-                score += 100;
-            });
-            fullCols.forEach(c => {
-                for(let y=0; y<8; y++) grid[y][c] = 0;
-                score += 100;
-            });
+            rs.forEach(r => { grid[r].fill(0); score += 100; });
+            cs.forEach(c => { for(let i=0; i<8; i++) grid[i][c] = 0; score += 100; });
         }
 
         function draw() {
-            const cells = gridEl.children;
+            const cells = document.getElementById('grid').children;
             for(let i=0; i<64; i++) {
-                const r = Math.floor(i/8);
-                const c = i%8;
+                const r = Math.floor(i/8), c = i%8;
                 cells[i].className = 'cell' + (grid[r][c] ? ' ' + grid[r][c] : '');
             }
-            scoreEl.innerText = score;
-        }
-
-        function checkGameOver() {
-            const visiblePieces = [...trayEl.children].filter(c => c.style.visibility !== 'hidden');
-            // Basit kontrol: En az bir parça herhangi bir yere sığıyor mu?
-            // (Performans için sadece mevcut parçaları kontrol ediyoruz)
-            // Eğer sığmıyorsa overlay gösterilir.
+            document.getElementById('score').innerText = score;
         }
 
         function resetGame() {
             grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
             score = 0;
-            overlay.style.display = 'none';
+            document.getElementById('game-over').style.display = 'none';
             init();
             draw();
         }
