@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PINIX App</title>
+<title>PINIX Telegram UI</title>
+
+<!-- Telegram WebApp -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 *{
@@ -12,208 +15,129 @@
     box-sizing:border-box;
     font-family:Arial, Helvetica, sans-serif;
 }
+
 body{
-    background: radial-gradient(circle at top, #2b1a3d, #0c0814);
-    color:#fff;
-    min-height:100vh;
+    background:#0b0714;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
 }
-.container{
-    max-width:420px;
-    margin:auto;
-    padding:16px;
+
+/* 9:6 (3:2) SABİT ALAN */
+.app{
+    aspect-ratio: 3 / 2;
+    width: min(95vw, 600px);
+    background: radial-gradient(circle at top, #2b1a3d, #0c0814);
+    border-radius:24px;
+    padding:20px;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
 }
 
 /* HEADER */
 .header{
     text-align:center;
+    font-size:20px;
     font-weight:bold;
-    font-size:18px;
-    margin-bottom:16px;
-}
-.header span{
-    color:#4fc3f7;
-    margin-left:6px;
+    margin-bottom:10px;
 }
 
-/* BALANCE BOX */
-.balance{
-    background:rgba(255,255,255,0.08);
-    border-radius:16px;
-    padding:14px;
+/* CONTENT */
+.content{
+    flex:1;
     display:flex;
+    flex-direction:column;
     align-items:center;
-    justify-content:space-between;
-    margin-bottom:12px;
-}
-.balance-left{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-.balance img{
-    width:32px;
-    height:32px;
-    border-radius:50%;
-}
-.balance small{
-    color:#aaa;
-}
-.balance b{
-    display:block;
-    font-size:16px;
+    justify-content:center;
 }
 
-/* MINING */
-.mining-area{
-    text-align:center;
-    margin:28px 0;
-}
-.mining-circle{
-    width:220px;
-    height:220px;
-    margin:auto;
+.circle{
+    width:160px;
+    height:160px;
     border-radius:50%;
     background:#1a1025;
     display:flex;
     align-items:center;
     justify-content:center;
+    margin-bottom:12px;
 }
-.mining-circle img{
-    width:200px;
-    animation:spin 8s linear infinite;
-}
-@keyframes spin{
-    from{transform:rotate(0deg);}
-    to{transform:rotate(360deg);}
-}
-.mining-area small{
-    display:block;
-    margin-top:12px;
-    color:#aaa;
-}
-.amount{
-    font-size:34px;
-    color:#f5c542;
-    font-weight:bold;
-    margin:6px 0 14px;
+.circle span{
+    font-size:42px;
 }
 
-/* POWER */
-.power{
-    background:rgba(255,255,255,0.1);
-    display:inline-block;
-    padding:12px 24px;
-    border-radius:14px;
-    font-size:16px;
+/* VALUE */
+.value{
+    font-size:28px;
+    color:#f5c542;
+    font-weight:bold;
 }
 
 /* BUTTONS */
 .buttons{
     display:flex;
     gap:12px;
-    margin-top:22px;
+    margin-top:16px;
 }
-.btn{
+button{
     flex:1;
     padding:14px;
     border:none;
-    border-radius:24px;
+    border-radius:18px;
     font-size:16px;
     color:#fff;
 }
 .claim{background:#7b3fe4;}
 .swap{background:#2ecc71;}
 
-.boost{
-    margin-top:16px;
-    background:#b08a1b;
-    text-align:center;
-    padding:16px;
-    border-radius:22px;
-    font-size:18px;
-}
-
-/* BOTTOM NAV */
-.nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    background:#120a1f;
+/* FOOTER */
+.footer{
     display:flex;
     justify-content:space-around;
-    padding:10px 0;
-}
-.nav div{
-    text-align:center;
-    color:#aaa;
+    margin-top:14px;
     font-size:12px;
+    color:#aaa;
 }
-.nav .active{
+.active{
     color:#f5c542;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
 
-    <div class="header">
-        PINIX App <span>✔</span>
-    </div>
+<div class="app">
+    <div class="header">PINIX App</div>
 
-    <div class="balance">
-        <div class="balance-left">
-            <img src="pico.jpg">
-            <div>
-                <small>Balance</small>
-                <b>0.0000000 PI</b>
-            </div>
+    <div class="content">
+        <div class="circle">
+            ⚙️
+        </div>
+        <div class="value" id="pi">0.0002435 PI</div>
+
+        <div class="buttons">
+            <button class="claim">Claim</button>
+            <button class="swap">Swap</button>
         </div>
     </div>
 
-    <div class="balance">
-        <div class="balance-left">
-            <img src="pinix.jpg">
-            <div>
-                <small>Balance</small>
-                <b>0 PINIX</b>
-            </div>
-        </div>
+    <div class="footer">
+        <div>Wallet</div>
+        <div class="active">Home</div>
+        <div>More</div>
     </div>
-
-    <div class="mining-area">
-        <div class="mining-circle">
-            <img src="pinix.jpg">
-        </div>
-        <small>Mining...</small>
-        <div class="amount" id="amount">0.0002435 PI</div>
-        <div class="power">⚡ 5 GH/s</div>
-    </div>
-
-    <div class="buttons">
-        <button class="btn claim">Claim</button>
-        <button class="btn swap">Swap PINIX</button>
-    </div>
-
-    <div class="boost">🚀 BOOST</div>
-
-</div>
-
-<div class="nav">
-    <div>Wallet</div>
-    <div>Friends</div>
-    <div class="active">Home</div>
-    <div>Missions</div>
-    <div>More</div>
 </div>
 
 <script>
-let value = 0.0002435;
+const tg = window.Telegram.WebApp;
+tg.expand(); // ekranı tam aç
+
+let v = 0.0002435;
 setInterval(()=>{
-    value += 0.0000001;
-    document.getElementById("amount").innerText =
-        value.toFixed(7) + " PI";
+    v += 0.0000001;
+    document.getElementById("pi").innerText =
+        v.toFixed(7) + " PI";
 },1000);
 </script>
 
