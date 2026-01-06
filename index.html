@@ -3,93 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX Mining & Wallet</title>
+    <title>PINIX App - Withdraw</title>
     <style>
         :root {
             --bg: #0b021a;
             --card-bg: rgba(255, 255, 255, 0.05);
-            --neon-purple: #a855f7;
-            --neon-green: #22c55e;
+            --neon-purple: #8b5cf6;
             --neon-gold: #f59e0b;
             --text: #ffffff;
             --glass-border: rgba(255, 255, 255, 0.1);
-            --nav-bg: #13062d;
+            --modal-bg: #1a162e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        body {
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text);
-            overflow: hidden;
-        }
+        body { background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text); overflow: hidden; }
 
-        #app-container {
-            width: 100%;
-            max-width: 450px; 
-            height: 100vh;
-            aspect-ratio: 6 / 9;
-            background: radial-gradient(circle at top, #2d135d 0%, var(--bg) 100%);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        #app-container { width: 100%; max-width: 450px; height: 100vh; aspect-ratio: 6 / 9; background: radial-gradient(circle at top, #2d135d 0%, var(--bg) 100%); position: relative; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- SAYFALAR --- */
-        .page { display: none; flex-direction: column; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
+        .page { display: none; flex-direction: column; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
         .page.active { display: flex; }
 
-        /* --- HOME & WALLET SHARED --- */
-        .header-top { text-align: center; font-weight: bold; font-size: 1.3rem; margin-bottom: 15px; }
-        .verified-icon { color: #38bdf8; margin-left: 5px; }
+        /* --- BALANCE CARDS --- */
+        .balance-card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 15px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .coin-img { width: 32px; height: 32px; border-radius: 50%; }
+        .balance-val { font-size: 1rem; font-weight: 700; flex: 1; }
 
-        .balance-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
+        /* --- BUTTONS --- */
+        .btn { border: none; padding: 15px; border-radius: 12px; font-weight: 800; color: #fff; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn-withdraw { background: #16a34a; width: 100%; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+
+        /* --- WITHDRAW MODAL (PENCERE) --- */
+        #withdraw-modal {
+            position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%;
+            background: var(--modal-bg); border-top: 2px solid var(--neon-purple);
+            border-top-left-radius: 25px; border-top-right-radius: 25px;
+            z-index: 100; padding: 25px; transition: 0.4s cubic-bezier(0.17, 0.84, 0.44, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+        }
+        #withdraw-modal.open { bottom: 0; }
+        
+        .modal-header { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 25px; }
+        .close-btn { position: absolute; right: 0; top: 0; font-size: 1.5rem; opacity: 0.6; cursor: pointer; }
+        
+        .input-group { margin-bottom: 20px; }
+        .label-small { font-size: 0.75rem; opacity: 0.6; margin-bottom: 8px; display: block; }
+        
+        .custom-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1.5px solid var(--neon-purple);
+            border-radius: 12px; padding: 14px; color: white; font-size: 0.95rem; outline: none;
         }
 
-        .coin-img { width: 35px; height: 35px; border-radius: 50%; }
-        .balance-info { flex: 1; }
-        .balance-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; }
-        .balance-val { font-size: 1rem; font-weight: 700; }
-        .wallet-mini-icon { font-size: 1.2rem; opacity: 0.8; }
+        .amount-container { position: relative; }
+        .max-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--neon-purple); font-weight: bold; font-size: 0.8rem; cursor: pointer; }
 
-        /* --- MINING ALANI --- */
-        .mining-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .turbine { width: 180px; height: 180px; border-radius: 50%; background: url('pinix.jpg') center/cover; animation: rotate 10s linear infinite; box-shadow: 0 0 40px rgba(168,85,247,0.3); }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .counter { font-size: 2.2rem; font-weight: 800; color: var(--neon-gold); margin: 10px 0; }
-        .power-badge { background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; display: flex; gap: 5px; align-items: center; }
+        .fee-info { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; margin-top: 20px; }
+        .fee-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; opacity: 0.8; }
+        .total-row { display: flex; justify-content: space-between; font-weight: bold; color: #22c55e; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); pt: 10px; }
 
-        /* --- BUTONLAR --- */
-        .action-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-        .btn { border: none; padding: 15px; border-radius: 18px; font-weight: 800; color: #fff; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); }
-        .btn-claim { background: #8b5cf6; }
-        .btn-swap { background: #22c55e; }
-        .btn-withdraw { background: #22c55e; width: 100%; margin: 15px 0; padding: 18px; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
-
-        /* --- TRANSACTION HISTORY --- */
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
-        .empty-history { text-align: center; opacity: 0.4; padding: 30px 0; border: 1px dashed rgba(255,255,255,0.1); border-radius: 20px; font-size: 0.9rem; }
+        .btn-send { width: 100%; background: var(--neon-purple); margin-top: 25px; padding: 18px; font-size: 1rem; }
+        .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display:none; z-index: 90; }
 
         /* --- BOTTOM NAV --- */
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--nav-bg); height: 80px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 10; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.7rem; flex: 1; }
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: var(--nav-bg); height: 75px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: rgba(255,255,255,0.4); font-size: 0.65rem; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--neon-gold); }
-        .nav-icon { font-size: 1.5rem; }
     </style>
 </head>
 <body>
@@ -97,186 +76,146 @@
 <div id="app-container">
     
     <div id="home-page" class="page active">
-        <div class="header-top">PINIX App <span class="verified-icon">✔</span></div>
-        
+        <h3 style="text-align: center; margin-bottom: 20px;">PINIX App ✔</h3>
         <div class="balance-card">
             <img src="pico.jpg" class="coin-img">
-            <div class="balance-info">
-                <div class="balance-label">Balance</div>
-                <div class="balance-val pi-text">0.00000000 PI</div>
-            </div>
-            <span class="wallet-mini-icon">👛</span>
+            <div class="balance-val pi-display">0.00000000 PI</div>
+            <span>👛</span>
         </div>
-        <div class="balance-card">
-            <img src="pinix.jpg" class="coin-img">
-            <div class="balance-info">
-                <div class="balance-label">Balance</div>
-                <div class="balance-val pnx-text">0 PINIX</div>
-            </div>
-            <span class="wallet-mini-icon">👛</span>
-        </div>
-
-        <div class="mining-section">
-            <div class="turbine"></div>
-            <div style="margin-top:20px; letter-spacing: 2px; opacity: 0.6; font-size: 0.8rem;">MINING...</div>
-            <div class="counter" id="unclaimed-display">0.00000000</div>
-            <div class="power-badge">⚡ <span>5 GH/s</span></div>
-        </div>
-
-        <div class="action-area">
-            <button class="btn btn-claim" onclick="claim()">Claim</button>
-            <button class="btn btn-swap" onclick="switchPage('wallet-page')">Swap PINIX</button>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div style="width:160px; height:160px; border-radius:50%; background:url('pinix.jpg') center/cover; animation: spin 15s linear infinite;"></div>
+            <div style="font-size: 2rem; color: var(--neon-gold); font-weight: 800; margin: 20px 0;" id="unclaimed">0.00000000</div>
+            <button class="btn" style="background:var(--neon-purple); padding:12px 40px;" onclick="claim()">Claim</button>
         </div>
     </div>
 
     <div id="wallet-page" class="page">
-        <div class="wallet-title" style="text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">Wallet</div>
-        
+        <h2 style="text-align: center; margin-bottom: 25px;">Wallet</h2>
         <div class="balance-card">
             <img src="pico.jpg" class="coin-img">
-            <div class="balance-info">
-                <div class="balance-label">Balance</div>
-                <div class="balance-val pi-text" style="font-size: 1.2rem;">0.00000000 PI</div>
-            </div>
-            <span class="wallet-mini-icon">👛</span>
+            <div class="balance-val pi-display">0.00000000 PI</div>
         </div>
         <div class="balance-card">
             <img src="pinix.jpg" class="coin-img">
-            <div class="balance-info">
-                <div class="balance-label">Balance</div>
-                <div class="balance-val pnx-text" style="font-size: 1.2rem;">0 PINIX</div>
-            </div>
-            <span class="wallet-mini-icon">👛</span>
+            <div class="balance-val">0 PINIX</div>
         </div>
 
-        <button class="btn btn-withdraw" onclick="handleWithdraw()">
-            <span style="transform: rotate(-45deg);">⬆</span> Withdraw
+        <button class="btn btn-withdraw" onclick="openWithdraw()">
+            <span>↗</span> Withdraw
         </button>
 
-        <div class="history-header">
-            <span style="font-weight: bold;">Transaction History</span>
-            <span style="color: var(--neon-purple); font-size: 0.8rem;">View All</span>
-        </div>
-
-        <div class="empty-history" id="history-list">
-            📄 No transactions yet
+        <div style="margin-top:30px;">
+            <p style="font-weight: bold; margin-bottom: 10px;">Transaction History</p>
+            <div style="opacity:0.3; text-align:center; padding:40px; border:1px dashed #fff; border-radius:15px;">📄 No transactions yet</div>
         </div>
     </div>
 
+    <div class="overlay" id="overlay" onclick="closeWithdraw()"></div>
+    <div id="withdraw-modal">
+        <div class="modal-header">
+            <div style="background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; font-weight: bold;">
+                <span class="pi-display">0.00 PI</span>
+            </div>
+            <span class="close-btn" onclick="closeWithdraw()">&times;</span>
+        </div>
+
+        <h3 style="text-align: center; margin-bottom: 5px;">Withdraw PI</h3>
+        <p style="text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 25px;">Minimum withdrawal amount: 30 PI</p>
+
+        <div class="input-group">
+            <label class="label-small">Your PI wallet address</label>
+            <input type="text" id="wallet-addr" class="custom-input" placeholder="Enter PI wallet address">
+        </div>
+
+        <div class="input-group">
+            <label class="label-small">Amount to withdraw</label>
+            <div class="amount-container">
+                <input type="number" id="withdraw-amount" class="custom-input" placeholder="0.00" oninput="calculateTotal()">
+                <span class="max-btn" onclick="setMax()">MAX</span>
+            </div>
+        </div>
+
+        <div class="fee-info">
+            <div class="fee-row">
+                <span>Network fee:</span>
+                <span>1 PI</span>
+            </div>
+            <div class="total-row">
+                <span>Amount to receive:</span>
+                <span id="receive-amount">0.00 PI</span>
+            </div>
+        </div>
+
+        <button class="btn btn-send" onclick="sendRequest()">Send withdrawal request</button>
+    </div>
+
     <nav class="bottom-nav">
-        <div class="nav-item" id="nav-wallet" onclick="switchPage('wallet-page')">
-            <span class="nav-icon">👛</span><span>Wallet</span>
-        </div>
-        <div class="nav-item">
-            <span class="nav-icon">👥</span><span>Friends</span>
-        </div>
-        <div class="nav-item active" id="nav-home" onclick="switchPage('home-page')">
-            <span class="nav-icon">🏠</span><span>Home</span>
-        </div>
-        <div class="nav-item">
-            <span class="nav-icon">🎯</span><span>Missions</span>
-        </div>
-        <div class="nav-item">
-            <span class="nav-icon">☰</span><span>More</span>
-        </div>
+        <div class="nav-item" onclick="switchPage('wallet-page')"><span>👛</span>Wallet</div>
+        <div class="nav-item"><span>👥</span>Friends</div>
+        <div class="nav-item active" onclick="switchPage('home-page')"><span>🏠</span>Home</div>
+        <div class="nav-item"><span>🎯</span>Missions</div>
+        <div class="nav-item"><span>☰</span>More</div>
     </nav>
 </div>
 
 <script>
-    // --- OYUN VERİLERİ ---
-    let state = {
-        pi: 0.00000000,
-        pnx: 0,
-        unclaimed: 0.00000000
-    };
+    let state = { pi: 14.0, unclaimed: 0.0002435 };
 
-    // --- SAYFA GEÇİŞİ ---
-    function switchPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(pageId === 'home-page') document.getElementById('nav-home').classList.add('active');
-        if(pageId === 'wallet-page') document.getElementById('nav-wallet').classList.add('active');
+    function switchPage(p) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(p).classList.add('active');
     }
 
-    // --- MİNİNG MANTIĞI ---
-    setInterval(() => {
-        state.unclaimed += 0.00000005; // 5 GH/s hızı temsili
-        document.getElementById('unclaimed-display').innerText = state.unclaimed.toFixed(8);
-    }, 1000);
+    function openWithdraw() {
+        document.getElementById('withdraw-modal').classList.add('open');
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function closeWithdraw() {
+        document.getElementById('withdraw-modal').classList.remove('open');
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    function calculateTotal() {
+        const val = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+        const receive = Math.max(0, val - 1);
+        document.getElementById('receive-amount').innerText = receive.toFixed(2) + " PI";
+    }
+
+    function setMax() {
+        document.getElementById('withdraw-amount').value = state.pi;
+        calculateTotal();
+    }
+
+    function sendRequest() {
+        const amt = parseFloat(document.getElementById('withdraw-amount').value);
+        const addr = document.getElementById('wallet-addr').value;
+
+        if(amt < 30) { alert("Minimum withdrawal is 30 PI"); return; }
+        if(amt > state.pi) { alert("Insufficient balance!"); return; }
+        if(addr.length < 10) { alert("Please enter a valid wallet address"); return; }
+
+        alert("Withdrawal request sent successfully!");
+        state.pi -= amt;
+        updateUI();
+        closeWithdraw();
+    }
 
     function claim() {
-        if(state.unclaimed > 0) {
-            state.pi += state.unclaimed;
-            state.unclaimed = 0;
-            updateUI();
-        }
+        state.pi += state.unclaimed;
+        state.unclaimed = 0;
+        updateUI();
     }
 
-    // --- ÇEKİM (WITHDRAW) MANTIĞI ---
-    function handleWithdraw() {
-        const minLimit = 51;
-        const fee = 1;
-
-        // 1. Soru: Miktar
-        const amountInput = prompt(`Kaç PI çekmek istiyorsunuz?\n(Minimum: ${minLimit} PI, Fee: ${fee} PI)`);
-        
-        if (amountInput === null) return; // İptal edildi
-        
-        const amount = parseFloat(amountInput);
-
-        if (isNaN(amount) || amount < minLimit) {
-            alert(`Hata: Minimum çekim miktarı ${minLimit} PI olmalıdır.`);
-            return;
-        }
-
-        if (amount > state.pi) {
-            alert(`Hata: Yetersiz bakiye. Mevcut bakiyeniz: ${state.pi.toFixed(2)} PI`);
-            return;
-        }
-
-        // 2. Soru: Adres
-        const address = prompt("Lütfen çekim yapacağınız Pi Network adresinizi girin:");
-
-        if (!address || address.trim().length < 10) {
-            alert("Hata: Geçersiz adres girdiniz.");
-            return;
-        }
-
-        // Onay ve İşlem
-        const confirmResult = confirm(`Çekim Özeti:\nMiktar: ${amount} PI\nFee: ${fee} PI\nAlınacak: ${amount - fee} PI\nAdres: ${address}\n\nOnaylıyor musunuz?`);
-
-        if (confirmResult) {
-            state.pi -= amount;
-            alert("Çekim talebiniz alındı! İşleminiz kontrol edildikten sonra cüzdanınıza yansıtılacaktır.");
-            
-            // Geçmişe ekle (Basit görsel simülasyon)
-            const history = document.getElementById('history-list');
-            history.innerHTML = `<div style="text-align:left; font-size:0.8rem; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; border-left:4px solid #f59e0b">
-                <b>Withdraw Pending</b><br>
-                Amount: ${amount} PI | Address: ${address.substring(0,8)}...
-            </div>`;
-            
-            updateUI();
-        }
-    }
-
-    // --- UI GÜNCELLEME ---
     function updateUI() {
-        // Tüm sayfalardaki PI bakiye yazılarını güncelle
-        document.querySelectorAll('.pi-text').forEach(el => {
-            el.innerText = state.pi.toFixed(8) + " PI";
-        });
-        // Tüm sayfalardaki PNX bakiye yazılarını güncelle
-        document.querySelectorAll('.pnx-text').forEach(el => {
-            el.innerText = state.pnx + " PINIX";
-        });
-        document.getElementById('unclaimed-display').innerText = state.unclaimed.toFixed(8);
+        document.querySelectorAll('.pi-display').forEach(el => el.innerText = state.pi.toFixed(8) + " PI");
+        document.getElementById('unclaimed').innerText = state.unclaimed.toFixed(8);
     }
 
-    // İlk yükleme
+    setInterval(() => { state.unclaimed += 0.00000010; updateUI(); }, 1000);
     updateUI();
 </script>
+
+<style> @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
 </body>
 </html>
