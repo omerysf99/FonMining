@@ -3,52 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE - REFERENCE SYSTEM</title>
+    <title>PINIX ULTIMATE PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        /* --- GLOBAL STYLE & THEME --- */
         :root {
             --bg-ultra: #05010d; --bg-deep: #0b021a; --p-purple: #8b5cf6;
-            --p-gold: #f59e0b; --p-green: #10b981; --text-white: #ffffff;
+            --p-gold: #f59e0b; --p-green: #10b981; --p-blue: #3b82f6; --text-white: #ffffff;
             --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
         body { background: var(--bg-ultra); color: var(--text-white); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 60%); position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); }
+        
+        #app { 
+            width: 100%; max-width: 450px; height: 100vh; 
+            background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 60%); 
+            position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); 
+        }
 
         /* HEADER */
         .header-system { padding: 15px; z-index: 10; }
-        .token-card { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; backdrop-filter: blur(15px); }
-        .token-icon { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: 'Orbitron'; font-size: 0.8rem; }
-        .pi-theme { background: linear-gradient(135deg, #4c1d95, #8b5cf6); border: 1px solid #a78bfa; }
-        .pnx-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; }
+        .token-card { 
+            background: var(--glass); border: 1px solid var(--border); border-radius: 18px; 
+            padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; backdrop-filter: blur(15px); 
+        }
+        .token-icon { 
+            width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: 800; font-family: 'Orbitron'; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .pi-theme { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+        .pnx-theme { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
         .token-data { flex: 1; }
-        .token-label { font-size: 0.55rem; text-transform: uppercase; opacity: 0.5; font-weight: 800; }
+        .token-label { font-size: 0.55rem; text-transform: uppercase; opacity: 0.5; font-weight: 800; letter-spacing: 1px; }
         .token-val { font-size: 0.95rem; font-weight: 800; font-family: 'Orbitron'; }
 
-        /* VIEW ENGINE */
+        /* VIEW SYSTEM */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .view.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MINING HUB */
+        /* MINING SECTION */
         .mining-hub { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan-core { width: 200px; height: 200px; border-radius: 50%; background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover; border: 4px solid var(--p-purple); animation: spin 10s linear infinite; box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); }
+        .fan-core { 
+            width: 200px; height: 200px; border-radius: 50%; 
+            background: url('https://i.ibb.co/h7R9K9Z/pinix.jpg') center/cover; 
+            border: 4px solid var(--p-purple); animation: spin 8s linear infinite; 
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.4); 
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .mining-amount { font-size: 2.8rem; font-weight: 800; font-family: 'Orbitron'; color: var(--p-gold); margin: 20px 0; }
+        .mining-amount { font-size: 2.8rem; font-weight: 900; font-family: 'Orbitron'; color: var(--p-gold); margin: 20px 0; text-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
 
-        /* REF PAGE */
-        .ref-box { background: var(--glass); border: 1px solid var(--p-purple); border-radius: 20px; padding: 20px; margin-top: 15px; text-align: center; }
-        .ref-code-text { font-size: 1.5rem; font-weight: 900; color: var(--p-gold); letter-spacing: 3px; margin: 10px 0; font-family: 'Orbitron'; }
-        .btn-tg { background: #0088cc; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; text-decoration: none; display: inline-block; }
+        /* TASKS STYLE */
+        .task-card { 
+            background: var(--glass); border: 1px solid var(--border); border-radius: 15px; 
+            padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; 
+        }
+        .task-info { display: flex; flex-direction: column; gap: 4px; }
+        .task-title { font-weight: 700; font-size: 0.9rem; }
+        .task-reward { color: var(--p-gold); font-size: 0.75rem; font-weight: 800; }
+        .btn-check { 
+            background: var(--p-purple); color: white; border: none; padding: 8px 15px; 
+            border-radius: 10px; font-weight: bold; font-size: 0.7rem; cursor: pointer; 
+        }
+        .btn-check.done { background: var(--p-green); opacity: 0.7; pointer-events: none; }
+
+        /* REFERRAL SYSTEM */
+        .ref-box { background: rgba(139, 92, 246, 0.1); border: 2px dashed var(--p-purple); border-radius: 20px; padding: 20px; text-align: center; margin: 15px 0; }
+        .ref-code { font-size: 1.8rem; font-weight: 900; color: var(--p-gold); font-family: 'Orbitron'; margin: 10px 0; }
 
         /* BUTTONS */
-        .main-btn { border: none; padding: 16px; border-radius: 14px; color: white; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-p { background: var(--p-purple); width: 100%; }
-        .btn-s { background: var(--p-green); width: 100%; }
+        .main-btn { border: none; padding: 16px; border-radius: 14px; color: white; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-p { background: var(--p-purple); }
+        .btn-s { background: var(--p-green); }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 80px; background: #0d041f; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
+        nav { 
+            position: absolute; bottom: 0; width: 100%; height: 80px; background: #0d041f; 
+            border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; 
+        }
         .nav-link { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.3); font-size: 0.65rem; cursor: pointer; }
         .nav-link.active { color: var(--p-gold); }
     </style>
@@ -59,7 +92,7 @@
     <div class="header-system">
         <div class="token-card">
             <div class="token-icon pi-theme">π</div>
-            <div class="token-data"><div class="token-label">Pi Balance</div><div class="pi-disp">0.0000 PI</div></div>
+            <div class="token-data"><div class="token-label">Pi Network</div><div class="pi-disp">0.0000 PI</div></div>
         </div>
         <div class="token-card">
             <div class="token-icon pnx-theme">🌀</div>
@@ -71,58 +104,91 @@
         <div class="mining-hub">
             <div class="fan-core"></div>
             <div class="mining-amount" id="uncl-text">0.00000000</div>
-            <button class="main-btn btn-p" onclick="doClaim()">CLAIM PI</button>
+            <button class="main-btn btn-p" onclick="doClaim()">CLAIM MINING</button>
+        </div>
+    </div>
+
+    <div id="view-tasks" class="view">
+        <h2 style="font-family: 'Orbitron'; margin-bottom: 20px; text-align: center;">Active Missions</h2>
+        
+        <div class="task-card">
+            <div class="task-info">
+                <span class="task-title">Join Telegram Channel</span>
+                <span class="task-reward">+50 PINIX</span>
+            </div>
+            <button class="btn-check" id="task1-btn" onclick="completeTask('task1', 50, 'https://t.me/FonixCommunity')">Join</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <span class="task-title">Invite 1 Friend</span>
+                <span class="task-reward">+25 PINIX</span>
+            </div>
+            <button class="btn-check" onclick="tab('view-ref', document.getElementById('ref-nav'))">Invite</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info">
+                <span class="task-title">Daily Check-in</span>
+                <span class="task-reward">+10 PINIX</span>
+            </div>
+            <button class="btn-check" id="task3-btn" onclick="completeTask('task3', 10)">Collect</button>
         </div>
     </div>
 
     <div id="view-ref" class="view">
-        <h2 style="font-family: 'Orbitron'; text-align: center;">Invite & Earn</h2>
-        <p style="text-align: center; opacity: 0.6; font-size: 0.8rem; margin: 10px 0;">Referansınla gelen her kişi için 50 PINIX kazanırsın!</p>
-        
+        <h2 style="font-family: 'Orbitron'; text-align: center;">Referral Program</h2>
         <div class="ref-box">
-            <div class="token-label">SENİN REFERANS KODUN</div>
-            <div class="ref-code-text" id="my-ref-code">PNX-8821</div>
-            <button style="background:transparent; border:1px solid var(--border); color:white; padding:5px 10px; border-radius:8px; font-size:0.7rem;" onclick="copyCode()">Kodu Kopyala</button>
+            <div class="token-label">YOUR INVITE CODE</div>
+            <div class="ref-code" id="my-ref-code">PNX-7723</div>
+            <button style="background:transparent; border:1px solid var(--border); color:white; padding:8px 15px; border-radius:10px; font-size:0.7rem; cursor:pointer;" onclick="copyRef()">Copy Link</button>
         </div>
-
-        <div id="referral-input-section" style="margin-top: 25px;">
-            <p class="token-label">KİM REFERANS ETTİ? (TEK SEFERLİK)</p>
+        
+        <div style="margin-top:20px;">
+            <p class="token-label">Enter Referral Code</p>
             <div style="display:flex; gap:10px; margin-top:8px;">
-                <input type="text" id="referral-input" placeholder="Kod girin..." style="flex:1; background:var(--glass); border:1px solid var(--border); padding:12px; border-radius:10px; color:white; outline:none;">
-                <button class="main-btn btn-s" style="padding:10px 20px; font-size:0.7rem;" onclick="applyReferral()">KULLAN</button>
+                <input type="text" id="ref-input" placeholder="CODE..." style="flex:1; background:var(--glass); border:1px solid var(--border); border-radius:10px; padding:12px; color:white; outline:none;">
+                <button class="main-btn btn-s" style="width:auto; padding:0 20px;" onclick="applyRef()">Apply</button>
             </div>
         </div>
 
-        <a id="tg-link" href="#" target="_blank" class="btn-tg" style="text-align:center; margin-top:20px;">TELEGRAM'DA PAYLAŞ</a>
+        <a id="tg-share" href="#" target="_blank" class="main-btn btn-p" style="display:block; text-align:center; margin-top:30px; background:#0088cc; text-decoration:none;">SHARE ON TELEGRAM</a>
     </div>
 
     <nav>
-        <div class="nav-link" onclick="tab('view-home', this)"><span>🏠</span>Home</div>
-        <div class="nav-link active" onclick="tab('view-ref', this)"><span>👥</span>Referral</div>
-        <div class="nav-link" onclick="alert('Soon')"><span>👛</span>Wallet</div>
+        <div class="nav-link active" onclick="tab('view-home', this)"><span>🏠</span>Home</div>
+        <div class="nav-link" onclick="tab('view-tasks', this)"><span>🎯</span>Tasks</div>
+        <div class="nav-link" id="ref-nav" onclick="tab('view-ref', this)"><span>👥</span>Friends</div>
+        <div class="nav-link" onclick="alert('Swap & Wallet Coming Soon')"><span>👛</span>Wallet</div>
     </nav>
 </div>
 
 <script>
-    let db = {
-        pi: 0.00, pnx: 100.00, uncl: 0.00,
-        myCode: "PNX-" + Math.floor(1000 + Math.random() * 9000),
-        hasUsedRef: false
+    /* --- DATA STATE --- */
+    let user = {
+        pi: 0.00,
+        pnx: 100.00, // Herkese 100 PNX hediye
+        uncl: 0.00,
+        refCode: "PNX-" + Math.floor(1000 + Math.random()*8999),
+        tasks: { task1: false, task3: false },
+        hasRef: false
     };
 
-    // INIT
-    document.getElementById('my-ref-code').innerText = db.myCode;
-    const shareMsg = encodeURIComponent(`PINIX Cloud Mining'e katıl! Benim kodum: ${db.myCode}\n\nLink: https://t.me/pinix_bot?start=${db.myCode}`);
-    document.getElementById('tg-link').href = `https://t.me/share/url?url=https://t.me/pinix_app&text=${shareMsg}`;
+    /* --- INITIALIZE --- */
+    document.getElementById('my-ref-code').innerText = user.refCode;
+    const tgMsg = encodeURIComponent("🚀 PINIX Mining başladı! Katıl ve 100 PNX hediye al. Kodum: " + user.refCode);
+    document.getElementById('tg-share').href = `https://t.me/share/url?url=https://t.me/pinix_app&text=${tgMsg}`;
 
+    /* --- MINING LOOP --- */
     setInterval(() => {
-        db.uncl += 0.00000034;
-        document.getElementById('uncl-text').innerText = db.uncl.toFixed(8);
+        user.uncl += 0.00000042;
+        document.getElementById('uncl-text').innerText = user.uncl.toFixed(8);
     }, 1000);
 
+    /* --- CORE FUNCTIONS --- */
     function sync() {
-        document.querySelector('.pi-disp').innerText = db.pi.toFixed(4) + " PI";
-        document.querySelector('.pnx-disp').innerText = db.pnx.toFixed(2) + " PNX";
+        document.querySelector('.pi-disp').innerText = user.pi.toFixed(4) + " PI";
+        document.querySelector('.pnx-disp').innerText = user.pnx.toFixed(2) + " PNX";
     }
 
     function tab(id, el) {
@@ -133,25 +199,59 @@
     }
 
     function doClaim() {
-        db.pi += db.uncl; db.uncl = 0; sync();
+        if(user.uncl > 0) {
+            user.pi += user.uncl;
+            user.uncl = 0;
+            sync();
+            alert("Success! Pi claimed.");
+        }
     }
 
-    function applyReferral() {
-        if(db.hasUsedRef) return alert("Zaten bir referans kodu kullandınız!");
-        const input = document.getElementById('referral-input').value;
-        if(input.length < 4) return alert("Geçersiz kod!");
-        
-        db.pnx += 50; // Referans kullandığı için ödül
-        db.hasUsedRef = true;
-        document.getElementById('referral-input-section').innerHTML = "<p style='color:var(--p-green); text-align:center;'>Referans kodu başarıyla uygulandı! +50 PNX</p>";
-        sync();
+    function completeTask(id, reward, link = null) {
+        if(user.tasks[id]) return;
+
+        if(link) {
+            window.open(link, '_blank');
+            // Kullanıcı döndüğünde ödül alması için buton modunu değiştiriyoruz
+            const btn = document.getElementById(id + '-btn');
+            btn.innerText = "Check";
+            btn.onclick = () => {
+                user.pnx += reward;
+                user.tasks[id] = true;
+                btn.innerText = "Completed";
+                btn.className = "btn-check done";
+                sync();
+                alert("Task Verified! +" + reward + " PNX");
+            };
+        } else {
+            // Check-in gibi direkt ödüller
+            user.pnx += reward;
+            user.tasks[id] = true;
+            const btn = document.getElementById(id + '-btn');
+            btn.innerText = "Completed";
+            btn.className = "btn-check done";
+            sync();
+            alert("Reward Collected!");
+        }
     }
 
-    function copyCode() {
-        navigator.clipboard.writeText(db.myCode);
-        alert("Kod kopyalandı: " + db.myCode);
+    function applyRef() {
+        if(user.hasRef) return alert("You already used a code!");
+        let code = document.getElementById('ref-input').value;
+        if(code.length > 3) {
+            user.pnx += 50;
+            user.hasRef = true;
+            sync();
+            alert("Referral Applied! +50 PNX");
+        }
     }
 
+    function copyRef() {
+        navigator.clipboard.writeText(user.refCode);
+        alert("Referral link copied!");
+    }
+
+    // Başlat
     sync();
 </script>
 </body>
