@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX COMMUNITY WEB3</title>
+    <title>FONIX COMMUNITY PRO</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --primary: #8b5cf6; --secondary: #f59e0b; --bg-ultra: #05010d;
@@ -19,47 +20,45 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
         body { background: var(--bg-ultra); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
         
-        #app { 
-            width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 70%); 
-            position: relative; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
-        }
+        #app { width: 100%; max-width: 450px; height: 100vh; background: radial-gradient(circle at top right, #2d135d 0%, var(--bg-deep) 70%); position: relative; display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
 
-        /* --- NOTIFICATION ENGINE --- */
+        /* REKLAM BAR */
+        .ad-timer-container { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.3); z-index: 1000; }
+        #ad-timer-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); transition: linear; }
+
+        /* BİLDİRİM */
         #notification-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 50000; pointer-events: none; width: 90%; }
-        .toast { padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-160px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px); }
+        .toast { padding: 16px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-weight: 600; box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: translateY(-180px); transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(20px); }
         .toast.active { transform: translateY(0); }
         .toast.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--p-green); color: var(--p-green); }
         .toast.error { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--p-red); color: var(--p-red); }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 60% { transform: translateX(10px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
         .shake-screen { animation: shake 0.3s ease-in-out 2; }
 
-        /* --- UI COMPONENTS --- */
-        .header { padding: 25px 20px; background: rgba(5, 1, 13, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* HEADER */
+        .header { padding: 20px; background: rgba(5, 1, 13, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; }
         .token-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
         
         .view { display: none; flex: 1; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 110px; }
         .view.active { display: flex; animation: viewIn 0.4s ease-out; }
-        @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- MINING DASHBOARD --- */
-        .mining-fan { width: 230px; height: 230px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 3s linear infinite; box-shadow: 0 0 60px rgba(139, 92, 246, 0.3); margin: 40px auto; }
+        /* DASHBOARD */
+        .fan-box { width: 220px; height: 220px; border-radius: 50%; border: 8px solid var(--primary); background: url('pinix.jpg') center/cover; animation: fanSpin 3s linear infinite; box-shadow: 0 0 50px rgba(139, 92, 246, 0.3); margin: 30px auto; }
         @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .balance-hero { font-size: 3.5rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-align: center; margin-bottom: 10px; }
+        .balance-hero { font-size: 3.2rem; font-family: 'Orbitron'; font-weight: 900; color: var(--secondary); text-align: center; }
 
-        /* --- AD INFO BAR --- */
-        .ad-timer-bar { position: absolute; top: 0; left: 0; height: 4px; background: var(--secondary); width: 0%; transition: linear; z-index: 100; }
-
-        /* --- MISSION & WALLET --- */
+        /* CARDS */
         .card { background: var(--glass); border: 1px solid var(--border); border-radius: 22px; padding: 20px; margin-bottom: 15px; }
-        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 20px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; }
-        .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 20px; padding: 18px 20px; color: white; width: 100%; outline: none; margin-top: 10px; }
+        .btn-mega { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 18px; border-radius: 25px; font-weight: 800; font-family: 'Orbitron'; cursor: pointer; width: 100%; transition: 0.2s; }
+        .pro-input { background: var(--input-bg); border: 2.5px solid var(--input-border); border-radius: 20px; padding: 15px 20px; color: white; width: 100%; outline: none; margin-top: 10px; }
 
-        /* --- NAV --- */
-        nav { position: absolute; bottom: 0; width: 100%; height: 95px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 15px; }
-        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.7rem; cursor: pointer; transition: 0.3s; flex: 1; }
+        /* NAV */
+        nav { position: absolute; bottom: 0; width: 100%; height: 90px; background: rgba(11, 2, 26, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        .nav-link { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; cursor: pointer; transition: 0.3s; flex: 1; }
         .nav-link.active { color: var(--secondary); }
-        .nav-link i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+        .nav-link i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
 
         .overlay { position: absolute; inset: 0; background: var(--bg-ultra); z-index: 40000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
     </style>
@@ -67,79 +66,92 @@
 <body>
 
 <div id="app">
+    <div class="ad-timer-container"><div id="ad-timer-fill"></div></div>
     <div id="notification-box"></div>
-    <div id="ad-progress-top" class="ad-timer-bar"></div>
 
     <div id="onboarding" class="overlay">
         <h1 style="font-family:'Orbitron';">FONIX HUB</h1>
-        <p style="opacity:0.6; margin: 20px 0;">Referans kodunuzu girerek 100 PNX kazanın.</p>
-        <input type="text" id="reg-ref" class="pro-input" style="text-align:center; margin-bottom:20px;" placeholder="DAVET KODU">
-        <button class="btn-mega" onclick="initApp()">SİSTEMİ BAŞLAT</button>
+        <p style="opacity:0.6; margin: 20px 0;">Referans kodunuzu girerek <b>100 PNX</b> kazanın.</p>
+        <input type="text" id="reg-ref" class="pro-input" style="text-align:center;" placeholder="DAVET KODU">
+        <button class="btn-mega" style="margin-top:20px;" onclick="initApp()">SİSTEME GİRİŞ YAP</button>
+        <p style="margin-top:20px; font-size:0.75rem; opacity:0.4; cursor:pointer;" onclick="initApp(true)">Kodum yok, devam et.</p>
     </div>
 
     <header class="header">
         <div class="stat-card">
             <div class="token-circle" style="background:#4c1d95; color:gold;">π</div>
-            <div><div style="font-size:0.6rem; opacity:0.5;">PI TOTAL</div><div class="pi-val" style="font-weight:800;">0.0000</div></div>
+            <div><div style="font-size:0.55rem; opacity:0.5;">PI TOTAL</div><div class="pi-val" style="font-weight:800;">0.0000</div></div>
         </div>
         <div class="stat-card">
             <div class="token-circle" style="background:#1e3a8a; color:white;">🌀</div>
-            <div><div style="font-size:0.6rem; opacity:0.5;">PNX ASSET</div><div class="pnx-val" style="font-weight:800;">0.00</div></div>
+            <div><div style="font-size:0.55rem; opacity:0.5;">PNX ASSET</div><div class="pnx-val" style="font-weight:800;">0.00</div></div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="mining-fan"></div>
+        <div class="fan-box"></div>
         <div class="balance-hero" id="uncl-ui">0.00000</div>
-        <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem;">MINING ENGINE ACTIVE</p>
-        <div style="margin-top:auto;">
-             <button class="btn-mega" onclick="manualAdClaim()">CLAIM REWARDS (AD)</button>
-             <p style="text-align:center; font-size:0.6rem; margin-top:10px; opacity:0.3;">Reklamlar her 30 saniyede bir otomatik yüklenir.</p>
-        </div>
+        <p style="text-align:center; opacity:0.4; letter-spacing:4px; font-size:0.7rem; margin-bottom:20px;">MINING ENGINE ACTIVE</p>
+        <button class="btn-mega" onclick="manualClaim()">CLAIM MINING (AD)</button>
     </div>
 
     <div id="v-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; text-align:center;">Missions</h2>
+        <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Missions</h2>
         <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><b>Join Telegram</b><br><span style="color:var(--secondary); font-size:0.8rem;">+50 PNX</span></div>
-            <button class="btn-mega" style="padding:10px 20px; width:auto;" onclick="window.open('https://t.me/FonixCommunity', '_blank')">JOIN</button>
+            <div><b>Join Telegram</b><br><span style="color:var(--secondary); font-size:0.75rem;">+50 PNX</span></div>
+            <button class="btn-mega" style="padding:10px 15px; width:auto; font-size:0.7rem;" onclick="runMission(this, 50, 'https://t.me/FonixCommunity')">JOIN</button>
         </div>
         <div class="card">
-            <h3 style="font-size:0.9rem; margin-bottom:10px;">🔄 PNX SWAP (100:1)</h3>
+            <h3 style="font-size:0.9rem;">🔄 SWAP PNX TO PI</h3>
             <input type="number" id="swap-amt" class="pro-input" placeholder="Min 100 PNX">
-            <button class="btn-mega" style="margin-top:15px; padding:12px;" onclick="swapAsset()">SWAP NOW</button>
+            <button class="btn-mega" style="margin-top:15px; padding:12px; font-size:0.8rem;" onclick="swapPNX()">CONVERT</button>
+        </div>
+    </div>
+
+    <div id="v-ref" class="view">
+        <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Invite & Earn</h2>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:0.8rem; opacity:0.6;">SİZİN DAVET KODUNUZ</p>
+            <h1 id="my-ref-display" style="font-size:2.5rem; color:var(--secondary); margin:15px 0; font-family:'Orbitron';">---</h1>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button class="btn-mega" style="font-size:0.7rem; padding:12px;" onclick="copyRef()">KOPYALA</button>
+                <button class="btn-mega" style="font-size:0.7rem; padding:12px; background: #0088cc;" onclick="shareOnTelegram()">PAYLAŞ</button>
+            </div>
+        </div>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Toplam Davet Edilen:</span>
+                <b id="ref-count" style="color:var(--secondary); font-size:1.2rem;">0</b>
+            </div>
+            <p style="font-size:0.7rem; opacity:0.4; margin-top:10px;">Her başarılı davet için anında 100 PNX kazanırsınız.</p>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
-        <h2 style="font-family:'Orbitron'; text-align:center;">Withdraw</h2>
-        <div class="card" style="margin-top:20px;">
-            <label style="font-size:0.7rem; opacity:0.5;">PI WALLET ADDRESS</label>
+        <h2 style="font-family:'Orbitron'; text-align:center; margin-bottom:20px;">Withdraw</h2>
+        <div class="card">
+            <label style="font-size:0.7rem; opacity:0.5;">CÜZDAN ADRESİ (PI MAINNET)</label>
             <input type="text" id="w-addr" class="pro-input" placeholder="G0...">
-            <div style="margin-top:20px;">
-                <label style="font-size:0.7rem; opacity:0.5;">WITHDRAW AMOUNT</label>
-                <div style="position:relative;">
-                    <input type="number" id="w-amt" class="pro-input" oninput="calcW()">
-                    <span style="position:absolute; right:15px; top:28px; color:var(--primary); font-weight:900;" onclick="maxW()">MAX</span>
-                </div>
+            <div style="margin-top:15px;">
+                <label style="font-size:0.7rem; opacity:0.5;">MİKTAR (Min 30)</label>
+                <input type="number" id="w-amt" class="pro-input" oninput="updateW()">
             </div>
-            <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.9rem;"><span>Fee:</span><span>1.00 PI</span></div>
-                <div style="display:flex; justify-content:space-between; font-weight:800; margin-top:10px; color:var(--p-green);"><span>Receive:</span><span id="w-res">0.00 PI</span></div>
+            <div style="margin-top:20px; font-size:0.85rem; border-top:1px solid var(--border); padding-top:15px;">
+                <div style="display:flex; justify-content:space-between;"><span>Net Alacak:</span><span id="w-res" style="color:var(--p-green); font-weight:800;">0.00 PI</span></div>
             </div>
         </div>
-        <button class="btn-mega" onclick="requestWithdraw()">SEND REQUEST</button>
+        <button class="btn-mega" onclick="sendW()">ÇEKİM TALEBİ GÖNDER</button>
     </div>
 
     <nav>
         <div class="nav-link active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
         <div class="nav-link" onclick="tab('v-tasks', this)"><i>🎯</i>Tasks</div>
+        <div class="nav-link" onclick="tab('v-ref', this)"><i>👥</i>Refs</div>
         <div class="nav-link" onclick="tab('v-wallet', this)"><i>👛</i>Wallet</div>
     </nav>
 </div>
 
 <script>
-    // --- TELEGRAM & AD INITIALIZATION ---
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
@@ -147,45 +159,29 @@
     let adWidget;
     document.addEventListener('DOMContentLoaded', () => {
         adWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-        startAdLoop();
+        startAds();
     });
 
-    // --- APP STATE ---
-    let db = JSON.parse(localStorage.getItem('fonix_v7_data')) || {
-        pi: 0.0, pnx: 0, uncl: 0.0, done: false
+    let db = JSON.parse(localStorage.getItem('fonix_pro_v9')) || {
+        pi: 0.0, pnx: 0, uncl: 0.0, done: false,
+        refCode: "PNX-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        refCount: 0
     };
 
-    function save() { localStorage.setItem('fonix_v7_data', JSON.stringify(db)); }
+    function save() { localStorage.setItem('fonix_pro_v9', JSON.stringify(db)); }
 
-    // --- AUTOMATIC AD LOOP (30 SECONDS) ---
-    function startAdLoop() {
-        let progress = 0;
-        const interval = 1000; // Her saniye
-        const bar = document.getElementById('ad-progress-top');
-
+    function startAds() {
+        let t = 0;
         setInterval(() => {
-            progress += (100 / 30);
-            bar.style.width = progress + '%';
-
-            if (progress >= 100) {
-                progress = 0;
-                bar.style.width = '0%';
-                showAd(); // Reklamı göster
-            }
-        }, interval);
+            t++;
+            document.getElementById('ad-timer-fill').style.width = (t/30)*100 + '%';
+            if(t >= 30) { t=0; if(adWidget) adWidget.autoMode(); }
+        }, 1000);
     }
 
-    function showAd() {
-        if (adWidget) {
-            adWidget.autoMode();
-            console.log("30sn Reklam Tetiklendi.");
-        }
-    }
-
-    // --- CORE LOGIC ---
-    function initApp() {
+    function initApp(skip = false) {
         const r = document.getElementById('reg-ref').value;
-        if(r.length > 3) db.pnx += 100;
+        if(!skip && r.length > 3) db.pnx += 100;
         db.done = true; save();
         document.getElementById('onboarding').style.display = 'none';
         render();
@@ -200,12 +196,37 @@
         }, 1000);
     };
 
-    function manualAdClaim() {
-        if(db.uncl < 0.0001) return notify("Yetersiz bakiye!", "error");
-        showAd(); // Claim butonuna basınca da reklam çıkar
-        db.pi += db.uncl; db.uncl = 0;
-        save(); render();
-        notify("Ödüller eklendi!");
+    function manualClaim() {
+        if(db.uncl < 0.0001) return notify("Yetersiz!", "error");
+        if(adWidget) adWidget.autoMode();
+        db.pi += db.uncl; db.uncl = 0; save(); render();
+        notify("Başarılı!");
+    }
+
+    function runMission(btn, rew, url) {
+        window.open(url, '_blank');
+        setTimeout(() => { db.pnx += rew; save(); render(); notify("Görev Tamam!"); }, 3000);
+    }
+
+    function swapPNX() {
+        const a = parseFloat(document.getElementById('swap-amt').value);
+        if(a >= 100 && db.pnx >= a) { db.pnx -= a; db.pi += (a/100); save(); render(); notify("Swap Tamam!"); }
+        else notify("Yetersiz!", "error");
+    }
+
+    function shareOnTelegram() {
+        const text = `Fonix Community'de madencilik yapmaya başla! Davet kodum: ${db.refCode}\nLink: https://t.me/SeninBotunLink`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(text)}`);
+    }
+
+    function copyRef() {
+        navigator.clipboard.writeText(db.refCode);
+        notify("Kod kopyalandı!");
+    }
+
+    function updateW() {
+        const a = parseFloat(document.getElementById('w-amt').value) || 0;
+        document.getElementById('w-res').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
     }
 
     function notify(msg, type = 'success') {
@@ -215,16 +236,15 @@
         t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
         box.appendChild(t);
         setTimeout(() => t.classList.add('active'), 10);
-        if(type === 'error') {
-            document.getElementById('app').classList.add('shake-screen');
-            setTimeout(() => document.getElementById('app').classList.remove('shake-screen'), 500);
-        }
-        setTimeout(() => { t.classList.remove('active'); setTimeout(() => t.remove(), 600); }, 3000);
+        if(type === 'error') document.getElementById('app').classList.add('shake-screen');
+        setTimeout(() => { t.classList.remove('active'); document.getElementById('app').classList.remove('shake-screen'); }, 3000);
     }
 
     function render() {
         document.querySelectorAll('.pi-val').forEach(e => e.innerText = db.pi.toFixed(4));
         document.querySelectorAll('.pnx-val').forEach(e => e.innerText = db.pnx.toFixed(2));
+        document.getElementById('my-ref-display').innerText = db.refCode;
+        document.getElementById('ref-count').innerText = db.refCount;
     }
 
     function tab(id, el) {
@@ -232,28 +252,6 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-    }
-
-    function calcW() {
-        const a = parseFloat(document.getElementById('w-amt').value) || 0;
-        document.getElementById('w-res').innerText = Math.max(0, a - 1).toFixed(2) + " PI";
-    }
-
-    function maxW() { document.getElementById('w-amt').value = db.pi.toFixed(2); calcW(); }
-
-    function requestWithdraw() {
-        const a = parseFloat(document.getElementById('w-amt').value);
-        if(a < 30 || a > db.pi) return notify("Hatalı miktar!", "error");
-        db.pi -= a; save(); render();
-        notify("Çekim talebi alındı.");
-    }
-
-    function swapAsset() {
-        const s = parseFloat(document.getElementById('swap-amt').value);
-        if(s >= 100 && db.pnx >= s) {
-            db.pnx -= s; db.pi += (s/100);
-            save(); render(); notify("Swap başarılı!");
-        } else notify("Yetersiz PNX!", "error");
     }
 </script>
 </body>
