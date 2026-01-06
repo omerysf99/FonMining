@@ -3,310 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX PRO - 9:16 Mobile UI</title>
+    <title>PINIX PRO - Ultimate Mining Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        /* --- GLOBAL CSS VARIABLES --- */
+        :root {
+            --primary: #a855f7;
+            --secondary: #7c3aed;
+            --accent: #facc15;
+            --bg-deep: #060608;
+            --bg-card: rgba(20, 20, 26, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: 'Space Grotesk', sans-serif;
+            height: 100vh; width: 100vw; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* 9:16 Format Container */
+        .app-shell {
+            width: 100%; max-width: 480px; height: 100vh;
+            background: radial-gradient(circle at top right, #1a1033 0%, #060608 60%);
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes spin-fan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.5; box-shadow: 0 0 20px var(--primary); } 50% { opacity: 1; box-shadow: 0 0 40px var(--primary); } }
+        @keyframes slide-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- REUSABLE COMPONENTS --- */
+        .glass-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 24px; backdrop-filter: blur(12px); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text { background: linear-gradient(135deg, #fff 30%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        body {
-            background-color: #0d0d12;
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+        /* Page Control */
+        .page { display: none; height: 100%; overflow-y: auto; padding: 20px; padding-bottom: 120px; scrollbar-width: none; }
+        .page::-webkit-scrollbar { display: none; }
+        .page.active { display: block; animation: slide-in 0.3s ease-out forwards; }
+
+        /* Mining Fan Design */
+        .mining-orb {
+            position: relative; width: 280px; height: 280px; margin: 30px auto;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .fan-main {
+            width: 100%; height: 100%; border-radius: 50%;
+            object-fit: cover; animation: spin-fan 8s linear infinite;
+            border: 2px solid rgba(168, 85, 247, 0.2); padding: 10px;
+        }
+        .orb-core {
+            position: absolute; width: 60px; height: 60px; background: var(--bg-deep);
+            border-radius: 20px; border: 2px solid var(--primary);
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 30px var(--primary); z-index: 5;
         }
 
-        .app-container {
-            width: 100%;
-            height: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            background: radial-gradient(circle at top, #1c1c2b 0%, #0d0d12 100%);
+        /* --- NAVIGATION --- */
+        .nav-dock {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 95px;
+            background: rgba(10, 10, 15, 0.95); border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: 20px; z-index: 1000;
+        }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); cursor: pointer; transition: 0.3s; flex: 1; }
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn i { font-size: 22px; margin-bottom: 4px; }
+        .nav-btn span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .main-btn-outer { margin-top: -50px; }
+        .main-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; justify-content: center; align-items: center;
+            border: 5px solid var(--bg-deep); box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            color: white !important; font-size: 24px;
         }
 
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 120px;
-            scrollbar-width: none;
-        }
-        .content-area::-webkit-scrollbar { display: none; }
-
-        .page { display: none; animation: fadeIn 0.2s ease-out; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
-        .glass-card {
-            background: rgba(26, 26, 36, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .pi-icon {
-            width: 36px;
-            height: 36px;
-            background: #f5841f;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-style: italic;
-            color: white;
-            box-shadow: 0 0 15px rgba(245, 132, 31, 0.3);
-        }
-
-        /* --- Madencilik Fan Alanı --- */
-        .mining-container {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            margin: 40px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fan-image {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            animation: spin 6s linear infinite;
-            filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.4));
-        }
-
-        .fan-overlay {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 2px dashed rgba(168, 85, 247, 0.3);
-            animation: spin-reverse 10s linear infinite;
-        }
-
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-
-        /* --- Navigasyon --- */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 90px;
-            background: #15151b;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: 15px;
-            border-top: 1px solid #25252b;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #6b7280;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            flex: 1;
-        }
-
-        .nav-item.active { color: #facc15; }
-
-        .home-circle {
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: -45px;
-            border: 5px solid #0d0d12;
-            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
-        }
-
-        .bot-signature {
-            position: absolute;
-            bottom: 5px;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: #374151;
-            letter-spacing: 1px;
-        }
-
-        .dot {
-            width: 6px;
-            height: 6px;
-            background: #ef4444;
-            border-radius: 50%;
-            position: absolute;
-            top: 0;
-            right: -2px;
-        }
+        /* UI Elements */
+        .badge-pending { background: rgba(250, 204, 21, 0.1); color: var(--accent); border: 1px solid rgba(250, 204, 21, 0.2); }
+        .badge-verified { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="content-area">
+<div class="app-shell">
+    <div class="content-viewport">
 
         <div id="home" class="page active">
-            <div class="glass-card flex justify-between items-center">
+            <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="pi-icon text-sm">π</div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-tight">Pi Balance</p>
-                        <p class="text-lg font-black mono">0.0000000</p>
-                    </div>
+                    <img src="pinix.jpg" class="w-8 h-8 rounded-lg border border-primary/30">
+                    <h1 class="font-black text-lg tracking-tighter">PINIX MINER</h1>
                 </div>
-                <i class="fas fa-wallet text-gray-700"></i>
+                <div class="badge-verified px-3 py-1 rounded-full text-[10px] font-bold">● NODE ACTIVE</div>
             </div>
 
-            <div class="mining-container">
-                <div class="fan-overlay"></div>
-                <img src="pinix.jpg" class="fan-image" alt="Mining Fan">
-                <div class="absolute bg-[#0d0d12]/60 p-2 rounded-xl backdrop-blur-sm border border-white/10">
-                    <div class="pi-icon w-10 h-10 text-lg">π</div>
+            <div class="glass-card p-5 mb-8 flex justify-between items-center overflow-hidden relative">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full blur-2xl"></div>
+                <div>
+                    <p class="text-[10px] text-text-dim font-bold uppercase tracking-widest mb-1">Total Balance</p>
+                    <h2 class="text-3xl font-black tracking-tight mono">0.0000000</h2>
+                    <p class="text-[9px] text-primary font-bold mt-1">WALLET ASSETS: PI NETWORK</p>
                 </div>
-            </div>
-
-            <div class="text-center">
-                <p class="text-gray-500 text-sm font-semibold mb-1 uppercase tracking-widest animate-pulse">Mining...</p>
-                <h1 class="text-5xl font-black text-yellow-500 tracking-tighter">0.0000000</h1>
-                <p class="text-white text-xs font-bold mt-1">PENDING PI REWARDS</p>
-
-                <div class="bg-[#1a1a24] px-6 py-2 rounded-2xl border border-gray-800 inline-flex items-center gap-3 mt-8">
-                    <i class="fas fa-bolt text-yellow-500"></i>
-                    <span class="font-bold text-sm">Mining Power <span class="text-white ml-2">0 GH/s</span></span>
+                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
+                    <i class="fas fa-wallet text-xl text-gray-500"></i>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mt-12">
-                <button class="bg-[#2d1b4d] py-4 rounded-2xl font-black text-sm active:scale-95 transition border border-purple-500/20">Claim</button>
-                <button class="bg-[#166534] py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition">
-                    <i class="fas fa-exchange-alt"></i> Swap
-                </button>
+            <div class="mining-orb">
+                <div class="absolute inset-0 border-2 border-primary/20 rounded-full animate-ping" style="animation-duration: 3s;"></div>
+                <img src="pinix.jpg" class="fan-main">
+                <div class="orb-core">
+                    <span class="text-2xl font-black italic text-white">π</span>
+                </div>
             </div>
 
-            <button onclick="showPage('boost')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-black font-black py-4 rounded-2xl mt-4 flex items-center justify-center gap-3 active:scale-95 transition shadow-lg shadow-orange-500/20">
-                <i class="fas fa-rocket"></i> BOOST MINING POWER
+            <div class="text-center mt-6">
+                <p class="text-text-dim text-xs font-bold uppercase tracking-[4px] mb-2">Mining Process</p>
+                <h3 class="text-5xl font-black gradient-text mono tracking-tighter">0.0000000</h3>
+                
+                <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 mt-6">
+                    <i class="fas fa-bolt text-accent animate-pulse"></i>
+                    <span class="font-bold text-sm">Power: <span class="text-white">0 GH/s</span></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-10">
+                <button class="glass-card py-4 font-black text-sm hover:bg-white/5 transition active:scale-95">CLAIM</button>
+                <button class="bg-gradient-to-r from-green-600 to-emerald-700 py-4 rounded-2xl font-black text-sm shadow-lg shadow-green-500/10 active:scale-95 transition">SWAP ASSETS</button>
+            </div>
+            
+            <button onclick="switchPage('boost')" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-5 rounded-2xl font-black mt-4 shadow-xl active:scale-95 transition tracking-widest text-sm">
+                UPGRADE MINING POWER
             </button>
         </div>
 
         <div id="wallet" class="page">
-            <h2 class="text-3xl font-black text-center mb-8 mt-4">My Assets</h2>
-            
-            <div class="glass-card flex justify-between items-center py-6 border-l-4 border-orange-500">
-                <div class="flex items-center gap-4">
-                    <div class="pi-icon">π</div>
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Main Balance</p>
-                        <p class="text-xl font-black">0.0000000 PI</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-black">MY ASSETS</h2>
+                <p class="text-xs text-text-dim">Manage your blockchain rewards</p>
             </div>
 
-            <div class="glass-card flex justify-between items-center py-6 border-l-4 border-purple-500">
-                <div class="flex items-center gap-4">
-                    <img src="pinix.jpg" class="w-9 h-9 rounded-xl object-cover" alt="Pinix">
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase">Token Balance</p>
-                        <p class="text-xl font-black">0 PINIX</p>
+            <div class="glass-card p-6 mb-4 border-l-4 border-orange-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-black italic text-white">π</div>
+                        <span class="font-bold">PI NETWORK</span>
                     </div>
+                    <span class="text-[10px] font-bold text-gray-500">MAINNET</span>
                 </div>
-                <button class="text-[10px] bg-purple-500/20 text-purple-400 px-3 py-1 rounded-lg font-bold">SWAP</button>
+                <h3 class="text-3xl font-black mono">0.0000000</h3>
+                <div class="flex justify-between mt-4">
+                    <p class="text-[10px] text-text-dim">≈ $0.00 USD</p>
+                    <p class="text-[10px] text-green-500 font-bold">+0.00% (24h)</p>
+                </div>
             </div>
 
-            <div class="glass-card p-4 mt-4">
-                <p class="text-[10px] text-gray-500 font-bold text-center mb-4 uppercase">Min. Withdraw: 100 PI</p>
-                <button class="w-full bg-[#22c55e] py-4 rounded-2xl font-black text-white shadow-xl shadow-green-900/20 active:scale-95 transition">
-                    <i class="fas fa-paper-plane mr-2"></i> WITHDRAW ASSETS
-                </button>
+            <div class="glass-card p-6 mb-8 border-l-4 border-purple-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <img src="pinix.jpg" class="w-10 h-10 rounded-xl">
+                        <span class="font-bold">PINIX TOKEN</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-purple-500">APP UTILITY</span>
+                </div>
+                <h3 class="text-3xl font-black mono">0</h3>
+                <button class="mt-4 text-[10px] font-bold text-purple-400 uppercase underline tracking-widest">Swap to Pi (100:1)</button>
             </div>
-            
-            <div class="flex justify-between items-center mt-10 mb-4 px-2">
-                <h3 class="font-bold text-gray-400 uppercase text-[10px] tracking-widest">History</h3>
-                <span class="text-[10px] text-purple-400 font-bold uppercase">Refresh <i class="fas fa-sync-alt ml-1"></i></span>
+
+            <div class="glass-card p-4">
+                <button class="w-full bg-white text-black py-4 rounded-xl font-black text-sm mb-3 active:scale-95 transition">SEND / WITHDRAW</button>
+                <button class="w-full bg-white/5 border border-white/10 py-4 rounded-xl font-black text-sm text-white active:scale-95 transition">RECEIVE</button>
+                <p class="text-center text-[9px] text-gray-600 mt-4 uppercase font-bold tracking-widest">Withdrawals processed within 24 hours</p>
             </div>
-            
-            <div class="text-center py-10 text-gray-700 text-[10px] font-black uppercase tracking-[3px]">No Transactions Yet</div>
         </div>
 
-        <div id="missions" class="page">
-            <h2 class="text-3xl font-black text-center mb-2">New Missions</h2>
-            <p class="text-center text-gray-500 text-xs mb-8">Complete tasks and earn more</p>
+        <div id="boost" class="page text-center">
+            <h2 class="text-2xl font-black mb-2">POWER UP</h2>
+            <p class="text-xs text-text-dim mb-8">Increase your mining hash rate effectively</p>
 
-            <div class="flex bg-[#15151b] p-1 rounded-2xl mb-8 border border-white/5">
-                <button class="flex-1 bg-[#25252b] py-3 rounded-xl text-xs font-black">Tasks</button>
-                <button class="flex-1 text-gray-500 text-xs font-bold relative">Ref <span class="dot"></span></button>
-                <button class="flex-1 text-gray-500 text-xs font-bold relative">Contest <span class="dot"></span></button>
+            <div class="glass-card p-10 mb-6 bg-gradient-to-b from-primary/10 to-transparent relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                <h4 class="text-5xl font-black italic tracking-tighter mb-2">100 <span class="text-xl">GH/s</span></h4>
+                <p class="text-[10px] text-primary font-bold uppercase tracking-[3px]">Mining Speed</p>
             </div>
 
-            <div class="glass-card flex justify-between items-center border-l-4 border-green-500">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-check-circle text-green-500"></i>
-                    <span class="font-bold text-sm">Completed Tasks (14)</span>
+            <div class="grid grid-cols-2 gap-4 mb-8 text-left">
+                <div class="glass-card p-4">
+                    <p class="text-[9px] text-text-dim font-bold uppercase">Price</p>
+                    <p class="text-lg font-bold">100 PI</p>
                 </div>
-                <i class="fas fa-chevron-down text-gray-600"></i>
+                <div class="glass-card p-4">
+                    <p class="text-[9px] text-text-dim font-bold uppercase">Duration</p>
+                    <p class="text-lg font-bold">30 Days</p>
+                </div>
+                <div class="glass-card p-4 border-b-2 border-green-500/30">
+                    <p class="text-[9px] text-text-dim font-bold uppercase">Daily Profit</p>
+                    <p class="text-lg font-bold text-green-500">+1.14 PI</p>
+                </div>
+                <div class="glass-card p-4 border-b-2 border-accent/30">
+                    <p class="text-[9px] text-text-dim font-bold uppercase">Total ROI</p>
+                    <p class="text-lg font-bold text-accent">+34.33 PI</p>
+                </div>
+            </div>
+
+            <div class="px-2 mb-10">
+                <input type="range" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" min="100" max="10000" step="100" value="100">
+                <div class="flex justify-between mt-3 text-[10px] font-bold text-gray-600 mono">
+                    <span>100 PI</span>
+                    <span>10,000 PI</span>
+                </div>
+            </div>
+
+            <button class="w-full bg-white text-black py-5 rounded-2xl font-black text-sm tracking-[2px] active:scale-95 transition">ACTIVATE MINING POWER</button>
+        </div>
+
+        <div id="friends" class="page">
+            <h2 class="text-2xl font-black text-center mb-6 uppercase">Referral Hub</h2>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="glass-card p-4 text-center">
+                    <p class="text-[9px] text-text-dim font-bold uppercase mb-1">Invited</p>
+                    <p class="text-2xl font-black">0</p>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <p class="text-[9px] text-text-dim font-bold uppercase mb-1">Bonus Speed</p>
+                    <p class="text-2xl font-black text-primary">+0 GH/s</p>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 mb-8 bg-gradient-to-r from-primary/5 to-transparent">
+                <p class="text-[10px] text-text-dim font-black mb-3 uppercase tracking-widest">Share Your Invite Link</p>
+                <div class="flex gap-2 bg-black/40 p-2 rounded-xl border border-white/5">
+                    <input type="text" value="https://t.me/PINIX_Bot?start=r83924" class="flex-1 bg-transparent text-[10px] mono text-gray-500 outline-none" readonly>
+                    <button class="bg-primary px-4 py-2 rounded-lg text-xs"><i class="far fa-copy"></i></button>
+                </div>
+            </div>
+
+            <h3 class="text-xs font-black text-gray-500 mb-4 uppercase tracking-[3px] ml-2">Referral Levels</h3>
+            <div class="space-y-3">
+                <div class="glass-card p-4 flex items-center justify-between border-l-4 border-primary">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-black">1</div>
+                        <div><p class="text-xs font-black">Direct Referrals</p><p class="text-[9px] text-text-dim">1000 PNX + 10% Hashrate</p></div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-800 text-xs"></i>
+                </div>
+                <div class="glass-card p-4 flex items-center justify-between border-l-4 border-gray-700 opacity-60">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-gray-500 font-black">2</div>
+                        <div><p class="text-xs font-black">Secondary Tier</p><p class="text-[9px] text-text-dim">500 PNX + 3% Hashrate</p></div>
+                    </div>
+                    <i class="fas fa-lock text-gray-800 text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="more" class="page">
+            <div class="glass-card p-6 mb-8 flex items-center gap-5 border-t-2 border-primary relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+                <div class="relative">
+                    <img src="pinix.jpg" class="w-20 h-20 rounded-3xl object-cover border-2 border-primary shadow-2xl">
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-bg-deep rounded-full"></div>
+                </div>
+                <div class="z-10">
+                    <h3 class="font-black text-xl tracking-tighter">Elite Miner</h3>
+                    <div class="badge-verified inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase mb-1 tracking-widest">Premium Account</div>
+                    <p class="text-[9px] text-gray-600 font-bold mono">UID: 8392479231 <i class="far fa-copy ml-1"></i></p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <section>
+                    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[4px] mb-3 ml-2">Security & Verification</p>
+                    <div class="glass-card divide-y divide-white/5">
+                        <div class="p-4 flex justify-between items-center">
+                            <div class="flex items-center gap-4"><i class="fas fa-id-card text-gray-600 w-5"></i><span class="text-xs font-bold">Identity KYC</span></div>
+                            <span class="text-[9px] text-accent font-black uppercase">Pending</span>
+                        </div>
+                        <div class="p-4 flex justify-between items-center">
+                            <div class="flex items-center gap-4"><i class="fas fa-shield-alt text-gray-600 w-5"></i><span class="text-xs font-bold">Two-Factor Auth</span></div>
+                            <div class="w-8 h-4 bg-gray-800 rounded-full relative"><div class="absolute left-1 top-1 w-2 h-2 bg-gray-600 rounded-full"></div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <p class="text-[10px] font-black text-gray-600 uppercase tracking-[4px] mb-3 ml-2">Project Info</p>
+                    <div class="glass-card divide-y divide-white/5">
+                        <div class="p-4 flex justify-between items-center">
+                            <div class="flex items-center gap-4"><i class="fas fa-file-invoice text-gray-600 w-5"></i><span class="text-xs font-bold">Whitepaper v2.4</span></div>
+                            <i class="fas fa-external-link-alt text-[10px] text-gray-800"></i>
+                        </div>
+                        <div class="p-4 flex justify-between items-center">
+                            <div class="flex items-center gap-4"><i class="fab fa-telegram-plane text-gray-600 w-5"></i><span class="text-xs font-bold">Official Channel</span></div>
+                            <i class="fas fa-chevron-right text-[10px] text-gray-800"></i>
+                        </div>
+                    </div>
+                </section>
+                
+                <button class="w-full bg-red-500/10 border border-red-500/20 py-4 rounded-xl text-red-500 font-black text-xs uppercase tracking-widest mt-10 active:scale-95 transition">
+                    Logout Session
+                </button>
+            </div>
+
+            <div class="mt-12 text-center pb-10">
+                <p class="text-[9px] text-gray-800 font-black tracking-[8px] uppercase">Pinix Network</p>
+                <p class="text-[8px] text-gray-900 font-bold mt-1">Core Version 4.0.1-PRO (2026)</p>
             </div>
         </div>
 
     </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item" onclick="showPage('wallet')" id="nav-wallet">
-            <i class="fas fa-wallet mb-1 text-xl"></i>
-            <span>Wallet</span>
-        </div>
-        <div class="nav-item" onclick="showPage('friends')" id="nav-friends">
-            <i class="fas fa-user-friends mb-1 text-xl"></i>
-            <span>Friends</span>
-        </div>
-        <div class="nav-item active" onclick="showPage('home')" id="nav-home">
-            <div class="home-circle">
-                <i class="fas fa-bolt text-2xl text-white"></i>
-            </div>
+    <nav class="nav-dock">
+        <div class="nav-btn" onclick="switchPage('wallet')" id="n-wallet"><i class="fas fa-wallet"></i><span>Assets</span></div>
+        <div class="nav-btn" onclick="switchPage('friends')" id="n-friends"><i class="fas fa-user-friends"></i><span>Friends</span></div>
+        <div class="nav-btn active main-btn-outer" onclick="switchPage('home')" id="n-home">
+            <div class="main-btn"><i class="fas fa-bolt"></i></div>
             <span class="mt-1">Mining</span>
         </div>
-        <div class="nav-item" onclick="showPage('missions')" id="nav-missions">
-            <i class="fas fa-bullseye mb-1 text-xl"></i>
-            <span>Missions</span>
-        </div>
-        <div class="nav-item" onclick="showPage('more')" id="nav-more">
-            <i class="fas fa-ellipsis-h mb-1 text-xl"></i>
-            <span>More</span>
-        </div>
+        <div class="nav-btn" onclick="switchPage('missions')" id="n-missions"><i class="fas fa-tasks"></i><span>Tasks</span></div>
+        <div class="nav-btn" onclick="switchPage('more')" id="n-more"><i class="fas fa-cog"></i><span>More</span></div>
     </nav>
 
-    <div class="bot-signature">@PINIX_Mining_Bot</div>
+    <div class="bot-signature text-[8px] text-gray-900 absolute bottom-2 w-full text-center font-bold tracking-[3px]">@PINIX_MINING_INFRA</div>
 </div>
 
 <script>
-    function showPage(pageId) {
+    function switchPage(pageId) {
+        // Hide all pages
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        // Show target page
         document.getElementById(pageId).classList.add('active');
-
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const activeNav = document.getElementById('nav-' + pageId);
+        
+        // Update Nav UI
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        const activeNav = document.getElementById('n-' + pageId);
         if(activeNav) activeNav.classList.add('active');
 
-        if(window.navigator.vibrate) window.navigator.vibrate(10);
+        // Haptic Feedback Simulation
+        if(window.navigator.vibrate) window.navigator.vibrate(12);
     }
 </script>
 
