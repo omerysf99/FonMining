@@ -13,9 +13,10 @@
             --neon-gold: #f59e0b;
             --text: #ffffff;
             --glass-border: rgba(255, 255, 255, 0.1);
+            --nav-bg: #13062d;
         }
 
-        /* 9:6 Oran Sabitleme */
+        /* 9:6 Oran ve Siyah Alanı Kaldırma */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
         body {
@@ -25,28 +26,29 @@
             align-items: center;
             min-height: 100vh;
             color: var(--text);
-            overflow: hidden;
+            overflow: hidden; /* Dış taşmaları engeller */
         }
 
         #app-container {
             width: 100%;
-            max-width: 450px; /* Standart Mobil Genişliği */
+            max-width: 450px; 
+            height: 100vh; /* Tam ekran yüksekliği */
+            max-height: 800px; /* Çok uzun ekranlarda oranı korumak için */
             aspect-ratio: 6 / 9;
             background: radial-gradient(circle at top, #2d135d 0%, var(--bg) 100%);
             position: relative;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
             border: 1px solid var(--glass-border);
             overflow: hidden;
         }
 
         /* --- ÜST PANEL --- */
         header {
-            padding: 20px;
+            padding: 20px 20px 10px 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .header-top {
@@ -54,45 +56,43 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             letter-spacing: 1px;
+            margin-bottom: 5px;
         }
 
-        .verified-icon { color: #38bdf8; margin-left: 5px; font-size: 0.9rem; }
-
-        .balance-stack { display: flex; flex-direction: column; gap: 8px; }
+        .verified-icon { color: #38bdf8; margin-left: 6px; font-size: 1rem; }
 
         .balance-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 10px 15px;
+            border-radius: 20px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: inset 0 0 10px rgba(168, 85, 247, 0.1);
+            gap: 15px;
+            margin-bottom: 8px;
         }
 
-        .coin-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--neon-purple); }
-        .balance-label { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; }
-        .balance-val { font-size: 1rem; font-weight: 700; }
+        .coin-img { width: 35px; height: 35px; border-radius: 50%; }
+        .balance-label { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px; }
+        .balance-val { font-size: 1.1rem; font-weight: 700; }
 
-        /* --- MİNİNG ALANI --- */
+        /* --- MİNİNG ALANI (MERKEZ) --- */
         .mining-section {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
         }
 
         .turbine-wrapper {
             position: relative;
-            width: 180px;
-            height: 180px;
-            margin-bottom: 20px;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 25px;
         }
 
         .turbine {
@@ -100,101 +100,101 @@
             height: 100%;
             border-radius: 50%;
             background: url('pinix.jpg') center/cover;
-            animation: rotateTurbine 8s linear infinite;
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.4);
+            animation: rotateTurbine 10s linear infinite;
+            box-shadow: 0 0 50px rgba(168, 85, 247, 0.3);
+            border: 2px solid rgba(168, 85, 247, 0.2);
         }
 
         @keyframes rotateTurbine { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .mining-text { font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; }
+        .mining-status { font-size: 0.85rem; opacity: 0.6; letter-spacing: 3px; font-weight: 300; }
         .counter {
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             font-weight: 800;
             color: var(--neon-gold);
-            margin: 5px 0;
-            text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            margin: 8px 0;
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
         }
 
-        .power-info {
-            background: rgba(0,0,0,0.4);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255,255,255,0.05);
+        .power-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* --- AKSİYON BUTONLARI --- */
-        .actions {
-            padding: 20px;
+        .action-area {
+            padding: 0 20px 20px 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 15px;
         }
 
         .btn {
             border: none;
-            padding: 14px;
-            border-radius: 14px;
+            padding: 16px;
+            border-radius: 18px;
             font-weight: 800;
             color: #fff;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            transition: 0.2s;
             text-transform: uppercase;
-            font-size: 0.8rem;
         }
 
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
-        .btn-claim { background: linear-gradient(135deg, #7c3aed, #a855f7); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
-        .btn-swap { background: linear-gradient(135deg, #16a34a, #22c55e); box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4); }
-        .btn-boost { 
-            grid-column: span 2; 
-            background: linear-gradient(135deg, #b45309, #f59e0b); 
-            box-shadow: 0 4px 15px rgba(180, 83, 9, 0.4);
-            font-size: 1rem;
-        }
+        .btn:active { transform: scale(0.95); }
+        .btn-claim { background: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+        .btn-swap { background: #22c55e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
 
-        /* --- ALT NAV --- */
-        nav {
-            background: rgba(0,0,0,0.6);
+        /* --- ALT NAVİGASYON (SEKMELER) --- */
+        .bottom-nav {
+            background: var(--nav-bg);
+            height: 75px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 15px 5px;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px; /* Mobil çubuk boşluğu */
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
-            font-size: 0.6rem;
-            opacity: 0.5;
-            transition: 0.3s;
+            gap: 5px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 0.65rem;
+            font-weight: 500;
+            flex: 1;
         }
 
-        .nav-item.active { opacity: 1; color: var(--neon-gold); transform: translateY(-3px); font-weight: bold; }
-        .nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
-
-        /* --- POPUP (OFFLINE) --- */
-        #offline-popup {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: #1e1b4b;
-            border: 2px solid var(--neon-gold);
-            padding: 25px;
-            border-radius: 24px;
-            text-align: center;
-            z-index: 100;
-            width: 80%;
-            visibility: hidden; opacity: 0; transition: 0.3s;
+        .nav-item.active {
+            color: var(--neon-gold);
         }
-        #offline-popup.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        .overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.85); z-index: 90; display: none;
+        .nav-icon {
+            font-size: 1.4rem;
+        }
+
+        .home-center {
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -35px;
+            border: 4px solid var(--bg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+            font-size: 1.6rem;
         }
     </style>
 </head>
@@ -203,20 +203,20 @@
     <div id="app-container">
         <header>
             <div class="header-top">PINIX App <span class="verified-icon">✔</span></div>
-            <div class="balance-stack">
-                <div class="balance-card">
-                    <img src="pico.jpg" class="coin-img" alt="PI">
-                    <div>
-                        <div class="balance-label">Main Balance (PI)</div>
-                        <div class="balance-val" id="pi-balance">0.00000000</div>
-                    </div>
+            
+            <div class="balance-card">
+                <img src="pico.jpg" class="coin-img" alt="PI">
+                <div>
+                    <div class="balance-label">Main Balance (PI)</div>
+                    <div class="balance-val" id="total-pi">0.00007283</div>
                 </div>
-                <div class="balance-card">
-                    <img src="pinix.jpg" class="coin-img" alt="PNX">
-                    <div>
-                        <div class="balance-label">PINIX Assets</div>
-                        <div class="balance-val" id="pinix-balance">0</div>
-                    </div>
+            </div>
+
+            <div class="balance-card">
+                <img src="pinix.jpg" class="coin-img" alt="PNX">
+                <div>
+                    <div class="balance-label">PINIX Assets</div>
+                    <div class="balance-val" id="total-pnx">0</div>
                 </div>
             </div>
         </header>
@@ -225,140 +225,66 @@
             <div class="turbine-wrapper">
                 <div class="turbine" id="turbine"></div>
             </div>
-            <div class="mining-text">MINING...</div>
-            <div class="counter" id="unclaimed-pi">0.00000000</div>
-            <div class="power-info">⚡ <span id="power-val">1.0</span> GH/s</div>
+            <div class="mining-status">MINING...</div>
+            <div class="counter" id="unclaimed">0.00000595</div>
+            <div class="power-badge">
+                <span>⚡</span> 1.0 GH/s
+            </div>
         </div>
 
-        <div class="actions">
-            <button class="btn btn-claim" onclick="claim()">Claim PI</button>
-            <button class="btn btn-swap" onclick="swap()">Swap PINIX</button>
-            <button class="btn btn-boost" onclick="alert('Boost shop coming soon!')">🚀 UPGRADE BOOST</button>
+        <div class="action-area">
+            <button class="btn btn-claim" onclick="handleClaim()">Claim PI</button>
+            <button class="btn btn-swap" onclick="handleSwap()">Swap PINIX</button>
         </div>
 
-        <nav>
-            <div class="nav-item"><span>👛</span>Wallet</div>
-            <div class="nav-item"><span>👥</span>Friends</div>
-            <div class="nav-item active"><span>🏠</span>Home</div>
-            <div class="nav-item"><span>🎯</span>Missions</div>
-            <div class="nav-item"><span>☰</span>More</div>
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👛</span>
+                <span>Wallet</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>Friends</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <div class="home-center">🏠</div>
+                <span style="margin-top: 5px;">Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🎯</span>
+                <span>Missions</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>More</span>
+            </a>
         </nav>
-
-        <div class="overlay" id="overlay"></div>
-        <div id="offline-popup">
-            <h3 style="color: var(--neon-gold); margin-bottom: 10px;">WELCOME BACK!</h3>
-            <p id="offline-msg" style="font-size: 0.9rem; margin-bottom: 20px;"></p>
-            <button class="btn btn-claim" style="width: 100%" onclick="closePopup()">AWESOME!</button>
-        </div>
     </div>
 
     <script>
-        // --- GAME STATE ---
-        let state = {
-            pi: 0,
-            pinix: 0,
-            unclaimed: 0,
-            power: 1.0,
-            lastSave: Date.now()
-        };
+        // Basit Sayaç Mantığı
+        let unclaimed = 0.00000595;
+        let totalPi = 0.00007283;
 
-        // --- CONSTANTS ---
-        const PI_PER_SECOND_BASE = 0.000001; // 1 GH/s için saniyelik kazanç
-
-        // --- CORE LOGIC ---
-        function init() {
-            const saved = localStorage.getItem('pinix_data');
-            if (saved) {
-                state = JSON.parse(saved);
-                calculateOfflineGain();
-            }
-            
-            updateUI();
-            requestAnimationFrame(gameLoop);
+        function updateCounter() {
+            unclaimed += 0.00000001;
+            document.getElementById('unclaimed').innerText = unclaimed.toFixed(8);
+            requestAnimationFrame(updateCounter);
         }
 
-        function gameLoop() {
-            // Her frame başı üretim (60fps varsayımıyla)
-            let gainPerFrame = (state.power * PI_PER_SECOND_BASE) / 60;
-            state.unclaimed += gainPerFrame;
-            
-            // UI Update (Sadece counter)
-            document.getElementById('unclaimed-pi').innerText = state.unclaimed.toFixed(8);
-            
-            requestAnimationFrame(gameLoop);
+        function handleClaim() {
+            totalPi += unclaimed;
+            unclaimed = 0;
+            document.getElementById('total-pi').innerText = totalPi.toFixed(8);
+            alert("PI Mined successfully claimed!");
         }
 
-        // Offline Mining Hesaplama
-        function calculateOfflineGain() {
-            const now = Date.now();
-            const diffSeconds = Math.floor((now - state.lastSave) / 1000);
-            
-            if (diffSeconds > 10) { // En az 10 saniye dışarıda kaldıysa
-                const maxSeconds = 12 * 3600; // 12 Saat limit
-                const effectiveSec = Math.min(diffSeconds, maxSeconds);
-                const gained = effectiveSec * (state.power * PI_PER_SECOND_BASE);
-                
-                state.unclaimed += gained;
-                
-                showPopup(`Mining continued while you were away! You earned ${gained.toFixed(6)} PI in ${Math.floor(effectiveSec/60)} minutes.`);
-            }
+        function handleSwap() {
+            alert("Swap feature will be active soon!");
         }
-
-        // --- ACTIONS ---
-        function claim() {
-            if (state.unclaimed > 0) {
-                state.pi += state.unclaimed;
-                state.unclaimed = 0;
-                save();
-                updateUI();
-            }
-        }
-
-        function swap() {
-            const rate = 100; // 1 PI = 100 PINIX
-            if (state.pi >= 0.1) {
-                state.pi -= 0.1;
-                state.pinix += (0.1 * rate);
-                save();
-                updateUI();
-            } else {
-                alert("Min swap: 0.1 PI");
-            }
-        }
-
-        // --- UTILS ---
-        function updateUI() {
-            document.getElementById('pi-balance').innerText = state.pi.toFixed(8);
-            document.getElementById('pinix-balance').innerText = Math.floor(state.pinix);
-            document.getElementById('power-val').innerText = state.power.toFixed(1);
-            
-            // Hız animasyonu güce göre değişsin
-            const duration = Math.max(1, 10 / state.power);
-            document.getElementById('turbine').style.animationDuration = duration + 's';
-        }
-
-        function save() {
-            state.lastSave = Date.now();
-            localStorage.setItem('pinix_data', JSON.stringify(state));
-        }
-
-        function showPopup(msg) {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('offline-msg').innerText = msg;
-            document.getElementById('offline-popup').classList.add('show');
-        }
-
-        function closePopup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('offline-popup').classList.remove('show');
-            save();
-        }
-
-        // Otomatik Save (Her 10 saniyede bir)
-        setInterval(save, 10000);
 
         // Başlat
-        window.onload = init;
+        updateCounter();
     </script>
 </body>
 </html>
