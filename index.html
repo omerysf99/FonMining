@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pinix Mining App</title>
+    <title>Pinix Mining Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -14,156 +14,180 @@
         }
         .app-container {
             width: 375px; height: 667px; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; padding: 20px; background: #0d0915;
+            display: flex; flex-direction: column; background: #0d0915; border-radius: 20px;
         }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .mining-fan { animation: rotate 12s linear infinite; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        /* Boost Penceresi (Modal) */
+        /* Sekme İçerik Yönetimi */
+        .tab-content { display: none; flex-direction: column; height: 100%; padding: 20px; }
+        .tab-content.active { display: flex; }
+
         #boost-modal {
             display: none; position: absolute; inset: 0;
-            background: rgba(13, 9, 21, 0.95); z-index: 100;
-            flex-direction: column; padding: 20px;
+            background: #0d0915; z-index: 100; flex-direction: column; padding: 20px;
         }
-        .profit-box { background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 10px; }
+        .nav-item { cursor: pointer; transition: 0.3s; }
+        .nav-item.active-tab { color: #eab308; } /* Yellow-500 */
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div class="space-y-3 mt-2">
-            <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-purple-600 rounded-full w-9 h-9 flex items-center justify-center text-[10px] font-black border border-purple-400">PI</div>
-                    <div>
-                        <p class="text-gray-400 text-[9px] uppercase tracking-tighter">Main Balance</p>
-                        <p id="main-balance" class="font-bold text-sm tracking-tight">0.0000000 PI</p>
+        
+        <div id="wallet" class="tab-content">
+            <h2 class="text-2xl font-bold mb-4">Wallet</h2>
+            <div class="glass-card p-6 rounded-3xl text-center">
+                <p class="text-gray-400 text-sm">Total Assets</p>
+                <h1 class="text-3xl font-black mt-2">Coming Soon</h1>
+            </div>
+        </div>
+
+        <div id="friends" class="tab-content">
+            <h2 class="text-2xl font-bold mb-4">Friends</h2>
+            <p class="text-gray-400">Invite friends to earn more PI.</p>
+        </div>
+
+        <div id="home" class="tab-content active">
+            <div class="space-y-3 mt-2">
+                <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-purple-600 rounded-full w-9 h-9 flex items-center justify-center text-[10px] font-black border border-purple-400">PI</div>
+                        <div>
+                            <p class="text-gray-400 text-[9px] uppercase tracking-tighter">Main Balance</p>
+                            <p id="main-balance" class="font-bold text-sm tracking-tight">0.0000000 PI</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <img src="pinix.jpg" class="w-9 h-9 rounded-full object-cover" onerror="this.src='https://via.placeholder.com/40'">
+                        <div>
+                            <p class="text-gray-400 text-[9px] uppercase tracking-tighter">Pinix Token</p>
+                            <p id="pinix-balance" class="font-bold text-sm text-indigo-300">100.00 PINIX</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="glass-card rounded-2xl p-3 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="pinix.jpg" class="w-9 h-9 rounded-full object-cover" onerror="this.src='https://via.placeholder.com/40'">
-                    <div>
-                        <p class="text-gray-400 text-[9px] uppercase tracking-tighter">Pinix Token</p>
-                        <p id="pinix-balance" class="font-bold text-sm text-indigo-300">100.00 PINIX</p>
+
+            <div class="flex-grow flex flex-col items-center justify-center">
+                <div class="relative w-44 h-44 flex items-center justify-center mb-6">
+                    <div class="absolute inset-0 bg-purple-600 rounded-full blur-[60px] opacity-20"></div>
+                    <img src="pinix.jpg" class="mining-fan w-40 h-40 rounded-full border-4 border-white/5 object-cover">
+                    <div class="absolute w-10 h-10 rounded-full border-2 border-yellow-500 bg-[#1a0b2e] flex items-center justify-center overflow-hidden">
+                        <img src="pinix.jpg" class="w-full h-full object-cover">
                     </div>
+                </div>
+                <h2 id="mining-counter" class="text-3xl font-black text-yellow-500 mb-6 tracking-tighter">0.0107114 PI</h2>
+                <div class="glass-card rounded-2xl px-6 py-2 flex items-center gap-4 border-white/5">
+                    <i class="fa-solid fa-bolt text-yellow-400 text-sm"></i>
+                    <div>
+                        <p class="font-black text-sm text-white">5 GH/s</p>
+                        <p class="text-[8px] text-gray-400 uppercase tracking-widest">Mining Power</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-2">
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="claimMining()" class="bg-purple-600 py-3.5 rounded-2xl font-bold text-sm shadow-lg">Claim</button>
+                    <button onclick="swapPinix()" class="bg-[#22c55e] py-3.5 rounded-2xl font-bold text-sm text-black flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-left"></i> Swap PINIX
+                    </button>
+                </div>
+                <button onclick="openBoost()" class="w-full bg-yellow-600 py-4 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-lg">
+                    <i class="fa-solid fa-rocket"></i> BOOST
+                </button>
+            </div>
+        </div>
+
+        <div id="missions" class="tab-content">
+            <h2 class="text-2xl font-bold mb-4">Missions</h2>
+            <div class="space-y-3">
+                <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
+                    <p class="text-sm">Follow Twitter</p>
+                    <span class="text-yellow-500 text-xs">+10 PI</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex-grow flex flex-col items-center justify-center">
-            <div class="relative w-48 h-48 flex items-center justify-center mb-6">
-                <div class="absolute inset-0 bg-purple-600 rounded-full blur-[60px] opacity-20"></div>
-                <img src="pinix.jpg" class="mining-fan w-40 h-40 rounded-full border-4 border-white/5 object-cover">
-                <div class="absolute w-10 h-10 rounded-full border-2 border-yellow-500 bg-[#1a0b2e] flex items-center justify-center overflow-hidden">
-                    <img src="pinix.jpg" class="w-full h-full object-cover">
-                </div>
-            </div>
-            <h2 id="mining-counter" class="text-3xl font-black text-yellow-500 mb-6">0.0000000 <span class="text-white text-lg font-normal ml-1">PI</span></h2>
-            <div class="glass-card rounded-2xl px-6 py-2 flex items-center gap-4 border-white/5">
-                <i class="fa-solid fa-bolt text-yellow-400 text-sm"></i>
-                <div>
-                    <p id="current-ghs" class="font-black text-sm text-white">1 GH/s</p>
-                    <p class="text-[8px] text-gray-400 uppercase">Current Power</p>
-                </div>
-            </div>
+        <div id="more" class="tab-content">
+            <h2 class="text-2xl font-bold mb-4">Settings</h2>
+            <p class="text-gray-400">Account details and support.</p>
         </div>
 
-        <div class="space-y-3 mb-4">
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="claimMining()" class="bg-purple-600 py-3.5 rounded-xl font-bold text-sm">Claim</button>
-                <button onclick="swapPinix()" class="bg-[#22c55e] py-3.5 rounded-xl font-bold text-sm text-black">Swap</button>
+        <div class="glass-card rounded-[2.5rem] p-4 flex justify-around items-center mx-4 mb-4 mt-auto">
+            <div onclick="switchTab('wallet', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-wallet text-xl"></i><span class="text-[9px]">Wallet</span>
             </div>
-            <button onclick="openBoost()" class="w-full bg-yellow-600 py-4 rounded-xl font-black text-base flex items-center justify-center gap-3">
-                <i class="fa-solid fa-rocket"></i> BOOST
-            </button>
+            <div onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-users text-xl"></i><span class="text-[9px]">Friends</span>
+            </div>
+            <div onclick="switchTab('home', this)" class="nav-item active-tab flex flex-col items-center gap-1">
+                <div class="bg-yellow-500/20 p-2 rounded-full"><i class="fa-solid fa-house text-xl"></i></div>
+                <span class="text-[9px]">Home</span>
+            </div>
+            <div onclick="switchTab('missions', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-bullseye text-xl"></i><span class="text-[9px]">Missions</span>
+            </div>
+            <div onclick="switchTab('more', this)" class="nav-item flex flex-col items-center gap-1 text-gray-500">
+                <i class="fa-solid fa-ellipsis text-xl"></i><span class="text-[9px]">More</span>
+            </div>
         </div>
 
         <div id="boost-modal">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="closeBoost()" class="text-gray-400"><i class="fa-solid fa-chevron-left text-xl"></i></button>
-                <h3 class="text-sm font-bold text-gray-300">Rent Mining Power</h3>
-                <div class="w-6"></div>
-            </div>
-
-            <p class="text-[10px] text-gray-400 text-center mb-6 px-4">Here you can rent mining power for 30 days. The more mining power you have, the more PI you can mine.</p>
-
-            <div class="bg-gradient-to-br from-purple-900/40 to-yellow-900/20 rounded-3xl p-8 mb-6 border border-white/5 text-center relative overflow-hidden">
-                <h4 id="calc-ghs" class="text-4xl font-black mb-1">0 GH/s <span class="text-yellow-500">⚡</span></h4>
-                <p class="text-[10px] text-gray-400">1 PI = 1 GH/s Mining Power</p>
-            </div>
-
-            <div class="glass-card rounded-2xl p-4 mb-6">
-                <p class="text-center text-[10px] font-bold tracking-widest text-gray-500 mb-4">PROFIT BREAKDOWN</p>
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div class="profit-box">
-                        <p class="text-[8px] text-gray-500 uppercase">Investment</p>
-                        <p id="calc-inv" class="text-xs font-bold">0 PI</p>
-                    </div>
-                    <div class="profit-box">
-                        <p class="text-[8px] text-gray-500 uppercase">Duration</p>
-                        <p class="text-xs font-bold">30 days</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <div class="profit-box border border-green-500/10">
-                        <p class="text-[8px] text-green-500 uppercase">Daily profit</p>
-                        <p id="calc-daily" class="text-xs font-bold text-green-400">+0.00 PI</p>
-                        <p class="text-[7px] text-gray-500">(4.477%)</p>
-                    </div>
-                    <div class="profit-box border border-yellow-500/10">
-                        <p class="text-[8px] text-yellow-500 uppercase">Total profit</p>
-                        <p id="calc-total" class="text-xs font-bold text-yellow-400">+0.00 PI</p>
-                        <p class="text-[7px] text-gray-500">(134.314%)</p>
-                    </div>
-                </div>
-                <div class="bg-green-950/30 border border-green-500/20 rounded-xl p-3 flex justify-between items-center">
-                    <span class="text-[9px] font-bold text-gray-400 uppercase">Total Receive</span>
-                    <span id="calc-receive" class="text-green-500 font-black text-sm">0.00 PI</span>
-                </div>
-            </div>
-
-            <div class="relative mb-6">
-                <input type="number" id="pi-input" placeholder="0" oninput="calculateProfit()"
-                    class="w-full bg-black/40 border-2 border-purple-500/30 rounded-2xl py-4 px-6 text-center font-black text-xl outline-none focus:border-purple-500 transition-all">
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/5 p-2 rounded-lg"><i class="fa-solid fa-p text-[10px]"></i></div>
-            </div>
-
-            <p class="text-center text-[10px] text-gray-500 mb-6 tracking-wide uppercase font-bold">Minimum amount: 100 PI</p>
-
-            <button class="w-full bg-white/5 py-4 rounded-2xl font-black text-gray-500 tracking-widest uppercase text-sm mb-4">Add</button>
-            <p class="text-center text-[10px] text-gray-300 font-bold">@PINIX_Mining_Bot</p>
+            <button onclick="closeBoost()" class="m-6 text-gray-400"><i class="fa-solid fa-chevron-left text-2xl"></i> Back</button>
+            <div class="flex-grow flex items-center justify-center"><p>Boost Content Ready</p></div>
         </div>
     </div>
 
     <script>
-        let currentMining = 0.0, mainBalance = 0.0, pinixBalance = 100.0, baseRate = 0.00001;
+        let currentMining = 0.0107114;
+        let mainBalance = 14.0;
+        let pinixBalance = 100.0;
+        const ratePerSecond = 0.00001;
 
+        // Mining Sayacı
         setInterval(() => {
-            currentMining += baseRate / 10;
+            currentMining += ratePerSecond / 10;
             document.getElementById('mining-counter').innerHTML = currentMining.toFixed(7) + ' <span class="text-white text-lg font-normal ml-1">PI</span>';
         }, 100);
 
-        function openBoost() { document.getElementById('boost-modal').style.display = 'flex'; }
-        function closeBoost() { document.getElementById('boost-modal').style.display = 'none'; }
+        // Sekme Değiştirme Fonksiyonu
+        function switchTab(tabId, element) {
+            // Tüm içerikleri gizle
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            // Tüm ikon renklerini sıfırla
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active-tab');
+                nav.classList.add('text-gray-500');
+            });
 
-        function calculateProfit() {
-            let val = parseFloat(document.getElementById('pi-input').value) || 0;
-            document.getElementById('calc-ghs').innerHTML = val + ' GH/s <span class="text-yellow-500">⚡</span>';
-            document.getElementById('calc-inv').innerText = val + ' PI';
-            
-            let daily = val * 0.04477;
-            let total = val * 1.34314;
-            
-            document.getElementById('calc-daily').innerText = '+' + daily.toFixed(2) + ' PI';
-            document.getElementById('calc-total').innerText = '+' + total.toFixed(2) + ' PI';
-            document.getElementById('calc-receive').innerText = (val + total).toFixed(2) + ' PI';
+            // Seçilen sekmeyi göster
+            document.getElementById(tabId).classList.add('active');
+            // Seçilen ikonu renklendir
+            element.classList.add('active-tab');
+            element.classList.remove('text-gray-500');
         }
 
-        function claimMining() { if(currentMining > 0) { mainBalance += currentMining; currentMining = 0; updateDisplay(); } }
-        function swapPinix() { if(pinixBalance >= 100) { mainBalance += 1; pinixBalance -= 100; updateDisplay(); } }
+        function openBoost() { document.getElementById('boost-modal').style.display = 'flex'; }
+        function closeBoost() { document.getElementById('boost-modal').style.display = 'none'; }
+        
+        function claimMining() {
+            mainBalance += currentMining;
+            currentMining = 0;
+            updateDisplay();
+        }
+
+        function swapPinix() {
+            if(pinixBalance >= 100) {
+                mainBalance += 1;
+                pinixBalance -= 100;
+                updateDisplay();
+            }
+        }
+
         function updateDisplay() {
             document.getElementById('main-balance').innerText = mainBalance.toFixed(7) + ' PI';
             document.getElementById('pinix-balance').innerText = pinixBalance.toFixed(2) + ' PINIX';
