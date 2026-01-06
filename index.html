@@ -16,292 +16,243 @@
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            user-select: none;
-        }
-
-        body {
-            background: var(--bg-dark);
-            background: var(--bg-gradient);
-            color: white;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
+        body { background: var(--bg-dark); color: white; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
         .app-container {
-            width: 100%;
-            max-width: 400px;
-            height: 92vh;
-            background: var(--bg-gradient);
-            position: relative;
-            border-radius: 40px;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
+            width: 100%; max-width: 400px; height: 95vh;
+            background: var(--bg-gradient); position: relative;
+            border-radius: 40px; display: flex; flex-direction: column;
+            padding: 24px; border: 1px solid var(--glass-border); overflow: hidden;
         }
 
-        /* Top Balance Area */
-        .header-stats {
-            margin-bottom: 20px;
-        }
+        /* Views Management */
+        .view { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease; }
+        .view.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .balance-row {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            transition: 0.3s;
-        }
+        /* Shared Header Styles */
+        .view-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-align: center; color: var(--accent-purple); }
+        
+        /* Home View Specifics */
+        .balance-row { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 14px; display: flex; align-items: center; margin-bottom: 12px; }
+        .token-thumb { width: 38px; height: 38px; border-radius: 50%; margin-right: 12px; border: 2px solid var(--accent-purple); object-fit: cover; }
+        .amount-text { font-size: 18px; font-weight: 700; transition: 0.3s; }
+        .flash-effect { color: var(--accent-green) !important; transform: scale(1.05); }
 
-        .token-thumb {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 2px solid var(--accent-purple);
-            object-fit: cover;
-        }
-
-        .label-group span {
-            display: block;
-            font-size: 10px;
-            color: #a1a1aa;
-            text-transform: uppercase;
-        }
-
-        .amount-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            transition: transform 0.2s;
-        }
-
-        .flash-effect {
-            color: var(--accent-green) !important;
-            transform: scale(1.1);
-        }
-
-        /* Mining Center */
-        .mining-core {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fan-container {
-            position: relative;
-            width: 240px;
-            height: 240px;
-            margin-bottom: 30px;
-        }
-
-        .fan-glow {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, rgba(147, 51, 234, 0.4) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(20px);
-            animation: pulse 3s infinite alternate;
-        }
-
-        .pinix-fan-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-            animation: spin 5s linear infinite;
-            filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.5));
-            z-index: 2;
-            position: relative;
-        }
+        .mining-core { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-container { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
+        .fan-glow { position: absolute; inset: 0; background: radial-gradient(circle, rgba(147, 51, 234, 0.4) 0%, transparent 70%); border-radius: 50%; animation: pulse 2s infinite alternate; }
+        .pinix-fan-img { width: 100%; height: 100%; border-radius: 50%; animation: spin 5s linear infinite; filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.5)); position: relative; z-index: 2; }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { from { opacity: 0.4; transform: scale(0.9); } to { opacity: 0.8; transform: scale(1.1); } }
 
-        .mining-info { text-align: center; }
-        .mining-info .status { color: #a1a1aa; font-size: 14px; margin-bottom: 8px; }
-
-        .counter-display {
-            font-size: 34px;
-            font-weight: 900;
-            background: linear-gradient(to bottom, #fff, #a1a1aa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-        }
-
-        .power-chip {
-            background: rgba(251, 191, 36, 0.1);
-            color: var(--accent-gold);
-            padding: 6px 16px;
-            border-radius: 50px;
-            font-size: 13px;
-            border: 1px solid rgba(251, 191, 36, 0.2);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .counter-display { font-size: 32px; font-weight: 900; margin-bottom: 10px; }
+        .power-chip { background: rgba(251, 191, 36, 0.1); color: var(--accent-gold); padding: 6px 16px; border-radius: 50px; font-size: 13px; border: 1px solid rgba(251, 191, 36, 0.2); }
 
         /* Buttons */
-        .action-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .u-btn {
-            height: 52px;
-            border-radius: 16px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .u-btn { height: 50px; border-radius: 16px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
         .btn-claim { background: var(--accent-purple); color: white; }
         .btn-swap { background: var(--accent-green); color: white; }
-        .btn-boost { 
-            background: linear-gradient(90deg, #fbbf24, #d97706); 
-            color: #000;
-            width: 100%;
-            margin-bottom: 25px;
-            font-size: 16px;
-            box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3);
-        }
+        .btn-boost { background: linear-gradient(90deg, #fbbf24, #d97706); color: #000; width: 100%; margin-bottom: 20px; box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3); }
+        .u-btn:active { transform: scale(0.96); }
 
-        .u-btn:active { transform: scale(0.96); opacity: 0.8; }
+        /* Lists & Items (Friends/Missions) */
+        .scrollable { overflow-y: auto; flex: 1; padding-right: 5px; }
+        .list-item { background: var(--glass); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; display: flex; align-items: center; margin-bottom: 10px; }
+        .list-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(147, 51, 234, 0.2); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); margin-right: 15px; }
+        .list-content h4 { font-size: 15px; margin-bottom: 3px; }
+        .list-content p { font-size: 12px; color: #a1a1aa; }
+        .list-action { margin-left: auto; color: var(--accent-gold); font-weight: bold; font-size: 13px; }
 
-        /* Navbar */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .nav-item { color: #52525b; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; }
+        /* Nav Bar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--glass-border); margin-top: 10px; }
+        .nav-item { color: #52525b; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-purple); }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+        .nav-center { width: 54px; height: 54px; background: var(--accent-purple); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; margin-top: -45px; border: 6px solid #070312; box-shadow: 0 8px 15px rgba(147, 51, 234, 0.4); }
 
-        .active-indicator {
-            width: 54px; height: 54px;
-            background: var(--accent-purple);
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            color: white; margin-top: -45px;
-            border: 6px solid #070312;
-            box-shadow: 0 8px 15px rgba(147, 51, 234, 0.4);
-        }
+        /* Custom Scrollbar */
+        .scrollable::-webkit-scrollbar { width: 4px; }
+        .scrollable::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div class="header-stats">
-            <div class="balance-row">
-                <img src="pinix.jpg" class="token-thumb" alt="PI">
-                <div class="label-group">
-                    <span>Wallet Balance</span>
-                    <div class="amount-text" id="walletBalance">0.0000000 PI</div>
+        
+        <div id="home-view" class="view active">
+            <div class="header-stats">
+                <div class="balance-row">
+                    <img src="pinix.jpg" class="token-thumb" alt="PI">
+                    <div><span style="font-size: 10px; color: #aaa;">WALLET</span><div class="amount-text" id="walletBal">0.0000000 PI</div></div>
                 </div>
             </div>
-            <div class="balance-row">
-                <img src="pinix.jpg" class="token-thumb" alt="PINIX" style="filter: grayscale(1) opacity(0.5);">
-                <div class="label-group">
-                    <span>PINIX Token</span>
-                    <div class="amount-text">0 PINIX</div>
+            <div class="mining-core">
+                <div class="fan-container">
+                    <div class="fan-glow"></div>
+                    <img src="pinix.jpg" class="pinix-fan-img" alt="Fan">
+                </div>
+                <div class="mining-info">
+                    <p style="color: #aaa; margin-bottom: 5px;">Mining...</p>
+                    <div class="counter-display" id="miningCount">0.0000000 PI</div>
+                    <div class="power-chip" id="powerDisplay"><i class="fas fa-bolt"></i> 5 GH/s</div>
+                </div>
+            </div>
+            <div class="footer-actions">
+                <div class="action-btns">
+                    <button class="u-btn btn-claim" onclick="claim()">Claim</button>
+                    <button class="u-btn btn-swap" onclick="switchView('wallet')"><i class="fas fa-random"></i> Swap</button>
+                </div>
+                <button class="u-btn btn-boost" onclick="activateBoost()" id="boostBtn"><i class="fas fa-rocket"></i> ACTIVATE BOOST (2X)</button>
+            </div>
+        </div>
+
+        <div id="wallet-view" class="view">
+            <h2 class="view-title">Wallet</h2>
+            <div class="balance-row" style="padding: 25px; flex-direction: column; text-align: center;">
+                <span style="color: #aaa; margin-bottom: 10px;">Total Balance</span>
+                <div class="amount-text" id="walletBalLarge" style="font-size: 28px;">0.0000000 PI</div>
+            </div>
+            <div class="scrollable">
+                <div class="list-item">
+                    <div class="list-icon"><i class="fas fa-arrow-down"></i></div>
+                    <div class="list-content"><h4>Last Claim</h4><p id="lastClaimTime">No transactions yet</p></div>
+                </div>
+                <div class="list-item" onclick="alert('Swap Pinix coming soon!')" style="cursor:pointer">
+                    <div class="list-icon" style="color:var(--accent-green)"><i class="fas fa-sync"></i></div>
+                    <div class="list-content"><h4>Swap PI to PINIX</h4><p>1000 PI = 1 PINIX</p></div>
+                    <div class="list-action"><i class="fas fa-chevron-right"></i></div>
                 </div>
             </div>
         </div>
 
-        <div class="mining-core">
-            <div class="fan-container">
-                <div class="fan-glow"></div>
-                <img src="pinix.jpg" class="pinix-fan-img" alt="Mining Fan">
+        <div id="friends-view" class="view">
+            <h2 class="view-title">Invite Friends</h2>
+            <p style="text-align:center; color:#aaa; font-size:13px; margin-bottom:20px;">Earn 10% of your friend's mining!</p>
+            <div class="scrollable">
+                <div class="list-item">
+                    <div class="list-icon"><i class="fas fa-user"></i></div>
+                    <div class="list-content"><h4>KriptoCan</h4><p>Active Mining</p></div>
+                    <div class="list-action">+0.24 PI</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon"><i class="fas fa-user"></i></div>
+                    <div class="list-content"><h4>MiningKing</h4><p>Offline</p></div>
+                    <div class="list-action">+0.00 PI</div>
+                </div>
             </div>
+            <button class="u-btn btn-claim" style="margin-top:10px;">Invite Friend</button>
+        </div>
 
-            <div class="mining-info">
-                <p class="status">Mining...</p>
-                <div class="counter-display" id="miningCounter">0.0000000 PI</div>
-                <div class="power-chip">
-                    <i class="fas fa-bolt"></i> 5 GH/s
+        <div id="missions-view" class="view">
+            <h2 class="view-title">Missions</h2>
+            <div class="scrollable">
+                <div class="list-item">
+                    <div class="list-icon" style="color:#1da1f2"><i class="fab fa-twitter"></i></div>
+                    <div class="list-content"><h4>Follow Twitter</h4><p>Reward: 50.0 PI</p></div>
+                    <div class="list-action">GO</div>
+                </div>
+                <div class="list-item">
+                    <div class="list-icon" style="color:#ff0000"><i class="fab fa-youtube"></i></div>
+                    <div class="list-content"><h4>Watch Video</h4><p>Reward: 20.0 PI</p></div>
+                    <div class="list-action">GO</div>
                 </div>
             </div>
         </div>
 
-        <div class="footer-actions">
-            <div class="action-btns">
-                <button class="u-btn btn-claim" onclick="claimEarnings()">Claim</button>
-                <button class="u-btn btn-swap"><i class="fas fa-random"></i> Swap</button>
+        <div id="more-view" class="view">
+            <h2 class="view-title">Settings</h2>
+            <div class="scrollable">
+                <div class="list-item"><div class="list-icon"><i class="fas fa-shield-alt"></i></div><div class="list-content"><h4>Security</h4><p>2FA & Password</p></div></div>
+                <div class="list-item"><div class="list-icon"><i class="fas fa-headset"></i></div><div class="list-content"><h4>Support</h4><p>24/7 Help Center</p></div></div>
+                <div class="list-item"><div class="list-icon"><i class="fas fa-info-circle"></i></div><div class="list-content"><h4>About Pi-Nix</h4><p>v1.0.4 Premium</p></div></div>
             </div>
-            <button class="u-btn btn-boost">
-                <i class="fas fa-rocket"></i> BOOST EARNINGS
-            </button>
         </div>
 
         <nav class="navbar">
-            <a href="#" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-            <a href="#" class="nav-item"><i class="fas fa-users"></i><span>Friends</span></a>
-            <a href="#" class="nav-item"><div class="active-indicator"><i class="fas fa-home"></i></div><span style="margin-top:4px">Home</span></a>
-            <a href="#" class="nav-item"><i class="fas fa-bullseye"></i><span>Missions</span></a>
-            <a href="#" class="nav-item"><i class="fas fa-bars"></i><span>More</span></a>
+            <div class="nav-item" onclick="switchView('wallet')"><i class="fas fa-wallet"></i><span>Wallet</span></div>
+            <div class="nav-item" onclick="switchView('friends')"><i class="fas fa-users"></i><span>Friends</span></div>
+            <div class="nav-item active" onclick="switchView('home')"><div class="nav-center"><i class="fas fa-home"></i></div><span style="margin-top:4px">Home</span></div>
+            <div class="nav-item" onclick="switchView('missions')"><i class="fas fa-bullseye"></i><span>Missions</span></div>
+            <div class="nav-item" onclick="switchView('more')"><i class="fas fa-bars"></i><span>More</span></div>
         </nav>
     </div>
 
     <script>
-        let walletBalance = 0.0000000;
+        let walletBal = 0.0000000;
         let currentlyMined = 0.0000000;
-        const perSecond = 0.00009; 
-        const intervalTime = 100; // 0.1 saniye
-        const perInterval = perSecond / (1000 / intervalTime);
+        let baseRate = 0.00009;
+        let currentRate = baseRate;
+        let boostActive = false;
 
-        const miningCounterEl = document.getElementById('miningCounter');
-        const walletBalanceEl = document.getElementById('walletBalance');
+        const miningCounterEl = document.getElementById('miningCount');
+        const walletBalEl = document.getElementById('walletBal');
+        const walletBalLargeEl = document.getElementById('walletBalLarge');
 
-        // Madencilik döngüsü
+        // Mining Loop
         setInterval(() => {
-            currentlyMined += perInterval;
+            currentlyMined += (currentRate / 10);
             miningCounterEl.innerText = currentlyMined.toFixed(7) + " PI";
-        }, intervalTime);
+        }, 100);
 
-        // Claim Fonksiyonu
-        function claimEarnings() {
-            if (currentlyMined > 0) {
-                // Bakiyeyi Wallet'a ekle
-                walletBalance += currentlyMined;
-                
-                // Wallet'ı güncelle
-                walletBalanceEl.innerText = walletBalance.toFixed(7) + " PI";
-                
-                // Madencilik sayacını sıfırla
+        // View Switcher Logic
+        function switchView(viewName) {
+            // Reset all active classes
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Activate target view
+            document.getElementById(viewName + '-view').classList.add('active');
+            
+            // Highlight nav item
+            if(viewName === 'home') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+            } else {
+                const navMap = { 'wallet':0, 'friends':1, 'missions':3, 'more':4 };
+                document.querySelectorAll('.nav-item')[navMap[viewName]].classList.add('active');
+            }
+        }
+
+        // Claim Function
+        function claim() {
+            if(currentlyMined > 0) {
+                walletBal += currentlyMined;
                 currentlyMined = 0;
-                miningCounterEl.innerText = "0.0000000 PI";
+                updateDisplay();
+                document.getElementById('lastClaimTime').innerText = new Date().toLocaleTimeString();
+                
+                walletBalEl.classList.add('flash-effect');
+                setTimeout(() => walletBalEl.classList.remove('flash-effect'), 500);
+            }
+        }
 
-                // Görsel geri bildirim (Efekt)
-                walletBalanceEl.classList.add('flash-effect');
+        function updateDisplay() {
+            walletBalEl.innerText = walletBal.toFixed(7) + " PI";
+            walletBalLargeEl.innerText = walletBal.toFixed(7) + " PI";
+            miningCounterEl.innerText = "0.0000000 PI";
+        }
+
+        // Boost Logic
+        function activateBoost() {
+            if(!boostActive) {
+                boostActive = true;
+                currentRate = baseRate * 2;
+                document.getElementById('powerDisplay').innerHTML = '<i class="fas fa-bolt"></i> 10 GH/s';
+                document.getElementById('boostBtn').innerText = "BOOST ACTIVE! (2X)";
+                document.getElementById('boostBtn').style.filter = "hue-rotate(90deg)";
+                
                 setTimeout(() => {
-                    walletBalanceEl.classList.remove('flash-effect');
-                }, 500);
+                    boostActive = false;
+                    currentRate = baseRate;
+                    document.getElementById('powerDisplay').innerHTML = '<i class="fas fa-bolt"></i> 5 GH/s';
+                    document.getElementById('boostBtn').innerText = "ACTIVATE BOOST (2X)";
+                    document.getElementById('boostBtn').style.filter = "none";
+                }, 30000); // Boost lasts 30 seconds
+                
+                alert("Boost Activated! 2X Mining speed for 30 seconds!");
             }
         }
     </script>
