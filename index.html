@@ -3,519 +3,629 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hamster CEO - Tap to Earn</title>
+    <title>Hamster CEO: Tap-to-Earn</title>
     <style>
         /* --- CSS STİLLERİ --- */
         :root {
-            --primary-bg: #1a1a1a;
-            --accent-color: #f3ba2f;
-            --text-color: #ffffff;
-            --card-bg: #2d2d2d;
-            --energy-color: #4cd137;
+            --bg-dark: #0f0f1a;
+            --card-bg: #1e1e2e;
+            --accent: #f3ba2f; /* Gold */
+            --energy-color: #00ff88;
+            --text-main: #ffffff;
+            --text-dim: #a0a0b8;
+            --neon-shadow: 0 0 15px rgba(243, 186, 47, 0.4);
         }
 
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
             overflow: hidden;
         }
 
-        /* Üst Panel (Coin ve Pasif Gelir) */
+        /* Üst Panel */
         .header {
-            text-align: center;
             padding: 20px;
-            background: linear-gradient(180deg, rgba(243,186,47,0.1) 0%, rgba(0,0,0,0) 100%);
+            text-align: center;
+            background: linear-gradient(180deg, rgba(30,30,46,1) 0%, rgba(15,15,26,1) 100%);
+            border-bottom: 1px solid #333;
         }
 
-        .coin-display {
+        .coin-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .coin-icon {
             font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            filter: drop-shadow(0 0 5px var(--accent));
         }
 
-        .passive-rate {
+        #balance {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: var(--neon-shadow);
+        }
+
+        .profit-per-hour {
             font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
-
-        /* Ana Oyun Alanı */
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .level-info {
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hamster-container {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .hamster-container:active {
-            transform: scale(0.95);
-        }
-
-        .hamster-emoji {
-            font-size: 150px;
-            filter: drop-shadow(0 0 20px rgba(243,186,47,0.3));
-        }
-
-        /* Tıklama Efekti */
-        .tap-effect {
-            position: absolute;
-            color: var(--accent-color);
-            font-weight: bold;
-            font-size: 1.5rem;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-100px); }
+            color: var(--text-dim);
         }
 
         /* Enerji Barı */
-        .energy-section {
-            width: 80%;
-            max-width: 300px;
-            margin-top: 30px;
+        .energy-wrapper {
+            padding: 10px 30px;
         }
 
-        .energy-text {
+        .energy-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 5px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
 
         .energy-bar-bg {
-            width: 100%;
             height: 12px;
-            background: #444;
-            border-radius: 10px;
+            background: #333;
+            border-radius: 6px;
             overflow: hidden;
+            border: 1px solid #444;
         }
 
         .energy-bar-fill {
             height: 100%;
-            background: var(--energy-color);
+            background: linear-gradient(90deg, #00bd68, var(--energy-color));
             width: 100%;
-            transition: width 0.2s;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--energy-color);
         }
 
-        /* Alt Sekmeler */
-        .nav-tabs {
-            display: flex;
-            background: var(--card-bg);
-            padding: 10px;
-            border-top: 2px solid #333;
-        }
-
-        .tab-btn {
+        /* Ana İçerik Alanı */
+        .content {
             flex: 1;
-            background: none;
-            border: none;
-            color: #888;
-            padding: 10px;
-            font-size: 1rem;
-            cursor: pointer;
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding-bottom: 80px;
         }
 
-        .tab-btn.active {
-            color: var(--accent-color);
-        }
-
-        /* Paneller */
         .panel {
             display: none;
-            position: absolute;
-            bottom: 70px;
-            left: 0;
-            right: 0;
-            top: 0;
-            background: var(--primary-bg);
+            width: 100%;
+            height: 100%;
             padding: 20px;
-            overflow-y: auto;
-            z-index: 50;
         }
 
         .panel.active {
             display: block;
         }
 
-        .upgrade-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
+        /* Tap Alanı */
+        #tap-panel {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
-        .upgrade-info h4 { margin: 0; color: var(--accent-color); }
-        .upgrade-info p { margin: 5px 0 0; font-size: 0.8rem; color: #ccc; }
+        .level-badge {
+            background: rgba(243, 186, 47, 0.1);
+            border: 1px solid var(--accent);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .hamster-btn {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #2e2e4a 0%, #1e1e2e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(243, 186, 47, 0.1);
+            transition: transform 0.05s;
+            border: 8px solid #2a2a3a;
+        }
+
+        .hamster-btn:active {
+            transform: scale(0.96);
+        }
+
+        .hamster-emoji {
+            font-size: 120px;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+        }
+
+        /* Floating Text Animasyonu */
+        .plus-one {
+            position: absolute;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: float-up 0.8s ease-out forwards;
+            z-index: 100;
+            text-shadow: 0 0 5px var(--accent);
+        }
+
+        @keyframes float-up {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-150px) scale(1.5); }
+        }
+
+        /* Upgrade Kartları */
+        .upgrade-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upgrade-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #333;
+            transition: 0.3s;
+        }
+
+        .upgrade-card:active { transform: scale(0.98); }
+
+        .up-info h4 { margin: 0; font-size: 1.1rem; color: var(--accent); }
+        .up-info p { margin: 5px 0 0; font-size: 0.8rem; color: var(--text-dim); }
 
         .buy-btn {
-            background: var(--accent-color);
+            background: var(--accent);
+            color: #000;
             border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
         }
 
         .buy-btn:disabled {
-            background: #555;
-            cursor: not-allowed;
+            background: #444;
+            color: #888;
         }
 
-        /* Modal (Hoşgeldin Kazancı) */
-        #offline-modal {
+        /* İstatistikler */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Alt Navigasyon */
+        .nav {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: #161625;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
             z-index: 1000;
-            border: 2px solid var(--accent-color);
-            display: none;
         }
 
-        .overlay {
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            cursor: pointer;
+            flex: 1;
+            padding: 10px;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item i { font-size: 1.5rem; }
+
+        /* Modal (Offline & Bonus) */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
+            background: rgba(0,0,0,0.9);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            border: 2px solid var(--accent);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        /* Dark Mode / Settings */
+        .settings-top {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 50;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="coin-display">
-            🪙 <span id="coin-count">0</span>
+        <div class="coin-container">
+            <span class="coin-icon">🪙</span>
+            <span id="balance">0</span>
         </div>
-        <div class="passive-rate">
-            Saatlik Kazanç: <span id="pps-display">0</span>
-        </div>
-    </div>
-
-    <div id="tap-panel" class="panel active">
-        <div class="game-area">
-            <div class="level-info" id="level-display">Level 1: Çaylak Hamster</div>
-            
-            <div class="hamster-container" id="hamster-trigger">
-                <div class="hamster-emoji" id="hamster-img">🐹</div>
-            </div>
-
-            <div class="energy-section">
-                <div class="energy-text">
-                    <span>⚡ Enerji</span>
-                    <span id="energy-val">100 / 100</span>
-                </div>
-                <div class="energy-bar-bg">
-                    <div id="energy-fill" class="energy-bar-fill"></div>
-                </div>
-            </div>
+        <div class="profit-per-hour">
+            Pasif Kazanç: <span id="passive-rate">0</span> / sn
         </div>
     </div>
 
-    <div id="upgrade-panel" class="panel">
-        <h3>Market & Geliştirmeler</h3>
+    <div class="energy-wrapper">
+        <div class="energy-info">
+            <span>⚡ ENERJİ</span>
+            <span id="energy-text">100 / 100</span>
+        </div>
+        <div class="energy-bar-bg">
+            <div id="energy-fill" class="energy-bar-fill"></div>
+        </div>
+    </div>
+
+    <main class="content">
         
-        <div class="upgrade-card">
-            <div class="upgrade-info">
-                <h4>Multi-Tap</h4>
-                <p>Her tıkta <span id="tap-power-val">1</span> coin fazla kazan.</p>
-                <p>Maliyet: 💰 <span id="upg-tap-cost">50</span></p>
-            </div>
-            <button class="buy-btn" onclick="buyUpgrade('tap')">Geliştir</button>
+        <div class="settings-top">
+            <button class="icon-btn" onclick="toggleMute()" id="mute-btn">🔊</button>
         </div>
 
-        <div class="upgrade-card">
-            <div class="upgrade-info">
-                <h4>Hamster Çarkı (Pasif)</h4>
-                <p>Saniyede +<span id="passive-val">1</span> coin kazan.</p>
-                <p>Maliyet: 💰 <span id="upg-passive-cost">100</span></p>
+        <div id="tap-panel" class="panel active">
+            <div class="level-badge" id="level-name">Level 1: Yeni Yetme Hamster</div>
+            <div class="hamster-btn" id="hamster-click">
+                <div class="hamster-emoji" id="hamster-visual">🐹</div>
             </div>
-            <button class="buy-btn" onclick="buyUpgrade('passive')">Satın Al</button>
         </div>
 
-        <div class="upgrade-card">
-            <div class="upgrade-info">
-                <h4>Enerji İçeceği</h4>
-                <p>Max enerjiyi +50 artır.</p>
-                <p>Maliyet: 💰 <span id="upg-energy-cost">200</span></p>
+        <div id="upgrade-panel" class="panel">
+            <h2 style="text-align:center; color: var(--accent);">Geliştirmeler</h2>
+            <div class="upgrade-list">
+                <div class="upgrade-card">
+                    <div class="up-info">
+                        <h4>Tıklama Gücü</h4>
+                        <p>Her tap: +<span id="tap-power-val">1</span> coin</p>
+                        <p>Maliyet: 💰 <span id="cost-tap">50</span></p>
+                    </div>
+                    <button class="buy-btn" onclick="buyUpgrade('tap')">Geliştir</button>
+                </div>
+                <div class="upgrade-card">
+                    <div class="up-info">
+                        <h4>Hamster Çarkı</h4>
+                        <p>Otomatik: +<span id="passive-val">1</span>/sn</p>
+                        <p>Maliyet: 💰 <span id="cost-passive">150</span></p>
+                    </div>
+                    <button class="buy-btn" onclick="buyUpgrade('passive')">Satın Al</button>
+                </div>
+                <div class="upgrade-card">
+                    <div class="up-info">
+                        <h4>Enerji İçeceği</h4>
+                        <p>Max Enerji: +50</p>
+                        <p>Maliyet: 💰 <span id="cost-energy">200</span></p>
+                    </div>
+                    <button class="buy-btn" onclick="buyUpgrade('energy')">İç</button>
+                </div>
             </div>
-            <button class="buy-btn" onclick="buyUpgrade('energy')">Satın Al</button>
+        </div>
+
+        <div id="stats-panel" class="panel">
+            <h2 style="text-align:center">Borsa Raporu</h2>
+            <div class="stat-row">
+                <span>Toplam Tıklama:</span>
+                <b id="stat-taps">0</b>
+            </div>
+            <div class="stat-row">
+                <span>Toplam Kazanç:</span>
+                <b id="stat-total-earned">0</b>
+            </div>
+            <div class="stat-row">
+                <span>Mevcut Seviye:</span>
+                <b id="stat-level">1</b>
+            </div>
+            <div class="stat-row">
+                <span>Saatlik Kazanç:</span>
+                <b id="stat-hourly">0</b>
+            </div>
+            <div style="margin-top:30px; text-align:center">
+                <button class="buy-btn" style="background:#ff4444; color:white" onclick="resetGame()">VERİLERİ SIFIRLA</button>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="modal-overlay" id="modal-offline">
+        <div class="modal">
+            <h2 style="color: var(--accent)">Tekrar Hoş Geldin!</h2>
+            <p id="offline-desc">Sen yokken hamsterların boş durmadı.</p>
+            <div style="font-size: 2rem; margin: 20px 0;">🪙 <span id="offline-amount">0</span></div>
+            <button class="buy-btn" onclick="closeModal('modal-offline')" style="width:100%">KAZANCI TOPLA</button>
         </div>
     </div>
 
-    <div id="stats-panel" class="panel">
-        <h3>İstatistiklerin</h3>
-        <p>Toplam Tıklama: <span id="stat-total-taps">0</span></p>
-        <p>En yüksek Seviye: <span id="stat-max-level">1</span></p>
-        <p>Oyun Başlangıcı: <span id="stat-start-date">-</span></p>
-        <button class="buy-btn" style="background:#ff4757; width:100%" onclick="resetGame()">OYUNU SIFIRLA</button>
-    </div>
-
-    <div class="overlay" id="overlay"></div>
-    <div id="offline-modal">
-        <h2>Hoş Geldin! 🐹</h2>
-        <p>Sen yokken hamsterların senin için çalıştı.</p>
-        <h1 style="color: var(--accent-color)">+ <span id="offline-amount">0</span> 🪙</h1>
-        <button class="buy-btn" onclick="closeModal()">Harika!</button>
-    </div>
-
-    <nav class="nav-tabs">
-        <button class="tab-btn active" onclick="showPanel('tap', this)">
-            <span>🐹</span>
+    <nav class="nav">
+        <div class="nav-item active" onclick="switchTab('tap', this)">
+            <i>🐹</i>
             <span>Tap</span>
-        </button>
-        <button class="tab-btn" onclick="showPanel('upgrade', this)">
-            <span>🛒</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('upgrade', this)">
+            <i>🛒</i>
             <span>Market</span>
-        </button>
-        <button class="tab-btn" onclick="showPanel('stats', this)">
-            <span>📊</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('stats', this)">
+            <i>📊</i>
             <span>Stats</span>
-        </button>
+        </div>
     </nav>
 
     <script>
-        /* --- OYUN MANTIĞI (JAVASCRIPT) --- */
+        /* --- JAVASCRIPT OYUN MANTIĞI --- */
 
-        // Oyun Durumu (State)
-        let game = {
+        // Oyun Verileri
+        let state = {
             coins: 0,
-            tapPower: 1,
-            passiveIncome: 0,
+            totalEarned: 0,
+            totalTaps: 0,
             energy: 100,
             maxEnergy: 100,
+            tapPower: 1,
+            passiveIncome: 0,
             level: 1,
-            totalTaps: 0,
-            lastSaveTime: Date.now(),
+            lastSave: Date.now(),
+            isMuted: false,
             upgrades: {
-                tap: { level: 0, cost: 50 },
-                passive: { level: 0, cost: 100 },
-                energy: { level: 0, cost: 200 }
+                tap: { level: 0, baseCost: 50 },
+                passive: { level: 0, baseCost: 150 },
+                energy: { level: 0, baseCost: 200 }
             }
         };
 
-        // Level Görselleri/Emoji
         const levels = [
-            { name: "Çaylak Hamster", emoji: "🐹", min: 0 },
-            { name: "Yatırımcı Hamster", emoji: "🐹👔", min: 1000 },
-            { name: "Milyoner Hamster", emoji: "🐹💰", min: 10000 },
-            { name: "CEO Hamster", emoji: "🐹👑", min: 100000 }
+            { name: "Yeni Yetme Hamster", emoji: "🐹", min: 0, bg: "#0f0f1a" },
+            { name: "Yatırımcı Hamster", emoji: "🐹💼", min: 5000, bg: "#1a1a2e" },
+            { name: "Broker Hamster", emoji: "🐹📈", min: 25000, bg: "#1e2a1e" },
+            { name: "Milyoner CEO", emoji: "🐹👑", min: 100000, bg: "#2a1e1e" },
+            { name: "Kripto Balinası", emoji: "🐳", min: 1000000, bg: "#1e2a2a" }
         ];
 
         // Başlatma
-        window.onload = () => {
+        init();
+
+        function init() {
             loadGame();
-            initOfflineIncome();
             updateUI();
+            checkOfflineProfit();
             
-            // Pasif Gelir Döngüsü (Her saniye)
-            setInterval(() => {
-                game.coins += game.passiveIncome;
-                regenerateEnergy();
-                updateUI();
-                saveGame();
-            }, 1000);
-        };
-
-        // Tıklama Olayı
-        const hamsterBtn = document.getElementById('hamster-trigger');
-        hamsterBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Mobil zoom engelleme
-            handleTap(e.touches[0].clientX, e.touches[0].clientY);
-        });
-
-        hamsterBtn.addEventListener('mousedown', (e) => {
-            handleTap(e.clientX, e.clientY);
-        });
-
-        function handleTap(x, y) {
-            if (game.energy >= 1) {
-                game.coins += game.tapPower;
-                game.energy -= 1;
-                game.totalTaps++;
-                
-                createTapEffect(x, y);
-                checkLevel();
-                updateUI();
-                
-                // Mobil Titreşim
-                if (navigator.vibrate) navigator.vibrate(20);
-            }
-        }
-
-        // Tıklama Efekti (+1 Yazısı)
-        function createTapEffect(x, y) {
-            const effect = document.createElement('div');
-            effect.className = 'tap-effect';
-            effect.innerText = `+${game.tapPower}`;
-            effect.style.left = `${x}px`;
-            effect.style.top = `${y}px`;
-            document.body.appendChild(effect);
+            // Döngüler
+            setInterval(gameLoop, 1000); // Pasif Gelir & Enerji
+            setInterval(saveGame, 5000); // Otomatik Kayıt
             
-            setTimeout(() => effect.remove(), 800);
+            // Event Listeners
+            document.getElementById('hamster-click').addEventListener('pointerdown', handleTap);
         }
 
-        // Enerji Yenilenmesi
-        function regenerateEnergy() {
-            if (game.energy < game.maxEnergy) {
-                game.energy = Math.min(game.maxEnergy, game.energy + 2);
+        // Ana Döngü (Saniyede 1 kez)
+        function gameLoop() {
+            // Pasif Gelir
+            if (state.passiveIncome > 0) {
+                addCoins(state.passiveIncome);
             }
-        }
 
-        // Seviye Kontrolü
-        function checkLevel() {
-            let currentLevel = 1;
-            levels.forEach((l, index) => {
-                if (game.coins >= l.min) currentLevel = index + 1;
-            });
-            
-            if (currentLevel !== game.level) {
-                game.level = currentLevel;
-                alert(`Tebrikler! Level Atladın: ${levels[game.level-1].name}`);
+            // Enerji Yenilenmesi
+            if (state.energy < state.maxEnergy) {
+                state.energy = Math.min(state.maxEnergy, state.energy + 1);
             }
+
+            updateUI();
         }
 
-        // Upgrade Satın Alma
+        // Tıklama İşlemi
+        function handleTap(e) {
+            if (state.energy <= 0) return;
+
+            // Veri güncelleme
+            state.energy -= 1;
+            state.totalTaps += 1;
+            addCoins(state.tapPower);
+
+            // Görsel efektler
+            createPlusText(e.clientX, e.clientY);
+            vibrate(20);
+            updateUI();
+        }
+
+        function addCoins(amount) {
+            state.coins += amount;
+            state.totalEarned += amount;
+            checkLevel();
+        }
+
+        function createPlusText(x, y) {
+            const el = document.createElement('div');
+            el.className = 'plus-one';
+            el.innerText = `+${state.tapPower}`;
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 50}px`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // Upgrade Mantığı
         function buyUpgrade(type) {
-            let upg = game.upgrades[type];
-            if (game.coins >= upg.cost) {
-                game.coins -= upg.cost;
-                upg.level++;
-                
-                if (type === 'tap') {
-                    game.tapPower += 1;
-                    upg.cost = Math.floor(upg.cost * 1.8);
-                } else if (type === 'passive') {
-                    game.passiveIncome += 2;
-                    upg.cost = Math.floor(upg.cost * 1.6);
-                } else if (type === 'energy') {
-                    game.maxEnergy += 50;
-                    game.energy = game.maxEnergy;
-                    upg.cost = Math.floor(upg.cost * 1.5);
+            const up = state.upgrades[type];
+            const cost = calculateCost(up.baseCost, up.level);
+
+            if (state.coins >= cost) {
+                state.coins -= cost;
+                up.level++;
+
+                if (type === 'tap') state.tapPower += 2;
+                if (type === 'passive') state.passiveIncome += 1;
+                if (type === 'energy') {
+                    state.maxEnergy += 50;
+                    state.energy = state.maxEnergy;
                 }
-                
+
+                vibrate(50);
                 updateUI();
                 saveGame();
             }
         }
 
-        // Arayüzü Güncelle
-        function updateUI() {
-            document.getElementById('coin-count').innerText = Math.floor(game.coins).toLocaleString();
-            document.getElementById('pps-display').innerText = (game.passiveIncome * 3600).toLocaleString();
-            document.getElementById('energy-val').innerText = `${game.energy} / ${game.maxEnergy}`;
-            document.getElementById('energy-fill').style.width = `${(game.energy / game.maxEnergy) * 100}%`;
-            
-            // Market Fiyatları
-            document.getElementById('upg-tap-cost').innerText = game.upgrades.tap.cost;
-            document.getElementById('upg-passive-cost').innerText = game.upgrades.passive.cost;
-            document.getElementById('upg-energy-cost').innerText = game.upgrades.energy.cost;
-            document.getElementById('tap-power-val').innerText = game.tapPower;
-            document.getElementById('passive-val').innerText = 2;
+        function calculateCost(base, level) {
+            return Math.floor(base * Math.pow(1.6, level));
+        }
 
-            // Seviye ve Emoji
-            const currentLvlObj = levels[game.level - 1];
-            document.getElementById('level-display').innerText = `Level ${game.level}: ${currentLvlObj.name}`;
-            document.getElementById('hamster-img').innerText = currentLvlObj.emoji;
+        // UI Güncelleme
+        function updateUI() {
+            document.getElementById('balance').innerText = Math.floor(state.coins).toLocaleString();
+            document.getElementById('passive-rate').innerText = state.passiveIncome;
+            document.getElementById('energy-text').innerText = `${state.energy} / ${state.maxEnergy}`;
+            document.getElementById('energy-fill').style.width = `${(state.energy / state.maxEnergy) * 100}%`;
+            
+            // Upgrade Fiyatları
+            document.getElementById('cost-tap').innerText = calculateCost(state.upgrades.tap.baseCost, state.upgrades.tap.level).toLocaleString();
+            document.getElementById('cost-passive').innerText = calculateCost(state.upgrades.passive.baseCost, state.upgrades.passive.level).toLocaleString();
+            document.getElementById('cost-energy').innerText = calculateCost(state.upgrades.energy.baseCost, state.upgrades.energy.level).toLocaleString();
+            
+            // Buton durumları
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                const costText = btn.previousElementSibling.querySelector('span[id^="cost"]').innerText.replace(/,/g, '');
+                btn.disabled = state.coins < parseInt(costText);
+            });
 
             // İstatistikler
-            document.getElementById('stat-total-taps').innerText = game.totalTaps;
-            document.getElementById('stat-max-level').innerText = game.level;
+            document.getElementById('stat-taps').innerText = state.totalTaps;
+            document.getElementById('stat-total-earned').innerText = Math.floor(state.totalEarned).toLocaleString();
+            document.getElementById('stat-level').innerText = state.level;
+            document.getElementById('stat-hourly').innerText = (state.passiveIncome * 3600).toLocaleString();
         }
 
-        // Sekme Değiştirme
-        function showPanel(panelId, btn) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // Level Sistemi
+        function checkLevel() {
+            let currentLevel = levels.slice().reverse().find(l => state.totalEarned >= l.min);
+            let levelIdx = levels.indexOf(currentLevel) + 1;
+
+            if (levelIdx !== state.level) {
+                state.level = levelIdx;
+                document.getElementById('level-name').innerText = `Level ${state.level}: ${currentLevel.name}`;
+                document.getElementById('hamster-visual').innerText = currentLevel.emoji;
+                document.body.style.backgroundColor = currentLevel.bg;
+            }
+        }
+
+        // Offline Kazanç Hesaplama
+        function checkOfflineProfit() {
+            const now = Date.now();
+            const elapsedSeconds = Math.floor((now - state.lastSave) / 1000);
             
-            document.getElementById(`${panelId}-panel`).classList.add('active');
-            btn.classList.add('active');
+            if (elapsedSeconds > 30 && state.passiveIncome > 0) {
+                const maxOffline = 8 * 3600; // 8 Saat sınırı
+                const actualSeconds = Math.min(elapsedSeconds, maxOffline);
+                const profit = actualSeconds * state.passiveIncome;
+                
+                state.coins += profit;
+                state.totalEarned += profit;
+                
+                document.getElementById('offline-amount').innerText = Math.floor(profit).toLocaleString();
+                document.getElementById('modal-offline').style.display = 'flex';
+            }
         }
 
-        // Kayıt ve Yükleme
+        // Utility Fonksiyonlar
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId + '-panel').classList.add('active');
+            el.classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
         function saveGame() {
-            game.lastSaveTime = Date.now();
-            localStorage.setItem('hamsterSave', JSON.stringify(game));
+            state.lastSave = Date.now();
+            localStorage.setItem('hamsterCEO_save', JSON.stringify(state));
         }
 
         function loadGame() {
-            const saved = localStorage.getItem('hamsterSave');
+            const saved = localStorage.getItem('hamsterCEO_save');
             if (saved) {
-                game = Object.assign(game, JSON.parse(saved));
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                // Upgrade objesini koruyarak birleştir
+                state.upgrades = { ...state.upgrades, ...parsed.upgrades };
             }
-            document.getElementById('stat-start-date').innerText = new Date().toLocaleDateString();
-        }
-
-        // Çevrimdışı Kazanç Hesaplama
-        function initOfflineIncome() {
-            const now = Date.now();
-            const diff = now - game.lastSaveTime; // Milisaniye cinsinden
-            const secondsAway = Math.floor(diff / 1000);
-            
-            if (secondsAway > 60 && game.passiveIncome > 0) {
-                const earned = secondsAway * game.passiveIncome;
-                game.coins += earned;
-                
-                document.getElementById('offline-amount').innerText = earned.toLocaleString();
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('offline-modal').style.display = 'block';
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('offline-modal').style.display = 'none';
         }
 
         function resetGame() {
-            if (confirm("Tüm ilerlemen sıfırlanacak! Emin misin?")) {
-                localStorage.removeItem('hamsterSave');
+            if(confirm("Tüm emeğin silinecek! CEO koltuğunu bırakmak istediğine emin misin?")) {
+                localStorage.removeItem('hamsterCEO_save');
                 location.reload();
+            }
+        }
+
+        function toggleMute() {
+            state.isMuted = !state.isMuted;
+            document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
+        }
+
+        function vibrate(ms) {
+            if (!state.isMuted && navigator.vibrate) {
+                navigator.vibrate(ms);
             }
         }
     </script>
