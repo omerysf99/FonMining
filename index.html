@@ -15,6 +15,7 @@
             --text-main: #ffffff;
             --text-dim: #8e99a1;
             --input-bg: #251f3d;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
@@ -26,161 +27,160 @@
             display: flex; flex-direction: column; padding: 20px; position: relative;
         }
 
-        /* --- ÜST BAKİYE KARTLARI --- */
+        /* --- REUSABLE COMPONENTS --- */
         .top-balance-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px; padding: 12px 16px; margin-bottom: 10px;
             display: flex; align-items: center; justify-content: space-between;
         }
         .token-info { display: flex; align-items: center; gap: 12px; }
         .token-info img { width: 35px; height: 35px; border-radius: 50%; }
-        .token-info span { font-size: 11px; color: var(--text-dim); display: block; }
         .token-info div b { font-size: 16px; font-weight: 700; }
-        .wallet-icon-btn { color: var(--text-dim); font-size: 18px; }
 
-        /* --- ANA EKRAN (MADENCİLİK) --- */
-        .view { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease; }
+        .view { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease; overflow-y: auto; padding-bottom: 80px; }
         .view.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .mining-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan-container { position: relative; width: 240px; height: 240px; margin-bottom: 20px; }
+        .view-title { font-size: 24px; font-weight: 800; margin: 10px 0 20px; text-align: center; color: var(--text-main); }
+
+        /* --- LIST ITEMS (MISSIONS & FRIENDS) --- */
+        .list-card {
+            background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px; padding: 16px; display: flex; align-items: center; margin-bottom: 12px;
+            transition: 0.2s; cursor: pointer;
+        }
+        .list-card:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .list-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px; }
+        .list-content h4 { font-size: 15px; margin-bottom: 4px; }
+        .list-content p { font-size: 12px; color: var(--text-dim); }
+        .list-reward { margin-left: auto; font-weight: 700; color: var(--accent-gold); font-size: 14px; }
+
+        /* --- BUTTONS --- */
+        .btn { border: none; border-radius: 16px; font-weight: 700; cursor: pointer; height: 54px; transition: 0.2s; font-size: 15px; width: 100%; }
+        .btn-purple { background: #7c3aed; color: white; }
+        .btn-gold { background: #f59e0b; color: black; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* --- HOME SPECIFIC --- */
+        .fan-container { position: relative; width: 220px; height: 220px; margin: 30px auto 20px; }
         .fan-img { width: 100%; height: 100%; border-radius: 50%; animation: spin 4s linear infinite; filter: drop-shadow(0 0 30px rgba(147, 51, 234, 0.4)); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .mining-status { font-size: 14px; color: var(--text-dim); margin-bottom: 5px; }
-        .live-counter { font-size: 38px; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; }
-        .power-badge { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 25px; border-radius: 16px; display: flex; align-items: center; gap: 10px;
-        }
-
-        /* --- BUTONLAR --- */
-        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        .btn { border: none; border-radius: 16px; font-weight: 700; cursor: pointer; height: 54px; transition: 0.2s; font-size: 15px; }
-        .btn-claim { background: #7c3aed; color: white; }
-        .btn-swap { background: #22c55e; color: white; }
-        .btn-boost { background: #f59e0b; color: black; width: 100%; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn:active { transform: scale(0.96); }
-
-        /* --- WALLET (WITHDRAW) VIEW --- */
-        .withdraw-view h2 { font-size: 22px; text-align: center; margin-bottom: 10px; }
-        .withdraw-desc { color: var(--text-dim); font-size: 13px; text-align: center; margin-bottom: 25px; line-height: 1.5; }
-        
-        .input-box {
-            background: var(--input-bg); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 14px; padding: 18px; margin-bottom: 15px; position: relative;
-        }
-        .input-box input {
-            background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 15px; text-align: center;
-        }
-        .max-tag { position: absolute; right: 20px; top: 18px; color: var(--accent-blue); font-weight: 700; cursor: pointer; }
-
-        .fee-label { text-align: center; color: var(--text-dim); font-size: 13px; margin-top: 20px; }
-        .receive-amt { text-align: center; font-size: 18px; font-weight: 700; margin-top: 5px; margin-bottom: 30px; }
-
-        .btn-blue { background: var(--accent-blue); color: white; width: 100%; margin-bottom: 10px; }
-        .btn-dark { background: #1a232e; color: var(--text-dim); width: 100%; }
-
         /* --- NAV BAR --- */
-        .navbar { display: flex; justify-content: space-between; padding: 10px 5px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .navbar { 
+            display: flex; justify-content: space-between; padding: 10px 5px; 
+            border-top: 1px solid rgba(255,255,255,0.05); position: absolute; bottom: 0; left: 0; right: 0; background: var(--bg-dark);
+        }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-dim); font-size: 11px; cursor: pointer; }
-        .nav-item i { font-size: 20px; }
         .nav-item.active { color: var(--accent-gold); }
-        .nav-item.home-active { color: white; }
-        .nav-item.home-active i { 
+        .nav-item.home-center i { 
             background: var(--accent-gold); color: white; width: 45px; height: 45px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-top: -25px; border: 5px solid var(--bg-dark);
+            margin-top: -25px; border: 5px solid var(--bg-dark); font-size: 20px;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Ad Overlay */
+        #ad-overlay { display:none; position:fixed; inset:0; background:black; z-index:1000; flex-direction:column; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         
+        <div id="ad-overlay">
+            <h2 style="color:var(--accent-gold)">Ad Playing...</h2>
+            <p id="ad-timer" style="font-size: 40px; margin-top:20px;">5</p>
+        </div>
+
         <div id="home-view" class="view active">
             <div class="top-balance-card">
                 <div class="token-info">
                     <img src="pinix.jpg" alt="Pi">
                     <div><span>Balance</span><b id="mainPiBal">0.000000 PI</b></div>
                 </div>
-                <div class="wallet-icon-btn"><i class="fas fa-wallet"></i></div>
             </div>
-            <div class="top-balance-card">
-                <div class="token-info">
-                    <img src="pinix.jpg" style="filter: hue-rotate(280deg);" alt="Pinix">
-                    <div><span>Balance</span><b>0 PINIX</b></div>
-                </div>
-                <div class="wallet-icon-btn"><i class="fas fa-wallet"></i></div>
+            <div class="mining-section" style="text-align: center;">
+                <div class="fan-container"><img src="pinix.jpg" class="fan-img"></div>
+                <div style="font-size: 38px; font-weight: 800; margin-bottom: 20px;" id="liveCount">0.000000</div>
+                <button class="btn btn-purple" onclick="claimPi()" style="margin-bottom: 10px;">Claim</button>
+                <button class="btn btn-gold"><i class="fas fa-rocket"></i> BOOST</button>
             </div>
-
-            <div class="mining-section">
-                <div class="fan-container">
-                    <img src="pinix.jpg" class="fan-img" alt="Fan">
-                </div>
-                <div class="mining-status">Mining...</div>
-                <div class="live-counter"><span id="liveCount">0.000000</span> <small style="font-size: 24px;">PI</small></div>
-                <div class="power-badge">
-                    <i class="fas fa-bolt" style="color: var(--accent-gold);"></i>
-                    <div><span style="display:block; font-size:10px; color:var(--text-dim)">Mining Power</span><b>5 GH/s</b></div>
-                </div>
-            </div>
-
-            <div class="action-row">
-                <button class="btn btn-claim" onclick="claimPi()">Claim</button>
-                <button class="btn btn-swap"> <i class="fas fa-exchange-alt"></i> Swap PINIX</button>
-            </div>
-            <button class="btn btn-boost"><i class="fas fa-rocket"></i> BOOST</button>
         </div>
 
-        <div id="wallet-view" class="view withdraw-view">
-            <div style="display: flex; gap: 10px; margin-bottom: 30px;">
-                <div class="top-balance-card" style="flex:1; margin:0;"><div class="token-info"><img src="pinix.jpg"> <b id="drawBal">0.00 PI</b></div></div>
-                <div class="top-balance-card" style="flex:1; margin:0; opacity:0.5;"><div class="token-info"><img src="pinix.jpg" style="filter:grayscale(1)"> <b>0 TONIX</b></div></div>
+        <div id="missions-view" class="view">
+            <h2 class="view-title">Missions</h2>
+            <div class="list-card" onclick="window.open('https://t.me/FonixCommunity', '_blank')">
+                <div class="list-icon" style="background:#0088cc1a; color:#0088cc"><i class="fab fa-telegram-plane"></i></div>
+                <div class="list-content"><h4>Join Telegram</h4><p>Stay updated with Fonix</p></div>
+                <div class="list-reward">+10.0 PI</div>
             </div>
-
-            <h2>Enter your personal PI address</h2>
-            <p class="withdraw-desc">This amount will be sent to the PI Network compatible wallet address</p>
-
-            <div class="input-box" style="display:flex; justify-content:center; gap:10px;">
-                <img src="pinix.jpg" style="width:20px; border-radius:50%;"> <b>PI</b>
+            <div class="list-card" onclick="startAd()">
+                <div class="list-icon" style="background:#f59e0b1a; color:#f59e0b"><i class="fas fa-play-circle"></i></div>
+                <div class="list-content"><h4>Watch Ad</h4><p>Earn daily rewards</p></div>
+                <div class="list-reward">+0.0001 PI</div>
             </div>
-            
-            <div class="input-box">
-                <input type="text" placeholder="Your PI address">
+        </div>
+
+        <div id="friends-view" class="view">
+            <h2 class="view-title">Friends</h2>
+            <div style="background:var(--bg-card); border-radius:20px; padding:25px; text-align:center; margin-bottom:20px;">
+                <p style="color:var(--text-dim); font-size:14px; margin-bottom:10px;">Total Referrals</p>
+                <h1 style="font-size:42px;">0</h1>
             </div>
-
-            <div class="input-box">
-                <input type="number" id="wAmount" placeholder="Amount" oninput="calc()">
-                <span class="max-tag" onclick="setMax()">MAX</span>
+            <div class="list-card">
+                <div class="list-icon" style="background:rgba(147, 51, 234, 0.1); color:var(--accent-purple)"><i class="fas fa-user-plus"></i></div>
+                <div class="list-content"><h4>Referral Bonus</h4><p>Get 10% from friend's earnings</p></div>
             </div>
+            <button class="btn btn-gold" onclick="inviteFriend()" style="margin-top:auto;"><i class="fab fa-telegram-plane"></i> Invite Friend</button>
+        </div>
 
-            <p class="fee-label">Network fee: 0.1 PI</p>
-            <p class="receive-amt">Receive amount: <span id="recVal">0</span> PI</p>
+        <div id="wallet-view" class="view">
+            <h2 class="view-title">Send PI</h2>
+            <div class="top-balance-card"><div class="token-info"><img src="pinix.jpg"><b id="drawBal">0.00 PI</b></div></div>
+            <div style="margin-top:20px;">
+                <div style="background:var(--input-bg); border-radius:14px; padding:18px; margin-bottom:15px; text-align:center;">
+                    <input type="text" placeholder="Enter PI Address" style="background:none; border:none; color:white; width:100%; outline:none; text-align:center;">
+                </div>
+                <div style="background:var(--input-bg); border-radius:14px; padding:18px; text-align:center; position:relative;">
+                    <input type="number" id="wAmount" placeholder="Amount" style="background:none; border:none; color:white; width:100%; outline:none; text-align:center;" oninput="calcFee()">
+                    <span style="position:absolute; right:20px; top:18px; color:var(--accent-blue); font-weight:700; cursor:pointer;" onclick="setMax()">MAX</span>
+                </div>
+                <p style="text-align:center; color:var(--text-dim); font-size:13px; margin:20px 0 5px;">Network Fee: 0.1 PI</p>
+                <p style="text-align:center; font-weight:700;">Receive: <span id="recVal">0</span> PI</p>
+                <button class="btn btn-purple" style="margin-top:20px; background:var(--accent-blue)">Send</button>
+            </div>
+        </div>
 
-            <button class="btn btn-blue" onclick="alert('Transaction Processing...')">Send</button>
-            <button class="btn btn-dark" onclick="switchView('home')">Not yet</button>
+        <div id="more-view" class="view">
+            <h2 class="view-title">Settings</h2>
+            <div class="list-card">
+                <div class="list-icon" style="background:rgba(255,255,255,0.05)"><i class="fas fa-user-circle"></i></div>
+                <div class="list-content"><h4>Account Info</h4><p>Verify your details</p></div>
+            </div>
+            <div class="list-card">
+                <div class="list-icon" style="background:rgba(255,255,255,0.05)"><i class="fas fa-shield-alt"></i></div>
+                <div class="list-content"><h4>Security</h4><p>Password & 2FA</p></div>
+            </div>
+            <div class="list-card">
+                <div class="list-icon" style="background:rgba(239, 68, 68, 0.1); color:#ef4444"><i class="fas fa-sign-out-alt"></i></div>
+                <div class="list-content"><h4>Logout</h4><p>Exit current session</p></div>
+            </div>
         </div>
 
         <nav class="navbar">
             <div class="nav-item" onclick="switchView('wallet')"><i class="fas fa-wallet"></i>Wallet</div>
             <div class="nav-item" onclick="switchView('friends')"><i class="fas fa-users"></i>Friends</div>
-            <div class="nav-item home-active active" onclick="switchView('home')"><i class="fas fa-home"></i>Home</div>
+            <div class="nav-item home-center active" onclick="switchView('home')"><i class="fas fa-home"></i>Home</div>
             <div class="nav-item" onclick="switchView('missions')"><i class="fas fa-bullseye"></i>Missions</div>
             <div class="nav-item" onclick="switchView('more')"><i class="fas fa-ellipsis-h"></i>More</div>
         </nav>
     </div>
 
     <script>
-        // Başlangıç değerleri 0 olarak ayarlandı
-        let balance = 0.000000;
-        let mining = 0.000000;
+        let balance = 0;
+        let mining = 0;
 
         setInterval(() => {
-            mining += 0.000045; // Mining hızı
+            mining += 0.000045;
             document.getElementById('liveCount').innerText = mining.toFixed(6);
         }, 1000);
 
@@ -199,15 +199,38 @@
             document.getElementById('liveCount').innerText = "0.000000";
         }
 
-        function setMax() {
-            document.getElementById('wAmount').value = balance.toFixed(2);
-            calc();
+        function startAd() {
+            const overlay = document.getElementById('ad-overlay');
+            const timerEl = document.getElementById('ad-timer');
+            let time = 5;
+            overlay.style.display = 'flex';
+            const itv = setInterval(() => {
+                time--;
+                timerEl.innerText = time;
+                if(time <= 0) {
+                    clearInterval(itv);
+                    overlay.style.display = 'none';
+                    balance += 0.0001;
+                    alert("Reward Added: +0.0001 PI");
+                    document.getElementById('mainPiBal').innerText = balance.toFixed(6) + " PI";
+                }
+            }, 1000);
         }
 
-        function calc() {
+        function inviteFriend() {
+            const link = "https://t.me/FonixMining2026Bot";
+            window.open(`https://t.me/share/url?url=${link}&text=Join me on Fonix Mining and start earning Pi!`, '_blank');
+        }
+
+        function setMax() {
+            document.getElementById('wAmount').value = balance.toFixed(2);
+            calcFee();
+        }
+
+        function calcFee() {
             let val = parseFloat(document.getElementById('wAmount').value) || 0;
-            let rec = val > 0.1 ? val - 0.1 : 0;
-            document.getElementById('recVal').innerText = rec.toFixed(2);
+            let res = val > 0.1 ? val - 0.1 : 0;
+            document.getElementById('recVal').innerText = res.toFixed(2);
         }
     </script>
 </body>
