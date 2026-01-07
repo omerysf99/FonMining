@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI MINER PRO V18</title>
+    <title>PI MINER ULTIMATE V19</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -15,62 +15,47 @@
         :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.1); --red: #ff4757; --green: #2ed573; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
-        
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 80%); }
         
-        /* AD BAR (Income source for Admin) */
         .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 1000; }
         #ad-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 10px var(--p); transition: linear 1s; }
 
         .header { padding: 15px; display: flex; justify-content: center; }
-        .box { background: var(--card); border: 1px solid var(--border); padding: 12px 25px; border-radius: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .box { background: var(--card); border: 1px solid var(--border); padding: 12px 25px; border-radius: 20px; display: flex; align-items: center; gap: 12px; }
         .box img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--s); }
 
         nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(5,2,15,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; z-index: 100; }
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; color: rgba(255,255,255,0.3); cursor: pointer; }
         .nav-btn.active { color: var(--s); font-weight: 900; }
-        .nav-btn i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
 
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
         .view.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .fan-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan { width: 200px; height: 200px; background: url('pico.jpg') center/cover; border-radius: 50%; border: 5px solid var(--s); animation: spin 2.5s linear infinite; box-shadow: 0 0 40px rgba(251,191,36,0.15); }
+        .fan { width: 220px; height: 220px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 5px solid var(--p); animation: spin 2s linear infinite; box-shadow: 0 0 50px rgba(139,92,246,0.2); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .counter { font-family: 'Orbitron'; font-size: 2.4rem; color: var(--s); margin: 25px 0; text-shadow: 0 0 15px rgba(251,191,36,0.4); }
+        .counter { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--s); margin: 25px 0; }
 
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 12px; }
-        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.8rem; color: white; transition: 0.2s; }
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; color: white; }
         .btn-p { background: linear-gradient(90deg, var(--p), #6d28d9); }
-        .btn:active { transform: scale(0.97); }
-
-        /* Görev Kartları */
+        
         .task-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 18px; border-radius: 18px; margin-bottom: 12px; border: 1px solid var(--border); }
-        .task-info p { font-size: 0.85rem; font-weight: bold; }
-        .task-info span { font-size: 0.7rem; color: var(--green); font-weight: 900; }
-        
-        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; color: white; margin: 10px 0; outline: none; }
-        
-        /* Admin */
-        .adm-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; text-align: center; }
-        .stat-card p { font-size: 1rem; font-family: 'Orbitron'; color: var(--s); }
-        .u-card { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--p); display: flex; justify-content: space-between; align-items: center;}
-        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.65rem; font-weight: 900; padding: 5px; letter-spacing: 1px; }
+        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.65rem; font-weight: 900; padding: 5px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="ghost-msg">CONTROL MODE: ACTING AS USER</div>
+    <div id="ghost-msg">ADMIN VIEWING MODE</div>
     <div class="ad-timer"><div id="ad-fill"></div></div>
     
     <header class="header">
         <div class="box">
             <img src="pico.jpg">
             <div>
-                <p style="font-size:0.6rem; opacity:0.6; letter-spacing:1px;">MY PI BALANCE</p>
+                <p style="font-size:0.6rem; opacity:0.6;">PI BALANCE</p>
                 <p id="h-pi" style="font-size:1.2rem; font-weight:900; font-family:'Orbitron'; color:var(--s);">0.00</p>
             </div>
         </div>
@@ -80,62 +65,48 @@
         <div class="fan-wrap">
             <div class="fan"></div>
             <div class="counter" id="m-val">0.00000000</div>
-            <button class="btn btn-p" onclick="claim()" style="max-width:240px; box-shadow: 0 0 20px rgba(139,92,246,0.3);">COLLECT PI</button>
-            <p style="font-size:0.6rem; opacity:0.4; margin-top:20px;">Mining automatically works 24/7</p>
+            <button class="btn btn-p" onclick="claim()" style="max-width:240px;">COLLECT PI</button>
+            <p id="offline-info" style="font-size:0.55rem; color:var(--green); margin-top:15px; font-weight:bold;"></p>
         </div>
     </div>
 
     <div id="v-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem; color:var(--s);">PI MISSIONS</h2>
-        
-        <div class="task-card" style="border: 2px solid var(--p); background: rgba(139,92,246,0.1);">
-            <div class="task-info"><p>Join Fonix Community</p><span>+0.50 PI</span></div>
-            <button class="btn" style="width:auto; padding:8px 20px; font-size:0.65rem; background:var(--p);" onclick="doTask('https://t.me/FonixCommunity', 0.50)">GO</button>
-        </div>
-
-        <div class="task-card">
-            <div class="task-info"><p>Share Invitation</p><span>+1.00 PI</span></div>
-            <button class="btn" style="width:auto; padding:8px 20px; font-size:0.65rem; background:rgba(255,255,255,0.1);" onclick="tab('v-friends')">INVITE</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">MISSIONS</h2>
+        <div class="task-card" style="border: 2px solid var(--p);">
+            <div><p style="font-weight:bold;">Join Fonix Community</p><span style="color:var(--green); font-size:0.7rem;">+0.50 PI</span></div>
+            <button class="btn" style="width:auto; padding:8px 15px; font-size:0.6rem; background:var(--p);" onclick="doTask('https://t.me/FonixCommunity', 0.50)">JOIN</button>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
         <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">WITHDRAW</h2>
         <div class="glass">
-            <p style="font-size:0.75rem; opacity:0.7; margin-bottom:15px;">Send your PI to Mainnet wallet.</p>
-            <label style="font-size:0.6rem; opacity:0.5;">MINIMUM: 30 PI</label>
-            <input type="text" id="w-addr" placeholder="Wallet Address (G...)">
-            <input type="number" id="w-amt" placeholder="Amount to Withdraw">
-            <button class="btn btn-p" id="wb" onclick="sendWithdraw()" style="margin-top:10px;">SUBMIT WITHDRAWAL</button>
+            <input type="text" id="w-addr" placeholder="Pi Wallet Address">
+            <input type="number" id="w-amt" placeholder="Amount (Min 30)">
+            <button class="btn btn-p" onclick="sendWithdraw()">SUBMIT REQUEST</button>
         </div>
     </div>
 
     <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">FRIENDS</h2>
-        <div class="glass" style="text-align:center; padding:40px 20px;">
-            <p style="font-size:0.7rem; opacity:0.5;">YOUR REFERRAL ID</p>
-            <h1 id="my-id" style="color:var(--s); letter-spacing:4px; margin:15px 0; font-size:2.2rem; font-family:'Orbitron';">---</h1>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">INVITE</h2>
+        <div class="glass" style="text-align:center;">
+            <p style="font-size:0.7rem; opacity:0.5;">YOUR ID</p>
+            <h1 id="my-id" style="color:var(--s); letter-spacing:4px; margin:15px 0;">---</h1>
             <button class="btn btn-p" onclick="shareRef()">SHARE LINK</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1.1rem; margin-bottom:20px;">SYSTEM ADMIN</h2>
-        <div class="adm-stats">
-            <div class="stat-card"><h4 style="font-size:0.5rem; opacity:0.5;">USERS</h4><p id="adm-u">0</p></div>
-            <div class="stat-card"><h4 style="font-size:0.5rem; opacity:0.5;">SYSTEM PI</h4><p id="adm-pi">0</p></div>
-        </div>
-        <div class="glass" style="border-color:var(--s);">
-            <p style="font-size:0.7rem; color:var(--s); font-weight:900; margin-bottom:10px;">PENDING WITHDRAWALS</p>
-            <div id="adm-pulls"></div>
-        </div>
-        <div id="adm-users"></div>
+        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">ADMIN</h2>
+        <div id="adm-stats" style="display:flex; gap:10px; margin-bottom:10px;"></div>
+        <div id="adm-pulls"></div>
+        <div id="adm-users" style="margin-top:10px;"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Mining</div>
         <div class="nav-btn" onclick="tab('v-tasks', this)"><i>🎯</i>Missions</div>
-        <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💸</i>Withdraw</div>
+        <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💸</i>Wallet</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>⚙️</i>Admin</div>
     </nav>
 </div>
@@ -157,30 +128,51 @@
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
     let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Guest" };
-    const mRate = 0.0001; // Mining Speed
-
-    // --- REKLAM (GELİR KAYNAĞI - ÖDÜLSÜZ) ---
-    let adTime = 0;
-    function runAdLoop() {
-        setInterval(() => {
-            adTime++;
-            if(document.getElementById('ad-fill')) document.getElementById('ad-fill').style.width = (adTime/3)*100 + "%";
-            if(adTime >= 3) {
-                adTime = 0;
-                new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'}).autoMode();
-            }
-        }, 1000);
-    }
+    const mRate = 0.0001;
+    let offlineChecked = false;
 
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
-            if(doc.exists) { uData = doc.data(); render(); }
-            else { db.collection("users").doc(activeUid).set(uData); }
+            if(doc.exists) {
+                const cloud = doc.data();
+                // OFFLINE MINING HESAPLAMA
+                if(!offlineChecked && activeUid === realUid) {
+                    const now = Date.now();
+                    const diffSeconds = Math.floor((now - (cloud.lastSync || now)) / 1000);
+                    if(diffSeconds > 1) {
+                        const earned = diffSeconds * mRate;
+                        cloud.uncl = (cloud.uncl || 0) + earned;
+                        document.getElementById('offline-info').innerText = `+${earned.toFixed(5)} PI earned while away!`;
+                        setTimeout(() => document.getElementById('offline-info').innerText = "", 5000);
+                    }
+                    offlineChecked = true;
+                }
+                uData = cloud;
+                render();
+            } else {
+                db.collection("users").doc(activeUid).set(uData);
+            }
         });
+
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        runAdLoop();
-        setInterval(() => { uData.uncl += mRate; document.getElementById('m-val').innerText = uData.uncl.toFixed(8); }, 1000);
-        setInterval(() => { if(activeUid === realUid) db.collection("users").doc(realUid).update({ uncl: uData.uncl, lastSync: Date.now() }); }, 10000);
+        
+        // UI Loops
+        setInterval(() => {
+            uData.uncl += mRate;
+            document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
+        }, 1000);
+
+        // Auto Save & Ads
+        let adTicks = 0;
+        setInterval(() => {
+            if(activeUid === realUid) {
+                db.collection("users").doc(realUid).update({ uncl: uData.uncl, lastSync: Date.now() });
+            }
+            // Ad Logic
+            adTicks++;
+            document.getElementById('ad-fill').style.width = (adTicks % 4 / 3) * 100 + "%";
+            if(adTicks % 4 === 0) new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'}).autoMode();
+        }, 3000);
     }
 
     function render() {
@@ -189,7 +181,6 @@
         document.getElementById('ghost-msg').style.display = activeUid !== realUid ? 'block' : 'none';
     }
 
-    // --- USER ACTIONS ---
     function claim() {
         if(uData.uncl < 0.0001 || activeUid !== realUid) return;
         db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
@@ -199,65 +190,41 @@
     function doTask(url, reward) {
         tg.openLink(url);
         db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(reward) });
-        tg.showAlert("Mission Verified! " + reward + " PI added to your balance.");
+        tg.showAlert("Success! PI Added.");
     }
 
     async function sendWithdraw() {
         const amt = parseFloat(document.getElementById('w-amt').value);
-        const addr = document.getElementById('w-addr').value.trim();
         if(amt >= 30 && uData.pi >= amt) {
-            await db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr, amt, status: "pending", date: Date.now() });
+            await db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr: document.getElementById('w-addr').value, amt, status: "pending", date: Date.now() });
             await db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            tg.showAlert("Withdrawal request sent to admin.");
-        } else {
-            tg.showAlert("Minimum 30 PI required.");
+            tg.showAlert("Request Sent.");
         }
     }
 
-    // --- ADMIN ACTIONS ---
+    // --- ADMIN ---
     async function loadAdmin() {
         const uBox = document.getElementById('adm-users');
         const wBox = document.getElementById('adm-pulls');
-        const allU = await db.collection("users").get();
-        let totalPi = 0;
-        allU.forEach(d => totalPi += d.data().pi);
-        document.getElementById('adm-u').innerText = allU.size;
-        document.getElementById('adm-pi').innerText = totalPi.toFixed(2);
-
         const wSnap = await db.collection("withdrawals").where("status", "==", "pending").get();
-        wBox.innerHTML = wSnap.empty ? "<p style='font-size:0.6rem; opacity:0.4;'>No pending payments.</p>" : "";
+        wBox.innerHTML = "";
         wSnap.forEach(doc => {
             const w = doc.data();
-            wBox.innerHTML += `<div class="u-card">
-                <div><b>@${w.username}</b><br>${w.amt} PI</div>
-                <div>
-                    <button onclick="admPay('${doc.id}', 'paid')" style="color:var(--green); background:none; border:none; margin-right:10px;">ONAY</button>
-                    <button onclick="admPay('${doc.id}', 'reject', '${w.uid}', ${w.amt})" style="color:var(--red); background:none; border:none;">RED</button>
-                </div>
-            </div>`;
+            wBox.innerHTML += `<div class="glass" style="font-size:0.6rem;">@${w.username}: ${w.amt} PI<br><button onclick="admPay('${doc.id}', 'paid')">ONAY</button></div>`;
         });
-
+        const allU = await db.collection("users").limit(10).get();
         uBox.innerHTML = "";
-        allU.docs.sort((a,b) => b.data().pi - a.data().pi).slice(0, 10).forEach(doc => {
-            const d = doc.data();
-            uBox.innerHTML += `<div class="u-card">
-                <span>@${d.username} - ${d.pi.toFixed(2)} PI</span>
-                <button onclick="enter('${doc.id}')" style="font-size:0.5rem; padding:4px; border-radius:5px;">LOGIN</button>
-            </div>`;
+        allU.forEach(doc => {
+            uBox.innerHTML += `<div class="glass" style="font-size:0.6rem;">@${doc.data().username} <button onclick="enter('${doc.id}')">İZLE</button></div>`;
         });
     }
 
-    async function admPay(id, status, uid, amt) {
-        if(!confirm("Emin misin?")) return;
-        if(status === 'paid') await db.collection("withdrawals").doc(id).update({ status: "paid" });
-        else {
-            await db.collection("users").doc(uid).update({ pi: firebase.firestore.FieldValue.increment(amt) });
-            await db.collection("withdrawals").doc(id).delete();
-        }
+    async function admPay(id, status) {
+        await db.collection("withdrawals").doc(id).update({ status });
         loadAdmin();
     }
 
-    function enter(id) { activeUid = id; tab('v-home'); init(); }
+    function enter(id) { activeUid = id; offlineChecked = true; tab('v-home'); init(); }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -270,8 +237,7 @@
     }
 
     function shareRef() {
-        const txt = `Start mining PI Coin! Use my ID: ${realUid}`;
-        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(txt)}`);
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=Join PI Miner ID: ${realUid}`);
     }
 
     window.onload = init;
