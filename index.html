@@ -3,320 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA EMPIRE</title>
+    <title>PI NEBULA PRO - V60</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Montserrat:wght@900&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
     
     <style>
         :root { 
-            --p-purple: #4c3ba5; --p-dark: #1a1a2e; --p-yellow: #fbc02d; 
-            --p-neon: #8eff31; --p-red: #ff3131; --p-glass: rgba(255, 255, 255, 0.08);
-            --p-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --bg-dark: #0f172a; --bg-card: #1e293b; --accent: #8eff31; 
+            --yellow: #fbc02d; --text-muted: #94a3b8;
         }
 
-        /* RESET & BASE */
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--p-purple); color: white; overflow: hidden; height: 100vh; touch-action: manipulation; }
+        body { background: var(--bg-dark); color: white; overflow: hidden; height: 100vh; }
 
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--p-glass); border-radius: 10px; }
-
-        /* UI COMPONENTS */
-        .view { display: none; height: 100vh; flex-direction: column; padding: 25px; overflow-y: auto; padding-bottom: 120px; animation: fadeIn 0.3s ease-out; }
+        .view { display: none; height: 100vh; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 110px; }
         .view.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 1000; background: rgba(26, 26, 46, 0.4); backdrop-filter: blur(10px); }
-        .user-pill { display: flex; align-items: center; gap: 8px; background: var(--p-glass); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .lvl-badge { background: var(--p-yellow); color: var(--p-dark); font-weight: 700; padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; }
+        /* --- OFFERWALL (GÖRSEL 1) --- */
+        .section-title { font-size: 1.1rem; margin: 15px 0 10px; display: flex; align-items: center; gap: 8px; }
+        .grid-offers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .offer-card { background: var(--bg-card); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .offer-card img { width: 40px; height: 40px; border-radius: 8px; margin-bottom: 5px; background: #334155; }
+        .offer-card .reward { color: var(--yellow); font-size: 0.75rem; font-weight: 700; margin-top: 4px; display: block; }
+        .offer-card .tag { position: absolute; top: 5px; right: 5px; background: var(--accent); color: black; font-size: 0.5rem; padding: 1px 4px; border-radius: 4px; font-weight: 900; }
 
-        /* HOME SCREEN */
-        #v-home { align-items: center; justify-content: center; text-align: center; }
-        .pet-container { position: relative; width: 260px; height: 260px; margin-bottom: 30px; }
-        .pet-img { width: 100%; filter: drop-shadow(var(--p-shadow)); transition: 0.5s; }
-        .pet-img:active { transform: scale(0.95); }
-        .main-balance { font-family: 'Montserrat'; font-size: 3rem; color: var(--p-yellow); text-shadow: 0 0 20px rgba(251, 192, 45, 0.4); margin: 10px 0; }
+        /* --- WITHDRAW ANA SAYFA (GÖRSEL 3) --- */
+        .provider-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .provider-card { background: var(--bg-card); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .provider-card img { height: 25px; object-fit: contain; margin-bottom: 8px; filter: brightness(1.2); }
+        .min-limit { font-size: 0.55rem; color: var(--text-muted); display: block; line-height: 1.2; }
 
-        /* MINING SCREEN - FIXED OVERLAY */
-        #mining-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--p-dark); z-index: 5000; display: none; 
-            flex-direction: column; align-items: center; justify-content: space-between; padding: 50px 25px;
-        }
-        .fan-frame { 
-            width: 280px; height: 280px; border-radius: 50%; border: 10px solid #222; 
-            position: relative; display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle, #333 0%, #000 100%); box-shadow: 0 0 50px rgba(142,255,49,0.1);
-        }
-        .fan-img { width: 90%; height: 90%; border-radius: 50%; transition: transform 0.1s linear; }
-        .fan-spinning { animation: spin var(--speed, 1s) linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* STATS PANEL */
-        .stats-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .stat-box { background: var(--p-glass); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; text-align: center; }
-        .stat-box label { font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-box div { font-family: 'Orbitron'; font-size: 1.1rem; color: var(--p-neon); margin-top: 5px; }
-
-        /* BUTTONS */
-        .btn-main { width: 90%; padding: 20px; border: none; border-radius: 25px; font-size: 1.4rem; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 0 rgba(0,0,0,0.3); }
-        .btn-yellow { background: var(--p-yellow); color: #2c1a74; }
-        .btn-red { background: var(--p-red); color: white; }
-        .btn-main:active { transform: translateY(4px); box-shadow: none; }
+        /* --- WITHDRAW DETAY (GÖRSEL 2) --- */
+        #v-withdraw-detail { align-items: center; padding-top: 40px; }
+        .withdraw-header { background: rgba(0,0,0,0.3); padding: 15px 40px; border-radius: 15px; margin-bottom: 30px; text-align: center; border: 1px solid var(--accent); }
+        .input-group { width: 100%; margin-bottom: 20px; text-align: left; }
+        .input-group label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-left: 10px; }
+        .input-group input { width: 100%; padding: 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; margin-top: 5px; }
+        .verify-btn { background: var(--accent); color: black; font-weight: 900; width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 1.1rem; margin-top: 20px; box-shadow: 0 0 20px rgba(142,255,49,0.2); }
 
         /* NAV BAR */
-        nav { 
-            position: fixed; bottom: 0; width: 100%; height: 100px; 
-            background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.08); border-radius: 35px 35px 0 0; z-index: 4000;
-        }
-        .nav-link { text-align: center; color: white; opacity: 0.4; transition: 0.3s; font-size: 0.75rem; text-decoration: none; }
-        .nav-link.active { opacity: 1; color: var(--p-yellow); }
-        .nav-link span { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+        nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: #020617; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
+        .nav-item { text-align: center; opacity: 0.5; font-size: 0.65rem; }
+        .nav-item.active { opacity: 1; color: var(--accent); }
+        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 4px; }
 
-        /* FRIENDS & TASKS CARDS */
-        .list-container { width: 100%; margin-top: 20px; }
-        .item-card { 
-            background: var(--p-glass); padding: 18px; border-radius: 22px; 
-            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .item-info h4 { font-size: 1rem; color: var(--p-yellow); }
-        .item-info p { font-size: 0.8rem; opacity: 0.6; }
-        .claim-btn { background: var(--p-neon); color: black; padding: 8px 15px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; border: none; }
-
-        /* WALLET STYLES */
-        .wallet-card { background: linear-gradient(135deg, #2c1a74 0%, #4c3ba5 100%); padding: 25px; border-radius: 25px; margin-bottom: 20px; box-shadow: var(--p-shadow); border: 1px solid rgba(255,255,255,0.1); }
-        .input-dark { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; margin-top: 15px; }
-
+        .back-btn { position: absolute; top: 20px; left: 20px; font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <header>
-        <div class="user-pill">
-            <span class="lvl-badge">LVL <span id="h-lvl">1</span></span>
-            <span id="h-user" style="font-size: 0.8rem;">@Guest</span>
-        </div>
-        <div onclick="adminCheck()" style="color:var(--p-yellow); font-weight:700; font-size:0.8rem;">8392479231</div>
-    </header>
-
-    <div id="v-home" class="view active">
-        <div class="pet-container">
-            <img src="yourfantastic.jpg" class="pet-img" onerror="this.src='https://via.placeholder.com/260?text=PET'">
-        </div>
-        <h1 style="font-family: 'Montserrat'; letter-spacing: -1px;">NEBULA GUARDIAN</h1>
-        <div class="main-balance" id="main-bal">0.00</div>
-        <button class="btn-main btn-yellow" onclick="openMining()">PLAY & MINE</button>
-    </div>
-
-    <div id="v-friends" class="view">
-        <h2 style="font-family:'Montserrat'">MY SQUAD</h2>
-        <p style="opacity:0.5; font-size:0.8rem;">Davet ettiğin her arkadaşın için 5.00 PI al.</p>
-        <div class="wallet-card" style="margin-top:20px;">
-            <label style="font-size:0.7rem; opacity:0.7;">REFERRAL LINK</label>
-            <input type="text" id="ref-link" class="input-dark" readonly onclick="this.select()">
-        </div>
-        <div class="list-container" id="friends-list">
-            <div class="item-card"><div class="item-info"><h4>No friends yet</h4><p>Linkini paylaş ve kazanmaya başla!</p></div></div>
-        </div>
-    </div>
-
     <div id="v-tasks" class="view">
-        <h2 style="font-family:'Montserrat'">MISSIONS</h2>
-        <div class="list-container">
-            <div class="item-card">
-                <div class="item-info"><h4>Follow PI X</h4><p>+10.00 PI Rewards</p></div>
-                <button class="claim-btn" onclick="completeTask('x_follow', 10)">GO</button>
-            </div>
-            <div class="item-card">
-                <div class="item-info"><h4>Join Nebula TG</h4><p>+5.00 PI Rewards</p></div>
-                <button class="claim-btn" onclick="completeTask('tg_join', 5)">JOIN</button>
-            </div>
+        <h1 style="text-align:center; font-family:'Montserrat';">OFFERWALL</h1>
+        
+        <div class="section-title">🔥 Hot Offers</div>
+        <div class="grid-offers">
+            <div class="offer-card"><div class="tag">99%</div><img src=""><span>Nuts Heist</span><span class="reward">💰 2000</span></div>
+            <div class="offer-card"><div class="tag">97%</div><img src=""><span>Givvy Weekly</span><span class="reward">💰 2000</span></div>
+            <div class="offer-card"><div class="tag">97%</div><img src=""><span>Follow X</span><span class="reward">💰 2000</span></div>
+        </div>
+
+        <div class="section-title">🏷️ Task Offers</div>
+        <div class="grid-offers">
+            <div class="offer-card"><div class="tag">100%</div><img src=""><span>TyrAds</span><span class="reward">💰 180M</span></div>
+            <div class="offer-card"><div class="tag">99%</div><img src=""><span>GeeMee</span><span class="reward">💰 180M</span></div>
+            <div class="offer-card"><div class="tag">100%</div><img src=""><span>Lootably</span><span class="reward">💰 200M</span></div>
+        </div>
+
+        <div class="section-title">📋 Survey Offers</div>
+        <div class="grid-offers">
+            <div class="offer-card"><img src=""><span>Pollfish</span><span class="reward">💰 200M</span></div>
+            <div class="offer-card"><img src=""><span>BitLabs</span><span class="reward">💰 150M</span></div>
+            <div class="offer-card"><img src=""><span>CPX Research</span><span class="reward">💰 170M</span></div>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
-        <h2 style="font-family:'Montserrat'">WITHDRAW</h2>
-        <div class="wallet-card">
-            <label>TOTAL BALANCE</label>
-            <div style="font-size: 2rem; font-weight: 900; color: var(--p-yellow);" id="wall-bal">0.00 PI</div>
-            <input type="text" class="input-dark" placeholder="Enter TON Wallet (UQ...)">
-            <button class="btn-main btn-yellow" style="margin-top:20px; width:100%; font-size:1rem;" onclick="tg.showAlert('Minimum 500 PI limitine ulaşılmadı.')">SEND TO WALLET</button>
+        <h1 style="text-align:center; font-family:'Montserrat'; margin-bottom:20px;">WITHDRAW</h1>
+        <p style="font-size:0.7rem; opacity:0.6; text-align:center; margin-bottom:15px;">Top 3 providers in your country</p>
+        
+        <div class="provider-grid">
+            <div class="provider-card" onclick="openWithdraw('BINANCE')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Binance_logo.svg">
+                <span class="min-limit">MIN 0.35 USD<br>Instant/1-2 days</span>
+            </div>
+            <div class="provider-card" onclick="openWithdraw('PAPARA')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Papara_logo.svg">
+                <span class="min-limit">MIN 0.35 USD<br>Instant/1-2 days</span>
+            </div>
+            <div class="provider-card" onclick="openWithdraw('PAYEER')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Payeer_logo.svg">
+                <span class="min-limit">MIN 0.35 USD<br>Instant/1-2 days</span>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-top:25px;">Other Providers</div>
+        <div class="provider-grid">
+            <div class="provider-card"><img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Tether_Logo.svg"><span class="min-limit">MIN 0.35 USD</span></div>
+            <div class="provider-card"><img src="https://cryptologos.cc/logos/hedera-hbar-logo.png"><span class="min-limit">MIN 0.35 USD</span></div>
+            <div class="provider-card"><img src=""><span class="min-limit">MIN 0.35 USD</span></div>
         </div>
     </div>
 
-    <div id="mining-overlay">
-        <div style="text-align:center;">
-            <h1 style="font-family: 'Orbitron'; color: var(--p-neon); letter-spacing: 5px;">MINING</h1>
-            <div id="mine-cycle" style="font-size:0.7rem; opacity:0.5;">DÖNGÜ: 0/30s</div>
+    <div id="v-withdraw-detail" class="view">
+        <div class="back-btn" onclick="showTab('v-wallet')">⬅️</div>
+        <h1 style="font-family:'Montserrat';">YOUR WITHDRAW</h1>
+        
+        <div class="withdraw-header">
+            <div style="font-size: 1.8rem; font-weight: 900;">USD <span id="selected-amount">3.00</span></div>
+            <div style="font-size: 0.6rem; opacity:0.6;">10000 = 0.01 USD</div>
         </div>
 
-        <div class="fan-frame">
-            <img src="pinix.jpg" id="mine-fan" class="fan-img fan-spinning" onerror="this.src='https://via.placeholder.com/240?text=FAN'">
+        <div style="margin-bottom:20px; text-align:center;">
+            <p style="font-size:0.6rem; opacity:0.5;">YOUR PROVIDER:</p>
+            <h2 id="provider-name" style="color:var(--yellow); letter-spacing:2px;">BINANCE</h2>
         </div>
 
-        <div class="stats-wrap">
-            <div class="stat-box">
-                <label>ACTIVE TIME</label>
-                <div id="m-time">0s</div>
-            </div>
-            <div class="stat-box">
-                <label>GH/s SPEED</label>
-                <div id="m-ghs">0.00</div>
-            </div>
-            <div class="stat-box" style="grid-column: span 2;">
-                <label>PI EARNED IN SESSION</label>
-                <div id="m-earned" style="font-size: 1.8rem;">0.0000</div>
-            </div>
+        <div class="input-group">
+            <label id="id-label">BINANCE ID:</label>
+            <input type="text" placeholder="********">
         </div>
 
-        <button class="btn-main btn-red" onclick="closeMining()">STOP MINING</button>
+        <div class="input-group">
+            <label>AMOUNT:</label>
+            <input type="number" placeholder="0.00">
+        </div>
+
+        <p style="font-size:0.6rem; opacity:0.5; text-align:center; padding: 0 20px;">
+            Please enter your ID correct or your money will be lost. Payment will be send in USDC.
+        </p>
+
+        <button class="verify-btn" onclick="verifyWithdraw()">VERIFY</button>
+    </div>
+
+    <div id="v-home" class="view active">
+        <h1 style="text-align:center; margin-top:100px;">HOME / MINING</h1>
+        <button class="verify-btn" onclick="tg.showAlert('Mining başlatıldı!')">START PLAY</button>
     </div>
 
     <nav>
-        <a href="#" class="nav-link" onclick="tab('v-friends', this)"><span>👥</span>Friends</a>
-        <a href="#" class="nav-link" onclick="tab('v-tasks', this)"><span>🎁</span>Tasks</a>
-        <a href="#" class="nav-link active" onclick="tab('v-home', this)"><span>🐾</span>Home</a>
-        <a href="#" class="nav-link" onclick="tab('v-wallet', this)"><span>💳</span>Wallet</a>
+        <div class="nav-item" onclick="showTab('v-tasks', this)"><i>🎁</i>Offers</div>
+        <div class="nav-item active" onclick="showTab('v-home', this)"><i>🐾</i>Home</div>
+        <div class="nav-item" onclick="showTab('v-wallet', this)"><i>💳</i>Withdraw</div>
     </nav>
-</div>
 
 <script>
-    // --- ENGINE CONFIG ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
-        authDomain: "fonix-b4de6.firebaseapp.com",
-        projectId: "fonix-b4de6",
-        storageBucket: "fonix-b4de6.firebasestorage.app",
-        messagingSenderId: "20899545652",
-        appId: "1:20899545652:web:f32ef599f0c8d3deaec061"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "admin_test";
-    let userData = { pi: 0, lvl: 1, friends: [], username: tg.initDataUnsafe?.user?.username || "Nebula" };
-    
-    let engine = {
-        mining: false,
-        timer: null,
-        sec: 0,
-        sessionPi: 0
-    };
-
-    function init() {
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // Sync Data
-        db.collection("users").doc(uid).onSnapshot(doc => {
-            if(doc.exists) {
-                userData = doc.data();
-                updateUI();
-            } else {
-                db.collection("users").doc(uid).set(userData);
-            }
-        });
-
-        document.getElementById('ref-link').value = "https://t.me/PiNebulaBot?start=" + uid;
-        document.getElementById('h-user').innerText = "@" + userData.username;
-    }
-
-    function updateUI() {
-        document.getElementById('main-bal').innerText = userData.pi.toFixed(2);
-        document.getElementById('wall-bal').innerText = userData.pi.toFixed(2) + " PI";
-        document.getElementById('h-lvl').innerText = userData.lvl;
-    }
-
-    function tab(id, el) {
+    function showTab(tabId, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-        tg.HapticFeedback.impactOccurred('light');
-    }
-
-    // --- MINING ENGINE ---
-    function openMining() {
-        engine.mining = true;
-        engine.sec = 0;
-        engine.sessionPi = 0;
+        document.getElementById(tabId).classList.add('active');
         
-        // Reset View
-        document.getElementById('m-time').innerText = "0s";
-        document.getElementById('m-earned').innerText = "0.0000";
-        document.getElementById('mining-overlay').style.display = 'flex';
-
-        engine.timer = setInterval(() => {
-            engine.sec++;
-            
-            // UI Update
-            document.getElementById('m-time').innerText = engine.sec + "s";
-            
-            // Random GH/s & Fan Speed Adjustment
-            let ghs = (Math.random() * (7 - 1) + 1);
-            document.getElementById('m-ghs').innerText = ghs.toFixed(2);
-            document.documentElement.style.setProperty('--speed', (1 / (ghs / 2)) + 's');
-
-            // 30s Logic
-            let cycle = engine.sec % 30;
-            document.getElementById('mine-cycle').innerText = `DÖNGÜ: ${cycle}/30s`;
-
-            if(engine.sec % 30 === 0) {
-                let gain = Math.random() * (0.001 - 0.0001) + 0.0001;
-                engine.sessionPi += gain;
-                document.getElementById('m-earned').innerText = engine.sessionPi.toFixed(4);
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        }, 1000);
-    }
-
-    function closeMining() {
-        clearInterval(engine.timer);
-        engine.mining = false;
-
-        db.collection("users").doc(uid).update({
-            pi: firebase.firestore.FieldValue.increment(engine.sessionPi)
-        }).then(() => {
-            document.getElementById('mining-overlay').style.display = 'none';
-            tg.showAlert(`Mining Session End!\nEarned: ${engine.sessionPi.toFixed(4)} PI`);
-            
-            // Hard Reset Stats
-            engine.sessionPi = 0;
-            engine.sec = 0;
-        });
-    }
-
-    // --- GAME ACTIONS ---
-    function completeTask(taskId, reward) {
-        tg.showConfirm("Görevi tamamladın mı?", (ok) => {
-            if(ok) {
-                db.collection("users").doc(uid).update({
-                    pi: firebase.firestore.FieldValue.increment(reward)
-                });
-                tg.showAlert("Success! Rewards added.");
-            }
-        });
-    }
-
-    function adminCheck() {
-        if(uid === "8392479231") {
-            tg.showPopup({ title: "Admin Panel", message: "Bakiye eklemek ister misin?", buttons: [{id: 'add', type: 'default', text: '+1000 PI'}] }, (id) => {
-                if(id === 'add') db.collection("users").doc(uid).update({pi: firebase.firestore.FieldValue.increment(1000)});
-            });
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
         }
     }
 
-    window.onload = init;
+    function openWithdraw(provider) {
+        document.getElementById('provider-name').innerText = provider;
+        document.getElementById('id-label').innerText = provider + " ID:";
+        showTab('v-withdraw-detail');
+    }
+
+    function verifyWithdraw() {
+        tg.showConfirm("İşlemi onaylıyor musunuz? Girdiğiniz ID hatalıysa para iadesi yapılmaz.", (ok) => {
+            if(ok) {
+                tg.showAlert("Talebiniz alındı! 1-2 iş günü içinde kontrol edilecektir.");
+                showTab('v-wallet');
+            }
+        });
+    }
 </script>
 </body>
 </html>
