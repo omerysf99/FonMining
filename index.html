@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pet Elite v350 - Ultimate Edition</title>
+    <title>Pet Elite v350 - Social Edition</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
@@ -19,15 +19,53 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        let uID = "8392479231", stats = { balance: 0.0, ref: false, tsk: false }, live = 0, isM = false, loop, seconds = 0;
+        // Admin ID senin ID'n: 8392479231
+        let uID = "8392479231", stats = { balance: 0.0, ref: false, invitedBy: "", earningsFromRefs: 0 }, live = 0, isM = false, loop, seconds = 0;
 
         async function start() {
             const ref = doc(db, "users", uID);
             const res = await getDoc(ref);
             if (res.exists()) stats = res.data();
-            else { stats = { balance: 0.0, ref: false, tsk: false }; await setDoc(ref, stats); }
+            else { 
+                stats = { balance: 0.0, ref: false, invitedBy: "", earningsFromRefs: 0 }; 
+                await setDoc(ref, stats); 
+            }
             ui();
+            loadReferrals();
         }
+
+        // Davet edilenleri listeleme
+        async function loadReferrals() {
+            const listEl = document.getElementById('ref-list');
+            listEl.innerHTML = '<p style="font-size:10px; opacity:0.5;">Yükleniyor...</p>';
+            
+            // Simüle edilmiş davet listesi (Firebase'de 'invitedBy' alanı uID olanları çeker)
+            // Gerçek projede: const q = query(collection(db, "users"), where("invitedBy", "==", uID));
+            const mockRefs = [
+                { id: "User_421", gain: 0.0500 },
+                { id: "User_902", gain: 0.0500 }
+            ];
+            
+            setTimeout(() => {
+                listEl.innerHTML = "";
+                mockRefs.forEach(r => {
+                    listEl.innerHTML += `<div class="list-item">
+                        <span>👤 ${r.id}</span>
+                        <span style="color:var(--g)">+$${r.gain.toFixed(4)}</span>
+                    </div>`;
+                });
+            }, 1000);
+        }
+
+        window.applyInviter = async () => {
+            const input = document.getElementById('inviter-input').value;
+            if(stats.invitedBy || input === uID) return;
+            stats.invitedBy = input;
+            stats.balance += 0.05; // Davet kodu girene ödül
+            await updateDoc(doc(db, "users", uID), { invitedBy: input, balance: stats.balance });
+            ui();
+            alert("Davet edenin kaydedildi! +$0.05 kazandın.");
+        };
 
         window.mine = (on) => {
             if(on) {
@@ -35,50 +73,37 @@
                 loop = setInterval(() => { 
                     live += 0.000035; seconds++;
                     let ghs = (Math.random() * (4.0 - 3.0) + 3.0).toFixed(2);
-                    let m = Math.floor(seconds / 60), s = seconds % 60;
                     document.getElementById('m-usd').innerText = live.toFixed(5);
-                    document.getElementById('m-paws').innerText = Math.floor(live * 850000);
-                    document.getElementById('m-time').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                    document.getElementById('m-time').innerText = `${Math.floor(seconds/60)}:${seconds%60 < 10 ? '0'+seconds%60 : seconds%60}`;
                     document.getElementById('m-ghs').innerText = ghs;
                 }, 1000);
             } else {
                 clearInterval(loop);
-                document.getElementById('congrats-val').innerText = Math.floor(live * 850000);
-                document.getElementById('congrats-usd').innerText = live.toFixed(4);
-                stats.balance += live; live = 0;
+                stats.balance += live;
                 updateDoc(doc(db, "users", uID), { balance: stats.balance });
                 tab('congrats');
             }
         };
 
-        window.closeCongrats = () => { isM = false; ui(); tab('home'); };
-
-        window.shareTG = () => {
-            const text = encodeURIComponent(`🐾 Pet Growth Madencilik! Kodum: ${uID}`);
-            window.open(`https://t.me/share/url?url=https://yourpet.app&text=${text}`);
+        window.tab = (id) => {
+            document.querySelectorAll('.p').forEach(x => x.classList.remove('a'));
+            document.getElementById('p-'+id).classList.add('a');
+            document.querySelector('.nav').style.display = (id === 'mining' || id === 'congrats') ? 'none' : 'flex';
         };
 
         function ui() {
             document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
             document.getElementById('my-code').innerText = uID;
+            if(stats.invitedBy) {
+                document.getElementById('inviter-box').innerHTML = `<p style="color:var(--g)">Davet eden: ${stats.invitedBy}</p>`;
+            }
         }
 
-        window.tab = (id) => {
-            document.querySelectorAll('.p').forEach(x => x.classList.remove('a'));
-            document.getElementById('p-'+id).classList.add('a');
-            const nav = document.querySelector('.nav');
-            if(id === 'mining' || id === 'congrats') nav.style.display = 'none';
-            else {
-                nav.style.display = 'flex';
-                document.querySelectorAll('.ni').forEach(n => n.classList.remove('act'));
-                if(document.getElementById('n-'+id)) document.getElementById('n-'+id).classList.add('act');
-            }
-        };
         window.onload = start;
     </script>
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #5c59d3; }
-        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         #app {
             width: 100%; max-width: 410px; aspect-ratio: 9/16;
@@ -86,117 +111,81 @@
             border-radius: 45px; border: 8px solid #222; overflow: hidden;
             display: flex; flex-direction: column; color: #fff; position: relative;
         }
-        .h { padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .pill { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); }
         .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; overflow-y: auto; }
         .a { display: flex; }
-        .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .btn:active { transform: scale(0.96); }
-        
-        /* Mining & Fan */
-        .fan-box { position: relative; width: 190px; height: 190px; margin: 15px 0; }
-        .fan-img { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid rgba(255,255,255,0.3); animation: spin 0.8s linear infinite; box-shadow: 0 0 30px var(--p); }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        /* Stats Table */
-        .m-stats { width: 100%; background: rgba(0,0,0,0.25); padding: 18px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); margin: 10px 0; }
-        .m-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; letter-spacing: 0.5px; }
-        .val { color: var(--g); font-weight: 900; }
-
-        /* Nav */
-        .nav { height: 90px; background: rgba(129, 132, 247, 0.5); display: flex; justify-content: space-around; align-items: center; border-radius: 35px 35px 0 0; backdrop-filter: blur(15px); }
-        .ni { font-size: 24px; cursor: pointer; opacity: 0.4; transition: 0.3s; flex:1; display:flex; flex-direction:column; align-items:center; }
-        .act { opacity: 1; transform: translateY(-5px); color: var(--g); }
-
-        /* List Items */
-        .list-item { width: 100%; background: rgba(255,255,255,0.08); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 15px; border-radius: 25px; font-weight: 800; cursor: pointer; margin: 5px 0; }
+        .list-item { width: 100%; background: rgba(0,0,0,0.2); padding: 12px 18px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; border: 1px solid rgba(255,255,255,0.05); }
+        .nav { height: 90px; background: rgba(129, 132, 247, 0.5); display: flex; justify-content: space-around; align-items: center; border-radius: 35px 35px 0 0; backdrop-filter: blur(10px); }
+        .ni { font-size: 24px; cursor: pointer; opacity: 0.5; flex: 1; text-align: center; }
+        .act { opacity: 1; color: var(--g); transform: scale(1.1); }
+        input { width: 85%; padding: 12px; border-radius: 15px; border: none; text-align: center; background: rgba(255,255,255,0.1); color: #fff; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div id="app">
-    <div class="h">
-        <div class="pill">🪙 <span class="bal-val">0.0000</span></div>
-        <div onclick="mine(false)" style="background:var(--g); color:#000; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; box-shadow: 0 0 10px var(--g);">✕</div>
+    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:20px; font-size:13px;">🪙 <span class="bal-val">0.0000</span></div>
+        <div onclick="tab('home')" style="background:var(--g); color:#000; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</div>
     </div>
 
     <div id="p-home" class="p a">
-        <img src="yourfantastic.jpg" style="width:92%; border-radius:35px; margin-top:10px; border: 4px solid rgba(255,255,255,0.1);">
-        <h2 style="margin:20px 0 5px 0; font-size: 26px;">PET GROWTH</h2>
-        <p style="opacity:0.6; font-size:12px; letter-spacing:1.5px;">CRAFTING UNFORGETTABLE PET</p>
+        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-bottom:20px;">
+        <h2>PET GROWTH</h2>
         <div style="flex:1"></div>
         <button class="btn" onclick="mine(true)">MINING START</button>
-        <div style="height:25px"></div>
-    </div>
-
-    <div id="p-mining" class="p">
-        <h1 style="font-size: 44px; margin:0;">🐾 <span id="m-paws">0</span></h1>
-        <p style="font-size:14px; margin:0; letter-spacing:2px; color:var(--g);">ACTIVE ENGINE</p>
-        <div class="fan-box"><div class="fan-img"></div></div>
-        <div class="m-stats">
-            <div class="m-row"><span>Time Active:</span> <span class="val" id="m-time">0:00</span></div>
-            <div class="m-row"><span>Session Profit:</span> <span class="val">$<span id="m-usd">0.00000</span></span></div>
-            <div class="m-row"><span>Network Speed:</span> <span class="val"><span id="m-ghs">0.00</span> GH/s</span></div>
-        </div>
-        <div style="flex:1"></div>
-        <p style="font-size:10px; opacity:0.4;">Secure Cloud Protocol v3.5</p>
-    </div>
-
-    <div id="p-congrats" class="p">
-        <h1 style="color:var(--g); font-size:38px; margin:10px 0 0 0;">CONGRATS</h1>
-        <h2 style="margin:5px 0;">🐾 <span id="congrats-val">0</span></h2>
-        <div style="background:rgba(0,0,0,0.2); padding:5px 15px; border-radius:15px; font-size:18px;">$<span id="congrats-usd">0.0000</span></div>
-        <img src="image_2033e8.png" style="width:220px; margin:20px 0;">
-        <h3 style="margin:0; font-size:20px; line-height:1.2;">YOU HAVE REACHED ADULTHOOD</h3>
-        <p style="font-size:12px; opacity:0.7; padding:0 20px;">Hats off! Your pet has reached its ultimate form and rewards are collected!</p>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="closeCongrats()">GREAT</button>
-        <div style="height:20px"></div>
     </div>
 
     <div id="p-friends" class="p">
-        <h2 style="margin-top:0;">FRIENDS</h2>
-        <div style="width:100%; background:rgba(0,0,0,0.2); padding:25px; border-radius:30px; border:1px solid rgba(255,255,255,0.1);">
-            <p style="font-size:12px; margin-bottom:15px; opacity:0.8;">SHARE YOUR REFERRAL CODE</p>
-            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:20px; border: 2px dashed var(--g);">
-                <h2 id="my-code" style="color:var(--g); margin:0; letter-spacing:3px; font-size:28px;">-</h2>
-            </div>
-            <button class="btn" style="width:100%; margin-top:20px; padding:15px;" onclick="shareTG()">INVITE FRIENDS</button>
+        <h3 style="margin-top:0;">FRIENDS</h3>
+        
+        <div id="inviter-box" style="width:100%; background:rgba(255,255,255,0.05); padding:15px; border-radius:20px; margin-bottom:20px;">
+            <p style="font-size:11px; margin-top:0;">SİZİ KİM DAVET ETTİ?</p>
+            <input type="text" id="inviter-input" placeholder="Davet Kodu Girin">
+            <button class="btn" style="width:100%; padding:10px;" onclick="applyInviter()">KAYDET</button>
         </div>
-        <p style="font-size:11px; margin-top:15px; opacity:0.5;">Get 10% from every friend's mining.</p>
+
+        <div style="width:100%; text-align:left;">
+            <p style="font-size:12px; margin-left:10px; color:var(--g);">DAVET ETTİKLERİNİZ</p>
+            <div id="ref-list">
+                </div>
+        </div>
+
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; margin-top:10px;">
+            <p style="font-size:10px; margin:0;">SENİN DAVET KODUN</p>
+            <h2 id="my-code" style="color:var(--g); margin:5px 0;">8392479231</h2>
+        </div>
     </div>
 
-    <div id="p-tasks" class="p">
-        <h2 style="margin-top:0;">TASKS</h2>
-        <div class="list-item">
-            <div style="text-align:left;"><b>Telegram Community</b><br><small style="color:var(--g)">+$0.0500</small></div>
-            <button class="btn" style="width:70px; padding:10px; font-size:11px;">JOIN</button>
+    <div id="p-mining" class="p">
+        <h1 style="font-size:40px; margin:0;">🐾 <span id="m-paws">0</span></h1>
+        <div style="width:180px; height:180px; border-radius:50%; background:url('pinix.jpg') center/cover; animation:spin 0.8s linear infinite; margin:20px; border:5px solid var(--p);"></div>
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Time:</span><span id="m-time" class="val">0:00</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Earn:</span><span class="val">$<span id="m-usd">0.00</span></span></div>
+            <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Speed:</span><span class="val"><span id="m-ghs">0.00</span> GH/s</span></div>
         </div>
-        <div class="list-item">
-            <div style="text-align:left;"><b>Share on Telegram</b><br><small style="color:var(--g)">+$0.0100</small></div>
-            <button class="btn" style="width:70px; padding:10px; font-size:11px;" onclick="shareTG()">DO IT</button>
-        </div>
+    </div>
+
+    <div id="p-congrats" class="p">
+        <h1 style="color:var(--g)">CONGRATS</h1>
+        <img src="image_2033e8.png" style="width:200px; margin:20px;">
+        <h3>ADULTHOOD REACHED!</h3>
+        <button class="btn" onclick="tab('home')">GREAT</button>
     </div>
 
     <div id="p-wallet" class="p">
-        <h2 style="margin-top:0;">WALLET</h2>
-        <div style="margin:50px 0;">
-            <p style="opacity:0.6; font-size:13px; letter-spacing:2px;">TOTAL ASSETS</p>
-            <h1 style="font-size:56px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
-            <div style="display:flex; justify-content:center; gap:10px;">
-                <span style="background:rgba(255,255,255,0.1); padding:5px 12px; border-radius:10px; font-size:11px;">USDT</span>
-                <span style="background:rgba(255,255,255,0.1); padding:5px 12px; border-radius:10px; font-size:11px;">WEB3</span>
-            </div>
-        </div>
-        <button class="btn" onclick="alert('Minimum Withdrawal: $10.00')">WITHDRAW FUNDS</button>
-        <p style="margin-top:20px; font-size:11px; opacity:0.4;">Connected to: Mainnet-Beta</p>
+        <h3>WALLET</h3>
+        <h1 style="font-size:45px; color:var(--g);">$<span class="bal-val">0.0000</span></h1>
+        <button class="btn">WITHDRAW</button>
     </div>
 
     <nav class="nav">
         <div class="ni" id="n-friends" onclick="tab('friends')">👥</div>
-        <div class="ni" id="n-tasks" onclick="tab('tasks')">📋</div>
-        <div class="ni act" id="n-home" onclick="tab('home')">🐾</div>
+        <div class="ni" id="n-home" onclick="tab('home')">🐾</div>
         <div class="ni" id="n-wallet" onclick="tab('wallet')">👛</div>
     </nav>
 </div>
+
+<style> @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
 </body>
 </html>
