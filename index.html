@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Mining</title>
+    <title>Your Fantastic Pet - Pro Mining</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -19,7 +19,6 @@
             overflow: hidden;
         }
 
-        /* 9:16 Mobil Oranı */
         #app-container {
             width: 100vw;
             height: calc(100vw * 16 / 9);
@@ -33,7 +32,6 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Üst Panel */
         .header {
             padding: 15px;
             display: flex;
@@ -53,7 +51,6 @@
             font-size: 12px;
         }
 
-        /* ANA EKRAN (Play) */
         #start-screen {
             flex: 1;
             display: flex;
@@ -64,7 +61,7 @@
         }
 
         .main-img {
-            width: 70%; /* Görseli küçülttüm */
+            width: 65%;
             margin-top: 50px;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
         }
@@ -82,7 +79,6 @@
             text-transform: uppercase;
         }
 
-        /* MINING EKRANI */
         #mining-screen {
             display: none;
             flex: 1;
@@ -93,12 +89,24 @@
             color: white;
         }
 
-        .growth-stats { margin-bottom: 20px; }
+        .close-btn {
+            background: var(--accent-yellow);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+
         .growth-stats h1 { font-size: 40px; margin: 0; }
-        .growth-stats span { color: var(--accent-yellow); font-size: 20px; }
+        .growth-stats .session-val { color: var(--accent-yellow); font-size: 20px; }
         .growth-title { font-size: 28px; letter-spacing: 2px; margin-top: 10px; }
 
-        /* Dönen Pinix Görseli */
         .pinix-container {
             flex: 1;
             display: flex;
@@ -107,12 +115,15 @@
         }
 
         .pinix-img {
-            width: 220px;
-            height: 220px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            animation: fan-rotate 3s linear infinite; /* Fan gibi dönme */
             border: 5px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
+        }
+
+        .rotating {
+            animation: fan-rotate 2s linear infinite;
         }
 
         @keyframes fan-rotate {
@@ -120,9 +131,6 @@
             to { transform: rotate(360deg); }
         }
 
-        .slogan { font-size: 11px; margin-bottom: 40px; opacity: 0.8; letter-spacing: 1px; }
-
-        /* Alt Panel */
         .mining-footer {
             width: 100%;
             background: rgba(255,255,255,0.1);
@@ -134,20 +142,13 @@
         }
 
         .footer-circle {
-            width: 65px; height: 65px;
+            width: 70px; height: 70px;
             background: var(--accent-yellow);
             border-radius: 50%;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
             color: #333; font-size: 10px;
         }
-
-        .main-circle {
-            width: 100px; height: 100px;
-            border: 6px solid var(--bg-purple);
-            box-shadow: 0 0 15px var(--accent-yellow);
-        }
-
     </style>
 </head>
 <body>
@@ -158,68 +159,98 @@
             <div style="background:orange; width:18px; height:18px; border-radius:50%"></div>
             <div>
                 <div style="font-size: 8px; color: var(--accent-yellow);">Admin: 8392479231</div>
-                <b>0,00,000</b>
+                <b id="main-balance-display">0.00000</b>
             </div>
         </div>
-        <div style="background: var(--accent-yellow); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #444;">✖</div>
+        <button id="global-close" class="close-btn" style="visibility: hidden;" onclick="stopMiningAndClaim()">✖</button>
     </div>
 
     <div id="start-screen">
-        <img src="yourfantastic.jpg" class="main-img" alt="Pet Group">
+        <img src="yourfantastic.jpg" class="main-img">
         <button class="play-btn" onclick="startMining()">PLAY</button>
     </div>
 
     <div id="mining-screen">
         <div class="growth-stats">
             <h1>🐾 0</h1>
-            <span>$0.0000</span>
+            <div class="session-val">$<span id="session-usd">0.00000</span></div>
             <div class="growth-title">PET GROWTH</div>
         </div>
 
         <div class="pinix-container">
-            <img src="pinix.jpg" class="pinix-img" alt="Fan Mining">
+            <img src="pinix.jpg" id="mining-logo" class="pinix-img">
         </div>
-
-        <div class="slogan">BECAUSE EVERY PET DESERVES</div>
 
         <div class="mining-footer">
             <div class="footer-circle">
                 <span>⏰</span>
                 <b id="timer">00:00:00</b>
             </div>
-            <div class="footer-circle main-circle">
-                <b style="font-size: 20px;">100%</b>
-                <span style="font-size: 7px; text-align: center;">AWAY FROM<br>EARNING</span>
+            <div class="footer-circle" style="width:90px; height:90px; border:4px solid var(--bg-purple);">
+                <b style="font-size: 18px;">100%</b>
+                <span style="font-size: 7px; text-align: center;">MINING<br>ACTIVE</span>
             </div>
             <div class="footer-circle">
-                <span>⚡</span>
-                <b>0.00GG/H</b>
+                <span>⚡ HIZ</span>
+                <b id="speed-display">0.00 GH/s</b>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let usdBalance = 0.0000;
+    let mainBalance = 0.00000;
+    let sessionBalance = 0.00000;
     let secondsElapsed = 0;
-    const rate = 0.0005 / 50; // 50 sn'de 0.0005 usdt
+    let miningInterval;
+    const ratePerSecond = 0.0005 / 50; 
 
     function startMining() {
+        // Ekranları değiştir
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('mining-screen').style.display = 'flex';
+        document.getElementById('global-close').style.visibility = 'visible';
+        document.getElementById('mining-logo').classList.add('rotating');
 
-        setInterval(() => {
-            // Bakiyeyi her saniye ufak ufak artır
-            usdBalance += rate;
-            document.querySelector('.growth-stats span').innerText = '$' + usdBalance.toFixed(4);
+        // Rastgele Hız Ver (3 ila 4 GH/s)
+        let randomSpeed = (Math.random() * (4.0 - 3.0) + 3.0).toFixed(2);
+        document.getElementById('speed-display').innerText = randomSpeed + " GH/s";
 
-            // Sayacı ilerlet
+        // Değerleri sıfırla
+        sessionBalance = 0.00000;
+        secondsElapsed = 0;
+        document.getElementById('session-usd').innerText = sessionBalance.toFixed(5);
+
+        miningInterval = setInterval(() => {
+            sessionBalance += ratePerSecond;
+            document.getElementById('session-usd').innerText = sessionBalance.toFixed(5);
+
             secondsElapsed++;
-            let h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
-            let m = Math.floor((secondsElapsed % 3600) / 60).toString().padStart(2, '0');
-            let s = (secondsElapsed % 60).toString().padStart(2, '0');
-            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            updateTimer();
         }, 1000);
+    }
+
+    function stopMiningAndClaim() {
+        clearInterval(miningInterval);
+        
+        // Claim: Session bakiyesini ana bakiyeye ekle
+        mainBalance += sessionBalance;
+        document.getElementById('main-balance-display').innerText = mainBalance.toFixed(5);
+
+        // Ekranları geri al
+        document.getElementById('start-screen').style.display = 'flex';
+        document.getElementById('mining-screen').style.display = 'none';
+        document.getElementById('global-close').style.visibility = 'hidden';
+        document.getElementById('mining-logo').classList.remove('rotating');
+        
+        alert("Claim Başarılı! Kazanç cüzdana eklendi: " + sessionBalance.toFixed(5) + " USDT");
+    }
+
+    function updateTimer() {
+        let h = Math.floor(secondsElapsed / 3600).toString().padStart(2, '0');
+        let m = Math.floor((secondsElapsed % 3600) / 60).toString().padStart(2, '0');
+        let s = (secondsElapsed % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
     }
 </script>
 
