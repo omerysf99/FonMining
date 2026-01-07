@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Final</title>
+    <title>Your Fantastic Pet - Hidden Admin</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -12,7 +12,6 @@
             --dark-card: rgba(0, 0, 0, 0.4);
             --glass: rgba(255, 255, 255, 0.15);
             --admin-red: #e74c3c;
-            --success: #2ecc71;
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -24,36 +23,35 @@
             position: relative; display: flex; flex-direction: column; color: white;
         }
 
-        /* --- Ghost Mode Katmanı --- */
+        /* Hayalet Modu Katmanı */
         #ghost-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(231, 76, 60, 0.15); border: 5px dashed var(--admin-red);
             z-index: 9999; display: none; pointer-events: all;
         }
-        #ghost-overlay::after { content: "GHOST MODE: VIEW ONLY (DblClick to Exit)"; position: absolute; top: 50%; width: 100%; text-align: center; color: white; font-size: 14px; text-shadow: 2px 2px 4px #000; }
+        #ghost-overlay::after { content: "GHOST MODE: VIEW ONLY\n(Çıkmak için Çift Tıkla)"; position: absolute; top: 50%; width: 100%; text-align: center; color: white; font-size: 14px; text-shadow: 2px 2px 4px #000; white-space: pre; }
 
-        /* --- Header --- */
+        /* Header */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .balance-pill { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
         .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
 
-        /* --- Screens --- */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; overflow-y: auto; }
+        /* Screens */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; overflow-y: auto; position: relative; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- UI Elements --- */
+        /* UI Kartları */
         .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
-        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
         .btn-yellow { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
             width: 100%; padding: 16px; font-size: 18px; border-radius: 25px; 
             box-shadow: 0 5px 0 #ccaa00; cursor: pointer; margin-top: 10px;
         }
-        .btn-yellow:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        .btn-yellow:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
         .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; outline: none; }
 
-        /* --- Mining Area --- */
+        /* Mining Visuals */
         .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
         .rotating { animation: fanRot 1.5s linear infinite; }
         @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -69,7 +67,7 @@
             font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
         }
 
-        /* --- Nav Bar --- */
+        /* Alt Navigasyon */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; font-size: 22px; transition: 0.3s; }
         .nav-item.active { opacity: 1; }
@@ -90,16 +88,54 @@
         <div id="stop-btn" class="exit-btn" onclick="stopMining()">✖</div>
     </div>
 
-    <div id="screen-login" class="screen active-screen" style="justify-content:center;">
-        <h1 style="margin-bottom:30px;">ENTER ID</h1>
-        <input type="text" id="login-id" class="input-box" placeholder="User or Admin ID" style="text-align:center;">
-        <button class="btn-yellow" onclick="handleLogin()">LOGIN</button>
+    <div id="screen-home" class="screen active-screen">
+        <img src="yourfantastic.jpg" style="width:85%; border-radius:30px; margin-top:30px;">
+        <h1 style="font-size:32px; margin:20px 0;">YOUR FANTASTIC PET</h1>
+        <button class="btn-yellow" onclick="startMining()">PLAY</button>
     </div>
 
-    <div id="screen-home" class="screen">
-        <img src="yourfantastic.jpg" style="width:85%; border-radius:30px; margin-top:30px;">
-        <h1 style="font-size:32px; margin:20px 0;">YOUR<br>FANTASTIC PET</h1>
-        <button class="btn-yellow" onclick="startMining()">PLAY</button>
+    <div id="screen-ref" class="screen">
+        <h2>FRIENDS</h2>
+        <div class="card">
+            <h4>Claim Bonus</h4>
+            <input type="text" id="ref-input" class="input-box" placeholder="Kodu Gir">
+            <button id="ref-btn" class="btn-yellow" onclick="handleAdminTrigger()">BONUSU AL</button>
+        </div>
+        <div class="card">
+            <h4>Davet Kodun: <b>PET839247</b></h4>
+            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareTG()">TELEGRAM'DA PAYLAŞ</button>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2>TASKS</h2>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><h4>Fonix Community</h4><p style="margin:5px 0 0 0;">+ $0.0014</p></div>
+            <button id="task-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doTask()">KATIL</button>
+        </div>
+    </div>
+
+    <div id="screen-wallet" class="screen">
+        <h2>WITHDRAW</h2>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:35px; color:var(--accent-yellow);">$<span id="w-bal">0.0000</span></p>
+        </div>
+        <div class="card">
+            <h4>Cüzdan Adresi</h4>
+            <input type="text" class="input-box" placeholder="USDT (BEP20) Adresi">
+            <h4 style="margin-top:10px;">Miktar</h4>
+            <input type="number" id="wd-amt" class="input-box" placeholder="Min $1.00">
+            <button class="btn-yellow" onclick="processWD()">ÇEKİM TALEBİ</button>
+        </div>
+    </div>
+
+    <div id="screen-admin" class="screen">
+        <h2 style="color:var(--admin-red);">ADMIN PANEL</h2>
+        <div class="card">
+            <h4>Hayalet Ekran</h4>
+            <input type="text" id="target-id" class="input-box" placeholder="Üye ID Gir">
+            <button class="btn-yellow" style="background:var(--admin-red); color:white; box-shadow:0 5px 0 #922b21;" onclick="enterGhost()">İZLEMEYE BAŞLA</button>
+        </div>
     </div>
 
     <div id="screen-mining" class="screen">
@@ -112,97 +148,47 @@
         </div>
         <div class="stats-footer">
             <div class="stat-circle">⏰<br><span id="t-val">00:00</span></div>
-            <div class="stat-circle" style="width:100px; height:100px; transform:translateY(-15px); font-size:14px;"><span id="p-val">0</span>%<br><small>COMPLETE</small></div>
+            <div class="stat-circle" style="width:100px; height:100px; transform:translateY(-15px); font-size:14px;"><span id="p-val">0</span>%<br><small>TAMAMLANDI</small></div>
             <div class="stat-circle">⚡<br><span>77.6 GH/s</span></div>
         </div>
     </div>
 
-    <div id="screen-congrats" class="screen" style="justify-content:center;">
-        <h1 style="color:var(--accent-yellow); font-size:45px; margin:0;">CONGRATS</h1>
-        <div style="font-size:30px;">🐾 <span id="c-paws">0</span></div>
-        <div style="color:var(--accent-yellow); font-size:20px;">$<span id="c-usd">0.0000</span></div>
-        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:160px; margin:25px 0;">
-        <button class="btn-yellow" onclick="goHome()">GREAT</button>
-    </div>
-
-    <div id="screen-ref" class="screen">
-        <h2>FRIENDS</h2>
-        <div class="card">
-            <h4>Claim Bonus</h4>
-            <input type="text" id="ref-input" class="input-box" placeholder="Enter Ref Code">
-            <button id="ref-btn" class="btn-yellow" onclick="claimRef()">CLAIM $0.05</button>
-        </div>
-        <div class="card">
-            <h4>Invite Code: <b>PET839247</b></h4>
-            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareTG()">SHARE ON TELEGRAM 🚀</button>
-        </div>
-    </div>
-
-    <div id="screen-tasks" class="screen">
-        <h2>TASKS</h2>
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><h4>Fonix Community</h4><p style="margin:5px 0 0 0;">+ $0.0014</p></div>
-            <button id="task-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doFonixTask()">JOIN</button>
-        </div>
-    </div>
-
-    <div id="screen-wallet" class="screen">
-        <h2>WITHDRAW</h2>
-        <div class="card" style="text-align:center;">
-            <p style="font-size:35px; color:var(--accent-yellow);">$<span id="w-bal">0.0000</span></p>
-        </div>
-        <div class="card">
-            <h4>Wallet Address</h4>
-            <input type="text" id="wd-addr" class="input-box" placeholder="USDT BEP20 Address">
-            <h4 style="margin-top:10px;">Amount</h4>
-            <input type="number" id="wd-amt" class="input-box" placeholder="Min $1.00">
-            <button class="btn-yellow" onclick="processWithdraw()">CONFIRM WITHDRAW</button>
-        </div>
-    </div>
-
-    <div id="screen-admin" class="screen">
-        <h2 style="color:var(--admin-red);">ADMIN DASHBOARD</h2>
-        <div class="card">
-            <h4>User Viewer (Ghost Mode)</h4>
-            <input type="text" id="target-id" class="input-box" placeholder="Enter Member ID">
-            <button class="btn-yellow" style="background:var(--admin-red); color:white; box-shadow:0 5px 0 #922b21;" onclick="enterGhost()">VIEW USER SCREEN</button>
-        </div>
-        <button class="btn-yellow" onclick="changeTab('home')">RETURN TO GAME</button>
-    </div>
-
-    <div id="main-nav" class="nav-bar" style="display:none;">
+    <div id="main-nav" class="nav-bar">
         <div class="nav-item" onclick="changeTab('ref')">👥</div>
         <div class="nav-item" onclick="changeTab('tasks')">🎁</div>
-        <div class="nav-item nav-center" onclick="changeTab('home')">🐾</div>
-        <div id="nav-adm-btn" class="nav-item" style="display:none; color:var(--admin-red);" onclick="changeTab('admin')">⚙️</div>
+        <div class="nav-item nav-center active" onclick="changeTab('home')">🐾</div>
+        <div id="adm-nav" class="nav-item" style="display:none; color:var(--admin-red);" onclick="changeTab('admin')">⚙️</div>
         <div class="nav-item" onclick="changeTab('wallet')">👛</div>
     </div>
 </div>
 
 <script>
-    let bal = 0, isGhost = false, refUsed = false, taskDone = false;
+    let bal = 0, isGhost = false, refTaken = false, taskTaken = false;
     let cUSD = 0, timer, secs = 0;
     const SPEED = 0.000015;
-    const ADMIN_ID = "8392479231";
-
-    function handleLogin() {
-        const id = document.getElementById('login-id').value;
-        if(!id) return alert("Please enter an ID");
-        document.getElementById('screen-login').style.display = 'none';
-        document.getElementById('main-nav').style.display = 'flex';
-        
-        if(id === ADMIN_ID) {
-            document.getElementById('nav-adm-btn').style.display = 'flex';
-            changeTab('admin');
-        } else {
-            changeTab('home');
-        }
-    }
+    const ADMIN_ID = "8392479231"; // Senin gizli ID'n
 
     function changeTab(t) {
-        if(isGhost && t === 'admin') return; // Ghost moddayken admin butonu dblclick ile çıkılır
+        if(isGhost && t !== 'admin') return; 
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById('screen-'+t).classList.add('active-screen');
+    }
+
+    function handleAdminTrigger() {
+        const input = document.getElementById('ref-input').value;
+        if(input === ADMIN_ID) {
+            document.getElementById('adm-nav').style.display = 'flex';
+            alert("Sistem Tanındı: Admin Paneli Aktif!");
+            changeTab('admin');
+            return;
+        }
+        // Normal referans işlemi
+        if(!refTaken && input.length > 2) {
+            bal += 0.05; refTaken = true;
+            document.getElementById('ref-btn').disabled = true;
+            document.getElementById('ref-btn').innerText = "ALINDI ✅";
+            updateUI();
+        }
     }
 
     function startMining() {
@@ -222,45 +208,29 @@
 
     function stopMining() {
         clearInterval(timer);
-        document.getElementById('c-usd').innerText = cUSD.toFixed(5);
-        document.getElementById('c-paws').innerText = Math.floor(cUSD * 45000);
-        changeTab('congrats');
-    }
-
-    function goHome() {
         bal += cUSD; updateUI();
         document.getElementById('main-nav').classList.remove('nav-locked');
         document.getElementById('stop-btn').style.display = 'none';
         changeTab('home');
     }
 
-    function doFonixTask() {
-        if(isGhost || taskDone) return;
+    function doTask() {
+        if(isGhost || taskTaken) return;
         window.open('https://t.me/FonixCommunity', '_blank');
         setTimeout(() => {
-            bal += 0.0014; taskDone = true;
+            bal += 0.0014; taskTaken = true;
             document.getElementById('task-btn').disabled = true;
-            document.getElementById('task-btn').innerText = "DONE ✅";
+            document.getElementById('task-btn').innerText = "BİTTİ ✅";
             updateUI();
         }, 1500);
     }
 
-    function claimRef() {
-        if(isGhost || refUsed) return;
-        if(document.getElementById('ref-input').value.length > 2) {
-            bal += 0.05; refUsed = true;
-            document.getElementById('ref-btn').disabled = true;
-            document.getElementById('ref-btn').innerText = "CLAIMED ✅";
-            updateUI();
-        }
-    }
-
-    function processWithdraw() {
+    function processWD() {
         if(isGhost) return;
         const amt = parseFloat(document.getElementById('wd-amt').value);
         if(amt >= 1.0 && amt <= bal) {
-            bal -= amt; updateUI(); alert("Withdrawal Requested!");
-        } else { alert("Insufficient Balance (Min $1.00)"); }
+            bal -= amt; updateUI(); alert("Talep Gönderildi!");
+        } else { alert("Hatalı Miktar! (Min $1.00)"); }
     }
 
     function updateUI() {
@@ -269,14 +239,12 @@
     }
 
     function shareTG() {
-        const msg = encodeURIComponent("🐾 Mining Your Fantastic Pet! Use code PET839247 for bonus!");
-        window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=${msg}`, "_blank");
+        window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=Hemen Kazanmaya Başla!`, "_blank");
     }
 
-    /* --- ADMIN FUNCTIONS --- */
     function enterGhost() {
-        const tid = document.getElementById('target-id').value;
-        if(!tid) return alert("Enter Member ID");
+        const id = document.getElementById('target-id').value;
+        if(!id) return alert("ID Girilmedi");
         isGhost = true;
         document.getElementById('ghost-overlay').style.display = 'block';
         changeTab('home');
