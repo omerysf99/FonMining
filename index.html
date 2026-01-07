@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v600 - High Earn Edition</title>
+    <title>FonixApp - Ultimate Web3</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -21,8 +21,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Admin ID senin ID'n
         let uID = "8392479231"; 
-        let stats = { balance: 0.0, invitedBy: "", completedTasks: [], totalMinedTime: 0, refCount: 0 };
+        let stats = { balance: 0.0, invitedBy: "", completedTasks: [], totalEarned: 0 };
         let liveEarn = 0, miningLoop, seconds = 0;
 
         async function init() {
@@ -33,153 +34,190 @@
             
             updateUI();
             loadReferrals();
+            renderTasks();
         }
 
-        // --- MINING (Saniyede 0.00002 USDT) ---
+        // --- MINING ENGINE (0.00002 USDT/sec) ---
         window.startMining = () => {
-            tab('mining');
+            tab('earning');
             liveEarn = 0; seconds = 0;
             miningLoop = setInterval(() => {
                 seconds++;
-                liveEarn += 0.00002; // İSTEDİĞİN ORAN: Saniyede 0.00002 USDT
+                liveEarn += 0.00002; 
                 document.getElementById('m-usd').innerText = liveEarn.toFixed(5);
                 document.getElementById('m-time').innerText = `${Math.floor(seconds/60)}:${seconds%60 < 10 ? '0'+seconds%60 : seconds%60}`;
+                document.getElementById('prog-bar').style.width = (seconds % 60) * 1.66 + "%";
             }, 1000);
         };
 
         window.stopMining = async () => {
             clearInterval(miningLoop);
             stats.balance += liveEarn;
-            stats.totalMinedTime = (stats.totalMinedTime || 0) + seconds;
-            await updateDoc(doc(db, "users", uID), { balance: stats.balance, totalMinedTime: stats.totalMinedTime });
+            stats.totalEarned = (stats.totalEarned || 0) + liveEarn;
+            await updateDoc(doc(db, "users", uID), { balance: stats.balance, totalEarned: stats.totalEarned });
             updateUI();
-            tab('congrats');
+            tab('wallet');
         };
 
-        // --- FRIENDS SEKME DÜZENLEME ---
-        window.applyInviter = async () => {
-            const input = document.getElementById('inviter-input').value;
-            if(!input || input === uID || stats.invitedBy) return;
-            stats.invitedBy = input;
-            stats.balance += 0.10; // Kod girene hoşgeldin bonusu
-            await updateDoc(doc(db, "users", uID), { invitedBy: input, balance: stats.balance });
+        // --- TASK SYSTEM ---
+        const tasks = [
+            { id: "x_follow", title: "X (Twitter) Follow", reward: 0.15, link: "https://x.com" },
+            { id: "tg_join", title: "Join Telegram Channel", reward: 0.10, link: "https://t.me" },
+            { id: "ig_follow", title: "Instagram Follow", reward: 0.10, link: "https://instagram.com" }
+        ];
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = "";
+            tasks.forEach(t => {
+                const done = stats.completedTasks.includes(t.id);
+                list.innerHTML += `
+                <div class="list-item">
+                    <div style="text-align:left">
+                        <div style="font-size:14px">${t.title}</div>
+                        <div style="font-size:11px; color:var(--g)">+$${t.reward.toFixed(2)}</div>
+                    </div>
+                    <button class="task-btn ${done ? 'done' : ''}" onclick="${done ? '' : `doTask('${t.id}', ${t.reward}, '${t.link}')`}">
+                        ${done ? 'COMPLETED' : 'GO'}
+                    </button>
+                </div>`;
+            });
+        }
+
+        window.doTask = async (id, reward, link) => {
+            window.open(link, '_blank');
+            setTimeout(async () => {
+                if(!stats.completedTasks.includes(id)) {
+                    stats.completedTasks.push(id);
+                    stats.balance += reward;
+                    await updateDoc(doc(db, "users", uID), { balance: stats.balance, completedTasks: stats.completedTasks });
+                    updateUI(); renderTasks();
+                }
+            }, 3000);
+        };
+
+        // --- WITHDRAW SYSTEM ---
+        window.withdraw = async () => {
+            const addr = document.getElementById('wd-addr').value;
+            const amt = parseFloat(document.getElementById('wd-amt').value);
+            const msg = document.getElementById('wd-msg');
+
+            if (!addr.startsWith('T') || addr.length < 30) return msg.innerText = "Error: Invalid Address";
+            if (amt < 10 || amt > stats.balance) return msg.innerText = "Error: Minimum $10 Required";
+
+            stats.balance -= amt;
+            await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+            await addDoc(collection(db, "withdrawals"), { uID, addr, amt, date: new Date().toISOString() });
+            msg.style.color = "#2ecc71";
+            msg.innerText = "Success! Processing...";
             updateUI();
-            alert("Davet kodu başarıyla uygulandı!");
         };
 
         async function loadReferrals() {
-            const refList = document.getElementById('ref-list');
-            refList.innerHTML = "Yükleniyor...";
             const q = query(collection(db, "users"), where("invitedBy", "==", uID));
             const snap = await getDocs(q);
-            stats.refCount = snap.size;
-            refList.innerHTML = "";
-            snap.forEach(doc => {
-                refList.innerHTML += `
-                    <div class="list-item">
-                        <div style="text-align:left">
-                            <div style="font-size:13px">👤 User_${doc.id.slice(-5)}</div>
-                            <div style="font-size:10px; opacity:0.6">Active Miner</div>
-                        </div>
-                        <div style="color:var(--g); font-size:13px">+$0.0500</div>
-                    </div>`;
+            document.getElementById('ref-count').innerText = snap.size;
+            const list = document.getElementById('ref-list');
+            list.innerHTML = snap.size ? "" : "<p style='opacity:0.5'>No friends yet</p>";
+            snap.forEach(d => {
+                list.innerHTML += `<div class="list-item"><span>👤 User_${d.id.slice(-4)}</span><span style="color:var(--g)">+$0.05</span></div>`;
             });
-            if(snap.size === 0) refList.innerHTML = "<p style='opacity:0.5; font-size:12px;'>Henüz referansınız yok.</p>";
-            updateUI();
         }
 
         function updateUI() {
             document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
             document.getElementById('my-code').innerText = uID;
-            document.getElementById('stat-refs').innerText = stats.refCount || 0;
-            if(stats.invitedBy) {
-                document.getElementById('inviter-section').innerHTML = `<p style="color:var(--g); font-size:13px;">Sizi Davet Eden: ${stats.invitedBy}</p>`;
-            }
         }
 
         window.tab = (id) => {
             document.querySelectorAll('.p').forEach(x => x.classList.remove('a'));
             document.getElementById('p-'+id).classList.add('a');
-            document.querySelector('.nav').style.display = (id === 'mining' || id === 'congrats') ? 'none' : 'flex';
+            document.querySelector('.nav').style.display = (id === 'earning') ? 'none' : 'flex';
         };
 
         window.onload = init;
     </script>
     <style>
-        :root { --p: #7b66ff; --g: #fbc531; }
-        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
-        #app { width: 100%; max-width: 410px; height: 92vh; background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%); border-radius: 40px; border: 8px solid #222; display: flex; flex-direction: column; position: relative; }
-        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        :root { --p: #7b66ff; --g: #fbc531; --bg: #0d0d1a; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
+        #app { width: 100%; max-width: 410px; height: 95vh; background: linear-gradient(180deg, #1a1a3a 0%, #0d0d1a 100%); border-radius: 40px; border: 4px solid #333; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 25px; overflow-y: auto; }
         .a { display: flex; }
-        .btn { background: var(--g); color: #000; border: none; width: 90%; padding: 15px; border-radius: 20px; font-weight: 800; cursor: pointer; margin: 10px 0; }
-        .list-item { width: 100%; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        input { width: 100%; padding: 12px; border-radius: 12px; border: none; margin-bottom: 10px; background: rgba(255,255,255,0.1); color: #fff; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .nav { height: 80px; background: rgba(0,0,0,0.3); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px); }
-        .ni { font-size: 24px; cursor: pointer; opacity: 0.6; }
-        .fan { width: 180px; height: 180px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid var(--g); animation: spin 0.8s linear infinite; margin: 20px; box-shadow: 0 0 20px var(--g); }
+        .btn { background: var(--g); color: #000; border: none; width: 100%; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; margin: 10px 0; font-size: 16px; transition: 0.3s; }
+        .list-item { width: 100%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .task-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .task-btn.done { background: #333; color: #888; cursor: default; }
+        input { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #444; margin-bottom: 12px; background: #151525; color: #fff; text-align: center; }
+        .nav { height: 85px; background: rgba(20,20,40,0.9); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px); border-top: 1px solid #333; }
+        .ni { font-size: 22px; cursor: pointer; opacity: 0.5; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .ni span { font-size: 10px; margin-top: 5px; font-weight: bold; }
+        .ni:hover { opacity: 1; color: var(--g); }
+        .fan-container { position: relative; margin: 30px 0; }
+        .fan { width: 200px; height: 200px; border-radius: 50%; border: 8px solid var(--p); animation: spin 1s linear infinite; box-shadow: 0 0 30px var(--p); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .progress-container { width: 80%; height: 6px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        #prog-bar { width: 0%; height: 100%; background: var(--g); transition: 0.3s; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:20px; font-size: 14px;">🪙 <span class="bal-val">0.0000</span></div>
-        <div onclick="tab('home')" style="cursor:pointer;">✕</div>
+        <div style="background:rgba(255,255,255,0.1); padding:8px 16px; border-radius:20px; font-size: 14px; border:1px solid #444;">🪙 <span class="bal-val">0.0000</span></div>
+        <div style="font-weight: bold; color: var(--g);">WEB3 PET</div>
     </div>
 
     <div id="p-home" class="p a">
-        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-top:10px;">
-        <h2 style="margin:20px 0 0 0;">FONIX MINING</h2>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="startMining()">START EARNING</button>
-    </div>
-
-    <div id="p-friends" class="p">
         <h3 style="margin-top:0;">FRIENDS</h3>
-        
-        <div id="inviter-section" style="width:100%; background:rgba(255,255,255,0.05); padding:15px; border-radius:20px; margin-bottom:15px;">
-            <p style="font-size:10px; margin:0 0 10px 0; opacity:0.7;">WHO INVITED YOU?</p>
-            <input type="text" id="inviter-input" placeholder="Enter Invite Code">
-            <button class="btn" style="width:100%; padding:10px; margin:0;" onclick="applyInviter()">SAVE</button>
+        <div style="background:rgba(123, 102, 255, 0.1); width:100%; padding:20px; border-radius:25px; border:1px dashed var(--p); margin-bottom:20px;">
+            <p style="font-size:11px; margin:0; opacity:0.7;">YOUR INVITE CODE</p>
+            <h2 id="my-code" style="margin:10px 0; letter-spacing:3px; color:var(--g)">-</h2>
         </div>
-
-        <div style="width:100%; text-align: left; flex:1;">
-            <p style="color:var(--g); font-size: 12px; margin-bottom:10px;">YOUR REFERRALS (<span id="stat-refs">0</span>)</p>
+        <div style="width:100%; text-align:left;">
+            <p style="font-size:12px; opacity:0.6;">REFERRALS (<span id="ref-count">0</span>)</p>
             <div id="ref-list"></div>
         </div>
-
-        <div style="background:rgba(0,0,0,0.3); width:100%; padding:15px; border-radius:20px; border: 2px dashed var(--g);">
-            <small style="opacity:0.6">YOUR INVITE CODE</small>
-            <h2 id="my-code" style="color:var(--g); margin:5px 0; letter-spacing:2px;">-</h2>
-        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="startMining()">GO TO EARNING</button>
     </div>
 
-    <div id="p-mining" class="p">
-        <h1 style="font-size:40px; margin:0;">🐾 <span id="m-paws">0</span></h1>
-        <div class="fan"></div>
-        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px;">
-            <div style="display:flex; justify-content:space-between;"><span>Time:</span><span id="m-time" style="color:var(--g)">0:00</span></div>
-            <div style="display:flex; justify-content:space-between; margin:5px 0;"><span>Profit:</span><span style="color:var(--g)">$<span id="m-usd">0.00000</span></span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Network:</span><span style="color:var(--g)">CLOUD_v2</span></div>
-        </div>
-        <button class="btn" style="margin-top:20px;" onclick="stopMining()">STOP & COLLECT</button>
+    <div id="p-tasks" class="p">
+        <h3>DAILY TASKS</h3>
+        <p style="font-size:12px; opacity:0.6; margin-bottom:20px;">Complete tasks to earn extra USDT</p>
+        <div id="task-list" style="width:100%;"></div>
+    </div>
+
+    <div id="p-earning" class="p">
+        <h1 style="font-size:48px; margin:0; color:var(--g);">$<span id="m-usd">0.00000</span></h1>
+        <p style="font-size:12px; letter-spacing:3px; opacity:0.7;">MINING ACTIVE</p>
+        <div class="fan-container"><div class="fan"></div></div>
+        <div class="progress-container"><div id="prog-bar"></div></div>
+        <p style="font-size:14px;">Time Elapsed: <span id="m-time" style="color:var(--g)">0:00</span></p>
+        <div style="flex:1"></div>
+        <button class="btn" style="background:#ff4757; color:#fff;" onclick="stopMining()">STOP & COLLECT</button>
     </div>
 
     <div id="p-wallet" class="p">
         <h3>WALLET</h3>
-        <div style="background:rgba(255,255,255,0.1); width:100%; padding:30px; border-radius:25px;">
+        <div style="background:rgba(255,255,255,0.05); width:100%; padding:30px; border-radius:30px; border:1px solid #333; margin-bottom:20px;">
             <p style="font-size:12px; opacity:0.6; margin:0;">TOTAL BALANCE</p>
-            <h1 style="font-size:45px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
+            <h1 style="font-size:52px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <button class="btn" style="margin-top:20px;" onclick="alert('Withdrawals process manually within 24h.')">WITHDRAWAL SECTION</button>
+        <div style="width:100%; text-align:left;">
+            <label style="font-size:11px; margin-left:10px;">USDT TRC20 ADDR</label>
+            <input type="text" id="wd-addr" placeholder="T...">
+            <label style="font-size:11px; margin-left:10px;">AMOUNT</label>
+            <input type="number" id="wd-amt" placeholder="Min $10.00">
+            <p id="wd-msg" style="text-align:center; font-size:12px; color:#ff4757;"></p>
+            <button class="btn" onclick="withdraw()">WITHDRAW NOW</button>
+        </div>
     </div>
 
     <nav class="nav">
-        <div class="ni" onclick="tab('friends')">👥</div>
-        <div class="ni" onclick="tab('home')">🐾</div>
-        <div class="ni" onclick="tab('wallet')">👛</div>
+        <div class="ni" onclick="tab('home')">👥<span>Friends</span></div>
+        <div class="ni" onclick="tab('tasks')">📋<span>Tasks</span></div>
+        <div class="ni" onclick="tab('wallet')">👛<span>Wallet</span></div>
     </nav>
 </div>
 
