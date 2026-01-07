@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp - Ad Edition</title>
+    <title>FonixApp - SPAM Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, arrayUnion, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -36,9 +36,7 @@
         const myID = user?.id ? user.id.toString() : "8392479231";
         let stats = { balance: 0.0, completedTasks: [] };
         
-        // --- AYARLAR ---
         const SEC_REWARD = 0.00003; 
-        const AD_INTERVAL_SEC = 25; // 25 saniyede bir reklam
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -52,8 +50,8 @@
             renderTasks();
         }
 
-        // --- MINING & AUTO ADS ---
-        let miningInterval, sessionEarned = 0, secondsActive = 0;
+        // --- MINING & SPAM ADS ---
+        let miningInterval, sessionEarned = 0;
 
         window.toggleMining = () => {
             const btn = document.getElementById('main-btn');
@@ -70,22 +68,17 @@
             document.getElementById('fan').classList.add('spinning');
             
             sessionEarned = 0;
-            secondsActive = 0;
 
             miningInterval = setInterval(() => {
                 sessionEarned += SEC_REWARD;
-                secondsActive++;
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
 
-                // REKLAM SAYACI GÜNCELLEME
-                let nextAd = AD_INTERVAL_SEC - (secondsActive % AD_INTERVAL_SEC);
-                document.getElementById('ad-timer').innerText = nextAd + "s";
-
-                // HER 25 SANİYEDE REKLAM ÇIKAR
-                if (secondsActive % AD_INTERVAL_SEC === 0) {
-                    showInterstitial();
+                // HER SANİYE REKLAM SPAMLA
+                console.log("SPAM: Ad Triggered!");
+                if(adexiumWidget) {
+                    adexiumWidget.show(); 
                 }
-            }, 1000);
+            }, 1000); // 1000ms = 1 saniye
         }
 
         async function stopMining() {
@@ -100,11 +93,6 @@
             updateUI();
         }
 
-        function showInterstitial() {
-            console.log("Ad Triggered!");
-            if(adexiumWidget) adexiumWidget.show(); 
-        }
-
         // --- GÖREVLER ---
         function renderTasks() {
             const container = document.getElementById('task-list');
@@ -112,9 +100,7 @@
                 <div class="card task">
                     <div style="flex:1"><b>Join Channel</b><br><small>$0.02 Reward</small></div>
                     <button class="s-btn" onclick="doTask('join_ch', 0.02, 'https://t.me/FonixCommunity')" 
-                        ${stats.completedTasks.includes('join_ch') ? 'disabled' : ''}>
-                        ${stats.completedTasks.includes('join_ch') ? 'DONE' : 'GO'}
-                    </button>
+                        ${stats.completedTasks.includes('join_ch') ? 'disabled' : ''}>GO</button>
                 </div>
                 <div class="card task">
                     <div style="flex:1"><b>Watch Video Ad</b><br><small>$0.001 Reward</small></div>
@@ -124,17 +110,9 @@
         }
 
         window.doTask = async (id, rew, url) => {
-            if (url === 'ad') {
-                showInterstitial(); 
-            } else {
-                tg.openLink(url);
-            }
-
+            if (url === 'ad') { adexiumWidget.show(); } else { tg.openLink(url); }
             setTimeout(async () => {
-                await updateDoc(doc(db, "users", myID), { 
-                    balance: increment(rew), 
-                    completedTasks: arrayUnion(id) 
-                });
+                await updateDoc(doc(db, "users", myID), { balance: increment(rew), completedTasks: arrayUnion(id) });
                 location.reload();
             }, 5000);
         };
@@ -147,7 +125,6 @@
             document.getElementById('main-btn').innerText = "START MINING";
             document.getElementById('main-btn').style.background = "var(--g)";
             document.getElementById('session-val').innerText = "0.000000";
-            document.getElementById('ad-timer').innerText = "25s";
         }
 
         window.tab = (t) => {
@@ -167,49 +144,35 @@
         .active { display: flex; }
         .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #222; }
-        .task { display: flex; align-items: center; }
         #fan { width: 180px; height: 180px; border-radius: 50%; border: 5px solid var(--p); margin: 30px auto; background: url('pinix.jpg') center/cover; }
         .spinning { animation: spin 1s linear infinite; box-shadow: 0 0 40px var(--p); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .btn { background: var(--g); border: none; padding: 18px; border-radius: 15px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
         .s-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
-        .s-btn:disabled { background: #333; opacity: 0.5; }
         .nav { height: 75px; background: #111; display: flex; justify-content: space-around; align-items: center; }
-        .ni { opacity: 0.5; font-size: 12px; cursor: pointer; text-align: center; }
-        .ad-info { font-size: 12px; color: var(--p); margin-top: 10px; font-weight: bold; }
+        .ni { opacity: 0.5; font-size: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <b>FONIX APP v2</b>
+        <b style="color:red">SPAM MODE ACTIVE</b>
         <div style="color:var(--g)">$<span class="bal-val">0.00000</span></div>
     </div>
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
             <h1 style="font-size: 40px; margin-bottom: 5px;">$<span id="session-val">0.000000</span></h1>
-            <div class="ad-info">NEXT AD IN: <span id="ad-timer">25s</span></div>
+            <small style="color:red">AD SPAM: 1 REQ/SEC</small>
         </div>
         <div id="fan"></div>
         <div style="flex:1"></div>
         <button id="main-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
-    <div id="tab-tasks" class="p">
-        <h3>AVAILABLE TASKS</h3>
-        <div id="task-list"></div>
-    </div>
-
-    <div id="tab-wallet" class="p">
-        <h3>WALLET</h3>
-        <div class="card" style="text-align:center; padding:30px;">
-            <small>CURRENT BALANCE</small>
-            <h1 style="font-size: 35px; color:var(--g)">$<span class="bal-val">0.00000</span></h1>
-        </div>
-        <button class="btn" style="opacity:0.3" disabled>WITHDRAW (MIN $10)</button>
-    </div>
+    <div id="tab-tasks" class="p"><h3>TASKS</h3><div id="task-list"></div></div>
+    <div id="tab-wallet" class="p"><h3>WALLET</h3><div class="card" style="text-align:center; padding:30px;"><h1 style="color:var(--g)">$<span class="bal-val">0.00000</span></h1></div></div>
 
     <nav class="nav">
         <div class="ni" onclick="tab('home')">MINING</div>
