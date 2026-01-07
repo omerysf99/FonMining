@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Final System</title>
+    <title>Your Fantastic Pet - Ultimate Version</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
             --accent-yellow: #ffcc00;
             --nav-bg: #8184f7;
-            --dark-rgba: rgba(0,0,0,0.4);
+            --dark-card: rgba(0, 0, 0, 0.3);
+            --glass: rgba(255, 255, 255, 0.1);
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; overflow: hidden;
+            background-color: #000; display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
         #app-container {
@@ -28,41 +29,53 @@
             box-shadow: 0 0 60px rgba(0,0,0,1); color: white;
         }
 
-        /* --- Header --- */
+        /* --- Global Header --- */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .coin-status {
-            background: var(--dark-rgba); padding: 5px 15px; border-radius: 20px;
-            display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            background: var(--dark-card); padding: 8px 15px; border-radius: 25px;
+            display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass);
         }
 
-        /* --- Ekranlar --- */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; text-align: center; padding: 20px; overflow-y: auto; }
-        .active-screen { display: flex; }
+        /* --- Screens --- */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        .active-screen { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Görseller --- */
-        .main-hero-img { width: 85%; margin-top: 20px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
-        .pinix-img { width: 180px; height: 180px; border-radius: 50%; border: 5px solid white; box-shadow: 0 0 30px var(--accent-yellow); }
-        .rotating { animation: fan-rotate 2s linear infinite; }
-        @keyframes fan-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* --- Components --- */
+        .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
+        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 13px; text-transform: uppercase; }
+        .card p { margin: 8px 0 0 0; font-size: 18px; }
 
-        /* --- Butonlar --- */
-        .btn-main { background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; width: 80%; padding: 15px; font-size: 22px; border-radius: 20px; box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin: 10px 0; }
-        .btn-main:disabled { background: #ccc; box-shadow: 0 6px 0 #999; cursor: not-allowed; }
+        .btn-action { 
+            background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
+            width: 100%; padding: 15px; font-size: 18px; border-radius: 15px; 
+            box-shadow: 0 5px 0 #ccaa00; cursor: pointer; margin-top: 10px;
+        }
+        .btn-action:disabled { background: #888; box-shadow: 0 5px 0 #555; cursor: not-allowed; }
 
-        /* --- Alt Navigasyon --- */
+        /* --- Navigation --- */
         .nav-bar {
-            height: 80px; background: var(--nav-bg);
+            height: 90px; background: var(--nav-bg);
             display: flex; justify-content: space-around; align-items: center;
-            border-radius: 40px 40px 0 0; padding: 0 5px;
+            border-radius: 40px 40px 0 0; padding-bottom: 5px;
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; font-size: 20px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; transition: 0.2s; }
         .nav-item.active { opacity: 1; transform: scale(1.1); }
-        .main-nav-btn { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .nav-icon { font-size: 24px; }
+        .nav-text { font-size: 9px; margin-top: 4px; }
+        
+        .nav-center { 
+            background: var(--accent-yellow); width: 75px; height: 75px; border-radius: 50%; 
+            transform: translateY(-35px); border: 6px solid #9ea1ff; 
+            display: flex; align-items: center; justify-content: center; opacity: 1;
+        }
 
-        /* --- İstatistik Kartları --- */
-        .info-card { background: var(--dark-rgba); width: 95%; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
-        .info-card h4 { margin: 0; color: var(--accent-yellow); font-size: 14px; }
-        .info-card p { margin: 5px 0 0 0; font-size: 18px; }
+        /* --- Mining Specific --- */
+        .rotating { animation: fan-rotate 3s linear infinite; }
+        @keyframes fan-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .stat-row { display: flex; width: 100%; justify-content: space-around; margin-top: auto; padding-bottom: 20px; }
+        .circle-stat { width: 70px; height: 70px; background: var(--accent-yellow); border-radius: 50%; color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; }
+
     </style>
 </head>
 <body>
@@ -70,173 +83,185 @@
 <div id="app-container">
     <div class="header">
         <div class="coin-status">
-            <div style="background:orange; width:18px; height:18px; border-radius:50%"></div>
-            <div>
-                <span style="font-size: 8px; color: var(--accent-yellow);">WALLET BALANCE</span>
-                <b id="wallet-balance-top">0.0000</b>
+            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
+            <b id="main-balance">0.0000</b>
+        </div>
+        <div id="mining-close-btn" style="display:none; background:var(--accent-yellow); color:#333; width:30px; height:30px; border-radius:50%; text-align:center; line-height:30px; cursor:pointer;" onclick="stopMining()">✖</div>
+    </div>
+
+    <div id="screen-ref" class="screen">
+        <h2 style="margin-top:0;">FRIENDS</h2>
+        <div class="card">
+            <h4>Invite Link</h4>
+            <p style="font-size: 14px; word-break: break-all;">t.me/YourPetBot?start=user772</p>
+            <button class="btn-action" style="font-size:12px; padding:8px;" onclick="alert('Copied!')">COPY LINK</button>
+        </div>
+        <div class="card">
+            <h4>Referral Stats</h4>
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <span>Invited: <b>0</b></span>
+                <span>Earned: <b>$0.00</b></span>
             </div>
         </div>
-        <div id="close-x" style="display:none; cursor:pointer;" onclick="finishMining()">✖</div>
     </div>
 
-    <div id="ref-screen" class="screen">
-        <h2>INVITE FRIENDS</h2>
-        <div class="info-card">
-            <h4>Your Referral Code</h4>
-            <p>REF-839247</p>
+    <div id="screen-tasks" class="screen">
+        <h2 style="margin-top:0;">TASKS</h2>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h4>Join Telegram</h4>
+                    <p style="font-size:14px;">+ $0.0500</p>
+                </div>
+                <button class="btn-action" style="width:70px; font-size:12px; padding:10px;">GO</button>
+            </div>
         </div>
-        <p style="font-size: 12px;">Get 10% of your friends' earnings!</p>
-        <button class="btn-main" style="font-size:16px;">COPY LINK</button>
-    </div>
-
-    <div id="tasks-screen" class="screen">
-        <h2>TASKS</h2>
-        <div class="info-card">
-            <h4>Follow Twitter</h4>
-            <p>+0.05 USDT</p>
-        </div>
-        <div class="info-card">
-            <h4>Watch Video Ad</h4>
-            <p>+0.01 USDT</p>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h4>Follow Twitter</h4>
+                    <p style="font-size:14px;">+ $0.0500</p>
+                </div>
+                <button class="btn-action" style="width:70px; font-size:12px; padding:10px;">GO</button>
+            </div>
         </div>
     </div>
 
-    <div id="home-screen" class="screen active-screen">
-        <img src="yourfantastic.jpg" class="main-hero-img">
-        <button class="btn-main" onclick="startMining()">START MINING</button>
+    <div id="screen-home" class="screen active-screen">
+        <img src="yourfantastic.jpg" style="width:85%; margin-top:20px; border-radius:20px;">
+        <button class="btn-action" style="margin-top:40px; width:80%; font-size:24px;" onclick="startMining()">PLAY & MINE</button>
     </div>
 
-    <div id="mining-live-screen" class="screen">
-        <h1 id="live-paws">🐾 0</h1>
-        <h2 style="color:var(--accent-yellow)">$<span id="live-usd">0.0000</span></h2>
+    <div id="screen-mining-live" class="screen">
+        <h1 id="live-paws" style="font-size:45px; margin:0;">🐾 0</h1>
+        <div style="color:var(--accent-yellow); font-size:22px;">$<span id="live-usd">0.0000</span></div>
         <div style="flex:1; display:flex; align-items:center;">
-            <img src="pinix.jpg" id="mining-logo" class="pinix-img">
+            <img src="pinix.jpg" id="fan-img" class="rotating" style="width:200px; height:200px; border-radius:50%; border:5px solid white;">
         </div>
-        <div style="width:100%; display:flex; justify-content:space-around; margin-bottom:20px;">
-            <div class="stat-circle" style="text-align:center;">⏰<br><span id="timer">00:00</span></div>
-            <div class="stat-circle" style="text-align:center;">⚡<br>3.50 GH/s</div>
+        <div class="stat-row">
+            <div class="circle-stat">⏰<br><b id="miner-clock">00:00</b></div>
+            <div class="circle-stat" style="width:90px; height:90px; border:4px solid var(--bg-purple);"><b style="font-size:18px;">100%</b><br>ACTIVE</div>
+            <div class="circle-stat">⚡<br><b>3.85 GH/s</b></div>
         </div>
-        <button class="btn-main" onclick="finishMining()">CLAIM & STOP</button>
+        <button class="btn-action" style="margin:20px 0;" onclick="stopMining()">CLAIM EARNINGS</button>
     </div>
 
-    <div id="wallet-screen" class="screen">
-        <h2>WITHDRAW</h2>
-        <div class="info-card" style="text-align:center;">
-            <h4>Available Balance</h4>
-            <p style="font-size: 32px;">$<span id="wallet-val">0.0000</span></p>
+    <div id="screen-wallet" class="screen">
+        <h2 style="margin-top:0;">WALLET</h2>
+        <div class="card" style="text-align:center; padding:30px 10px;">
+            <h4>Total Balance</h4>
+            <p style="font-size:40px; color:var(--accent-yellow);">$<span id="wallet-total">0.0000</span></p>
         </div>
-        <p style="font-size: 11px; color: #ff9999;">Minimum Withdraw: $0.35</p>
-        <input type="text" placeholder="USDT (BEP20) Address" style="width:90%; padding:15px; border-radius:10px; border:none; margin:10px 0;">
-        <button id="withdraw-btn" class="btn-main" disabled onclick="alert('Withdraw request sent!')">WITHDRAW NOW</button>
+        <div class="card">
+            <h4>Withdraw USDT</h4>
+            <p style="font-size:11px; margin-bottom:10px;">Min: $0.35 | Network: BEP20</p>
+            <input type="text" placeholder="Wallet Address" style="width:100%; padding:12px; border-radius:10px; border:none; margin-bottom:10px;">
+            <button id="draw-btn" class="btn-action" disabled>WITHDRAW</button>
+        </div>
     </div>
 
-    <div id="profile-screen" class="screen">
-        <h2>USER DATA</h2>
-        <div class="info-card">
-            <h4>Admin ID</h4>
-            <p>8392479231</p>
+    <div id="screen-profile" class="screen">
+        <h2 style="margin-top:0;">MY STATS</h2>
+        <div class="card">
+            <h4>Lifetime Earnings</h4>
+            <p>$<span id="stat-total-earn">0.0000</span></p>
         </div>
-        <div class="info-card">
+        <div class="card">
             <h4>Total Mining Time</h4>
-            <p><span id="total-min-display">0</span> Minutes</p>
+            <p><span id="stat-total-time">0</span> Minutes</p>
         </div>
-        <div id="stats-area">
-            <div class="info-card">
-                <h4>Total Earned</h4>
-                <p>$<span id="total-earned-display">0.0000</span></p>
-            </div>
-            <div class="info-card">
-                <h4>Total Withdrawn</h4>
-                <p>$0.0000</p>
-            </div>
+        <div class="card">
+            <h4>Total Withdrawn</h4>
+            <p>$0.0000</p>
         </div>
     </div>
 
-    <div id="congrats-screen" class="screen">
-        <h1 style="color:var(--accent-yellow)">WELL DONE!</h1>
-        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:150px;">
-        <h3>You Earned:</h3>
-        <h2 id="congrats-usd" style="color:var(--accent-yellow)">$0.0000</h2>
-        <button class="btn-main" onclick="showScreen('home')">CONTINUE</button>
+    <div id="screen-congrats" class="screen" style="justify-content:center;">
+        <h1 style="color:var(--accent-yellow); font-size:45px; margin:0;">CONGRATS!</h1>
+        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" width="160" style="margin:20px;">
+        <p>You mined successfully!</p>
+        <h2 id="congrats-val" style="color:var(--accent-yellow)">$0.0000</h2>
+        <button class="btn-action" style="width:60%;" onclick="changeTab('home')">GREAT</button>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item" onclick="showScreen('ref')">👥<br><small style="font-size:8px;">REF</small></div>
-        <div class="nav-item" onclick="showScreen('tasks')">📋<br><small style="font-size:8px;">TASKS</small></div>
-        <div class="nav-item main-nav-btn active" onclick="showScreen('home')">🐾</div>
-        <div class="nav-item" onclick="showScreen('wallet')">👛<br><small style="font-size:8px;">WALLET</small></div>
-        <div class="nav-item" onclick="showScreen('profile')">👤<br><small style="font-size:8px;">USER</small></div>
+        <div class="nav-item" onclick="changeTab('ref')"><span class="nav-icon">👥</span><span class="nav-text">FRIENDS</span></div>
+        <div class="nav-item" onclick="changeTab('tasks')"><span class="nav-icon">📋</span><span class="nav-text">TASKS</span></div>
+        <div class="nav-item nav-center active" onclick="changeTab('home')"><span class="nav-icon" style="font-size:35px;">🐾</span></div>
+        <div class="nav-item" onclick="changeTab('wallet')"><span class="nav-icon">👛</span><span class="nav-text">WALLET</span></div>
+        <div class="nav-item" onclick="changeTab('profile')"><span class="nav-icon">📊</span><span class="nav-text">STATS</span></div>
     </div>
 </div>
 
 <script>
-    // Global Veriler
-    let walletBalance = 0.0000;
-    let totalEarned = 0.0000;
-    let totalMinutes = 0;
+    // State
+    let wallet = 0.0000;
+    let lifetimeEarned = 0.0000;
+    let lifetimeMinutes = 0;
     
-    // Mining Session Verileri
     let sessionUSD = 0;
-    let sessionSeconds = 0;
-    let miningInterval;
-    const rate = 0.0005 / 50; // Saniyelik kazanç
+    let sessionSec = 0;
+    let minerLoop = null;
 
-    function showScreen(screenId) {
-        // Tüm ekranları gizle
+    function changeTab(tabId) {
+        if(minerLoop && tabId !== 'mining-live') {
+            if(!confirm("Mining will stop. Continue?")) return;
+            stopMining(false);
+        }
+
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(screenId + '-screen').classList.add('active-screen');
-        
-        // Navigasyon ikonlarını güncelle
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        // Eşleşen nav item'ı bul (basit mantık)
-        if(screenId === 'home') document.querySelector('.main-nav-btn').classList.add('active');
-        
-        // Header X butonu kontrolü
-        document.getElementById('close-x').style.display = (screenId === 'mining-live') ? 'block' : 'none';
+        document.getElementById('screen-' + tabId).classList.add('active-screen');
+
+        // Nav Active State
+        document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
+        if(tabId === 'home') document.querySelector('.nav-center').classList.add('active');
+
+        document.getElementById('mining-close-btn').style.display = (tabId === 'mining-live') ? 'block' : 'none';
     }
 
     function startMining() {
         sessionUSD = 0;
-        sessionSeconds = 0;
-        showScreen('mining-live');
-        document.getElementById('mining-logo').classList.add('rotating');
+        sessionSec = 0;
+        changeTab('mining-live');
 
-        miningInterval = setInterval(() => {
-            sessionSeconds++;
-            sessionUSD += rate;
+        minerLoop = setInterval(() => {
+            sessionSec++;
+            sessionUSD += (0.0005 / 50);
+
+            // Update UI
+            document.getElementById('live-usd').innerText = sessionUSD.toFixed(4);
+            document.getElementById('live-paws').innerText = "🐾 " + Math.floor(sessionSec / 12);
             
-            // UI Güncelle
-            document.getElementById('live-usd').innerText = sessionUSD.toFixed(5);
-            document.getElementById('live-paws').innerText = "🐾 " + Math.floor(sessionSeconds / 10);
-            
-            let m = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
-            let s = (sessionSeconds % 60).toString().padStart(2, '0');
-            document.getElementById('timer').innerText = `${m}:${s}`;
+            let m = Math.floor(sessionSec / 60).toString().padStart(2, '0');
+            let s = (sessionSec % 60).toString().padStart(2, '0');
+            document.getElementById('miner-clock').innerText = `${m}:${s}`;
         }, 1000);
     }
 
-    function finishMining() {
-        clearInterval(miningInterval);
-        document.getElementById('mining-logo').classList.remove('rotating');
+    function stopMining(showCongrats = true) {
+        clearInterval(minerLoop);
+        minerLoop = null;
 
-        // Bakiyeleri aktar
-        walletBalance += sessionUSD;
-        totalEarned += sessionUSD;
-        totalMinutes += Math.round(sessionSeconds / 60);
+        // Data Update
+        wallet += sessionUSD;
+        lifetimeEarned += sessionUSD;
+        lifetimeMinutes += Math.floor(sessionSec / 60);
 
-        // Arayüzü Güncelle
-        document.getElementById('wallet-balance-top').innerText = walletBalance.toFixed(4);
-        document.getElementById('wallet-val').innerText = walletBalance.toFixed(4);
-        document.getElementById('total-earned-display').innerText = totalEarned.toFixed(4);
-        document.getElementById('total-min-display').innerText = totalMinutes;
-        document.getElementById('congrats-usd').innerText = "$" + sessionUSD.toFixed(5);
+        // UI Refresh
+        document.getElementById('main-balance').innerText = wallet.toFixed(4);
+        document.getElementById('wallet-total').innerText = wallet.toFixed(4);
+        document.getElementById('stat-total-earn').innerText = lifetimeEarned.toFixed(4);
+        document.getElementById('stat-total-time').innerText = lifetimeMinutes;
 
-        // Para çekme butonunu kontrol et
-        if(walletBalance >= 0.35) {
-            document.getElementById('withdraw-btn').disabled = false;
+        // Check Withdraw Button
+        document.getElementById('draw-btn').disabled = (wallet < 0.35);
+
+        if(showCongrats) {
+            document.getElementById('congrats-val').innerText = "$" + sessionUSD.toFixed(5);
+            changeTab('congrats');
+        } else {
+            changeTab('home');
         }
-
-        showScreen('congrats');
     }
 </script>
 
