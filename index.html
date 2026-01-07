@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA V39 - PRIVATE ADMIN</title>
+    <title>PI NEBULA V40 - SUPREME ADMIN</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,130 +12,100 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --p: #a855f7; --p-glow: rgba(168, 85, 247, 0.4); 
-            --s: #fbbf24; --bg: #030008; 
-            --card: rgba(255, 255, 255, 0.05); 
-            --border: rgba(255, 255, 255, 0.1);
-            --red: #ff4757; --green: #00ff88;
-        }
-
+        :root { --p: #a855f7; --s: #fbbf24; --bg: #030008; --card: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); --red: #ff4757; --green: #00ff88; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; background-image: radial-gradient(circle at 50% -20%, #2e1065 0%, #030008 80%); }
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; }
 
-        /* PROGRESS BAR */
+        /* HEADER & UI */
         .fuel-container { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.5); z-index: 1000; }
-        #fuel-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--p), var(--s)); box-shadow: 0 0 10px var(--p); transition: width 1s linear; }
-
-        /* UI ELEMENTS */
+        #fuel-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--p), var(--s)); transition: width 1s linear; }
         .header { padding: 30px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
-        .balance-card { background: var(--card); border: 1px solid var(--border); padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px); }
-        .balance-val { font-family: 'Orbitron'; font-weight: 900; color: var(--s); font-size: 1.2rem; }
-
+        .balance-card { background: var(--card); border: 1px solid var(--border); padding: 8px 18px; border-radius: 15px; backdrop-filter: blur(10px); }
         .view { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
         .view.active { display: flex; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* MINER */
-        .miner-circle { position: relative; width: 200px; height: 200px; margin: 30px auto; }
-        .fan { width: 100%; height: 100%; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--border); transition: 0.5s; }
-        .fan.spinning { animation: spin 3s linear infinite; border-color: var(--p); box-shadow: 0 0 30px var(--p-glow); }
+        .fan { width: 180px; height: 180px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--border); margin: 20px auto; }
+        .fan.spinning { animation: spin 3s linear infinite; border-color: var(--p); box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .btn { padding: 16px; border-radius: 16px; border: none; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
+        /* BUTTONS & GLASS */
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
         .btn-p { background: linear-gradient(135deg, #a855f7, #7e22ce); color: white; }
         .btn-s { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; }
-        .btn:active { transform: scale(0.96); }
+        .glass-box { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-bottom: 15px; }
 
-        .glass-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 15px; backdrop-filter: blur(10px); }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+        /* ADMIN SPECIFIC */
+        .user-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .user-img { width: 40px; height: 40px; border-radius: 50%; background: #222; object-fit: cover; border: 1px solid var(--p); }
+        #ghost-overlay { display: none; position: absolute; top: 65px; left: 50%; transform: translateX(-50%); background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; animation: pulse 1s infinite; cursor: pointer; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         /* NAVBAR */
-        nav { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 70px; background: rgba(15, 7, 32, 0.8); backdrop-filter: blur(20px); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 1000; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.4; font-size: 0.6rem; font-weight: bold; }
-        .nav-btn.active { opacity: 1; color: var(--p); transform: translateY(-3px); }
+        nav { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 65px; background: rgba(15, 7, 32, 0.8); backdrop-filter: blur(20px); display: flex; border-radius: 20px; border: 1px solid var(--border); }
+        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 0.6rem; font-weight: bold; color: white; }
+        .nav-btn.active { opacity: 1; color: var(--p); }
 
-        input { width: 100%; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; outline: none; }
+        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="fuel-container"><div id="fuel-bar"></div></div>
+    <div id="fuel-bar-cont" class="fuel-container"><div id="fuel-bar"></div></div>
+    <div id="ghost-overlay" onclick="exitGhost()">İZLENİYOR: <span id="ghost-name">...</span> (ÇIK ✕)</div>
     
     <header class="header">
         <div>
             <p style="font-family:'Orbitron'; font-size: 0.8rem; font-weight:900;">PI NEBULA</p>
-            <p id="time-text" style="font-size: 0.6rem; color: var(--red);">KALAN: 30s</p>
+            <p id="time-text" style="font-size: 0.6rem; color: var(--red);">SÜRE: 30s</p>
         </div>
-        <div class="balance-card">
-            <div id="h-pi" class="balance-val">0.00</div>
-        </div>
+        <div class="balance-card"><div id="h-pi" style="font-family:'Orbitron'; color:var(--s); font-weight:900;">0.00</div></div>
     </header>
 
     <div id="v-home" class="view active">
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-            <div class="miner-circle"><div id="fan-obj" class="fan spinning"></div></div>
-            <div id="m-val" style="font-family:'Orbitron'; font-size:2.4rem; font-weight:900; margin-bottom:10px;">0.00000000</div>
-            <div id="status-badge" style="color:var(--green); font-size:0.7rem; font-weight:bold; letter-spacing:1px;">MINING AKTİF</div>
-            
+            <div id="fan-obj" class="fan spinning"></div>
+            <div id="m-val" style="font-family:'Orbitron'; font-size:2.4rem; font-weight:900; margin-bottom:5px;">0.00000000</div>
+            <p id="status-badge" style="color:var(--green); font-size:0.7rem; font-weight:900;">MADENCİLİK AKTİF</p>
             <div style="width:100%; margin-top:30px;">
                 <button id="btn-claim" class="btn btn-p" onclick="claim()">Pİ TOPLA</button>
-                <button id="btn-ad" class="btn btn-s" onclick="watchAdForTime()" style="display:none;">REKLAM İZLE (+30SN)</button>
+                <button id="btn-ad" class="btn btn-s" onclick="watchAd()" style="display:none;">SÜREYİ YENİLE (+30SN)</button>
             </div>
         </div>
     </div>
 
-    <div id="v-earn" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">GÖREVLER</h2>
-        <div class="glass-box">
-            <input type="text" id="ref-input" placeholder="Referans Kodu Gir">
-            <button class="btn btn-p" style="padding:10px;" onclick="applyRef()">ONAYLA</button>
-        </div>
-    </div>
-
     <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">EKİBİN</h2>
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">REFERANSLAR</h2>
         <div class="glass-box" style="text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.6;">SENİN KODUN</p>
-            <h1 id="my-id" style="font-family:'Orbitron'; color:var(--s); letter-spacing:3px;">---</h1>
+            <p style="font-size:0.7rem; opacity:0.6;">KODUN: <b id="my-id">...</b></p>
         </div>
         <div id="ref-list"></div>
     </div>
 
     <div id="v-wallet" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">CÜZDAN</h2>
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">CÜZDAN</h2>
         <div class="glass-box">
-            <input type="text" id="w-addr" placeholder="Pi Cüzdan Adresi">
+            <input type="text" id="w-addr" placeholder="Cüzdan Adresi">
             <input type="number" id="w-amt" placeholder="Miktar (Min 500)">
-            <button class="btn btn-p" onclick="sendWithdraw()">ÇEKİM TALEBİ</button>
+            <button class="btn btn-p" onclick="withdraw()">TALEP GÖNDER</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; margin-bottom:15px;">COMMAND CENTER</h2>
-        <div class="glass-box" style="border:1px solid var(--p);">
-            <p style="font-size:0.6rem; color:var(--p); margin-bottom:8px;">ID SORGULA & DÜZENLE</p>
-            <input type="text" id="adm-target-id" placeholder="Telegram ID">
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-p" style="padding:10px;" onclick="admSearch()">BUL</button>
-                <button class="btn btn-s" style="padding:10px;" onclick="admGhost()">İZLE</button>
-            </div>
-            <div id="adm-result" style="display:none; margin-top:15px;">
-                <p id="adm-res-name" style="font-size:0.8rem;"></p>
-                <div style="display:flex; gap:5px; margin-top:8px;">
-                    <input type="number" id="adm-new-pi" style="margin:0;">
-                    <button class="btn btn-s" style="width:60px; padding:0;" onclick="admUpdatePi()">SET</button>
-                </div>
-            </div>
-        </div>
-        <div id="adm-withdrawals"></div>
+        <h2 style="color:var(--red); font-family:'Orbitron';">ADMİN PANEL</h2>
+        
+        <p style="font-size:0.7rem; color:var(--s); margin:15px 0 5px;">💰 ÖDEME TALEPLERİ</p>
+        <div id="adm-withdraws" class="glass-box" style="padding:0;"></div>
+
+        <p style="font-size:0.7rem; color:var(--p); margin:15px 0 5px;">👥 ÜYELER (İZLEMEK İÇİN TIKLA)</p>
+        <div id="adm-users" class="glass-box" style="padding:0;"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)">EV</div>
-        <div class="nav-btn" onclick="tab('v-earn', this)">GÖREV</div>
         <div class="nav-btn" onclick="tab('v-friends', this)">REF</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)">CÜZDAN</div>
         <div class="nav-btn" id="adm-nav" style="display:none;" onclick="tab('v-admin', this)">ADMİN</div>
@@ -154,41 +124,42 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    
-    // SANA ÖZEL ADMIN ID
-    const MY_ADMIN_ID = "8392479231"; 
+    const MY_ID = "8392479231";
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", invitedBy: "" };
+    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", photo: tg.initDataUnsafe?.user?.photo_url || "" };
     let fuel = 30;
     let isMining = true;
 
     function init() {
-        // Kullanıcı verisi
         db.collection("users").doc(activeUid).onSnapshot(doc => {
             if(doc.exists) { uData = doc.data(); updateUI(); }
             else { db.collection("users").doc(activeUid).set(uData); }
         });
 
-        // SADECE SENİN İÇİN ADMİN PANELİNİ AÇ
-        if(realUid === MY_ADMIN_ID) {
-            document.getElementById('adm-nav').style.display = 'flex';
-        }
-
+        if(realUid === MY_ID) document.getElementById('adm-nav').style.display = 'flex';
         document.getElementById('my-id').innerText = realUid;
-        loadRefList();
-        setInterval(miningLoop, 1000);
+        
+        setInterval(() => {
+            if(isMining && fuel > 0) {
+                fuel--;
+                uData.uncl += 0.00015;
+                document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
+                document.getElementById('time-text').innerText = `SÜRE: ${fuel}s`;
+                document.getElementById('fuel-bar').style.width = (fuel / 30 * 100) + "%";
+                if(fuel <= 0) { isMining = false; updateStatus(); }
+            }
+        }, 1000);
     }
 
-    function miningLoop() {
-        if(isMining && fuel > 0) {
-            fuel--;
-            uData.uncl += 0.00015;
-            document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
-            document.getElementById('time-text').innerText = `KALAN: ${fuel}s`;
-            document.getElementById('fuel-bar').style.width = (fuel / 30 * 100) + "%";
-            if(fuel <= 0) { isMining = false; updateStatus(); }
+    function updateUI() {
+        document.getElementById('h-pi').innerText = uData.pi.toFixed(2);
+        if(activeUid !== realUid) {
+            document.getElementById('ghost-overlay').style.display = 'block';
+            document.getElementById('ghost-name').innerText = uData.username;
+        } else {
+            document.getElementById('ghost-overlay').style.display = 'none';
         }
     }
 
@@ -196,51 +167,74 @@
         const fan = document.getElementById('fan-obj');
         const badge = document.getElementById('status-badge');
         if(isMining) {
-            fan.classList.add('spinning');
-            badge.innerText = "MINING AKTİF"; badge.style.color = "var(--green)";
+            fan.classList.add('spinning'); badge.innerText = "MADENCİLİK AKTİF";
             document.getElementById('btn-claim').style.display = 'block';
             document.getElementById('btn-ad').style.display = 'none';
         } else {
-            fan.classList.remove('spinning');
-            badge.innerText = "SÜRE BİTTİ"; badge.style.color = "var(--red)";
+            fan.classList.remove('spinning'); badge.innerText = "SÜRE BİTTİ";
             document.getElementById('btn-claim').style.display = 'none';
             document.getElementById('btn-ad').style.display = 'block';
-            watchAdForTime(); // OTOMATİK DÖNGÜ
+            watchAd();
         }
     }
 
-    function watchAdForTime() {
+    function watchAd() {
         try {
-            if(typeof AdexiumWidget !== 'undefined') {
-                new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'}).autoMode();
-                fuel = 30; isMining = true; updateStatus();
-            }
+            new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'}).autoMode();
+            fuel = 30; isMining = true; updateStatus();
         } catch(e) { fuel = 30; isMining = true; updateStatus(); }
     }
 
-    function updateUI() {
-        document.getElementById('h-pi').innerText = uData.pi.toFixed(2);
+    // --- ADMIN PANEL FUNCTIONS ---
+    async function loadAdmin() {
+        // Üyeleri Listele
+        const uSnap = await db.collection("users").orderBy("pi", "desc").get();
+        const uDiv = document.getElementById('adm-users');
+        uDiv.innerHTML = "";
+        uSnap.forEach(doc => {
+            const d = doc.data();
+            uDiv.innerHTML += `
+                <div class="user-row" onclick="ghostMode('${doc.id}')">
+                    <img src="${d.photo || 'https://via.placeholder.com/40'}" class="user-img">
+                    <div style="flex:1">
+                        <div style="font-size:0.8rem; font-weight:bold;">@${d.username}</div>
+                        <div style="font-size:0.6rem; opacity:0.6;">ID: ${doc.id}</div>
+                    </div>
+                    <div style="color:var(--s); font-weight:900;">${d.pi.toFixed(2)}</div>
+                </div>`;
+        });
+
+        // Ödemeleri Listele
+        const wSnap = await db.collection("withdrawals").where("status","==","pending").get();
+        const wDiv = document.getElementById('adm-withdraws');
+        wDiv.innerHTML = "";
+        wSnap.forEach(doc => {
+            wDiv.innerHTML += `
+                <div class="user-row">
+                    <div style="flex:1">
+                        <b>@${doc.data().username}</b><br><small>${doc.data().amt} PI - ${doc.data().addr}</small>
+                    </div>
+                    <button class="btn btn-s" style="width:60px; padding:5px;" onclick="approvePay('${doc.id}')">OK</button>
+                </div>`;
+        });
     }
 
-    // --- ADMİN FONKSİYONLARI ---
-    async function admSearch() {
-        const id = document.getElementById('adm-target-id').value;
-        const doc = await db.collection("users").doc(id).get();
-        if(doc.exists) {
-            document.getElementById('adm-result').style.display = 'block';
-            document.getElementById('adm-res-name').innerText = `@${doc.data().username} | ${doc.data().pi.toFixed(2)} PI`;
-            document.getElementById('adm-new-pi').value = doc.data().pi;
+    function ghostMode(id) { activeUid = id; tab('v-home', document.querySelector('.nav-btn')); init(); }
+    function exitGhost() { activeUid = realUid; init(); }
+
+    async function approvePay(id) {
+        await db.collection("withdrawals").doc(id).update({status: "paid"});
+        alert("Ödeme Onaylandı!"); loadAdmin();
+    }
+
+    function withdraw() {
+        const amt = parseFloat(document.getElementById('w-amt').value);
+        const addr = document.getElementById('w-addr').value;
+        if(amt >= 500 && uData.pi >= amt) {
+            db.collection("withdrawals").add({ uid: realUid, username: uData.username, amt: amt, addr: addr, status: "pending" });
+            db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
+            alert("Talep Gönderildi!");
         }
-    }
-    async function admUpdatePi() {
-        const id = document.getElementById('adm-target-id').value;
-        const amt = parseFloat(document.getElementById('adm-new-pi').value);
-        await db.collection("users").doc(id).update({ pi: amt });
-        alert("Bakiye Güncellendi!"); admSearch();
-    }
-    function admGhost() {
-        activeUid = document.getElementById('adm-target-id').value;
-        tab('v-home', document.querySelector('.nav-btn')); init();
     }
 
     function tab(id, el) {
@@ -248,18 +242,12 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        if(id === 'v-admin') loadAdmin();
     }
 
     function claim() {
-        if(uData.uncl < 0.001) return;
+        if(uData.uncl < 0.001 || activeUid !== realUid) return;
         db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
-    }
-
-    async function loadRefList() {
-        const snap = await db.collection("users").where("invitedBy", "==", realUid).get();
-        const div = document.getElementById('ref-list');
-        div.innerHTML = "";
-        snap.forEach(doc => div.innerHTML += `<div class="item">@${doc.data().username} <span>ID: ${doc.id}</span></div>`);
     }
 
     window.onload = init;
