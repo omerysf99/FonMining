@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Mining System</title>
+    <title>Your Fantastic Pet - Fonix Edition</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -29,13 +29,14 @@
         .balance-pill { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
         .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
 
-        /* Screens */
+        /* Screen Management */
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; position: relative; overflow-y: auto; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Components */
+        /* UI Cards */
         .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
+        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
         .btn-yellow { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
             width: 100%; padding: 15px; font-size: 18px; border-radius: 25px; 
@@ -44,7 +45,7 @@
         .btn-yellow:disabled { background: var(--disabled); box-shadow: 0 5px 0 #7a7a7a; color: #eee; cursor: not-allowed; }
         .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; outline: none; }
 
-        /* Mining Area */
+        /* Mining Visuals */
         .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; }
         .rotating { animation: fanRot 1.5s linear infinite; }
         @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -60,7 +61,7 @@
             font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
         }
 
-        /* Nav Bar */
+        /* Bottom Nav */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; font-size: 22px; transition: 0.3s; }
         .nav-item.active { opacity: 1; }
@@ -83,26 +84,22 @@
         <h2 style="margin:0 0 20px 0;">FRIENDS</h2>
         <div class="card">
             <h4>Claim Invitation Bonus</h4>
-            <p style="font-size:12px; opacity:0.8;">Enter a code to get $0.05 bonus instantly. (Only once!)</p>
-            <input type="text" id="ref-input" class="input-box" placeholder="Enter Ref Code">
-            <button id="ref-btn" class="btn-yellow" onclick="applyRef()">CLAIM BONUS</button>
+            <p style="font-size:11px; opacity:0.8;">Her kullanıcı sadece bir kez bonus alabilir.</p>
+            <input type="text" id="ref-input" class="input-box" placeholder="Kod Gir">
+            <button id="ref-btn" class="btn-yellow" onclick="applyRef()">BONUSU AL ($0.05)</button>
         </div>
         <div class="card">
-            <h4>Your Invite Link</h4>
+            <h4>Invite Link</h4>
             <p style="font-size:14px;">Code: <b>PET839247</b></p>
-            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareOnTG()">SHARE ON TELEGRAM 🚀</button>
+            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareOnTG()">PAYLAŞ 🚀</button>
         </div>
     </div>
 
     <div id="screen-tasks" class="screen">
         <h2 style="margin-bottom:20px;">TASKS</h2>
         <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><h4 style="margin:0;">Join Community</h4><p style="margin:5px 0 0 0;">+ $0.10</p></div>
-            <button id="task1-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="completeTask('task1', 0.10)">CLAIM</button>
-        </div>
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-            <div><h4 style="margin:0;">Follow X</h4><p style="margin:5px 0 0 0;">+ $0.05</p></div>
-            <button id="task2-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="completeTask('task2', 0.05)">CLAIM</button>
+            <div><h4 style="margin:0;">Fonix Community</h4><p style="margin:5px 0 0 0;">+ $0.0014</p></div>
+            <button id="task1-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doTask('https://t.me/FonixCommunity', 0.0014)">JOIN</button>
         </div>
     </div>
 
@@ -114,39 +111,24 @@
 
     <div id="screen-stats" class="screen">
         <h2 style="margin-bottom:20px;">STATISTICS</h2>
-        <div class="card">
-            <h4>Total Earned</h4>
-            <span style="font-size:28px; color:var(--accent-yellow);">$<span id="st-total">0.0000</span></span>
-        </div>
-        <div class="card">
-            <h4>Mining Sessions</h4>
-            <span style="font-size:28px;" id="st-sess">0</span>
-        </div>
+        <div class="card"><h4>Total Earned</h4><span style="font-size:28px; color:var(--accent-yellow);">$<span id="st-total">0.0000</span></span></div>
+        <div class="card"><h4>Sessions</h4><span style="font-size:28px;" id="st-sess">0</span></div>
     </div>
 
     <div id="screen-wallet" class="screen">
         <h2>WITHDRAW</h2>
-        <div class="card" style="text-align:center; padding:20px; background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.2));">
-            <h4 style="color:#fff; opacity:0.7;">Available Balance</h4>
-            <p style="font-size:42px; color:var(--accent-yellow); margin:10px 0; letter-spacing:1px;">$<span id="w-bal">0.0000</span></p>
+        <div class="card" style="text-align:center; padding:20px; background:rgba(255,255,255,0.05);">
+            <h4 style="opacity:0.6;">Balance</h4>
+            <p style="font-size:38px; color:var(--accent-yellow); margin:10px 0;">$<span id="w-bal">0.0000</span></p>
         </div>
-        
         <div class="card">
-            <h4>Payment Method</h4>
-            <select class="input-box" style="background:#fff url('https://cdn-icons-png.flaticon.com/512/31/31087.png') no-repeat 95% center; background-size:15px;">
-                <option>USDT (BEP20)</option>
-                <option>USDT (TRC20)</option>
-                <option>TON Network</option>
-            </select>
-            
-            <h4 style="margin-top:15px;">Wallet Address</h4>
-            <input type="text" id="wd-addr" class="input-box" placeholder="Ox... or U...">
-            
-            <h4 style="margin-top:15px;">Amount to Withdraw</h4>
+            <h4>Network</h4>
+            <select class="input-box"><option>USDT (BEP20)</option><option>USDT (TRC20)</option><option>TON</option></select>
+            <h4 style="margin-top:15px;">Address</h4>
+            <input type="text" id="wd-addr" class="input-box" placeholder="Ox...">
+            <h4 style="margin-top:15px;">Amount</h4>
             <input type="number" id="wd-amt" class="input-box" placeholder="Min $1.00">
-            
-            <button class="btn-yellow" style="margin-top:20px;" onclick="handleWithdraw()">CONFIRM WITHDRAWAL</button>
-            <p style="font-size:10px; text-align:center; margin-top:10px; opacity:0.6;">Processing time: 1-24 hours</p>
+            <button class="btn-yellow" style="margin-top:20px;" onclick="handleWithdraw()">CONFIRM</button>
         </div>
     </div>
 
@@ -156,9 +138,7 @@
             <h2 style="color:var(--accent-yellow); margin:0;">$<span id="m-usd">0.00000</span></h2>
             <p style="font-size:12px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
         </div>
-        <div style="flex:1; display:flex; align-items:center;">
-            <img src="pinix.jpg" class="fan-pet rotating">
-        </div>
+        <div style="flex:1; display:flex; align-items:center;"><img src="pinix.jpg" class="fan-pet rotating"></div>
         <div class="stats-footer">
             <div class="stat-circle">⏰<br><span id="t-val">00:00</span></div>
             <div class="stat-circle" style="width:100px; height:100px; transform:translateY(-15px); font-size:14px;"><span id="p-val">0</span>%<br><small>COMPLETE</small></div>
@@ -171,6 +151,7 @@
         <div style="font-size:30px;">🐾 <span id="c-paws">0</span></div>
         <div style="color:var(--accent-yellow); font-size:20px;">$<span id="c-usd">0.0000</span></div>
         <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:160px; margin:25px 0;">
+        <h2 style="font-size:18px;">ADULTHOOD REACHED</h2>
         <button class="btn-yellow" onclick="goHome()">GREAT</button>
     </div>
 
@@ -185,108 +166,76 @@
 
 <script>
     let bal = 0.0000;
-    let sessCount = 0;
-    let refClaimed = false;
-    let completedTasks = { task1: false, task2: false };
-    
-    let curUSD = 0;
-    let timer;
-    let seconds = 0;
+    let sess = 0;
+    let refTaken = false;
+    let taskTaken = false;
+    let cUSD = 0, timer, secs = 0;
     const SPEED = 0.000015;
 
     function changeTab(t) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('screen-'+t).classList.add('active-screen');
     }
 
     function startMining() {
-        curUSD = 0; seconds = 0;
+        cUSD = 0; secs = 0;
         changeTab('mining');
         document.getElementById('main-nav').classList.add('nav-locked');
         document.getElementById('stop-trigger').style.display = 'flex';
-
         timer = setInterval(() => {
-            seconds++;
-            curUSD += SPEED;
-            document.getElementById('m-usd').innerText = curUSD.toFixed(5);
-            document.getElementById('m-paws').innerText = Math.floor(curUSD * 45000);
-            
-            let m = Math.floor(seconds/60).toString().padStart(2,'0');
-            let s = (seconds%60).toString().padStart(2,'0');
-            document.getElementById('t-val').innerText = `${m}:${s}`;
-            document.getElementById('p-val').innerText = Math.min(100, Math.floor((seconds/120)*100));
+            secs++; cUSD += SPEED;
+            document.getElementById('m-usd').innerText = cUSD.toFixed(5);
+            document.getElementById('m-paws').innerText = Math.floor(cUSD * 45000);
+            document.getElementById('t-val').innerText = `${Math.floor(secs/60).toString().padStart(2,'0')}:${(secs%60).toString().padStart(2,'0')}`;
+            document.getElementById('p-val').innerText = Math.min(100, Math.floor((secs/120)*100));
         }, 1000);
     }
 
     function stopAndCongrats() {
-        clearInterval(timer);
-        sessCount++;
-        document.getElementById('c-usd').innerText = curUSD.toFixed(5);
-        document.getElementById('c-paws').innerText = Math.floor(curUSD * 45000);
+        clearInterval(timer); sess++;
+        document.getElementById('c-usd').innerText = cUSD.toFixed(5);
+        document.getElementById('c-paws').innerText = Math.floor(cUSD * 45000);
         changeTab('congrats');
     }
 
     function goHome() {
-        bal += curUSD;
-        updateUI();
+        bal += cUSD; updateUI();
         document.getElementById('main-nav').classList.remove('nav-locked');
         document.getElementById('stop-trigger').style.display = 'none';
         changeTab('home');
     }
 
-    // --- REFS (1 KERE) ---
     function applyRef() {
-        if(refClaimed) return;
-        const code = document.getElementById('ref-input').value;
-        if(code.length > 2) {
-            bal += 0.05;
-            refClaimed = true;
+        if(refTaken) return;
+        if(document.getElementById('ref-input').value.length > 2) {
+            bal += 0.05; refTaken = true;
             document.getElementById('ref-btn').disabled = true;
-            document.getElementById('ref-btn').innerText = "CLAIMED ✅";
+            document.getElementById('ref-btn').innerText = "BONUS ALINDI ✅";
             updateUI();
-            alert("Success! $0.05 added.");
         }
     }
 
-    // --- TASKS (1 KERE) ---
-    function completeTask(id, reward) {
-        if(completedTasks[id]) return;
-        bal += reward;
-        completedTasks[id] = true;
-        document.getElementById(id+'-btn').disabled = true;
-        document.getElementById(id+'-btn').innerText = "DONE ✅";
-        updateUI();
-        alert(`Task Complete! $${reward} added.`);
+    function doTask(url, reward) {
+        if(taskTaken) return;
+        window.open(url, '_blank');
+        setTimeout(() => {
+            bal += reward; taskTaken = true;
+            document.getElementById('task1-btn').disabled = true;
+            document.getElementById('task1-btn').innerText = "TAMAM ✅";
+            updateUI();
+            alert(`Ödül Eklendi: $${reward}`);
+        }, 2000);
     }
 
-    // --- WITHDRAW (GELİŞMİŞ) ---
     function handleWithdraw() {
-        const addr = document.getElementById('wd-addr').value;
-        const amt = parseFloat(document.getElementById('wd-amt').value);
-
-        if(!addr || addr.length < 10) {
-            alert("Please enter a valid wallet address!");
-            return;
-        }
-        if(isNaN(amt) || amt < 1.0) {
-            alert("Minimum withdrawal is $1.00!");
-            return;
-        }
-        if(amt > bal) {
-            alert("Insufficient balance!");
-            return;
-        }
-
-        bal -= amt;
-        updateUI();
-        alert("Withdrawal request sent successfully! Please wait for confirmation.");
-        document.getElementById('wd-addr').value = "";
-        document.getElementById('wd-amt').value = "";
+        let a = parseFloat(document.getElementById('wd-amt').value);
+        if(a >= 1.0 && a <= bal) {
+            bal -= a; updateUI(); alert("Çekim talebi alındı!");
+        } else { alert("Geçersiz miktar veya bakiye yetersiz! (Min $1.00)"); }
     }
 
     function shareOnTG() {
-        const msg = encodeURIComponent("🐾 Mining with Your Pet! Use my code PET839247 for $0.05 bonus.\nJoin here: https://t.me/YourPetBot");
+        const msg = encodeURIComponent("🐾 Fonix Mining! Kodum: PET839247\nKatıl: https://t.me/YourPetBot");
         window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=${msg}`, "_blank");
     }
 
@@ -294,9 +243,8 @@
         document.getElementById('global-bal').innerText = bal.toFixed(4);
         document.getElementById('w-bal').innerText = bal.toFixed(4);
         document.getElementById('st-total').innerText = bal.toFixed(4);
-        document.getElementById('st-sess').innerText = sessCount;
+        document.getElementById('st-sess').innerText = sess;
     }
 </script>
-
 </body>
 </html>
