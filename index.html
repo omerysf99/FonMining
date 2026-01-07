@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Withdraw System</title>
+    <title>Your Fantastic Pet - Pro Mining & Withdraw</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -24,26 +24,19 @@
             position: relative; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,1); color: white;
         }
 
+        /* Header */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .coin-status { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
 
+        /* Screens */
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Cards & Buttons */
         .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
         .card h4 { margin: 0; color: var(--accent-yellow); font-size: 13px; text-transform: uppercase; }
-
-        /* Withdraw Form Styles */
-        .input-group { margin-top: 10px; width: 100%; }
-        .input-group input { 
-            width: 100%; padding: 12px; border-radius: 12px; border: 2px solid transparent; 
-            background: rgba(255,255,255,0.9); color: #333; font-weight: bold; margin-bottom: 10px; outline: none;
-        }
-        .input-group input:focus { border-color: var(--accent-yellow); }
-
-        #withdraw-msg { font-size: 12px; margin-bottom: 10px; font-weight: bold; display: none; padding: 8px; border-radius: 8px; width: 100%; text-align: center; }
-
+        
         .btn-action { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
             width: 100%; padding: 15px; font-size: 18px; border-radius: 15px; 
@@ -51,11 +44,25 @@
         }
         .btn-action:active { transform: translateY(3px); box-shadow: 0 2px 0 #ccaa00; }
 
-        /* Nav Bar */
+        /* Input & Messages */
+        .input-box {
+            width: 100%; padding: 12px; border-radius: 12px; border: 2px solid transparent; 
+            background: white; color: #333; font-weight: bold; margin: 8px 0; outline: none;
+        }
+        #status-msg {
+            display: none; padding: 10px; border-radius: 10px; margin-bottom: 15px;
+            font-size: 12px; font-weight: bold; text-align: center; width: 100%;
+        }
+
+        /* Navigation */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; }
-        .nav-item.active { opacity: 1; transform: scale(1.1); }
-        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .nav-item.active { opacity: 1; }
+        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; }
+
+        /* Animation */
+        .rotating { animation: rotate 3s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -64,8 +71,24 @@
     <div class="header">
         <div class="coin-status">
             <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
-            <b id="header-balance">0.0000</b>
+            <b id="top-balance">0.0000</b>
         </div>
+        <div id="stop-btn" style="display:none; background:var(--accent-yellow); color:#333; width:30px; height:30px; border-radius:50%; text-align:center; line-height:30px; font-weight:bold; cursor:pointer;" onclick="stopMining()">✖</div>
+    </div>
+
+    <div id="screen-ref" class="screen">
+        <h2>REFERRALS</h2>
+        <div class="card">
+            <h4>Invite Link</h4>
+            <p style="font-size:12px;">t.me/YourPetBot?ref=839247</p>
+            <button class="btn-action" style="font-size:12px; padding:5px; margin-top:10px;">COPY</button>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2>TASKS</h2>
+        <div class="card"><h4>Watch Ad</h4><p>+ $0.01</p></div>
+        <div class="card"><h4>Join Channel</h4><p>+ $0.05</p></div>
     </div>
 
     <div id="screen-home" class="screen active-screen">
@@ -75,110 +98,127 @@
 
     <div id="screen-mining-live" class="screen">
         <h1 style="font-size:45px; margin:0;">🐾 <span id="live-paws">0</span></h1>
-        <h2 style="color:var(--accent-yellow)">$<span id="live-usd">0.0000</span></h2>
+        <h2 style="color:var(--accent-yellow)">$<span id="live-usd">0.00000</span></h2>
         <div style="flex:1; display:flex; align-items:center;">
-            <img src="pinix.jpg" id="fan" style="width:200px; height:200px; border-radius:50%; border:5px solid white;">
+            <img src="pinix.jpg" id="fan-img" style="width:200px; height:200px; border-radius:50%; border:5px solid white;">
         </div>
         <button class="btn-action" style="margin-bottom:20px;" onclick="stopMining()">CLAIM EARNINGS</button>
     </div>
 
     <div id="screen-wallet" class="screen">
-        <h2 style="margin-top:0;">WITHDRAW FUNDS</h2>
+        <h2 style="margin-top:0;">WITHDRAW</h2>
         <div class="card" style="text-align:center; padding:20px;">
             <h4>Your Balance</h4>
-            <p style="font-size:35px; color:var(--accent-yellow); margin:5px 0;">$<span id="wallet-balance">0.0000</span></p>
+            <p style="font-size:38px; color:var(--accent-yellow); margin:5px 0;">$<span id="wallet-balance">0.0000</span></p>
         </div>
 
         <div class="card">
-            <h4>Withdraw Details</h4>
-            <div id="withdraw-msg"></div>
-            <div class="input-group">
-                <input type="number" id="draw-amount" placeholder="Amount to withdraw (USD)" step="0.01">
-                <input type="text" id="draw-address" placeholder="USDT BEP20 Address">
-            </div>
-            <p style="font-size:11px; opacity:0.8;">Minimum withdrawal is $0.35</p>
-            <button class="btn-action" onclick="processWithdraw()">WITHDRAW NOW</button>
+            <div id="status-msg"></div>
+            <h4>Withdraw Settings</h4>
+            <input type="number" id="withdraw-amount" class="input-box" placeholder="Amount to withdraw ($)">
+            <input type="text" id="withdraw-address" class="input-box" placeholder="USDT BEP20 Address">
+            <p style="font-size:10px; opacity:0.8;">Minimum: $0.35</p>
+            <button class="btn-action" onclick="processWithdraw()">CONFIRM WITHDRAW</button>
         </div>
     </div>
 
+    <div id="screen-stats" class="screen">
+        <h2>STATISTICS</h2>
+        <div class="card"><h4>Lifetime Mined</h4><p>$<span id="stat-mined">0.0000</span></p></div>
+        <div class="card"><h4>Total Minutes</h4><p id="stat-time">0</p></div>
+    </div>
+
     <div class="nav-bar">
-        <div class="nav-item" onclick="changeTab('home')">🏠<br><small>HOME</small></div>
+        <div class="nav-item" onclick="changeTab('ref')">👥<br><small>REF</small></div>
+        <div class="nav-item" onclick="changeTab('tasks')">📋<br><small>TASKS</small></div>
         <div class="nav-item nav-center" onclick="changeTab('home')">🐾</div>
         <div class="nav-item" onclick="changeTab('wallet')">👛<br><small>WALLET</small></div>
+        <div class="nav-item" onclick="changeTab('stats')">📊<br><small>STATS</small></div>
     </div>
 </div>
 
 <script>
-    let mainWallet = 0.0000;
+    let mainBalance = 0.0000;
+    let lifetimeEarned = 0.0000;
+    let totalSecs = 0;
     let sessionUSD = 0;
-    let minerInterval;
+    let miningLoop;
 
     function changeTab(tab) {
+        if(miningLoop && tab !== 'home' && tab !== 'mining-live') {
+            alert("Lütfen önce mining'i durdurun!"); return;
+        }
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById('screen-' + tab).classList.add('active-screen');
-        // Mesajı temizle
-        document.getElementById('withdraw-msg').style.display = 'none';
+        document.getElementById('status-msg').style.display = 'none';
     }
 
     function startMining() {
         sessionUSD = 0;
         changeTab('mining-live');
-        document.getElementById('fan').classList.add('rotating'); // Opsiyonel animasyon sınıfı
+        document.getElementById('fan-img').classList.add('rotating');
+        document.getElementById('stop-btn').style.display = 'block';
         
-        minerInterval = setInterval(() => {
+        miningLoop = setInterval(() => {
             sessionUSD += (0.0005 / 50);
+            totalSecs++;
             document.getElementById('live-usd').innerText = sessionUSD.toFixed(5);
-            document.getElementById('live-paws').innerText = Math.floor(sessionUSD * 2000);
+            document.getElementById('live-paws').innerText = Math.floor(totalSecs / 5);
         }, 1000);
     }
 
     function stopMining() {
-        clearInterval(minerInterval);
-        mainWallet += sessionUSD;
-        updateUI();
+        clearInterval(miningLoop);
+        miningLoop = null;
+        mainBalance += sessionUSD;
+        lifetimeEarned += sessionUSD;
+        
+        document.getElementById('top-balance').innerText = mainBalance.toFixed(4);
+        document.getElementById('wallet-balance').innerText = mainBalance.toFixed(4);
+        document.getElementById('stat-mined').innerText = lifetimeEarned.toFixed(4);
+        document.getElementById('stat-time').innerText = Math.floor(totalSecs / 60);
+        
+        document.getElementById('fan-img').classList.remove('rotating');
+        document.getElementById('stop-btn').style.display = 'none';
         changeTab('wallet');
     }
 
-    function updateUI() {
-        document.getElementById('header-balance').innerText = mainWallet.toFixed(4);
-        document.getElementById('wallet-balance').innerText = mainWallet.toFixed(4);
-    }
-
     function processWithdraw() {
-        const amount = parseFloat(document.getElementById('draw-amount').value);
-        const address = document.getElementById('draw-address').value;
-        const msgBox = document.getElementById('withdraw-msg');
+        const amount = parseFloat(document.getElementById('withdraw-amount').value);
+        const address = document.getElementById('withdraw-address').value;
+        const msg = document.getElementById('status-msg');
 
-        msgBox.style.display = 'block';
+        msg.style.display = 'block';
 
-        if (isNaN(amount) || amount <= 0) {
-            showMsg("Lütfen geçerli bir tutar girin!", "red");
+        if (isNaN(amount) || amount < 0.35) {
+            msg.innerText = "HATA: Minimum çekim tutarı $0.35!";
+            msg.style.color = "var(--error-red)";
+            msg.style.border = "1px solid var(--error-red)";
+            msg.style.backgroundColor = "rgba(255, 77, 77, 0.1)";
         } 
-        else if (amount < 0.35) {
-            showMsg("HATA: Minimum çekim tutarı 0.35$ olmalıdır!", "red");
+        else if (amount > mainBalance) {
+            msg.innerText = "HATA: Yetersiz bakiye!";
+            msg.style.color = "var(--error-red)";
+            msg.style.border = "1px solid var(--error-red)";
+            msg.style.backgroundColor = "rgba(255, 77, 77, 0.1)";
         } 
-        else if (amount > mainWallet) {
-            showMsg("HATA: Yetersiz bakiye!", "red");
-        } 
-        else if (address.length < 10) {
-            showMsg("HATA: Geçersiz cüzdan adresi!", "red");
-        } 
-        else {
-            // BAŞARILI
-            mainWallet -= amount;
-            updateUI();
-            showMsg("ONAYLANDI: " + amount + "$ çekim talebiniz alındı!", "green");
-            document.getElementById('draw-amount').value = "";
-            document.getElementById('draw-address').value = "";
+        else if (address.length < 5) {
+            msg.innerText = "HATA: Geçersiz adres!";
+            msg.style.color = "var(--error-red)";
+            msg.style.border = "1px solid var(--error-red)";
         }
-    }
-
-    function showMsg(text, color) {
-        const msgBox = document.getElementById('withdraw-msg');
-        msgBox.innerText = text;
-        msgBox.style.backgroundColor = (color === "red") ? "rgba(255, 77, 77, 0.2)" : "rgba(46, 204, 113, 0.2)";
-        msgBox.style.color = (color === "red") ? "#ff4d4d" : "#2ecc71";
-        msgBox.style.border = "1px solid " + (color === "red" ? "#ff4d4d" : "#2ecc71");
+        else {
+            mainBalance -= amount;
+            document.getElementById('top-balance').innerText = mainBalance.toFixed(4);
+            document.getElementById('wallet-balance').innerText = mainBalance.toFixed(4);
+            
+            msg.innerText = "ONAYLANDI: $" + amount + " çekim talebi alındı!";
+            msg.style.color = "var(--success-green)";
+            msg.style.border = "1px solid var(--success-green)";
+            msg.style.backgroundColor = "rgba(46, 204, 113, 0.1)";
+            
+            document.getElementById('withdraw-amount').value = "";
+        }
     }
 </script>
 
