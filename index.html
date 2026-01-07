@@ -31,7 +31,11 @@
         window.mine = (on) => {
             if(on) {
                 isM = true; tab('mining');
-                loop = setInterval(() => { live += 0.000025; document.getElementById('m-usd').innerText = live.toFixed(5); }, 1000);
+                loop = setInterval(() => { 
+                    live += 0.000025; 
+                    document.getElementById('m-usd').innerText = live.toFixed(4);
+                    document.getElementById('m-paws').innerText = Math.floor(live * 900000);
+                }, 1000);
             } else {
                 clearInterval(loop); stats.balance += live; live = 0;
                 updateDoc(doc(db, "users", uID), { balance: stats.balance });
@@ -52,7 +56,7 @@
         function ui() {
             document.getElementById('h-bal').innerText = stats.balance.toFixed(4);
             document.getElementById('w-bal').innerText = stats.balance.toFixed(4);
-            if(stats.ref) document.getElementById('r-box').innerHTML = "<b style='color:#fbc531'>AKTİF</b>";
+            if(stats.ref) document.getElementById('r-box').innerHTML = "<b>AKTİF</b>";
             if(stats.tsk) document.getElementById('t-btn').innerText = "OK";
         }
         window.tab = (id) => {
@@ -65,82 +69,93 @@
         window.onload = start;
     </script>
     <style>
-        :root { --p: #6c5ce7; --g: #fbc531; --b: #0f0c29; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { --p: #7b66ff; --g: #fbc531; --bg: #5c59d3; }
+        * { box-sizing: border-box; font-family: 'Arial Black', Gadget, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; }
         #app {
             width: 100%; max-width: 410px; aspect-ratio: 9/16;
-            background: linear-gradient(180deg, #1e3799, #000);
-            border-radius: 40px; border: 8px solid #222; overflow: hidden;
+            background: radial-gradient(circle, #6a67e6 0%, #4a47b1 100%);
+            border-radius: 45px; border: 10px solid #222; overflow: hidden;
             display: flex; flex-direction: column; color: #fff; position: relative;
         }
-        .h { padding: 25px 20px; display: flex; justify-content: space-between; z-index: 9; }
-        .pill { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
+        .h { padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 9; }
+        .pill { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; font-size: 14px; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.1); }
         .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
-        .a { display: flex; animation: fade 0.3s ease; }
-        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .btn { background: var(--g); color: #000; border: none; width: 100%; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #cc8e00; }
+        .a { display: flex; }
+        .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #cc8e00; }
         .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #cc8e00; }
-        .card { background: rgba(255,255,255,0.05); width: 100%; padding: 20px; border-radius: 25px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .spin { width: 230px; height: 230px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.1); margin: 30px 0; background: url('pinix.jpg') center/cover; animation: r 4s linear infinite; box-shadow: 0 0 30px var(--p); }
-        @keyframes r { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        nav { height: 90px; background: rgba(0,0,0,0.5); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .ni { font-size: 20px; cursor: pointer; opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; flex:1; }
-        .act { opacity: 1; color: var(--g); transform: scale(1.1); }
+        
+        /* Mining Screen Assets */
+        .fan-container { position: relative; width: 280px; height: 280px; margin-top: 20px; }
+        .fan-base { width: 100%; height: 100%; background: url('fan-mining.png') center/contain no-repeat; animation: spin 0.8s linear infinite; }
+        .fan-glow { position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%; box-shadow: 0 0 40px rgba(255,255,255,0.2); pointer-events:none; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .stat-label { font-size: 42px; margin: 10px 0 0 0; }
+        .sub-label { color: var(--g); font-size: 18px; margin-bottom: 5px; }
+        
+        .nav { height: 90px; background: rgba(129, 132, 247, 0.8); display: flex; justify-content: space-around; align-items: center; border-radius: 35px 35px 0 0; }
+        .ni { font-size: 20px; cursor: pointer; opacity: 0.5; flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .act { opacity: 1; transform: scale(1.1); }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="h">
-        <div class="pill">💰 <span id="h-bal">0.0000</span></div>
-        <div onclick="mine(false)" style="cursor:pointer; color:var(--g)">[✕]</div>
+        <div class="pill">🪙 <span id="h-bal">0.0000</span></div>
+        <div onclick="mine(false)" style="cursor:pointer; background:var(--g); color:#000; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">X</div>
     </div>
+
     <div id="p-home" class="p a">
-        <img src="yourfantastic.jpg" style="width:95%; border-radius:30px; margin-top:10px; box-shadow: 0 10px 20px #000;">
-        <h2 style="margin:20px 0 5px 0;">PET ELITE</h2>
-        <p style="opacity:0.6; font-size: 14px;">Kazandıkça evcil hayvanını büyüt</p>
+        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-top:10px;">
+        <h2 style="margin:20px 0;">PET GROWTH</h2>
         <div style="flex:1"></div>
-        <button class="btn" onclick="mine(true)">KAZIMA BAŞLA</button>
-        <div style="height:15px"></div>
+        <button class="btn" onclick="mine(true)">MINING START</button>
+        <div style="height:20px"></div>
     </div>
-    <div id="p-friends" class="p">
-        <h3>ARKADAŞLAR</h3>
-        <div class="card" id="r-box">
-            <p style="margin:0 0 10px 0;">Referans Kodu Gir</p>
-            <input type="text" id="r-in" style="width:100%; padding:12px; border-radius:15px; border:none; margin-bottom:15px; text-align:center;">
-            <button class="btn" style="padding:12px" onclick="apply()">BONUSU AL</button>
-        </div>
-        <div class="card">Davet Kodun: PET-839</div>
-    </div>
-    <div id="p-tasks" class="p">
-        <h3>GÖREVLER</h3>
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="text-align:left;"><p style="margin:0;">Telegram Katıl</p><small style="color:var(--g)">+$0.0014</small></div>
-            <button class="btn" id="t-btn" style="width:70px; padding:8px; font-size:12px; margin:0;" onclick="doTsk()">GİT</button>
-        </div>
-    </div>
-    <div id="p-wallet" class="p">
-        <h3>CÜZDAN</h3>
-        <div class="card" style="padding:45px 10px">
-            <p style="opacity:0.6; font-size:12px;">MEVCUT BAKİYE</p>
-            <h1 style="color:var(--g); font-size:48px;">$<span id="w-bal">0.0000</span></h1>
-        </div>
-        <button class="btn" onclick="alert('Min: $1.00')">ÇEKİM YAP</button>
-    </div>
+
     <div id="p-mining" class="p">
-        <p style="letter-spacing:2px; color:var(--g)">MINING...</p>
-        <h1 id="m-usd" style="font-size:48px; margin:15px 0;">$0.00000</h1>
-        <div class="spin"></div>
-        <div style="width:100%; display:flex; justify-content:space-around; opacity:0.6; font-size:12px;">
-            <span>⚡ 77.6 GH/s</span><span>🛰️ Synced</span>
+        <h1 class="stat-label">🐾 <span id="m-paws">0</span></h1>
+        <div class="sub-label">$<span id="m-usd">0.0000</span></div>
+        <p style="font-size:12px; opacity:0.8;">PET GROWTH ACTIVE</p>
+        <div class="fan-container">
+            <div class="fan-base"></div>
+            <div class="fan-glow"></div>
+        </div>
+        <p style="margin-top:20px; font-size:11px; letter-spacing:1px; opacity:0.7;">CRAFTING UNFORGETTABLE PET</p>
+    </div>
+
+    <div id="p-friends" class="p">
+        <h3>FRIENDS</h3>
+        <div id="r-box" style="width:100%; background:rgba(0,0,0,0.2); padding:20px; border-radius:20px;">
+            <input type="text" placeholder="Enter Ref Code" style="width:100%; padding:15px; border-radius:15px; border:none; margin-bottom:10px; text-align:center;">
+            <button class="btn" style="width:100%; padding:10px;" onclick="apply()">CLAIM</button>
         </div>
     </div>
-    <nav>
-        <div class="ni" id="n-friends" onclick="tab('friends')">👥<small style="font-size:9px">Friends</small></div>
-        <div class="ni" id="n-tasks" onclick="tab('tasks')">📋<small style="font-size:9px">Tasks</small></div>
-        <div class="ni act" id="n-home" onclick="tab('home')">🐾<small style="font-size:9px">Home</small></div>
-        <div class="ni" id="n-wallet" onclick="tab('wallet')">👛<small style="font-size:9px">Wallet</small></div>
-    </nav>
+
+    <div id="p-tasks" class="p">
+        <h3>TASKS</h3>
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="text-align:left;"><b>Telegram</b><br><small>$0.0014</small></div>
+            <button class="btn" id="t-btn" style="width:60px; padding:8px; font-size:12px;" onclick="doTsk()">GO</button>
+        </div>
+    </div>
+
+    <div id="p-wallet" class="p">
+        <h3>WALLET</h3>
+        <div style="margin:40px 0;">
+            <p style="opacity:0.6;">TOTAL BALANCE</p>
+            <h1 style="font-size:48px; color:var(--g);">$<span id="w-bal">0.0000</span></h1>
+        </div>
+        <button class="btn">WITHDRAW</button>
+    </div>
+
+    <div class="nav">
+        <div class="ni" id="n-friends" onclick="tab('friends')">👥</div>
+        <div class="ni" id="n-tasks" onclick="tab('tasks')">📋</div>
+        <div class="ni act" id="n-home" onclick="tab('home')">🐾</div>
+        <div class="ni" id="n-wallet" onclick="tab('wallet')">👛</div>
+    </div>
 </div>
 </body>
 </html>
