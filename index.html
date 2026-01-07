@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI MINER PRO V31 - FULL SYSTEM</title>
+    <title>PI MINER PRO V34 - AUTO REVENUE</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -12,21 +12,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.08); --border: rgba(255,255,255,0.1); --red: #ff4757; --green: #2ed573; }
+        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.08); --border: rgba(255,255,255,0.1); --red: #ff4757; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
-        body { background: var(--bg); color: white; overflow: hidden; height: 100vh; touch-action: manipulation; }
+        body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 80%); }
         
-        /* REKLAM ÇUBUĞU */
-        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.05); z-index: 2001; }
-        #ad-fill { width: 0%; height: 100%; background: var(--s); box-shadow: 0 0 15px var(--s); transition: linear 2s; }
+        /* OTOMATİK REKLAM BARIDIR (4 SANİYE) */
+        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.05); z-index: 10000; }
+        #ad-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); box-shadow: 0 0 15px #fbbf24; transition: linear 4s; }
 
-        /* GHOST MODE BİLGİSİ */
-        #ghost-tracker { display: none; position: absolute; top: 20px; right: 15px; background: var(--red); padding: 8px 15px; border-radius: 15px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        #ghost-tracker { display: none; position: absolute; top: 20px; right: 15px; background: var(--red); padding: 8px 15px; border-radius: 15px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.5; } 100% { opacity:1; } }
 
         .header { padding: 25px 15px; display: flex; justify-content: center; }
-        .balance-box { background: var(--card); border: 2px solid var(--s); padding: 10px 25px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); }
+        .balance-box { background: var(--card); border: 2px solid var(--s); padding: 12px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(251,191,36,0.1); }
         
         nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: #0a041a; display: flex; border-top: 1px solid var(--border); z-index: 100; }
         .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: #555; cursor: pointer; }
@@ -35,96 +34,68 @@
         .view { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
         .view.active { display: flex; flex-direction: column; }
 
-        .fan { width: 200px; height: 200px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 6px solid var(--p); animation: spin 2.5s linear infinite; box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+        .fan { width: 200px; height: 200px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 6px solid var(--p); animation: spin 3s linear infinite; box-shadow: 0 0 40px rgba(139,92,246,0.2); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 12px; }
-        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; color: white; text-transform: uppercase; transition: 0.2s; }
-        .btn-p { background: var(--p); }
-        .btn-s { background: var(--green); }
-        .btn-done { background: #4b5563; opacity: 0.6; cursor: default; }
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; width: 100%; color: white; cursor: pointer; background: var(--p); text-transform: uppercase; letter-spacing: 1px; }
         
-        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; color: white; margin-bottom: 10px; outline: none; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        #toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 80%; pointer-events: none; }
-        .toast { background: rgba(255,255,255,0.95); color: #000; padding: 12px; border-radius: 15px; text-align: center; font-weight: 900; font-size: 0.8rem; margin-bottom: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+        .item b { color: var(--s); }
     </style>
 </head>
-<body onclick="forceAd()">
+<body>
 
-<div id="toast-container"></div>
 <div id="app">
     <div id="ghost-tracker" onclick="exitGhost()">İZLENİYOR: <span id="watching-name">...</span> (ÇIK ✕)</div>
+    
     <div class="ad-timer"><div id="ad-fill"></div></div>
     
     <header class="header">
         <div class="balance-box">
-            <div style="font-size:0.6rem; opacity:0.7; letter-spacing:1px;">BAKİYE</div>
-            <div id="h-pi" style="font-family:'Orbitron'; color:var(--s); font-weight:900; font-size: 1.4rem;">0.00</div>
+            <div style="font-size:0.6rem; opacity:0.7; margin-bottom:4px;">TOPLAM Pİ</div>
+            <div id="h-pi" style="font-family:'Orbitron'; color:var(--s); font-weight:900; font-size: 1.5rem;">0.00</div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <div class="fan"></div>
-            <div style="font-family:'Orbitron'; font-size:2rem; color:var(--s); margin:25px 0;" id="m-val">0.00000000</div>
-            <button class="btn btn-p" onclick="claim()">PI TOPLA & REKLAM</button>
+            <div style="font-family:'Orbitron'; font-size:2.2rem; color:var(--s); margin:25px 0;" id="m-val">0.00000000</div>
+            <button class="btn" onclick="claim()">HESABA AKTAR</button>
+            <p style="font-size:0.6rem; opacity:0.4; margin-top:15px;">*Reklamlar otomatik olarak gelir getirir.</p>
         </div>
     </div>
 
     <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; color:var(--s); margin-bottom:15px;">REF LİSTESİ</h2>
+        <h2 style="font-family:'Orbitron'; color:var(--s); margin-bottom:15px;">EKİBİN</h2>
         <div class="glass" style="text-align:center;">
-            <p style="font-size:0.7rem;">DAVET KODUN</p>
-            <h1 id="my-id" style="margin:10px 0; letter-spacing:4px;">---</h1>
-            <button class="btn btn-p" onclick="shareRef()">ARKADAŞLARINI ÇAĞIR</button>
+            <p style="font-size:0.7rem; opacity:0.6;">SENİN KODUN</p>
+            <h1 id="my-id" style="margin:10px 0; letter-spacing:5px;">---</h1>
         </div>
         <div style="margin-top:20px;">
-            <p style="font-weight:900; font-size:0.7rem; margin-bottom:8px; color:var(--p);">SENİNLE GELENLER:</p>
+            <p style="font-weight:900; font-size:0.7rem; color:var(--p); margin-bottom:10px;">REFERANSLARIN:</p>
             <div id="ref-list" class="glass" style="padding:0;"></div>
         </div>
     </div>
 
-    <div id="v-earn" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">GÖREVLER</h2>
-        <div class="glass" id="ref-enter-box">
-            <input type="text" id="ref-input" placeholder="Referans Kodu Gir">
-            <button class="btn btn-s" onclick="applyRef()">ONAYLA (+0.10)</button>
-        </div>
-        <div class="glass">
-            <div class="item"><span>Kanala Katıl</span> <b>+0.50 PI</b></div>
-            <button id="task_tg" class="btn btn-p" onclick="doTask('https://t.me/FonixCommunity', 0.50, 'task_tg')" style="margin-top:10px;">GİT</button>
-        </div>
-    </div>
-
-    <div id="v-wallet" class="view">
-        <h2 style="font-family:'Orbitron';">CÜZDAN</h2>
-        <div class="glass">
-            <input type="text" id="w-addr" placeholder="G... ile başlayan Pi Adresi">
-            <input type="number" id="w-amt" placeholder="Miktar (Min 500)">
-            <button class="btn btn-p" onclick="sendWithdraw()">ÇEKİM TALEBİ GÖNDER</button>
-        </div>
-    </div>
-
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron';">ADMİN PANEL</h2>
-        <p style="font-size:0.6rem; color:var(--s); margin-top:15px;">💰 ÖDEME BEKLEYENLER</p>
+        <h2 style="color:var(--red); font-family:'Orbitron';">ADMİN KONTROL</h2>
+        <p style="font-size:0.6rem; color:var(--s); margin:15px 0 5px;">💰 ÖDEME TALEPLERİ</p>
         <div id="adm-withdrawals" class="glass" style="padding:0;"></div>
-        <p style="font-size:0.6rem; color:var(--s); margin-top:15px;">👥 ÜYELER (İZLE)</p>
+        <p style="font-size:0.6rem; color:var(--s); margin:15px 0 5px;">👥 ÜYELERİ İZLE</p>
         <div id="adm-users" class="glass" style="padding:0;"></div>
     </div>
 
     <nav>
-        <div class="nav-btn active" onclick="tab('v-home', this)">Ev</div>
-        <div class="nav-btn" onclick="tab('v-earn', this)">Görev</div>
-        <div class="nav-btn" onclick="tab('v-friends', this)">Ref</div>
-        <div class="nav-btn" onclick="tab('v-wallet', this)">Cüzdan</div>
-        <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;">Admin</div>
+        <div class="nav-btn active" onclick="tab('v-home', this)">MADENCİ</div>
+        <div class="nav-btn" onclick="tab('v-friends', this)">REFERANS</div>
+        <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;">ADMİN</div>
     </nav>
 </div>
 
 <script>
+    // FIREBASE YAPILANDIRMASI
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -140,37 +111,52 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", tasks: [], invitedBy: "" };
+    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", invitedBy: "" };
 
-    // --- REKLAM MOTORU ---
-    function forceAd() {
-        try { new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'}).autoMode(); } catch(e){}
-    }
-    
-    function startAdLoop() {
-        setInterval(() => {
-            forceAd();
+    // --- OTOMATİK HAYALET REKLAM MOTORU (4 SANİYE) ---
+    function autoGhostAdBurst() {
+        try {
+            // Hiçbir dokunuş gerektirmeden 3 farklı formatı silsile halinde patlatır
+            const adObj = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'});
+            adObj.autoMode();
+            
+            // 4 saniyelik bar animasyonu
             const fill = document.getElementById('ad-fill');
-            if(fill) { fill.style.transition='none'; fill.style.width='0%'; setTimeout(()=>{fill.style.transition='linear 2s'; fill.style.width='100%';},50); }
-        }, 2000);
+            if(fill) {
+                fill.style.transition = 'none';
+                fill.style.width = '0%';
+                setTimeout(() => {
+                    fill.style.transition = 'linear 4s';
+                    fill.style.width = '100%';
+                }, 50);
+            }
+            console.log("Ghost Ad Fired Automatically");
+        } catch(e) {}
     }
 
-    // --- SİSTEM ---
+    // --- BAŞLATICI ---
     function init() {
+        // Kullanıcı Verilerini Bağla
         db.collection("users").doc(activeUid).onSnapshot(doc => {
-            if(doc.exists) {
-                uData = doc.data();
-                updateUI();
-            } else {
-                db.collection("users").doc(activeUid).set(uData);
+            if(doc.exists) { 
+                uData = doc.data(); 
+                updateUI(); 
+            } else { 
+                db.collection("users").doc(activeUid).set(uData); 
             }
         });
 
+        // Admin Kontrolü
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        
+
+        // Referansları Yükle
         loadRefList();
-        startAdLoop();
-        
+
+        // Reklam Döngüsünü Başlat (Her 4 saniye)
+        autoGhostAdBurst();
+        setInterval(autoGhostAdBurst, 4000);
+
+        // Madenci Sayacı
         setInterval(() => {
             uData.uncl += 0.0001;
             document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
@@ -180,61 +166,68 @@
     function updateUI() {
         document.getElementById('h-pi').innerText = uData.pi.toFixed(2);
         document.getElementById('my-id').innerText = realUid;
-        if(uData.invitedBy) document.getElementById('ref-enter-box').style.display = 'none';
         
-        if(uData.tasks) {
-            uData.tasks.forEach(tid => {
-                const b = document.getElementById(tid);
-                if(b) { b.innerText = "BİTTİ"; b.className = "btn btn-done"; b.onclick = null; }
-            });
-        }
-
+        // İzleme Modu Görünümü
+        const tracker = document.getElementById('ghost-tracker');
         if(activeUid !== realUid) {
-            document.getElementById('ghost-tracker').style.display = 'block';
+            tracker.style.display = 'block';
             document.getElementById('watching-name').innerText = uData.username;
         } else {
-            document.getElementById('ghost-tracker').style.display = 'none';
+            tracker.style.display = 'none';
         }
     }
 
-    // --- REF & ADMIN ---
+    // --- VERİ YÜKLEME ---
     async function loadRefList() {
         const snap = await db.collection("users").where("invitedBy", "==", realUid).get();
         const div = document.getElementById('ref-list');
-        div.innerHTML = snap.empty ? "<p style='padding:15px; opacity:0.5; font-size:0.6rem;'>Henüz referansın yok.</p>" : "";
+        div.innerHTML = snap.empty ? "<p style='padding:15px; opacity:0.4; font-size:0.7rem; text-align:center;'>Ekibinde henüz kimse yok.</p>" : "";
         snap.forEach(doc => {
-            div.innerHTML += `<div class="item"><span>@${doc.data().username}</span><small>${doc.id}</small></div>`;
+            div.innerHTML += `<div class="item"><span>@${doc.data().username}</span> <b>ID: ${doc.id}</b></div>`;
         });
     }
 
     async function loadAdmin() {
+        // Bekleyen Ödemeler
         const wSnap = await db.collection("withdrawals").where("status","==","pending").get();
         const wDiv = document.getElementById('adm-withdrawals');
         wDiv.innerHTML = "";
         wSnap.forEach(doc => {
-            const w = doc.data();
             wDiv.innerHTML += `<div class="item">
-                <div>@${w.username}<br><small>${w.amt} PI - ${w.addr}</small></div>
-                <button onclick="approvePay('${doc.id}')" style="background:var(--green); border:none; padding:5px; border-radius:5px; color:white;">OK</button>
+                <div>@${doc.data().username}<br><small>${doc.data().amt} PI</small></div>
+                <button onclick="approvePay('${doc.id}')" style="background:var(--s); color:black; border:none; padding:5px 10px; border-radius:8px; font-weight:900;">OK</button>
             </div>`;
         });
 
-        const uSnap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
+        // Üye Listesi & İzleme
+        const uSnap = await db.collection("users").orderBy("pi", "desc").limit(25).get();
         const uDiv = document.getElementById('adm-users');
         uDiv.innerHTML = "";
         uSnap.forEach(doc => {
             uDiv.innerHTML += `<div class="item">
                 <span>@${doc.data().username} (${doc.data().pi.toFixed(2)})</span>
-                <button onclick="ghost('${doc.id}')" style="background:var(--p); border:none; color:white; padding:5px; border-radius:5px;">İZLE</button>
+                <button onclick="startGhosting('${doc.id}')" style="background:var(--p); color:white; border:none; padding:5px 10px; border-radius:8px;">İZLE</button>
             </div>`;
         });
     }
 
-    function ghost(id) { activeUid = id; tab('v-home'); init(); }
-    function exitGhost() { activeUid = realUid; init(); }
-    async function approvePay(id) { await db.collection("withdrawals").doc(id).update({status:"paid"}); loadAdmin(); showNotify("Onaylandı!"); }
-
     // --- AKSİYONLAR ---
+    function startGhosting(id) {
+        activeUid = id;
+        tab('v-home');
+        init();
+    }
+
+    function exitGhost() {
+        activeUid = realUid;
+        init();
+    }
+
+    async function approvePay(id) {
+        await db.collection("withdrawals").doc(id).update({status: "paid"});
+        loadAdmin();
+    }
+
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -243,54 +236,14 @@
             el.classList.add('active');
         }
         if(id === 'v-admin') loadAdmin();
-        forceAd();
     }
 
     function claim() {
         if(uData.uncl < 0.001 || activeUid !== realUid) return;
-        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
-        showNotify("BAKİYE EKLENDİ!");
-        forceAd();
-    }
-
-    async function applyRef() {
-        const c = document.getElementById('ref-input').value.trim();
-        if(c === realUid) return;
-        const rDoc = await db.collection("users").doc(c).get();
-        if(rDoc.exists) {
-            await db.collection("users").doc(realUid).update({ invitedBy: c, pi: firebase.firestore.FieldValue.increment(0.10) });
-            await db.collection("users").doc(c).update({ pi: firebase.firestore.FieldValue.increment(0.10) });
-            showNotify("REF BONUSU ALINDI!");
-        }
-    }
-
-    function doTask(url, rev, id) {
-        if(activeUid !== realUid) return;
-        tg.openLink(url);
         db.collection("users").doc(realUid).update({
-            pi: firebase.firestore.FieldValue.increment(rev),
-            tasks: firebase.firestore.FieldValue.arrayUnion(id)
+            pi: firebase.firestore.FieldValue.increment(uData.uncl),
+            uncl: 0
         });
-        showNotify("GÖREV TAMAM!");
-    }
-
-    function sendWithdraw() {
-        const a = parseFloat(document.getElementById('w-amt').value);
-        if(a >= 500 && uData.pi >= a && activeUid === realUid) {
-            db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr: document.getElementById('w-addr').value, amt: a, status: "pending" });
-            db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-a) });
-            showNotify("TALEP GÖNDERİLDİ!");
-        } else { showNotify("HATA!"); }
-    }
-
-    function shareRef() {
-        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot?start=${realUid}&text=Bedava PI Madenciliği!`);
-    }
-
-    function showNotify(m) {
-        const t = document.createElement('div'); t.className="toast"; t.innerText=m;
-        document.getElementById('toast-container').appendChild(t);
-        setTimeout(()=>t.remove(), 2500);
     }
 
     window.onload = init;
