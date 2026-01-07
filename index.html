@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pet Elite v400 - Full Firebase</title>
+    <title>FonixApp - Mining & Withdraw</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // YENİ FİREBASE CONFIG (fonixapp)
         const firebaseConfig = {
-            apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
-            authDomain: "fonix-b4de6.firebaseapp.com",
-            projectId: "fonix-b4de6",
-            storageBucket: "fonix-b4de6.firebasestorage.app",
-            messagingSenderId: "20899545652",
-            appId: "1:20899545652:web:f32ef599f0c8d3deaec061"
+            apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
+            authDomain: "fonixapp.firebaseapp.com",
+            projectId: "fonixapp",
+            storageBucket: "fonixapp.firebasestorage.app",
+            messagingSenderId: "980255542194",
+            appId: "1:980255542194:web:883a3f7a8fc05fee6332ab",
+            measurementId: "G-LTYXGYFTKV"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // KULLANICI BİLGİLERİ (Admin ID: 8392479231)
+        // KULLANICI BİLGİSİ (Admin ID: 8392479231)
         let uID = "8392479231"; 
         let stats = { balance: 0.0, invitedBy: "", completedTasks: [] };
         let liveEarn = 0, miningLoop, seconds = 0;
@@ -28,99 +30,89 @@
         async function init() {
             const userRef = doc(db, "users", uID);
             const userSnap = await getDoc(userRef);
-
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
+                stats = { balance: 0.0, invitedBy: "", completedTasks: [] };
                 await setDoc(userRef, stats);
             }
             updateUI();
             loadReferrals();
-            checkTasks();
         }
 
-        // UI Güncelleme
-        function updateUI() {
-            document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
-            document.getElementById('my-code').innerText = uID;
-            
-            if(stats.invitedBy) {
-                document.getElementById('inviter-area').innerHTML = `<p style="color:#fbc531">Sizi Davet Eden: ${stats.invitedBy}</p>`;
-            }
-        }
-
-        // Davet Edilenleri Firebase'den Çek (Canlı)
-        async function loadReferrals() {
-            const refList = document.getElementById('ref-list');
-            refList.innerHTML = "Yükleniyor...";
-            
-            const q = query(collection(db, "users"), where("invitedBy", "==", uID));
-            const querySnapshot = await getDocs(q);
-            
-            refList.innerHTML = "";
-            let count = 0;
-            querySnapshot.forEach((doc) => {
-                count++;
-                refList.innerHTML += `
-                    <div class="list-item">
-                        <span>👤 User_${doc.id.slice(-4)}</span>
-                        <span style="color:#4cd137">+$0.0500</span>
-                    </div>`;
-            });
-            if(count === 0) refList.innerHTML = "<p style='opacity:0.5'>Henüz kimse yok.</p>";
-        }
-
-        // Madencilik Başlat
+        // MADENCİLİK MOTORU
         window.startMining = () => {
             tab('mining');
             liveEarn = 0; seconds = 0;
             miningLoop = setInterval(() => {
                 seconds++;
-                liveEarn += 0.000045;
+                liveEarn += 0.000045; // Saniyelik kazanç
+                let ghs = (Math.random() * (4.0 - 3.0) + 3.0).toFixed(2);
                 document.getElementById('m-usd').innerText = liveEarn.toFixed(5);
+                document.getElementById('m-ghs').innerText = ghs;
                 document.getElementById('m-time').innerText = `${Math.floor(seconds/60)}:${seconds%60 < 10 ? '0'+seconds%60 : seconds%60}`;
             }, 1000);
         };
 
-        // Madencilik Durdur ve Firebase'e Yaz
         window.stopMining = async () => {
             clearInterval(miningLoop);
             stats.balance += liveEarn;
             await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+            updateUI();
             tab('congrats');
-            updateUI();
         };
 
-        // Davet Edeni Kaydet
-        window.applyInviter = async () => {
-            const input = document.getElementById('inviter-input').value;
-            if(!input || input === uID || stats.invitedBy) return;
-            
-            stats.invitedBy = input;
-            stats.balance += 0.10; // Kod girene ödül
-            await updateDoc(doc(db, "users", uID), { invitedBy: input, balance: stats.balance });
-            updateUI();
-            alert("Davet kodu onaylandı!");
+        // PARA ÇEKME (Withdraw)
+        window.processWithdraw = async () => {
+            const address = document.getElementById('wd-address').value;
+            const amount = parseFloat(document.getElementById('wd-amount').value);
+            const msg = document.getElementById('wd-msg');
+
+            if (!address || address.length < 30 || !address.startsWith('T')) {
+                msg.innerHTML = '<span style="color:#ff4757">Hata: Geçersiz TRC20 Adresi!</span>';
+                return;
+            }
+            if (isNaN(amount) || amount < 10) {
+                msg.innerHTML = '<span style="color:#ff4757">Hata: Minimum çekim $10.00!</span>';
+                return;
+            }
+            if (amount > stats.balance) {
+                msg.innerHTML = '<span style="color:#ff4757">Hata: Yetersiz bakiye!</span>';
+                return;
+            }
+
+            try {
+                // Bakiyeyi düşür ve Withdrawal kaydı oluştur
+                stats.balance -= amount;
+                await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+                await addDoc(collection(db, "withdrawals"), {
+                    uID: uID,
+                    address: address,
+                    amount: amount,
+                    status: "pending",
+                    date: new Date().toISOString()
+                });
+
+                msg.innerHTML = '<span style="color:#2ecc71">Onaylandı! Talebiniz alındı.</span>';
+                updateUI();
+            } catch (e) {
+                msg.innerHTML = '<span style="color:#ff4757">Sistem Hatası!</span>';
+            }
         };
 
-        // Görev Tamamla
-        window.doTask = async (taskId, reward) => {
-            if(stats.completedTasks.includes(taskId)) return;
-            stats.balance += reward;
-            stats.completedTasks.push(taskId);
-            await updateDoc(doc(db, "users", uID), { 
-                balance: stats.balance, 
-                completedTasks: stats.completedTasks 
-            });
-            updateUI();
-            checkTasks();
-            alert("Görev Tamamlandı!");
-        };
+        // UI GÜNCELLEME VE SEKME YÖNETİMİ
+        function updateUI() {
+            document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
+            document.getElementById('my-code').innerText = uID;
+        }
 
-        function checkTasks() {
-            stats.completedTasks.forEach(id => {
-                const btn = document.getElementById('btn-'+id);
-                if(btn) { btn.innerText = "DONE"; btn.style.background = "#444"; btn.disabled = true; }
+        async function loadReferrals() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", uID));
+            const snap = await getDocs(q);
+            const refList = document.getElementById('ref-list');
+            refList.innerHTML = "";
+            snap.forEach(doc => {
+                refList.innerHTML += `<div class="list-item"><span>👤 ${doc.id.slice(-5)}</span><span style="color:#fbc531">+$0.0500</span></div>`;
             });
         }
 
@@ -134,95 +126,93 @@
     </script>
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #5c59d3; }
-        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; }
-        body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; color: #fff; }
-        #app { width: 100%; max-width: 410px; height: 90vh; background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%); border-radius: 40px; position: relative; display: flex; flex-direction: column; overflow: hidden; border: 8px solid #222; }
-        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
+        #app { width: 100%; max-width: 410px; height: 92vh; background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%); border-radius: 40px; border: 8px solid #222; display: flex; flex-direction: column; position: relative; }
+        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; text-align: center; }
         .a { display: flex; }
-        .btn { background: var(--g); color: #000; border: none; width: 90%; padding: 15px; border-radius: 20px; font-weight: 800; margin: 10px 0; cursor: pointer; }
-        .list-item { width: 100%; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .btn { background: var(--g); color: #000; border: none; width: 90%; padding: 15px; border-radius: 20px; font-weight: 800; cursor: pointer; margin: 10px 0; transition: 0.2s; }
+        .list-item { width: 100%; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        input { width: 90%; padding: 12px; border-radius: 12px; border: none; margin-bottom: 10px; background: rgba(255,255,255,0.1); color: #fff; text-align: center; }
         .nav { height: 80px; background: rgba(0,0,0,0.3); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px); }
         .ni { font-size: 24px; cursor: pointer; opacity: 0.6; }
-        input { width: 90%; padding: 12px; border-radius: 12px; border: none; margin-bottom: 10px; background: rgba(255,255,255,0.1); color: #fff; text-align: center; }
+        .fan { width: 180px; height: 180px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid var(--g); animation: spin 0.8s linear infinite; margin: 20px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:20px;">🪙 <span class="bal-val">0.0000</span></div>
-        <div onclick="tab('home')" style="cursor:pointer;">✕</div>
+        <div style="background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:20px; font-size: 14px;">🪙 <span class="bal-val">0.0000</span></div>
+        <div onclick="tab('home')" style="cursor:pointer; font-weight: bold;">✕</div>
     </div>
 
     <div id="p-home" class="p a">
-        <img src="https://via.placeholder.com/150" style="width:200px; border-radius:50%; margin-top:20px;">
-        <h2 style="letter-spacing:2px;">PET ELITE</h2>
-        <p style="font-size:12px; opacity:0.7;">Kazmaya Başlamak İçin Hazır Mısın?</p>
+        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-top:10px;">
+        <h2 style="margin:20px 0 0 0;">PET GROWTH</h2>
+        <p style="font-size: 11px; opacity: 0.6;">CRAFTING UNFORGETTABLE PET</p>
         <div style="flex:1"></div>
         <button class="btn" onclick="startMining()">MINING START</button>
     </div>
 
     <div id="p-friends" class="p">
         <h3>FRIENDS</h3>
-        <div id="inviter-area" style="width:100%;">
-            <input type="text" id="inviter-input" placeholder="Davet Kodu Gir">
-            <button class="btn" style="padding:10px;" onclick="applyInviter()">ONAYLA</button>
+        <div style="width:100%; background:rgba(0,0,0,0.1); padding:15px; border-radius:20px;">
+            <p style="font-size:10px; opacity:0.7;">SİZİ KİM DAVET ETTİ?</p>
+            <input type="text" id="inviter-input" placeholder="Kod Giriniz">
+            <button class="btn" style="padding:10px;">KAYDET</button>
         </div>
-        <div style="width:100%; margin-top:20px;">
-            <p style="text-align:left; font-size:12px; color:var(--g)">DAVET ETTİĞİN KİŞİLER</p>
+        <div style="width:100%; margin-top:20px; text-align: left;">
+            <p style="color:var(--g); font-size: 12px; margin-left: 10px;">DAVET ETTİKLERİNİZ</p>
             <div id="ref-list"></div>
         </div>
-        <div style="margin-top:auto; background:rgba(0,0,0,0.2); width:100%; padding:15px; border-radius:20px;">
-            <p style="font-size:10px; margin:0;">SENİN KODUN</p>
-            <h2 id="my-code" style="color:var(--g); margin:5px 0;">-</h2>
-        </div>
-    </div>
-
-    <div id="p-tasks" class="p">
-        <h3>TASKS</h3>
-        <div class="list-item">
-            <span>Follow X (Twitter)</span>
-            <button id="btn-t1" onclick="doTask('t1', 0.50)" style="background:var(--g); border:none; border-radius:10px; padding:5px 10px;">+$0.50</button>
-        </div>
-        <div class="list-item">
-            <span>Join Telegram</span>
-            <button id="btn-t2" onclick="doTask('t2', 0.30)" style="background:var(--g); border:none; border-radius:10px; padding:5px 10px;">+$0.30</button>
+        <div style="margin-top:auto; background:rgba(0,0,0,0.3); width:100%; padding:15px; border-radius:20px;">
+            <small>KODUNUZ</small>
+            <h2 id="my-code" style="color:var(--g); margin:5px 0;">8392479231</h2>
         </div>
     </div>
 
     <div id="p-mining" class="p">
-        <div style="width:200px; height:200px; border-radius:50%; border:10px solid var(--g); margin:30px; display:flex; align-items:center; justify-content:center; animation: pulse 1s infinite alternate;">
-            <h2 id="m-usd">0.00000</h2>
+        <h1 style="font-size:40px; margin:0;">🐾 <span id="m-paws">0</span></h1>
+        <div class="fan"></div>
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between;"><span>Time:</span><span id="m-time">0:00</span></div>
+            <div style="display:flex; justify-content:space-between; margin:5px 0;"><span>Profit:</span><span>$<span id="m-usd">0.00000</span></span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Speed:</span><span><span id="m-ghs">0.00</span> GH/s</span></div>
         </div>
-        <p>Süre: <span id="m-time">0:00</span></p>
-        <button class="btn" onclick="stopMining()">STOP & COLLECT</button>
+        <button class="btn" style="margin-top:20px;" onclick="stopMining()">STOP & COLLECT</button>
     </div>
 
     <div id="p-congrats" class="p">
-        <h1 style="color:var(--g); margin-top:50px;">TEBRİKLER!</h1>
-        <p>Bakiyen Güncellendi.</p>
-        <button class="btn" onclick="tab('home')">ANA SAYFA</button>
+        <h1 style="color:var(--g); font-size:35px;">CONGRATS!</h1>
+        <img src="image_2033e8.png" style="width:200px; margin:20px;">
+        <h3>ADULTHOOD REACHED</h3>
+        <button class="btn" onclick="tab('home')">GREAT</button>
     </div>
 
     <div id="p-wallet" class="p">
         <h3>WALLET</h3>
-        <div style="background:rgba(255,255,255,0.1); width:100%; padding:30px; border-radius:30px; margin-top:20px;">
-            <p style="margin:0; opacity:0.6;">Toplam Bakiye</p>
-            <h1 style="font-size:40px; margin:10px 0; color:var(--g);">$<span class="bal-val">0.0000</span></h1>
+        <div style="background:rgba(255,255,255,0.1); width:100%; padding:25px; border-radius:25px; margin-bottom:20px;">
+            <p style="font-size:12px; opacity:0.6; margin:0;">TOTAL BALANCE</p>
+            <h1 style="font-size:45px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <button class="btn" style="margin-top:20px;">WITHDRAW (SOON)</button>
+        <div style="width:100%; text-align:left;">
+            <label style="font-size:11px; margin-left:10px;">TRC20 ADDRESS</label>
+            <input type="text" id="wd-address" placeholder="T...">
+            <label style="font-size:11px; margin-left:10px;">AMOUNT ($)</label>
+            <input type="number" id="wd-amount" placeholder="Min 10.00">
+            <div id="wd-msg" style="text-align:center; font-size:12px; margin:5px;"></div>
+            <button class="btn" style="width:100%;" onclick="processWithdraw()">WITHDRAW</button>
+        </div>
     </div>
 
     <nav class="nav">
         <div class="ni" onclick="tab('friends')">👥</div>
-        <div class="ni" onclick="tab('tasks')">📋</div>
         <div class="ni" onclick="tab('home')">🐾</div>
         <div class="ni" onclick="tab('wallet')">👛</div>
     </nav>
 </div>
 
-<style>
-    @keyframes pulse { from { transform: scale(1); border-color: var(--g); } to { transform: scale(1.05); border-color: #fff; } }
-</style>
 </body>
 </html>
