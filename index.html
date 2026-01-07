@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1450 - Ad Boost</title>
+    <title>FonixApp - Ad Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     
@@ -25,24 +25,20 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Reklam Başlatma
-        const adexiumWidget = new AdexiumWidget({
-            wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
-            adFormat: 'interstitial'
+        // REKLAM KODU BAŞLATMA
+        let adexiumWidget;
+        document.addEventListener('DOMContentLoaded', () => {
+            adexiumWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+            adexiumWidget.autoMode();
         });
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const myUsername = user?.username || "Miner";
-        const myPhoto = user?.photo_url || `https://ui-avatars.com/api/?name=${myUsername}`;
-
         let stats = { balance: 0.0, completedTasks: [] };
         
         // --- AYARLAR ---
         const SEC_REWARD = 0.00003; 
-        const AD_INTERVAL = 25; // REKLAM ARTIK 25 SANİYEDE BİR
-
-        let miningInterval, sessionEarned = 0, secondsCounter = 0;
+        const AD_INTERVAL_SEC = 25; // 25 saniyede bir reklam
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -50,16 +46,17 @@
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { balance: 0.0, invitedBy: "", completedTasks: [], username: myUsername, photo: myPhoto };
-                await setDoc(userRef, stats);
+                await setDoc(userRef, { balance: 0.0, invitedBy: "", completedTasks: [], username: user?.username || "Guest" });
             }
             updateUI();
             renderTasks();
-            loadFriends();
         }
 
+        // --- MINING & AUTO ADS ---
+        let miningInterval, sessionEarned = 0, secondsActive = 0;
+
         window.toggleMining = () => {
-            const btn = document.getElementById('main-action-btn');
+            const btn = document.getElementById('main-btn');
             if (btn.innerText === "START MINING") {
                 startMining();
             } else {
@@ -68,177 +65,156 @@
         };
 
         function startMining() {
-            document.getElementById('nav-bar').style.opacity = "0.3";
-            document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
-            document.getElementById('main-action-btn').style.background = "#ff4757";
-            document.getElementById('mining-fan-outer').classList.add('active-spin');
+            document.getElementById('main-btn').innerText = "STOP & COLLECT";
+            document.getElementById('main-btn').style.background = "#ff4757";
+            document.getElementById('fan').classList.add('spinning');
             
             sessionEarned = 0;
-            secondsCounter = 0;
+            secondsActive = 0;
 
             miningInterval = setInterval(() => {
                 sessionEarned += SEC_REWARD;
-                secondsCounter++;
-                
+                secondsActive++;
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
-                
-                // Reklam Sayacı Güncelleme
-                let nextAdIn = AD_INTERVAL - (secondsCounter % AD_INTERVAL);
-                document.getElementById('ad-timer').innerText = nextAdIn + "s";
 
-                if (secondsCounter % AD_INTERVAL === 0) {
-                    adexiumWidget.show();
-                    tg.HapticFeedback.notificationOccurred('warning');
+                // REKLAM SAYACI GÜNCELLEME
+                let nextAd = AD_INTERVAL_SEC - (secondsActive % AD_INTERVAL_SEC);
+                document.getElementById('ad-timer').innerText = nextAd + "s";
+
+                // HER 25 SANİYEDE REKLAM ÇIKAR
+                if (secondsActive % AD_INTERVAL_SEC === 0) {
+                    showInterstitial();
                 }
             }, 1000);
         }
 
         async function stopMining() {
             clearInterval(miningInterval);
-            const anim = document.getElementById('reward-anim');
-            document.getElementById('earned-final').innerText = "+" + sessionEarned.toFixed(5);
-            anim.style.display = 'flex';
-
+            document.getElementById('fan').classList.remove('spinning');
+            
             stats.balance += sessionEarned;
             await updateDoc(doc(db, "users", myID), { balance: stats.balance });
-
-            setTimeout(() => {
-                anim.style.display = 'none';
-                resetMiningUI();
-                updateUI();
-            }, 2000);
+            
+            alert(`Collected: $${sessionEarned.toFixed(5)}`);
+            resetUI();
+            updateUI();
         }
 
-        function resetMiningUI() {
-            document.getElementById('nav-bar').style.opacity = "1";
-            document.getElementById('main-action-btn').innerText = "START MINING";
-            document.getElementById('main-action-btn').style.background = "var(--g)";
-            document.getElementById('mining-fan-outer').classList.remove('active-spin');
-            document.getElementById('session-val').innerText = "0.000000";
-            document.getElementById('ad-timer').innerText = "25s";
+        function showInterstitial() {
+            console.log("Ad Triggered!");
+            if(adexiumWidget) adexiumWidget.show(); 
         }
 
-        window.doTask = async (id, rew, url) => {
-            if (url === 'ad') { adexiumWidget.show(); } else { tg.openLink(url); }
-            setTimeout(async () => {
-                await updateDoc(doc(db, "users", myID), { balance: increment(rew), completedTasks: arrayUnion(id) });
-                location.reload();
-            }, 5000);
-        };
-
+        // --- GÖREVLER ---
         function renderTasks() {
             const container = document.getElementById('task-list');
             container.innerHTML = `
-                <div class="list-item">
-                    <div style="flex:1"><b>Join Community</b><br><small>$0.02</small></div>
-                    <button class="s-btn" onclick="doTask('join_ch', 0.02, 'https://t.me/FonixCommunity')" ${stats.completedTasks.includes('join_ch') ? 'disabled' : ''}>GO</button>
+                <div class="card task">
+                    <div style="flex:1"><b>Join Channel</b><br><small>$0.02 Reward</small></div>
+                    <button class="s-btn" onclick="doTask('join_ch', 0.02, 'https://t.me/FonixCommunity')" 
+                        ${stats.completedTasks.includes('join_ch') ? 'disabled' : ''}>
+                        ${stats.completedTasks.includes('join_ch') ? 'DONE' : 'GO'}
+                    </button>
                 </div>
-                <div class="list-item">
-                    <div style="flex:1"><b>Watch Ad</b><br><small>$0.001</small></div>
+                <div class="card task">
+                    <div style="flex:1"><b>Watch Video Ad</b><br><small>$0.001 Reward</small></div>
                     <button class="s-btn" onclick="doTask('watch_ad', 0.001, 'ad')">WATCH</button>
                 </div>
             `;
         }
 
-        async function loadFriends() {
-            const container = document.getElementById('friends-list');
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            document.getElementById('friend-count').innerText = snap.size;
-            container.innerHTML = "";
-            snap.forEach(d => {
-                const f = d.data();
-                container.innerHTML += `<div class="list-item"><img src="${f.photo}" class="list-img"><div style="flex:1"><b>@${f.username}</b></div><div style="color:var(--g)">+$0.05</div></div>`;
-            });
-        }
+        window.doTask = async (id, rew, url) => {
+            if (url === 'ad') {
+                showInterstitial(); 
+            } else {
+                tg.openLink(url);
+            }
+
+            setTimeout(async () => {
+                await updateDoc(doc(db, "users", myID), { 
+                    balance: increment(rew), 
+                    completedTasks: arrayUnion(id) 
+                });
+                location.reload();
+            }, 5000);
+        };
 
         function updateUI() {
             document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(5));
-            document.getElementById('my-id-display').innerText = myID;
+        }
+
+        function resetUI() {
+            document.getElementById('main-btn').innerText = "START MINING";
+            document.getElementById('main-btn').style.background = "var(--g)";
+            document.getElementById('session-val').innerText = "0.000000";
+            document.getElementById('ad-timer').innerText = "25s";
         }
 
         window.tab = (t) => {
-            document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
-            document.getElementById('tab-'+t).classList.add('active');
+            document.querySelectorAll('.p').forEach(p => p.style.display = 'none');
+            document.getElementById('tab-'+t).style.display = 'flex';
         };
 
         window.onload = init;
     </script>
+
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: sans-serif; }
         body { margin: 0; background: #000; color: #fff; overflow: hidden; }
         #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
-        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .balance-badge { background: #1a1a2e; padding: 8px 15px; border-radius: 20px; color: var(--g); font-weight: 800; }
-        .mining-circle { width: 220px; height: 220px; margin: 20px auto; position: relative; display: flex; align-items: center; justify-content: center; }
-        .fan-outer { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed #333; position: absolute; }
-        .active-spin { animation: spin 2s linear infinite; border-color: var(--p); }
-        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 4px solid #111; z-index: 2; }
-        .list-item { background: rgba(255,255,255,0.04); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border: 1px solid #222; }
-        .list-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--p); }
-        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; cursor: pointer; color: #000; }
-        .s-btn { background: var(--p); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-weight: bold; }
-        .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .ni { opacity: 0.5; font-size: 11px; cursor: pointer; text-align: center; }
-        #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
+        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #222; }
+        .task { display: flex; align-items: center; }
+        #fan { width: 180px; height: 180px; border-radius: 50%; border: 5px solid var(--p); margin: 30px auto; background: url('pinix.jpg') center/cover; }
+        .spinning { animation: spin 1s linear infinite; box-shadow: 0 0 40px var(--p); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .btn { background: var(--g); border: none; padding: 18px; border-radius: 15px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
+        .s-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
+        .s-btn:disabled { background: #333; opacity: 0.5; }
+        .nav { height: 75px; background: #111; display: flex; justify-content: space-around; align-items: center; }
+        .ni { opacity: 0.5; font-size: 12px; cursor: pointer; text-align: center; }
+        .ad-info { font-size: 12px; color: var(--p); margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <span style="font-weight: 900; color: var(--p);">FONIX v1450</span>
-        <div class="balance-badge">🪙 $<span class="bal-val">0.00000</span></div>
+        <b>FONIX APP v2</b>
+        <div style="color:var(--g)">$<span class="bal-val">0.00000</span></div>
     </div>
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
-            <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <div style="display:inline-block; background:#1a1a2e; padding:5px 15px; border-radius:10px;">
-                <small style="color:var(--p)">NEXT AD: </small><b id="ad-timer">25s</b>
-            </div>
+            <h1 style="font-size: 40px; margin-bottom: 5px;">$<span id="session-val">0.000000</span></h1>
+            <div class="ad-info">NEXT AD IN: <span id="ad-timer">25s</span></div>
         </div>
-
-        <div class="mining-circle">
-            <div id="mining-fan-outer" class="fan-outer"></div>
-            <div class="fan-inner"></div>
-        </div>
-
-        <div style="display: flex; justify-content: space-around; margin-bottom: 20px;">
-            <div style="text-align:center"><small>SPEED</small><br><b>$0.00003/s</b></div>
-            <div style="text-align:center"><small>STATUS</small><br><b style="color:var(--g)">ACTIVE</b></div>
-        </div>
-
-        <button id="main-action-btn" class="btn" onclick="toggleMining()">START MINING</button>
+        <div id="fan"></div>
+        <div style="flex:1"></div>
+        <button id="main-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
     <div id="tab-tasks" class="p">
-        <h2>QUESTS</h2>
+        <h3>AVAILABLE TASKS</h3>
         <div id="task-list"></div>
     </div>
 
-    <div id="tab-friends" class="p">
-        <h2>NETWORK</h2>
-        <div class="list-item" style="background:var(--p); color:#fff; justify-content:center;">
-            <b>ID: <span id="my-id-display">-</span></b>
+    <div id="tab-wallet" class="p">
+        <h3>WALLET</h3>
+        <div class="card" style="text-align:center; padding:30px;">
+            <small>CURRENT BALANCE</small>
+            <h1 style="font-size: 35px; color:var(--g)">$<span class="bal-val">0.00000</span></h1>
         </div>
-        <p>Referrals (<span id="friend-count">0</span>)</p>
-        <div id="friends-list"></div>
+        <button class="btn" style="opacity:0.3" disabled>WITHDRAW (MIN $10)</button>
     </div>
 
-    <div id="reward-anim">
-        <h2 id="earned-final" style="font-size: 45px; color: var(--g);">+0.00</h2>
-        <p>MINED SUCCESSFULLY!</p>
-    </div>
-
-    <nav class="nav" id="nav-bar">
+    <nav class="nav">
         <div class="ni" onclick="tab('home')">MINING</div>
         <div class="ni" onclick="tab('tasks')">TASKS</div>
-        <div class="ni" onclick="tab('friends')">FRIENDS</div>
+        <div class="ni" onclick="tab('wallet')">WALLET</div>
     </nav>
 </div>
 
