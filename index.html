@@ -3,112 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ID-REF EDITION</title>
+    <title>PINIX MASTER MINER</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #030008; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08); }
+        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --red: #ff4757; --green: #2ed573; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
-        #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 80%); }
+        #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #2e1065 0%, var(--bg) 75%); }
         
-        /* AD PROGRESS BAR */
+        /* Ad Timer Bar */
         .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); z-index: 1000; }
-        #ad-bar { width: 0%; height: 100%; background: var(--s); transition: linear 1s; }
+        #ad-progress { width: 0%; height: 100%; background: var(--s); box-shadow: 0 0 10px var(--s); transition: linear 1s; }
 
         .header { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .box { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 15px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px); }
-        .box img { width: 28px; border-radius: 50%; border: 1px solid var(--p); }
+        .box { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 15px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px); }
+        .box img { width: 30px; border-radius: 50%; border: 1.5px solid var(--p); }
+
+        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(10,5,20,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; z-index: 100; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.4); cursor: pointer; }
+        .nav-btn.active { color: var(--s); font-weight: 900; }
+        .nav-btn i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
 
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
-        .view.active { display: flex; }
+        .view.active { display: flex; animation: slide 0.3s ease; }
+        @keyframes slide { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        .fan-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan { width: 200px; height: 200px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--p); animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .counter { font-family: 'Orbitron'; font-size: 2.6rem; margin-top: 15px; color: var(--s); }
+        .mining-section { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-container { position: relative; width: 200px; height: 200px; margin-bottom: 20px; }
+        .fan { width: 100%; height: 100%; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--p); box-shadow: 0 0 30px rgba(139,92,246,0.3); }
+        .counter { font-family: 'Orbitron'; font-size: 2.4rem; color: var(--s); text-shadow: 0 0 15px rgba(251,191,36,0.4); }
 
-        .glass { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-bottom: 10px; }
-        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.7rem; }
+        .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 12px; }
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; transition: 0.2s; width: 100%; text-transform: uppercase; font-size: 0.7rem; }
         .btn-p { background: var(--p); color: white; }
-        .btn-s { background: #10b981; color: white; }
-        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 10px; color: white; margin: 8px 0; outline: none; }
-
-        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(5,2,15,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.3); }
-        .nav-btn.active { color: var(--s); }
+        .btn-s { background: var(--green); color: white; }
+        .btn-boost { background: linear-gradient(45deg, #f59e0b, #ef4444); color: white; margin-top: 10px; }
         
-        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.6rem; font-weight: 900; padding: 3px; }
+        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin: 8px 0; outline: none; }
+        .u-card { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid var(--p); }
+        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.65rem; font-weight: 900; padding: 4px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="ghost-msg">ADMIN VIEWING MODE</div>
-    <div class="ad-timer"><div id="ad-bar"></div></div>
+    <div id="ghost-msg">GHOST MODE: READ ONLY</div>
+    <div class="ad-timer"><div id="ad-progress"></div></div>
     
     <header class="header">
-        <div class="box"><img src="pico.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PI</p><p id="h-pi" style="font-weight:900;">0.00</p></div></div>
-        <div class="box"><img src="pinix.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PNX</p><p id="h-pnx" style="font-weight:900;">0</p></div></div>
+        <div class="box"><img src="pico.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PI BALANCE</p><p id="h-pi" style="font-weight:900;">0.00</p></div></div>
+        <div class="box"><img src="pinix.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PNX ASSET</p><p id="h-pnx" style="font-weight:900;">0</p></div></div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="fan-wrap">
-            <div class="fan"></div>
+        <div class="mining-section">
+            <div class="fan-container">
+                <div class="fan" id="fan-obj"></div>
+            </div>
             <div class="counter" id="m-val">0.00000000</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; margin-top:20px;">
-                <button class="btn btn-p" onclick="claim()">Claim</button>
-                <button class="btn btn-s" onclick="tab('v-wallet')">Wallet</button>
+            <p id="pwr-txt" style="font-size:0.6rem; color:var(--p); margin-top:5px; font-weight:bold;">POWER: 1.0x</p>
+            
+            <div style="width:100%; margin-top:20px;">
+                <button class="btn btn-p" onclick="claim()">Claim Pi</button>
+                <button class="btn btn-boost" onclick="tab('v-shop')">🚀 Upgrade Mining Power</button>
             </div>
         </div>
     </div>
 
-    <div id="v-wallet" class="view">
-        <h2>Withdrawal</h2>
+    <div id="v-shop" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.2rem;">Power Store</h2>
         <div class="glass">
-            <input type="text" id="w-addr" placeholder="Wallet Address">
+            <h3>Mining Speed +0.5x</h3>
+            <p style="font-size:0.7rem; opacity:0.6; margin:5px 0;">Cost: 1000 PNX</p>
+            <button class="btn btn-s" onclick="buyPower(0.5, 1000)">Upgrade Now</button>
+        </div>
+        <div class="glass">
+            <h3>Super Turbo +2.0x</h3>
+            <p style="font-size:0.7rem; opacity:0.6; margin:5px 0;">Cost: 3500 PNX</p>
+            <button class="btn btn-s" onclick="buyPower(2.0, 3500)">Upgrade Now</button>
+        </div>
+    </div>
+
+    <div id="v-wallet" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">Wallet</h2>
+        <div class="glass">
+            <input type="text" id="w-addr" placeholder="Pi Wallet Address">
             <input type="number" id="w-amt" placeholder="Amount (Min 30)">
-            <button class="btn btn-p" onclick="sendWithdraw()">Withdraw PI</button>
+            <button class="btn btn-p" onclick="sendWithdraw()">Send Withdrawal</button>
         </div>
     </div>
 
     <div id="v-friends" class="view">
-        <h2>Referral System</h2>
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">Friends</h2>
         <div class="glass" style="text-align:center;">
             <p style="font-size:0.6rem; opacity:0.6;">YOUR INVITE ID</p>
-            <h1 id="my-id-display" style="color:var(--s); margin:10px 0; font-size:1.8rem;">---</h1>
-            <button class="btn btn-p" onclick="shareRef()">Copy & Invite (200 PNX)</button>
+            <h1 id="my-id" style="color:var(--s); margin:10px 0; font-size:1.8rem;">---</h1>
+            <button class="btn btn-p" onclick="shareRef()">Invite Friend (200 PNX)</button>
         </div>
-        <div class="glass" id="ref-box">
-            <p style="font-size:0.6rem; opacity:0.6;">ENTER FRIEND'S ID (+100 PNX)</p>
-            <input type="number" id="ref-input" placeholder="Example: 12345678">
-            <button class="btn btn-s" onclick="applyRef()">Apply Code</button>
+        <div class="glass" id="ref-input-div">
+            <input type="number" id="ref-input" placeholder="Enter Friend ID">
+            <button class="btn btn-s" onclick="applyRef()">Submit</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:red">Admin Console</h2>
-        <div id="adm-withdraws" style="margin-bottom:15px;"></div>
+        <h2 style="color:var(--red); font-family:'Orbitron';">Admin Console</h2>
+        <div id="adm-pulls" style="margin:15px 0;"></div>
         <div id="adm-users"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
-        <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💳</i>Wallet</div>
+        <div class="nav-btn" onclick="tab('v-shop', this)"><i>⚡</i>Shop</div>
         <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Friends</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>🛠️</i>Admin</div>
     </nav>
 </div>
 
 <script>
-    const firebaseConfig = { /* Sizin Config Bilgileriniz */ };
+    const firebaseConfig = { /* SİZİN BİLGİLERİNİZ */ };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
@@ -116,22 +136,22 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), usedRef:false, username: tg.initDataUnsafe?.user?.username || "Guest" };
-    const mRate = 0.0001;
+    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), power: 1.0, usedRef: false, username: tg.initDataUnsafe?.user?.username || "Guest" };
+    let baseRate = 0.0001;
 
-    // REKLAM DÖNGÜSÜ (Her 3 Saniyede Bir)
-    function startAdCycle() {
-        let count = 0;
+    // --- REKLAM SİSTEMİ (HER 3 SN) ---
+    let adTick = 0;
+    function adEngine() {
         setInterval(() => {
-            count++;
-            document.getElementById('ad-bar').style.width = (count/3)*100 + "%";
-            if(count >= 3) {
-                count = 0;
-                // Adexium Reklam Tetikleme
-                const adexiumWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-                adexiumWidget.autoMode();
-                // Reklam izleme ödülü
-                if(activeUid === realUid) db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(5) });
+            adTick++;
+            document.getElementById('ad-progress').style.width = (adTick / 3) * 100 + "%";
+            if(adTick >= 3) {
+                adTick = 0;
+                // Adexium Call
+                const widget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+                widget.autoMode();
+                // Reklam Ödülü (Sadece gerçek kullanıcıya)
+                if(activeUid === realUid) db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(2) });
             }
         }, 1000);
     }
@@ -142,7 +162,7 @@
                 const cloud = doc.data();
                 if(!window.isSynced) {
                     const diff = Math.floor((Date.now() - (cloud.lastSync || Date.now())) / 1000);
-                    if(diff > 0) cloud.uncl = (cloud.uncl || 0) + (diff * mRate);
+                    if(diff > 0) cloud.uncl = (cloud.uncl || 0) + (diff * baseRate * (cloud.power || 1));
                     window.isSynced = true;
                 }
                 uData = cloud;
@@ -153,12 +173,18 @@
         });
 
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        startAdCycle();
+        adEngine();
 
+        // Madencilik Döngüsü
         setInterval(() => {
-            uData.uncl += mRate;
+            let currentPower = uData.power || 1.0;
+            uData.uncl += (baseRate * currentPower);
             document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
-            if(Math.floor(Date.now()/1000) % 15 === 0) {
+            
+            // Fan Hızı Ayarı
+            document.getElementById('fan-obj').style.animation = `spin ${1.2 / currentPower}s linear infinite`;
+
+            if(Math.floor(Date.now()/1000) % 20 === 0) {
                 db.collection("users").doc(activeUid).update({ uncl: uData.uncl, lastSync: Date.now() });
             }
         }, 1000);
@@ -167,35 +193,70 @@
     function render() {
         document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
         document.getElementById('h-pnx').innerText = Math.floor(uData.pnx || 0);
-        document.getElementById('my-id-display').innerText = realUid; // ID Referans Kodu oldu
-        if(uData.usedRef) document.getElementById('ref-box').style.display = 'none';
+        document.getElementById('my-id').innerText = realUid;
+        document.getElementById('pwr-txt').innerText = `POWER: ${(uData.power || 1).toFixed(1)}x`;
+        if(uData.usedRef) document.getElementById('ref-input-div').style.display = 'none';
         
         const isGhost = activeUid !== realUid;
         document.getElementById('ghost-msg').style.display = isGhost ? 'block' : 'none';
     }
 
+    // --- GAME LOGIC ---
+    async function buyPower(add, cost) {
+        if(uData.pnx < cost) return alert("Yetersiz PNX!");
+        await db.collection("users").doc(activeUid).update({
+            pnx: firebase.firestore.FieldValue.increment(-cost),
+            power: firebase.firestore.FieldValue.increment(add)
+        });
+        alert("Mining Power Upgraded!");
+    }
+
     async function applyRef() {
-        const inputId = document.getElementById('ref-input').value.trim();
-        if(inputId === realUid) return alert("Kendi ID'ni giremezsin!");
-        
-        const refDoc = await db.collection("users").doc(inputId).get();
+        const refId = document.getElementById('ref-input').value.trim();
+        if(refId === realUid) return alert("Hata!");
+        const refDoc = await db.collection("users").doc(refId).get();
         if(refDoc.exists) {
-            await db.collection("users").doc(inputId).update({ pnx: firebase.firestore.FieldValue.increment(200) });
+            await db.collection("users").doc(refId).update({ pnx: firebase.firestore.FieldValue.increment(200) });
             await db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(100), usedRef: true });
-            alert("Başarılı! 100 PNX kazandın.");
-        } else alert("Bu ID'ye sahip bir kullanıcı bulunamadı.");
+            alert("Referans kabul edildi!");
+        }
     }
 
     function claim() {
         if(uData.uncl < 0.001 || activeUid !== realUid) return;
-        db.collection("users").doc(realUid).update({
+        db.collection("users").doc(activeUid).update({
             pi: firebase.firestore.FieldValue.increment(uData.uncl),
             uncl: 0,
             lastSync: Date.now()
         });
     }
 
-    // ... (Withdraw ve Admin Fonksiyonları Öncekiyle Aynı Kalacak) ...
+    // --- ADMIN ---
+    async function loadAdmin() {
+        const uBox = document.getElementById('adm-users');
+        const snap = await db.collection("users").orderBy("username", "asc").get();
+        uBox.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            uBox.innerHTML += `
+                <div class="u-card">
+                    <b>@${d.username}</b> (ID: ${doc.id})<br>
+                    PI: ${d.pi.toFixed(2)} | PNX: ${d.pnx} | PWR: ${d.power}x
+                    <div style="margin-top:8px; display:flex; gap:5px;">
+                        <button onclick="enter('${doc.id}')" style="font-size:0.5rem; padding:4px;">İZLE</button>
+                        <button onclick="admEdit('${doc.id}', 'pi')" style="font-size:0.5rem; padding:4px;">+PI</button>
+                        <button onclick="admEdit('${doc.id}', 'power')" style="font-size:0.5rem; padding:4px; color:var(--s);">+PWR</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function enter(id) { activeUid = id; window.isSynced = false; tab('v-home'); init(); }
+    async function admEdit(id, f) { 
+        let v = prompt("Miktar:"); 
+        if(v) await db.collection("users").doc(id).update({ [f]: firebase.firestore.FieldValue.increment(parseFloat(v)) });
+        loadAdmin();
+    }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -205,6 +266,11 @@
             el.classList.add('active');
         }
         if(id === 'v-admin') loadAdmin();
+    }
+
+    function shareRef() {
+        const txt = `Pinix Miner! ID'mi kullan 100 PNX kazan: ${realUid}`;
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT&text=${encodeURIComponent(txt)}`);
     }
 
     window.onload = init;
