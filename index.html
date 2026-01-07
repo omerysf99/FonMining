@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA PRO - V57</title>
+    <title>PI NEBULA PRO - V58</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,48 +12,63 @@
     
     <style>
         :root { 
-            --bg-home: #4c3ba5; 
+            --bg-deep: #4c3ba5; 
             --bg-mine: #0a0a0a; 
             --yellow: #fbc02d; 
             --neon: #8eff31; 
-            --glass: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.1);
         }
 
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-home); color: white; overflow: hidden; height: 100vh; }
+        body { background: var(--bg-deep); color: white; overflow: hidden; height: 100vh; }
 
+        /* --- SAYFA YAPISI --- */
         .view { display: none; height: 100vh; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 110px; }
         .view.active { display: flex; }
 
-        /* --- HOME --- */
+        /* --- ANA EKRAN (HOME) --- */
         #v-home { align-items: center; justify-content: center; text-align: center; background-image: radial-gradient(circle at 50% 30%, #5e48c2 0%, #2c1a74 100%); }
         .hero-img { width: 220px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5)); margin-bottom: 20px; }
         .bal-display { font-family: 'Montserrat'; font-size: 2.5rem; color: var(--yellow); margin-bottom: 25px; }
 
         /* --- MINING EKRANI --- */
-        #v-mining { background: var(--bg-mine); align-items: center; justify-content: space-between; padding: 40px 20px; }
+        #v-mining { background: var(--bg-mine); align-items: center; justify-content: space-between; padding: 40px 20px; z-index: 2000; position: fixed; top:0; left:0; width: 100%; }
         .fan-box { position: relative; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
         .pinix-fan { width: 100%; height: 100%; border-radius: 50%; border: 5px solid var(--neon); box-shadow: 0 0 40px rgba(142,255,49,0.2); object-fit: cover; }
         .spinning { animation: rotateFan 1.2s linear infinite; }
         @keyframes rotateFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .mining-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin: 20px 0; }
-        .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; border-radius: 15px; text-align: center; }
-        .st-val { color: var(--neon); font-family: 'Montserrat'; font-size: 1rem; font-weight: 900; margin-bottom: 5px; }
-        .st-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; }
+        /* --- SEKMELERE ÖZEL KARTLAR --- */
+        .card { background: var(--glass); padding: 18px; border-radius: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); width: 100%; }
+        .card h3 { color: var(--yellow); margin-bottom: 5px; font-size: 1.1rem; }
+        .card p { font-size: 0.85rem; opacity: 0.8; }
 
-        /* --- NAV & BUTTONS --- */
-        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(44, 26, 116, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { text-align: center; opacity: 0.4; color: white; font-size: 0.7rem; }
+        /* --- ALT NAVİGASYON (GÖRSELDEKİ GİBİ) --- */
+        nav { 
+            position: fixed; bottom: 0; width: 100%; height: 95px; 
+            background: rgba(44, 26, 116, 0.9); backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1); border-radius: 30px 30px 0 0;
+            z-index: 1000;
+        }
+        .nav-item { text-align: center; opacity: 0.4; color: white; font-size: 0.75rem; transition: 0.3s; }
         .nav-item.active { opacity: 1; color: var(--yellow); }
+        .nav-item div { font-size: 1.6rem; margin-bottom: 3px; }
 
-        .btn { width: 90%; padding: 20px; border: none; border-radius: 50px; font-size: 1.4rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        /* --- BUTONLAR --- */
+        .btn { width: 85%; padding: 18px; border: none; border-radius: 50px; font-size: 1.4rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn-play { background: var(--yellow); color: #2c1a74; box-shadow: 0 6px 0 #9e7500; }
         .btn-stop { background: #ff3131; color: white; box-shadow: 0 6px 0 #b2102f; }
         .btn:active { transform: translateY(3px); box-shadow: none; }
 
-        header { position: absolute; top: 15px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; z-index: 100; }
-        .badge { background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(142,255,49,0.3); }
+        /* STATS GRID */
+        .mining-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin: 20px 0; }
+        .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 15px; text-align: center; }
+        .st-val { color: var(--neon); font-family: 'Montserrat'; font-size: 0.9rem; font-weight: 900; }
+        .st-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; }
+
+        header { position: fixed; top: 15px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; z-index: 100; }
+        .badge { background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -61,53 +76,80 @@
 <div id="app">
     <header id="ui-header">
         <div class="badge">LVL <span id="u-lvl">1</span></div>
-        <div class="badge" style="color:var(--neon)">STATUS: ACTIVE</div>
+        <div class="badge" style="color:var(--yellow)">Admin: 8392479231</div>
     </header>
 
     <div id="v-home" class="view active">
         <img src="yourfantastic.jpg" class="hero-img" onerror="this.src='https://via.placeholder.com/220'">
-        <h1 style="line-height: 0.85; margin-bottom: 15px;">YOUR<br>FANTASTIC PET</h1>
+        <h1 style="line-height: 0.85; margin-bottom: 10px;">YOUR<br>FANTASTIC PET</h1>
         <div class="bal-display" id="total-bal">0.00</div>
         <button class="btn btn-play" onclick="startMining()">PLAY / START</button>
     </div>
 
-    <div id="v-mining" class="view">
+    <div id="v-mining" style="display:none;">
         <div style="text-align:center;">
-            <h2 style="color:var(--neon); letter-spacing:4px; font-size:1.5rem;">MINING PRO</h2>
-            <p id="mine-cycle-text" style="font-size:0.7rem; opacity:0.5; margin-top:5px;">Döngü Bekleniyor...</p>
+            <h2 style="color:var(--neon); letter-spacing:4px;">MINING MODE</h2>
+            <p id="mine-cycle-text" style="font-size:0.7rem; opacity:0.5;">Sistem Hazırlanıyor...</p>
         </div>
-
         <div class="fan-box">
             <img src="pinix.jpg" id="fan-img" class="pinix-fan spinning" onerror="this.src='https://via.placeholder.com/240'">
         </div>
-
         <div class="mining-stats">
             <div class="stat-card">
-                <span class="st-val" id="st-time">0s</span>
-                <span class="st-lbl">Süre</span>
+                <span class="st-val" id="st-time">0s</span><br><span class="st-lbl">Süre</span>
             </div>
             <div class="stat-card">
-                <span class="st-val" id="st-earned">0.0000</span>
-                <span class="st-lbl">Kazanılan</span>
+                <span class="st-val" id="st-earned">0.0000</span><br><span class="st-lbl">Kazanılan</span>
             </div>
             <div class="stat-card">
-                <span class="st-val" id="st-ghs">0.00</span>
-                <span class="st-lbl">Hız (GH/s)</span>
+                <span class="st-val" id="st-ghs">0.00</span><br><span class="st-lbl">GH/s</span>
             </div>
         </div>
-
         <button class="btn btn-stop" onclick="stopMining()">STOP & COLLECT</button>
     </div>
 
-    <div id="v-friends" class="view"><h2>Friends</h2></div>
-    <div id="v-tasks" class="view"><h2>Tasks</h2></div>
-    <div id="v-wallet" class="view"><h2>Wallet</h2></div>
+    <div id="v-friends" class="view">
+        <h2 style="margin-bottom:20px;">Arkadaşlarını Davet Et</h2>
+        <div class="card">
+            <h3>Davet Linkin</h3>
+            <input type="text" id="ref-link" readonly style="width:100%; background:rgba(0,0,0,0.3); border:none; color:white; padding:10px; border-radius:10px; font-size:0.8rem;">
+        </div>
+        <div class="card">
+            <h3>Ödüller</h3>
+            <p>Her arkadaşın için 5 PI kazanırsın.</p>
+        </div>
+    </div>
+
+    <div id="v-tasks" class="view">
+        <h2 style="margin-bottom:20px;">Günlük Görevler</h2>
+        <div class="card" onclick="tg.openLink('https://x.com')">
+            <h3>X (Twitter) Takip Et</h3>
+            <p>+2.50 PI Ödül</p>
+        </div>
+        <div class="card" onclick="tg.openTelegramLink('https://t.me/your_channel')">
+            <h3>Telegram Kanalına Katıl</h3>
+            <p>+1.50 PI Ödül</p>
+        </div>
+    </div>
+
+    <div id="v-wallet" class="view">
+        <h2 style="margin-bottom:20px;">Cüzdan & Çekim</h2>
+        <div class="card">
+            <h3>Mevcut Bakiye</h3>
+            <div style="font-size: 1.8rem; color: var(--yellow);" id="wallet-bal">0.00 PI</div>
+        </div>
+        <div class="card">
+            <h3>Çekim Adresi</h3>
+            <input type="text" placeholder="TON Cüzdan Adresi" style="width:100%; padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:white;">
+        </div>
+        <button class="btn btn-play" style="width:100%;" onclick="alert('Minimum çekim tutarı 500 PI.')">PARA ÇEK</button>
+    </div>
 
     <nav id="bottom-nav">
-        <div class="nav-item" onclick="showTab('v-friends', this)">👥<br>Friends</div>
-        <div class="nav-item" onclick="showTab('v-tasks', this)">🎁<br>Tasks</div>
-        <div class="nav-item active" onclick="showTab('v-home', this)">🐾<br>Home</div>
-        <div class="nav-item" onclick="showTab('v-wallet', this)">💳<br>Wallet</div>
+        <div class="nav-item" onclick="showTab('v-friends', this)"><div>👥</div>Friends</div>
+        <div class="nav-item" onclick="showTab('v-tasks', this)"><div>🎁</div>Tasks</div>
+        <div class="nav-item active" onclick="showTab('v-home', this)"><div>🐾</div>Home</div>
+        <div class="nav-item" onclick="showTab('v-wallet', this)"><div>💳</div>Wallet</div>
     </nav>
 </div>
 
@@ -126,7 +168,6 @@
 
     let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let uData = { pi: 0, lvl: 1 };
-    
     let miningInt = null;
     let seconds = 0;
     let sessionPi = 0;
@@ -137,11 +178,13 @@
             if(doc.exists) { 
                 uData = doc.data(); 
                 document.getElementById('total-bal').innerText = uData.pi.toFixed(2);
+                document.getElementById('wallet-bal').innerText = uData.pi.toFixed(2) + " PI";
                 document.getElementById('u-lvl').innerText = uData.lvl || 1;
             } else { 
                 db.collection("users").doc(uid).set(uData); 
             }
         });
+        document.getElementById('ref-link').value = "https://t.me/BotAdiniz?start=" + uid;
     }
 
     function showTab(tabId, el) {
@@ -152,30 +195,25 @@
     }
 
     function startMining() {
-        showTab('v-mining');
+        // Mining ekranını göster, diğerlerini gizle
+        document.getElementById('v-mining').style.display = 'flex';
         document.getElementById('bottom-nav').style.display = 'none';
-        document.getElementById('ui-header').style.display = 'none';
-
-        // Sayaçları her başlangıçta sıfırla
-        seconds = 0;
-        sessionPi = 0;
+        
+        seconds = 0; sessionPi = 0;
         document.getElementById('st-time').innerText = "0s";
         document.getElementById('st-earned').innerText = "0.0000";
-        document.getElementById('mine-cycle-text').innerText = "Döngü: 0/30 saniye";
-        
+
         miningInt = setInterval(() => {
             seconds++;
             document.getElementById('st-time').innerText = seconds + "s";
-            
-            let randomGhs = (Math.random() * (7 - 1) + 1).toFixed(2);
-            document.getElementById('st-ghs').innerText = randomGhs;
+            document.getElementById('st-ghs').innerText = (Math.random() * (7 - 1) + 1).toFixed(2);
 
-            let cyclePos = seconds % 30;
-            document.getElementById('mine-cycle-text').innerText = `Döngü: ${cyclePos}/30 saniye`;
+            let cycle = seconds % 30;
+            document.getElementById('mine-cycle-text').innerText = `Döngü: ${cycle}/30 saniye`;
 
             if (seconds > 0 && seconds % 30 === 0) {
-                let randomWin = Math.random() * (0.001 - 0.0001) + 0.0001;
-                sessionPi += randomWin;
+                let gain = Math.random() * (0.001 - 0.0001) + 0.0001;
+                sessionPi += gain;
                 document.getElementById('st-earned').innerText = sessionPi.toFixed(4);
                 tg.HapticFeedback.notificationOccurred('success');
             }
@@ -184,25 +222,18 @@
 
     function stopMining() {
         clearInterval(miningInt);
-        
-        // Veritabanına kaydet
         db.collection("users").doc(uid).update({
             pi: firebase.firestore.FieldValue.increment(sessionPi)
         }).then(() => {
-            // Arayüzü eski haline getir
+            document.getElementById('v-mining').style.display = 'none';
             document.getElementById('bottom-nav').style.display = 'flex';
-            document.getElementById('ui-header').style.display = 'flex';
-            showTab('v-home', document.querySelectorAll('.nav-item')[2]);
             
-            tg.showAlert(`Kazanılan PI Hesaba Eklendi!`);
-
-            // KRİTİK: Mining ekranındaki değerleri görsel olarak SIFIRLA
-            seconds = 0;
-            sessionPi = 0;
+            // Stats Sıfırla
+            seconds = 0; sessionPi = 0;
             document.getElementById('st-time').innerText = "0s";
             document.getElementById('st-earned').innerText = "0.0000";
-            document.getElementById('st-ghs').innerText = "0.00";
-            document.getElementById('mine-cycle-text').innerText = "Döngü Sıfırlandı";
+            
+            tg.showAlert("Mining durduruldu, kazanç hesabına eklendi!");
         });
     }
 
