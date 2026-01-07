@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI MINER PRO V25 - ADMIN OVERLORD</title>
+    <title>PI MINER PRO V25 - ADMIN CONTROL</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -18,15 +18,15 @@
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 80%); }
         
         /* BAN SCREEN */
-        #ban-screen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
+        #ban-screen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; }
         
         /* ADMIN MODAL */
-        #adm-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
-        .modal-content { background: #1a1a1a; width: 85%; border-radius: 25px; border: 1px solid var(--border); padding: 25px; position: relative; animation: modalPop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        #adm-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:3000; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+        .modal-content { background: #151515; width: 85%; border-radius: 25px; border: 1px solid var(--border); padding: 25px; position: relative; animation: modalPop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         @keyframes modalPop { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
 
         /* GHOST TRACKER */
-        #ghost-tracker { display: none; position: absolute; top: 15px; right: 15px; background: rgba(255,71,87,0.95); padding: 8px 15px; border-radius: 15px; font-size: 0.65rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; animation: slideInRight 0.5s ease; }
+        #ghost-tracker { display: none; position: absolute; top: 15px; right: 15px; background: rgba(255,71,87,0.95); padding: 8px 15px; border-radius: 15px; font-size: 0.65rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; backdrop-filter: blur(8px); animation: slideInRight 0.5s ease; }
 
         .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 1000; }
         #ad-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 10px var(--p); transition: linear 1s; }
@@ -50,11 +50,12 @@
         .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; color: white; transition: 0.2s; }
         .btn-p { background: linear-gradient(135deg, var(--p), #6d28d9); }
         .btn-red { background: var(--red); }
+        .btn-green { background: var(--green); }
         
         input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; color: white; margin: 10px 0; outline: none; }
 
         .payment-card { background: linear-gradient(90deg, rgba(46,213,115,0.1), transparent); border-left: 4px solid var(--green); padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .user-row { background: var(--card); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .user-row { background: var(--card); padding: 10px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
         
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes viewFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -63,33 +64,33 @@
 <body>
 
 <div id="ban-screen">
-    <h1 style="color:var(--red); font-family:'Orbitron';">HESAP DURDURULDU</h1>
-    <p style="opacity:0.6; margin-top:10px;">Kullanım şartları ihlali nedeniyle erişiminiz engellendi.</p>
+    <h1 style="color:var(--red); font-family:'Orbitron'; font-size:1.5rem;">ERİŞİM ENGELLENDİ</h1>
+    <p style="opacity:0.6; margin-top:15px; font-size:0.8rem;">Hesabınız kullanım şartlarını ihlal ettiği için durdurulmuştur.</p>
 </div>
 
-<div id="adm-modal" onclick="this.style.display='none'">
+<div id="adm-modal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 id="mod-user" style="color:var(--s); font-family:'Orbitron';">@Kullanici</h3>
-        <p id="mod-id" style="font-size:0.6rem; opacity:0.5; margin-bottom:15px;">ID: ...</p>
+        <h3 id="mod-user" style="color:var(--s); font-family:'Orbitron'; margin-bottom:5px;">@Username</h3>
+        <p id="mod-id" style="font-size:0.6rem; opacity:0.5; margin-bottom:20px;">ID: ...</p>
         
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
+            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:12px; text-align:center;">
                 <small style="font-size:0.5rem; opacity:0.5;">TOPLAM PI</small>
                 <p id="mod-pi" style="font-weight:900; color:var(--green);">0.00</p>
             </div>
-            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
-                <small style="font-size:0.5rem; opacity:0.5;">REF SAYISI</small>
+            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:12px; text-align:center;">
+                <small style="font-size:0.5rem; opacity:0.5;">REFERANS</small>
                 <p id="mod-ref" style="font-weight:900;">0</p>
             </div>
         </div>
         
-        <button class="btn btn-red" id="ban-btn" onclick="toggleBan()">KULLANICIYI BANLA</button>
-        <button class="btn" style="margin-top:10px; background:rgba(255,255,255,0.1);" onclick="document.getElementById('adm-modal').style.display='none'">KAPAT</button>
+        <button class="btn" id="ban-action-btn" onclick="toggleBan()">YÜKLENİYOR...</button>
+        <button class="btn" style="margin-top:10px; background:rgba(255,255,255,0.05); font-size:0.7rem;" onclick="document.getElementById('adm-modal').style.display='none'">PANELLİ KAPAT</button>
     </div>
 </div>
 
 <div id="app">
-    <div id="ghost-tracker" onclick="exitGhost()">İZLENİYOR: <span id="watching-name">...</span> <br><small>Geri dön ✕</small></div>
+    <div id="ghost-tracker" onclick="exitGhost()">İZLENİYOR: <span id="watching-name">...</span> <br><small>Kendi hesabına dön ✕</small></div>
     <div class="ad-timer"><div id="ad-fill"></div></div>
     
     <header class="header">
@@ -105,26 +106,41 @@
         </div>
     </div>
 
+    <div id="v-earn" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">GÖREVLER</h2>
+        <div class="glass" id="ref-input-box"><input type="text" id="ref-code-input" placeholder="Referans ID"><button class="btn btn-s" onclick="applyRef()">BONUSU AL</button></div>
+    </div>
+
+    <div id="v-friends" class="view"><h2 style="font-family:'Orbitron';">ARKADAŞLAR</h2><div class="glass" style="text-align:center;"><h1 id="my-id">---</h1><button class="btn btn-p" onclick="shareRef()">DAVET ET</button></div></div>
+    
+    <div id="v-wallet" class="view"><h2 style="font-family:'Orbitron';">CÜZDAN</h2><div class="glass"><input type="text" id="w-addr" placeholder="Adres"><input type="number" id="w-amt" placeholder="Miktar"><button class="btn btn-p" onclick="sendWithdraw()">ÇEK</button></div></div>
+
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">ADMİN PANEL</h2>
-        <div style="font-size:0.6rem; color:var(--s); margin-bottom:10px;">⌛ BEKLEYEN ÖDEMELER</div>
+        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">YÖNETİM PANELİ</h2>
+        <div style="font-size:0.6rem; color:var(--s); margin-bottom:10px;">⌛ ÖDEME TALEPLERİ</div>
         <div id="adm-pulls"></div>
-        <div style="font-size:0.6rem; color:var(--s); margin:15px 0 10px 0;">👥 ÜYELER (Yönetmek için isme tıkla)</div>
+        <div style="font-size:0.6rem; color:var(--s); margin:15px 0 10px 0;">👥 TÜM ÜYELER (Detay için isme tıkla)</div>
         <div id="adm-users"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Madenci</div>
         <div class="nav-btn" onclick="tab('v-earn', this)"><i>🎯</i>Görevler</div>
-        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Referans</div>
+        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Ref</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💸</i>Cüzdan</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>⚙️</i>Admin</div>
     </nav>
 </div>
 
 <script>
-    // ... FirebaseConfig ve Temel Değişkenler ...
-    const firebaseConfig = { /* Mevcut Bilgilerinizi Buraya Yapıştırın */ };
+    const firebaseConfig = {
+        apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
+        authDomain: "fonix-b4de6.firebaseapp.com",
+        projectId: "fonix-b4de6",
+        storageBucket: "fonix-b4de6.firebasestorage.app",
+        messagingSenderId: "20899545652",
+        appId: "1:20899545652:web:f32ef599f0c8d3deaec061"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
@@ -132,14 +148,15 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Misafir", hasRef: false, refCount: 0, refEarned: 0, banned: false };
+    let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Misafir", banned: false };
     const mRate = 0.0001;
-    let selectedUser = null; 
+    let selectedUserForAdmin = null;
 
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
             if(doc.exists) {
                 const cloud = doc.data();
+                // BAN KONTROLÜ
                 if(cloud.banned && activeUid === realUid) {
                     document.getElementById('app').style.display = 'none';
                     document.getElementById('ban-screen').style.display = 'flex';
@@ -149,53 +166,76 @@
             } else { db.collection("users").doc(activeUid).set(uData); }
         });
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        // ... Zamanlayıcılar ...
+        setInterval(() => { uData.uncl += mRate; document.getElementById('m-val').innerText = uData.uncl.toFixed(8); }, 1000);
+        setInterval(() => { if(activeUid === realUid) db.collection("users").doc(realUid).update({ uncl: uData.uncl, lastSync: Date.now() }); }, 10000);
     }
 
-    // --- ADMIN PANELİ GÜNCELLEMESİ ---
+    function render() {
+        document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
+        document.getElementById('my-id').innerText = realUid;
+        document.getElementById('ghost-tracker').style.display = activeUid !== realUid ? 'block' : 'none';
+        if(activeUid !== realUid) document.getElementById('watching-name').innerText = uData.username;
+    }
+
+    // --- ADMIN ÖZEL ---
     async function loadAdmin() {
         const uBox = document.getElementById('adm-users');
-        const wBox = document.getElementById('adm-pulls');
-        
         const uSnap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
         uBox.innerHTML = "";
         uSnap.forEach(doc => {
             const d = doc.data();
             uBox.innerHTML += `
             <div class="user-row">
-                <span onclick="openUserModal('${doc.id}')" style="cursor:pointer; flex:1; ${d.banned ? 'text-decoration:line-through; color:gray;' : ''}">@${d.username}</span>
-                <button onclick="enter('${doc.id}')" style="background:var(--p); border:none; color:white; padding:4px 8px; border-radius:5px; font-size:0.55rem;">İZLE</button>
+                <span onclick="openUserSummary('${doc.id}')" style="cursor:pointer; flex:1; ${d.banned ? 'text-decoration:line-through; color:gray;' : ''}">
+                    @${d.username} <small style="font-size:0.5rem; opacity:0.5;">(${d.pi.toFixed(2)} PI)</small>
+                </span>
+                <button onclick="enter('${doc.id}')" style="background:var(--p); border:none; color:white; padding:4px 8px; border-radius:8px; font-size:0.5rem; font-weight:900;">İZLE</button>
             </div>`;
         });
-        // ... Ödeme yükleme kodları ...
     }
 
-    async function openUserModal(id) {
+    async function openUserSummary(id) {
         const doc = await db.collection("users").doc(id).get();
-        selectedUser = { id, ...doc.data() };
+        selectedUserForAdmin = { id, ...doc.data() };
         
-        document.getElementById('mod-user').innerText = "@" + selectedUser.username;
+        document.getElementById('mod-user').innerText = "@" + (selectedUserForAdmin.username || "Adsız");
         document.getElementById('mod-id').innerText = "ID: " + id;
-        document.getElementById('mod-pi').innerText = (selectedUser.pi || 0).toFixed(2) + " PI";
-        document.getElementById('mod-ref').innerText = selectedUser.refCount || 0;
+        document.getElementById('mod-pi').innerText = (selectedUserForAdmin.pi || 0).toFixed(2) + " PI";
+        document.getElementById('mod-ref').innerText = selectedUserForAdmin.refCount || 0;
         
-        const banBtn = document.getElementById('ban-btn');
-        banBtn.innerText = selectedUser.banned ? "BANI KALDIR" : "KULLANICIYI BANLA";
-        banBtn.className = selectedUser.banned ? "btn btn-s" : "btn btn-red";
+        const bBtn = document.getElementById('ban-action-btn');
+        if(selectedUserForAdmin.banned) {
+            bBtn.innerText = "BANI KALDIR";
+            bBtn.className = "btn btn-green";
+        } else {
+            bBtn.innerText = "KULLANICIYI BANLA";
+            bBtn.className = "btn btn-red";
+        }
         
         document.getElementById('adm-modal').style.display = 'flex';
     }
 
     async function toggleBan() {
-        if(!selectedUser) return;
-        const newStatus = !selectedUser.banned;
-        await db.collection("users").doc(selectedUser.id).update({ banned: newStatus });
-        tg.showAlert(newStatus ? "Kullanıcı Banlandı!" : "Ban Kaldırıldı!");
+        if(!selectedUserForAdmin) return;
+        const newStatus = !selectedUserForAdmin.banned;
+        await db.collection("users").doc(selectedUserForAdmin.id).update({ banned: newStatus });
+        tg.showAlert(newStatus ? "Kullanıcı Banlandı!" : "Kullanıcının Banı Kaldırıldı.");
         document.getElementById('adm-modal').style.display = 'none';
         loadAdmin();
     }
 
-    // ... Diğer yardımcı fonksiyonlar (enter, exitGhost, tab, shareRef vb.) ...
+    function enter(id) { activeUid = id; tab('v-home'); init(); }
+    function exitGhost() { activeUid = realUid; init(); }
+    function closeModal(e) { document.getElementById('adm-modal').style.display = 'none'; }
+
+    function tab(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(el) { document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+        if(id === 'v-admin') loadAdmin();
+    }
+
+    window.onload = init;
 </script>
 </body>
 </html>
