@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI MINER PRO V24 - ADMIN OVERLORD</title>
+    <title>PI MINER PRO V25 - ADMIN OVERLORD</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -67,10 +67,11 @@
     <p style="opacity:0.6; margin-top:10px;">Kullanım şartları ihlali nedeniyle erişiminiz engellendi.</p>
 </div>
 
-<div id="adm-modal" onclick="closeModal(event)">
+<div id="adm-modal" onclick="this.style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 id="mod-user" style="color:var(--s); font-family:'Orbitron';">...</h3>
+        <h3 id="mod-user" style="color:var(--s); font-family:'Orbitron';">@Kullanici</h3>
         <p id="mod-id" style="font-size:0.6rem; opacity:0.5; margin-bottom:15px;">ID: ...</p>
+        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
             <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
                 <small style="font-size:0.5rem; opacity:0.5;">TOPLAM PI</small>
@@ -81,6 +82,7 @@
                 <p id="mod-ref" style="font-weight:900;">0</p>
             </div>
         </div>
+        
         <button class="btn btn-red" id="ban-btn" onclick="toggleBan()">KULLANICIYI BANLA</button>
         <button class="btn" style="margin-top:10px; background:rgba(255,255,255,0.1);" onclick="document.getElementById('adm-modal').style.display='none'">KAPAT</button>
     </div>
@@ -103,25 +105,8 @@
         </div>
     </div>
 
-    <div id="v-earn" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">GÖREVLER</h2>
-        <div class="glass" id="ref-input-box"><p style="font-size:0.7rem; font-weight:bold;">HOŞGELDİN BONUSU</p><input type="text" id="ref-code-input" placeholder="Referans ID Gir"><button class="btn btn-s" onclick="applyRef()">BONUSU AL</button></div>
-        <div class="glass" style="border: 1px solid var(--p);"><div style="display:flex; justify-content:space-between; align-items:center;"><div><p style="font-weight:bold;">Fonix Topluluğu</p><span style="color:var(--green);">+0.50 PI</span></div><button class="btn" style="width:auto; padding:8px 15px; font-size:0.55rem; background:var(--p);" onclick="doTask('https://t.me/FonixCommunity', 0.50)">KATIL</button></div></div>
-    </div>
-
-    <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:10px; font-size:1.3rem;">ARKADAŞLAR</h2>
-        <div class="glass" style="text-align:center; padding:30px 15px;"><p style="font-size:0.6rem; opacity:0.5;">ID</p><h1 id="my-id" style="color:var(--s); font-family:'Orbitron'; margin-bottom:20px;">---</h1><button class="btn btn-p" onclick="shareRef()">ARKADAŞINI DAVET ET</button></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div class="glass" style="text-align:center;"><p style="font-size:0.55rem;">DAVETLER</p><p id="ref-count">0</p></div><div class="glass" style="text-align:center;"><p style="font-size:0.55rem;">REF KAZANCI</p><p id="ref-earned">0.00</p></div></div>
-    </div>
-
-    <div id="v-wallet" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">CÜZDAN</h2>
-        <div class="glass"><p style="font-size:0.7rem; color:var(--red); font-weight:900; margin-bottom:15px; text-align:center;">MİNİMUM ÇEKİM: 500 PI</p><input type="text" id="w-addr" placeholder="Pi Cüzdan Adresi"><input type="number" id="w-amt" placeholder="Miktar"><button class="btn btn-p" onclick="sendWithdraw()">ÇEKİM TALEBİ</button></div>
-    </div>
-
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">ADMİN</h2>
+        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">ADMİN PANEL</h2>
         <div style="font-size:0.6rem; color:var(--s); margin-bottom:10px;">⌛ BEKLEYEN ÖDEMELER</div>
         <div id="adm-pulls"></div>
         <div style="font-size:0.6rem; color:var(--s); margin:15px 0 10px 0;">👥 ÜYELER (Yönetmek için isme tıkla)</div>
@@ -131,21 +116,15 @@
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Madenci</div>
         <div class="nav-btn" onclick="tab('v-earn', this)"><i>🎯</i>Görevler</div>
-        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Ref</div>
+        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Referans</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💸</i>Cüzdan</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>⚙️</i>Admin</div>
     </nav>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
-        authDomain: "fonix-b4de6.firebaseapp.com",
-        projectId: "fonix-b4de6",
-        storageBucket: "fonix-b4de6.firebasestorage.app",
-        messagingSenderId: "20899545652",
-        appId: "1:20899545652:web:f32ef599f0c8d3deaec061"
-    };
+    // ... FirebaseConfig ve Temel Değişkenler ...
+    const firebaseConfig = { /* Mevcut Bilgilerinizi Buraya Yapıştırın */ };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
@@ -155,8 +134,7 @@
     let activeUid = realUid;
     let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Misafir", hasRef: false, refCount: 0, refEarned: 0, banned: false };
     const mRate = 0.0001;
-    let offCheck = false;
-    let selectedUser = null; // Admin panelde seçilen kişi
+    let selectedUser = null; 
 
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
@@ -167,88 +145,49 @@
                     document.getElementById('ban-screen').style.display = 'flex';
                     return;
                 }
-                if(!offCheck && activeUid === realUid) {
-                    const diff = Math.floor((Date.now() - (cloud.lastSync || Date.now())) / 1000);
-                    if(diff > 5) { cloud.uncl = (cloud.uncl || 0) + (diff * mRate); }
-                    offCheck = true;
-                }
                 uData = cloud; render();
             } else { db.collection("users").doc(activeUid).set(uData); }
         });
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        setInterval(() => { uData.uncl += mRate; document.getElementById('m-val').innerText = uData.uncl.toFixed(8); }, 1000);
-        setInterval(() => { if(activeUid === realUid) db.collection("users").doc(realUid).update({ uncl: uData.uncl, lastSync: Date.now() }); }, 10000);
+        // ... Zamanlayıcılar ...
     }
 
-    function render() {
-        document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
-        document.getElementById('my-id').innerText = realUid;
-        document.getElementById('ref-count').innerText = uData.refCount || 0;
-        document.getElementById('ref-earned').innerText = (uData.refEarned || 0).toFixed(2);
-        document.getElementById('ref-input-box').style.display = uData.hasRef ? 'none' : 'block';
-        document.getElementById('ghost-tracker').style.display = activeUid !== realUid ? 'block' : 'none';
-        if(activeUid !== realUid) document.getElementById('watching-name').innerText = uData.username;
-    }
-
-    function claim() {
-        if(uData.uncl < 0.0001 || activeUid !== realUid) return;
-        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
-    }
-
-    async function applyRef() {
-        const code = document.getElementById('ref-code-input').value.trim();
-        const refDoc = await db.collection("users").doc(code).get();
-        if(refDoc.exists && code !== realUid) {
-            const batch = db.batch();
-            batch.update(db.collection("users").doc(realUid), { pi: firebase.firestore.FieldValue.increment(0.01), hasRef: true });
-            batch.update(db.collection("users").doc(code), { pi: firebase.firestore.FieldValue.increment(0.01), refCount: firebase.firestore.FieldValue.increment(1), refEarned: firebase.firestore.FieldValue.increment(0.01) });
-            await batch.commit(); tg.showAlert("Başarılı!");
-        }
-    }
-
-    async function sendWithdraw() {
-        const amt = parseFloat(document.getElementById('w-amt').value);
-        if(amt >= 500 && uData.pi >= amt) {
-            await db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr: document.getElementById('w-addr').value, amt, status: "pending" });
-            await db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            tg.showAlert("Talep alındı.");
-        }
-    }
-
-    // --- ADMIN ACTIONS ---
+    // --- ADMIN PANELİ GÜNCELLEMESİ ---
     async function loadAdmin() {
-        const wBox = document.getElementById('adm-pulls');
         const uBox = document.getElementById('adm-users');
-        const wSnap = await db.collection("withdrawals").where("status", "==", "pending").get();
-        wBox.innerHTML = "";
-        wSnap.forEach(doc => {
-            const w = doc.data();
-            wBox.innerHTML += `<div class="payment-card"><div><b>@${w.username}</b><br><small>${w.amt} PI</small></div><button onclick="admPay('${doc.id}')" style="background:var(--green); border:none; color:white; padding:5px; border-radius:5px; font-size:0.6rem;">ÖDE</button></div>`;
-        });
+        const wBox = document.getElementById('adm-pulls');
+        
         const uSnap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
         uBox.innerHTML = "";
         uSnap.forEach(doc => {
             const d = doc.data();
-            uBox.innerHTML += `<div class="user-row">
-                <span onclick="openUserModal('${doc.id}')" style="cursor:pointer; ${d.banned ? 'text-decoration:line-through; color:gray;' : ''}">@${d.username}</span>
+            uBox.innerHTML += `
+            <div class="user-row">
+                <span onclick="openUserModal('${doc.id}')" style="cursor:pointer; flex:1; ${d.banned ? 'text-decoration:line-through; color:gray;' : ''}">@${d.username}</span>
                 <button onclick="enter('${doc.id}')" style="background:var(--p); border:none; color:white; padding:4px 8px; border-radius:5px; font-size:0.55rem;">İZLE</button>
             </div>`;
         });
+        // ... Ödeme yükleme kodları ...
     }
 
     async function openUserModal(id) {
         const doc = await db.collection("users").doc(id).get();
         selectedUser = { id, ...doc.data() };
+        
         document.getElementById('mod-user').innerText = "@" + selectedUser.username;
         document.getElementById('mod-id').innerText = "ID: " + id;
-        document.getElementById('mod-pi').innerText = selectedUser.pi.toFixed(2) + " PI";
+        document.getElementById('mod-pi').innerText = (selectedUser.pi || 0).toFixed(2) + " PI";
         document.getElementById('mod-ref').innerText = selectedUser.refCount || 0;
-        document.getElementById('ban-btn').innerText = selectedUser.banned ? "BANI KALDIR" : "KULLANICIYI BANLA";
-        document.getElementById('ban-btn').style.background = selectedUser.banned ? var(--green) : var(--red);
+        
+        const banBtn = document.getElementById('ban-btn');
+        banBtn.innerText = selectedUser.banned ? "BANI KALDIR" : "KULLANICIYI BANLA";
+        banBtn.className = selectedUser.banned ? "btn btn-s" : "btn btn-red";
+        
         document.getElementById('adm-modal').style.display = 'flex';
     }
 
     async function toggleBan() {
+        if(!selectedUser) return;
         const newStatus = !selectedUser.banned;
         await db.collection("users").doc(selectedUser.id).update({ banned: newStatus });
         tg.showAlert(newStatus ? "Kullanıcı Banlandı!" : "Ban Kaldırıldı!");
@@ -256,17 +195,7 @@
         loadAdmin();
     }
 
-    async function admPay(id) { await db.collection("withdrawals").doc(id).update({ status: "paid" }); loadAdmin(); }
-    function enter(id) { activeUid = id; offCheck = true; tab('v-home'); init(); }
-    function exitGhost() { activeUid = realUid; offCheck = false; init(); }
-    function tab(id, el) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(el) { document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
-        if(id === 'v-admin') loadAdmin();
-    }
-    function shareRef() { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=Davet ID: ${realUid}`); }
-    window.onload = init;
+    // ... Diğer yardımcı fonksiyonlar (enter, exitGhost, tab, shareRef vb.) ...
 </script>
 </body>
 </html>
