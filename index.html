@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEBULA FOREST - V67</title>
+    <title>NEBULA FOREST - V68</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,10 +12,9 @@
     
     <style>
         :root { 
-            --forest-dark: #0a0f0d; 
-            --accent-green: #a3e635; 
+            --accent: #a3e635; 
+            --bg-dark: #0a0f0d;
             --card-bg: rgba(30, 41, 59, 0.7);
-            --usdt-color: #26a17b;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -28,125 +27,143 @@
             height: 100vh; 
         }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: -1; }
-
-        .view { display: none; height: 100vh; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 120px; position: relative; }
+        .view { display: none; height: 100vh; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 110px; position: relative; z-index: 10; }
         .view.active { display: flex; }
+        .overlay-dark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1; }
 
-        /* --- ANA EKRAN (Görsel 4 Benzeri) --- */
-        #v-home { align-items: center; justify-content: flex-start; pt: 40px; }
-        .level-text { font-size: 1.5rem; font-weight: 700; margin-top: 20px; }
-        .balance-text { color: var(--accent-green); font-size: 1.2rem; margin-bottom: 20px; }
-        .character-img { width: 280px; filter: drop-shadow(0 0 30px rgba(163, 230, 53, 0.3)); margin: 20px 0; }
+        /* ANA SAYFA (ESKİ STİL) */
+        #v-home { align-items: center; justify-content: center; text-align: center; }
+        .hero-img-classic { width: 180px; filter: drop-shadow(0 0 20px var(--accent)); margin-bottom: 20px; }
+        .bal-classic { font-family: 'Montserrat'; font-size: 3.5rem; color: var(--accent); margin-bottom: 30px; }
+
+        /* MINING EKRANI (YENİ - GÖRSELDEKİ GİBİ) */
+        #mining-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000 url('https://w0.peakpx.com/wallpaper/340/320/HD-wallpaper-dark-forest-trees-fog-nature.jpg') no-repeat center center;
+            background-size: cover; z-index: 2000; display: none; flex-direction: column; align-items: center; padding: 40px 20px;
+        }
+        .char-img { width: 90%; max-width: 320px; margin: 20px 0; filter: drop-shadow(0 0 30px rgba(163, 230, 53, 0.2)); }
+        .level-tag { font-family: 'Montserrat'; font-size: 1.8rem; margin-bottom: 5px; }
+        .usd-tag { color: var(--accent); font-size: 1.1rem; opacity: 0.9; margin-bottom: 30px; }
         
-        .progress-container { width: 80%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent-green); width: 45%; box-shadow: 0 0 10px var(--accent-green); }
+        .progress-box { width: 85%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; margin-bottom: 10px; }
+        .progress-fill { height: 100%; background: var(--accent); width: 45%; border-radius: 10px; box-shadow: 0 0 15px var(--accent); transition: width 0.5s; }
+        .progress-text { font-size: 0.6rem; opacity: 0.6; letter-spacing: 1px; margin-bottom: 40px; }
 
-        .action-buttons { display: flex; gap: 15px; margin-top: 20px; }
-        .circle-btn { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-green); border: 4px solid rgba(0,0,0,0.3); color: #000; font-weight: 900; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1; }
+        .mining-btns { display: flex; gap: 20px; width: 100%; justify-content: center; }
+        .m-btn { 
+            width: 85px; height: 85px; border-radius: 50%; background: var(--accent); border: 5px solid rgba(0,0,0,0.2);
+            color: #000; font-weight: 900; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s;
+        }
+        .m-btn:active { transform: scale(0.95); }
 
-        /* --- OFFERWALL (Görsel 1 Benzeri) --- */
-        .section-title { font-size: 1rem; margin: 20px 0 10px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        /* OFFERWALL (GÖRSEL 1) */
+        .section-title { font-size: 0.9rem; margin: 15px 0 10px; display: flex; align-items: center; gap: 8px; font-weight: 700; opacity: 0.8; }
         .offer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .offer-card { background: var(--card-bg); border-radius: 15px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); position: relative; backdrop-filter: blur(5px); }
-        .offer-card .tag { position: absolute; top: 5px; right: 5px; color: var(--accent-green); font-size: 0.6rem; font-weight: 700; }
-        .offer-card .icon { width: 40px; height: 40px; background: #334155; border-radius: 10px; margin: 5px auto; }
-        .offer-card span { font-size: 0.65rem; display: block; height: 20px; overflow: hidden; }
-        .offer-card .reward { color: #fbbf24; font-size: 0.75rem; font-weight: 700; margin-top: 5px; display: block; }
+        .offer-card { background: var(--card-bg); border-radius: 15px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); position: relative; backdrop-filter: blur(8px); }
+        .offer-card .icon-box { width: 45px; height: 45px; background: #2d3748; border-radius: 12px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .offer-card span { font-size: 0.6rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8; }
+        .offer-card b { color: #fbbf24; font-size: 0.75rem; display: block; margin-top: 4px; }
 
-        /* --- WITHDRAW (Görsel 3 Benzeri) --- */
+        /* WITHDRAW (GÖRSEL 3) */
         .provider-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-        .provider-card { background: var(--card-bg); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
-        .provider-card img { height: 25px; object-fit: contain; margin-bottom: 8px; filter: brightness(1.2); }
-        .provider-card small { font-size: 0.55rem; color: #94a3b8; display: block; }
+        .provider-card { background: var(--card-bg); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .provider-card img { height: 22px; margin-bottom: 8px; filter: brightness(1.1); }
+        .provider-card small { font-size: 0.5rem; color: #94a3b8; display: block; line-height: 1.2; }
 
-        /* --- NAVBAR --- */
-        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); }
-        .nav-item { text-align: center; opacity: 0.4; transition: 0.3s; color: white; text-decoration: none; }
-        .nav-item.active { opacity: 1; }
-        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 4px; }
-        .main-nav-btn { background: var(--accent-green); width: 60px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: none; box-shadow: 0 0 15px rgba(163, 230, 53, 0.4); }
+        /* NAVBAR */
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { text-align: center; opacity: 0.4; transition: 0.3s; color: white; }
+        .nav-item.active { opacity: 1; color: var(--accent); }
+        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 
-        /* MINING OVERLAY */
-        #mining-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .gain-anim { color: var(--accent-green); font-size: 2rem; font-weight: 900; animation: floatUp 1s ease-out; position: absolute; }
-        @keyframes floatUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100px); opacity: 0; } }
+        .btn-start { width: 80%; padding: 20px; border-radius: 50px; background: var(--accent); color: #000; font-weight: 900; border: none; font-size: 1.2rem; box-shadow: 0 10px 20px rgba(163, 230, 53, 0.3); cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
+    <div class="overlay-dark"></div>
 
     <div id="v-home" class="view active">
-        <div class="level-text">LEVEL 1</div>
-        <div class="balance-text">$<span id="display-balance">0.0037</span></div>
+        <img src="yourfantastic.jpg" class="hero-img-classic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/606/606611.png'">
+        <div class="bal-classic">$<span id="main-bal">0.0037</span></div>
+        <button class="btn-start" onclick="openMining()">MINING'I BAŞLAT</button>
+    </div>
+
+    <div id="mining-screen">
+        <div style="width:100%; display:flex; justify-content:flex-end;"><button onclick="closeMining()" style="background:none; border:none; color:white; font-size:1.5rem; font-weight:bold;">✕</button></div>
         
-        <img src="https://i.ibb.co/L6S9YvM/character-nebula.png" class="character-img" alt="Character">
+        <div class="level-tag">LEVEL 1</div>
+        <div class="usd-tag">$<span id="mining-bal">0.0037</span></div>
 
-        <div class="progress-container">
-            <div class="progress-bar" id="mining-progress"></div>
+        <img src="https://i.ibb.co/L6S9YvM/character-nebula.png" class="char-img" alt="Nebula Character">
+
+        <div class="progress-box">
+            <div class="progress-fill" id="p-bar"></div>
         </div>
-        <p style="font-size: 0.7rem; opacity: 0.6;">45% AWAY FROM COINS</p>
+        <div class="progress-text">45% AWAY FROM COINS</div>
 
-        <div class="action-buttons">
-            <div class="circle-btn" onclick="startMiningProcess()">⚡<br>MINING</div>
-            <div class="circle-btn" style="background: rgba(163,230,53,0.2); color: var(--accent-green);">🔥<br>BOOST</div>
-            <div class="circle-btn" onclick="tg.showAlert('Daily Bonus collected!')">📅<br>BONUS</div>
+        <div class="mining-btns">
+            <div class="m-btn" style="background:rgba(163,230,53,0.15); color:var(--accent); border-color:var(--accent);">🕒<br>BOOST</div>
+            <div class="m-btn" id="mining-trigger" onclick="toggleMining()">⚡<br>START<br>MINING</div>
+            <div class="m-btn" style="background:rgba(163,230,53,0.15); color:var(--accent); border-color:var(--accent);">🎁<br>BONUS</div>
         </div>
     </div>
 
     <div id="v-tasks" class="view">
-        <h2 style="text-align: center; font-family: 'Montserrat';">OFFERWALL</h2>
+        <h2 style="text-align: center; font-family: 'Montserrat'; margin-bottom:10px;">OFFERWALL</h2>
         
         <div class="section-title">🔥 Hot Offers</div>
         <div class="offer-grid">
-            <div class="offer-card"><div class="tag">99%</div><div class="icon"></div><span>The Nuts Heist</span><b class="reward">💰 2000</b></div>
-            <div class="offer-card"><div class="tag">97%</div><div class="icon"></div><span>Givvy Weekly</span><b class="reward">💰 2000</b></div>
-            <div class="offer-card"><div class="tag">97%</div><div class="icon"></div><span>Follow X</span><b class="reward">💰 2000</b></div>
+            <div class="offer-card"><div class="icon-box">🌰</div><span>The Nuts Heist</span><b>💰 2000</b></div>
+            <div class="offer-card"><div class="icon-box">📱</div><span>Givvy's Weekly</span><b>💰 2000</b></div>
+            <div class="offer-card"><div class="icon-box">🐦</div><span>Follow Givvy</span><b>💰 2000</b></div>
         </div>
 
         <div class="section-title">🏷️ Task Offers</div>
         <div class="offer-grid">
-            <div class="offer-card"><div class="tag">100%</div><div class="icon"></div><span>TyrAds</span><b class="reward">💰 180M</b></div>
-            <div class="offer-card"><div class="tag">99%</div><div class="icon"></div><span>GeeMee</span><b class="reward">💰 180M</b></div>
-            <div class="offer-card"><div class="tag">100%</div><div class="icon"></div><span>Lootably</span><b class="reward">💰 200M</b></div>
+            <div class="offer-card"><div class="icon-box">📢</div><span>TyrAds</span><b>💰 180M</b></div>
+            <div class="offer-card"><div class="icon-box">🎯</div><span>GeeMee</span><b>💰 180M</b></div>
+            <div class="offer-card"><div class="icon-box">📦</div><span>Lootably</span><b>💰 200M</b></div>
+        </div>
+
+        <div class="section-title">📋 Survey Offers</div>
+        <div class="offer-grid">
+            <div class="offer-card"><div class="icon-box">📊</div><span>Pollfish</span><b>💰 200M</b></div>
+            <div class="offer-card"><div class="icon-box">🔬</div><span>Bitlabs</span><b>💰 150M</b></div>
+            <div class="offer-card"><div class="icon-box">🔎</div><span>CPX Research</span><b>💰 170M</b></div>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
         <h2 style="text-align: center; font-family: 'Montserrat';">WITHDRAW</h2>
-        <p style="font-size: 0.6rem; text-align: center; opacity: 0.6; margin: 10px 0;">Top 3 providers in your country</p>
+        <p style="font-size: 0.6rem; text-align: center; opacity: 0.6; margin: 10px 0;">Top 3 providers in your country 🇹🇷</p>
         
         <div class="provider-grid">
-            <div class="provider-card" onclick="tg.showAlert('Papara selection active')">
+            <div class="provider-card" onclick="tg.showAlert('Papara seçildi. Min: 5$')">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Papara_logo.svg">
-                <small>MIN 0.35 USD<br>Instant/1-2 days</small>
+                <small>MIN 0.35 USD<br>1-2 business days</small>
             </div>
-            <div class="provider-card" onclick="tg.showAlert('Binance selection active')">
+            <div class="provider-card" onclick="tg.showAlert('Binance seçildi. Min: 5$')">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Binance_logo.svg">
-                <small>MIN 0.35 USD<br>Instant/1-2 days</small>
+                <small>MIN 0.35 USD<br>Instant payment</small>
             </div>
-            <div class="provider-card">
+            <div class="provider-card" onclick="tg.showAlert('Payeer seçildi. Min: 5$')">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Payeer_logo.svg">
-                <small>MIN 0.35 USD<br>Instant/1-2 days</small>
+                <small>MIN 0.35 USD<br>1 business day</small>
             </div>
         </div>
 
         <div class="section-title" style="margin-top: 30px;">Other Providers</div>
         <div class="provider-grid">
-            <div class="provider-card"><img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Tether_Logo.svg"><small>MIN 5.00 USDT</small></div>
-            <div class="provider-card">➕<br><small>Add a provider</small></div>
+            <div class="provider-card"><img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Tether_Logo.svg"><small>USDT TRC20</small></div>
+            <div class="provider-card"><div style="font-size:1.5rem;">+</div><small>Add new</small></div>
         </div>
-    </div>
-
-    <div id="mining-overlay">
-        <h2 style="color: var(--accent-green); letter-spacing: 5px;">MINING...</h2>
-        <p id="mining-timer" style="margin-top: 10px;">Döngü Bekleniyor</p>
-        <button class="circle-btn" style="margin-top: 40px; width: 120px; height: 120px;" onclick="stopMiningProcess()">STOP</button>
     </div>
 
     <nav>
         <div class="nav-item" onclick="showTab('v-tasks', this)"><i>🎁</i>Offers</div>
-        <button class="main-nav-btn" onclick="showTab('v-home', this)">🌿</button>
+        <div class="nav-item active" onclick="showTab('v-home', this)"><i>🌿</i>Forest</div>
         <div class="nav-item" onclick="showTab('v-wallet', this)"><i>💳</i>Wallet</div>
     </nav>
 
@@ -155,55 +172,64 @@
     tg.expand();
 
     let balance = 0.0037;
-    let miningActive = false;
-    let miningTimeout;
+    let isMining = false;
+    let miningInt;
 
     function showTab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(el.classList.contains('nav-item')) el.classList.add('active');
+        el.classList.add('active');
     }
 
-    function startMiningProcess() {
-        miningActive = true;
-        document.getElementById('mining-overlay').style.display = 'flex';
-        runMiningCycle();
+    // --- MINING MANTİĞI ---
+    function openMining() {
+        document.getElementById('mining-screen').style.display = 'flex';
+        document.getElementById('mining-bal').innerText = balance.toFixed(4);
     }
 
-    function runMiningCycle() {
-        if(!miningActive) return;
+    function closeMining() {
+        document.getElementById('mining-screen').style.display = 'none';
+        document.getElementById('main-bal').innerText = balance.toFixed(4);
+    }
+
+    function toggleMining() {
+        if(!isMining) {
+            isMining = true;
+            document.getElementById('mining-trigger').innerHTML = "🛑<br>STOP<br>MINING";
+            document.getElementById('mining-trigger').style.background = "#ff3131";
+            document.getElementById('mining-trigger').style.color = "#fff";
+            startRandomEarnings();
+        } else {
+            isMining = false;
+            document.getElementById('mining-trigger').innerHTML = "⚡<br>START<br>MINING";
+            document.getElementById('mining-trigger').style.background = "var(--accent)";
+            document.getElementById('mining-trigger').style.color = "#000";
+            clearTimeout(miningInt);
+        }
+    }
+
+    function startRandomEarnings() {
+        if(!isMining) return;
         
-        let randomSec = Math.floor(Math.random() * (6000 - 3000 + 1) + 3000);
+        // 3-6 saniye arası rastgele süre
+        let randTime = Math.floor(Math.random() * (6000 - 3000 + 1) + 3000);
         
-        miningTimeout = setTimeout(() => {
+        miningInt = setTimeout(() => {
             balance += 0.0001;
-            document.getElementById('display-balance').innerText = balance.toFixed(4);
-            
-            // Kazanç efekti
-            showGainAnim();
+            document.getElementById('mining-bal').innerText = balance.toFixed(4);
             tg.HapticFeedback.notificationOccurred('success');
             
-            runMiningCycle();
-        }, randomSec);
+            // Progress barı rastgele hareket ettir
+            document.getElementById('p-bar').style.width = Math.floor(Math.random() * 40 + 30) + "%";
+            
+            startRandomEarnings();
+        }, randTime);
     }
 
-    function showGainAnim() {
-        const anim = document.createElement('div');
-        anim.className = 'gain-anim';
-        anim.innerText = '+0.0001$';
-        anim.style.left = Math.random() * 80 + 10 + '%';
-        anim.style.top = '50%';
-        document.body.appendChild(anim);
-        setTimeout(() => anim.remove(), 1000);
-    }
-
-    function stopMiningProcess() {
-        miningActive = false;
-        clearTimeout(miningTimeout);
-        document.getElementById('mining-overlay').style.display = 'none';
-        tg.showAlert("Mining durduruldu. Bakiyeniz kaydedildi.");
-    }
+    window.onload = () => {
+        document.getElementById('main-bal').innerText = balance.toFixed(4);
+    };
 </script>
 </body>
 </html>
