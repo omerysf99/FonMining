@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp - Ultimate Web3</title>
+    <title>FonixApp - Mining Center</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -21,202 +21,183 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Admin ID senin ID'n
+        // Kullanıcı ID (Sabit ID'niz: 8392479231)
         let uID = "8392479231"; 
-        let stats = { balance: 0.0, invitedBy: "", completedTasks: [], totalEarned: 0 };
-        let liveEarn = 0, miningLoop, seconds = 0;
+        let stats = { balance: 0.0, completedTasks: [], invitedBy: "" };
+        let liveSession = 0, isMining = false, loop;
 
         async function init() {
-            const userRef = doc(db, "users", uID);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) stats = userSnap.data();
-            else await setDoc(userRef, stats);
+            const ref = doc(db, "users", uID);
+            const snap = await getDoc(ref);
+            if (snap.exists()) stats = snap.data();
+            else await setDoc(ref, stats);
             
             updateUI();
-            loadReferrals();
+            loadRefs();
             renderTasks();
         }
 
-        // --- MINING ENGINE (0.00002 USDT/sec) ---
-        window.startMining = () => {
-            tab('earning');
-            liveEarn = 0; seconds = 0;
-            miningLoop = setInterval(() => {
-                seconds++;
-                liveEarn += 0.00002; 
-                document.getElementById('m-usd').innerText = liveEarn.toFixed(5);
-                document.getElementById('m-time').innerText = `${Math.floor(seconds/60)}:${seconds%60 < 10 ? '0'+seconds%60 : seconds%60}`;
-                document.getElementById('prog-bar').style.width = (seconds % 60) * 1.66 + "%";
-            }, 1000);
+        // --- MINING MOTORU (0.00002 USDT/sn) ---
+        window.toggleMining = async () => {
+            const btn = document.getElementById('m-btn');
+            if(!isMining) {
+                isMining = true;
+                btn.innerText = "STOP & COLLECT";
+                btn.style.background = "#ff4757";
+                loop = setInterval(() => {
+                    liveSession += 0.00002;
+                    document.getElementById('live-val').innerText = liveSession.toFixed(5);
+                }, 1000);
+            } else {
+                clearInterval(loop);
+                isMining = false;
+                stats.balance += liveSession;
+                liveSession = 0;
+                btn.innerText = "START MINING";
+                btn.style.background = "var(--g)";
+                document.getElementById('live-val').innerText = "0.00000";
+                await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+                updateUI();
+            }
         };
 
-        window.stopMining = async () => {
-            clearInterval(miningLoop);
-            stats.balance += liveEarn;
-            stats.totalEarned = (stats.totalEarned || 0) + liveEarn;
-            await updateDoc(doc(db, "users", uID), { balance: stats.balance, totalEarned: stats.totalEarned });
-            updateUI();
-            tab('wallet');
-        };
-
-        // --- TASK SYSTEM ---
-        const tasks = [
-            { id: "x_follow", title: "X (Twitter) Follow", reward: 0.15, link: "https://x.com" },
-            { id: "tg_join", title: "Join Telegram Channel", reward: 0.10, link: "https://t.me" },
-            { id: "ig_follow", title: "Instagram Follow", reward: 0.10, link: "https://instagram.com" }
+        // --- GÖREVLER ---
+        const taskData = [
+            { id: "t1", name: "Join Telegram", reward: 0.10, url: "https://t.me" },
+            { id: "t2", name: "Follow X.com", reward: 0.15, url: "https://x.com" }
         ];
 
         function renderTasks() {
             const list = document.getElementById('task-list');
             list.innerHTML = "";
-            tasks.forEach(t => {
-                const done = stats.completedTasks.includes(t.id);
-                list.innerHTML += `
-                <div class="list-item">
-                    <div style="text-align:left">
-                        <div style="font-size:14px">${t.title}</div>
-                        <div style="font-size:11px; color:var(--g)">+$${t.reward.toFixed(2)}</div>
-                    </div>
-                    <button class="task-btn ${done ? 'done' : ''}" onclick="${done ? '' : `doTask('${t.id}', ${t.reward}, '${t.link}')`}">
-                        ${done ? 'COMPLETED' : 'GO'}
-                    </button>
+            taskData.forEach(t => {
+                const isDone = stats.completedTasks.includes(t.id);
+                list.innerHTML += `<div class="card">
+                    <div style="text-align:left"><b>${t.name}</b><br><small style="color:var(--g)">+$${t.reward}</small></div>
+                    <button class="s-btn" onclick="${isDone ? '' : `doTask('${t.id}',${t.reward},'${t.url}')`}" ${isDone ? 'disabled' : ''}>${isDone ? 'DONE' : 'GO'}</button>
                 </div>`;
             });
         }
 
-        window.doTask = async (id, reward, link) => {
-            window.open(link, '_blank');
+        window.doTask = async (id, rew, url) => {
+            window.open(url, '_blank');
             setTimeout(async () => {
-                if(!stats.completedTasks.includes(id)) {
-                    stats.completedTasks.push(id);
-                    stats.balance += reward;
-                    await updateDoc(doc(db, "users", uID), { balance: stats.balance, completedTasks: stats.completedTasks });
-                    updateUI(); renderTasks();
-                }
-            }, 3000);
+                stats.completedTasks.push(id);
+                stats.balance += rew;
+                await updateDoc(doc(db, "users", uID), { balance: stats.balance, completedTasks: stats.completedTasks });
+                updateUI(); renderTasks();
+            }, 2000);
         };
 
-        // --- WITHDRAW SYSTEM ---
-        window.withdraw = async () => {
-            const addr = document.getElementById('wd-addr').value;
-            const amt = parseFloat(document.getElementById('wd-amt').value);
-            const msg = document.getElementById('wd-msg');
-
-            if (!addr.startsWith('T') || addr.length < 30) return msg.innerText = "Error: Invalid Address";
-            if (amt < 10 || amt > stats.balance) return msg.innerText = "Error: Minimum $10 Required";
-
-            stats.balance -= amt;
-            await updateDoc(doc(db, "users", uID), { balance: stats.balance });
-            await addDoc(collection(db, "withdrawals"), { uID, addr, amt, date: new Date().toISOString() });
-            msg.style.color = "#2ecc71";
-            msg.innerText = "Success! Processing...";
-            updateUI();
+        // --- CÜZDAN & ÇEKİM ---
+        window.requestWithdraw = async () => {
+            const addr = document.getElementById('addr').value;
+            const amt = parseFloat(document.getElementById('amt').value);
+            if(addr.startsWith('T') && amt >= 10 && amt <= stats.balance) {
+                stats.balance -= amt;
+                await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+                await addDoc(collection(db, "withdrawals"), { uID, addr, amt, date: new Date().toISOString() });
+                alert("Talebiniz Alındı!");
+                updateUI();
+            } else { alert("Hata: Bilgileri kontrol edin (Min $10)"); }
         };
 
-        async function loadReferrals() {
+        async function loadRefs() {
             const q = query(collection(db, "users"), where("invitedBy", "==", uID));
             const snap = await getDocs(q);
             document.getElementById('ref-count').innerText = snap.size;
             const list = document.getElementById('ref-list');
-            list.innerHTML = snap.size ? "" : "<p style='opacity:0.5'>No friends yet</p>";
+            list.innerHTML = "";
             snap.forEach(d => {
-                list.innerHTML += `<div class="list-item"><span>👤 User_${d.id.slice(-4)}</span><span style="color:var(--g)">+$0.05</span></div>`;
+                list.innerHTML += `<div class="card">👤 User_${d.id.slice(-4)} <span style="color:var(--g)">+$0.05</span></div>`;
             });
         }
 
         function updateUI() {
-            document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
-            document.getElementById('my-code').innerText = uID;
+            document.querySelectorAll('.bal-text').forEach(el => el.innerText = stats.balance.toFixed(4));
+            document.getElementById('user-code').innerText = uID;
         }
 
         window.tab = (id) => {
-            document.querySelectorAll('.p').forEach(x => x.classList.remove('a'));
-            document.getElementById('p-'+id).classList.add('a');
-            document.querySelector('.nav').style.display = (id === 'earning') ? 'none' : 'flex';
+            document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-'+id).classList.add('active');
         };
 
         window.onload = init;
     </script>
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0d0d1a; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; overflow: hidden; }
-        #app { width: 100%; max-width: 410px; height: 95vh; background: linear-gradient(180deg, #1a1a3a 0%, #0d0d1a 100%); border-radius: 40px; border: 4px solid #333; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 25px; overflow-y: auto; }
-        .a { display: flex; }
-        .btn { background: var(--g); color: #000; border: none; width: 100%; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; margin: 10px 0; font-size: 16px; transition: 0.3s; }
-        .list-item { width: 100%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        .task-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .task-btn.done { background: #333; color: #888; cursor: default; }
-        input { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #444; margin-bottom: 12px; background: #151525; color: #fff; text-align: center; }
-        .nav { height: 85px; background: rgba(20,20,40,0.9); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px); border-top: 1px solid #333; }
-        .ni { font-size: 22px; cursor: pointer; opacity: 0.5; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
-        .ni span { font-size: 10px; margin-top: 5px; font-weight: bold; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; }
+        #phone { width: 100%; max-width: 410px; height: 95vh; background: var(--bg); border-radius: 40px; border: 6px solid #222; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .p { flex: 1; display: none; flex-direction: column; padding: 25px; overflow-y: auto; text-align: center; }
+        .active { display: flex; }
+        .bal-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; margin-bottom: 20px; border: 1px solid #333; }
+        .card { background: rgba(255,255,255,0.07); padding: 15px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .s-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
+        input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #444; background: #111; color: #fff; margin-bottom: 10px; text-align: center; }
+        .nav { height: 80px; background: #161625; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
+        .ni { opacity: 0.5; font-size: 20px; cursor: pointer; text-align: center; }
+        .ni span { display: block; font-size: 10px; margin-top: 4px; font-weight: bold; }
         .ni:hover { opacity: 1; color: var(--g); }
-        .fan-container { position: relative; margin: 30px 0; }
-        .fan { width: 200px; height: 200px; border-radius: 50%; border: 8px solid var(--p); animation: spin 1s linear infinite; box-shadow: 0 0 30px var(--p); }
+        .fan { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--p); margin: 20px auto; animation: spin 1.5s linear infinite; box-shadow: 0 0 20px var(--p); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .progress-container { width: 80%; height: 6px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        #prog-bar { width: 0%; height: 100%; background: var(--g); transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="background:rgba(255,255,255,0.1); padding:8px 16px; border-radius:20px; font-size: 14px; border:1px solid #444;">🪙 <span class="bal-val">0.0000</span></div>
-        <div style="font-weight: bold; color: var(--g);">WEB3 PET</div>
+<div id="phone">
+    <div style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 900; color: var(--g); font-size: 18px;">FONIX APP</span>
+        <div style="background:#222; padding:5px 12px; border-radius:15px; font-size:12px;">🪙 <span class="bal-text">0.0000</span></div>
     </div>
 
-    <div id="p-home" class="p a">
-        <h3 style="margin-top:0;">FRIENDS</h3>
-        <div style="background:rgba(123, 102, 255, 0.1); width:100%; padding:20px; border-radius:25px; border:1px dashed var(--p); margin-bottom:20px;">
-            <p style="font-size:11px; margin:0; opacity:0.7;">YOUR INVITE CODE</p>
-            <h2 id="my-code" style="margin:10px 0; letter-spacing:3px; color:var(--g)">-</h2>
+    <div id="tab-mining" class="p active">
+        <div class="bal-box">
+            <small style="opacity: 0.5;">SESSION PROFIT</small>
+            <h1 style="font-size: 42px; margin: 5px 0; color: var(--g);">$<span id="live-val">0.00000</span></h1>
         </div>
-        <div style="width:100%; text-align:left;">
-            <p style="font-size:12px; opacity:0.6;">REFERRALS (<span id="ref-count">0</span>)</p>
+        <div class="fan"></div>
+        <p style="font-size: 13px; opacity: 0.6;">Saniyede 0.00002 USDT üretiliyor</p>
+        <div style="flex:1"></div>
+        <button id="m-btn" class="btn" onclick="toggleMining()">START MINING</button>
+    </div>
+
+    <div id="tab-tasks" class="p">
+        <h3>DAILY MISSIONS</h3>
+        <div id="task-list"></div>
+    </div>
+
+    <div id="tab-friends" class="p">
+        <h3>FRIENDS</h3>
+        <div style="background:rgba(123, 102, 255, 0.1); padding:15px; border-radius:20px; border:1px dashed var(--p); margin-bottom:20px;">
+            <small>REFERRAL CODE</small>
+            <h2 id="user-code" style="margin:5px 0; color:var(--g)">-</h2>
+        </div>
+        <div style="text-align:left;">
+            <p style="font-size:12px; opacity:0.6;">MY REFERRALS (<span id="ref-count">0</span>)</p>
             <div id="ref-list"></div>
         </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="startMining()">GO TO EARNING</button>
     </div>
 
-    <div id="p-tasks" class="p">
-        <h3>DAILY TASKS</h3>
-        <p style="font-size:12px; opacity:0.6; margin-bottom:20px;">Complete tasks to earn extra USDT</p>
-        <div id="task-list" style="width:100%;"></div>
-    </div>
-
-    <div id="p-earning" class="p">
-        <h1 style="font-size:48px; margin:0; color:var(--g);">$<span id="m-usd">0.00000</span></h1>
-        <p style="font-size:12px; letter-spacing:3px; opacity:0.7;">MINING ACTIVE</p>
-        <div class="fan-container"><div class="fan"></div></div>
-        <div class="progress-container"><div id="prog-bar"></div></div>
-        <p style="font-size:14px;">Time Elapsed: <span id="m-time" style="color:var(--g)">0:00</span></p>
-        <div style="flex:1"></div>
-        <button class="btn" style="background:#ff4757; color:#fff;" onclick="stopMining()">STOP & COLLECT</button>
-    </div>
-
-    <div id="p-wallet" class="p">
-        <h3>WALLET</h3>
-        <div style="background:rgba(255,255,255,0.05); width:100%; padding:30px; border-radius:30px; border:1px solid #333; margin-bottom:20px;">
-            <p style="font-size:12px; opacity:0.6; margin:0;">TOTAL BALANCE</p>
-            <h1 style="font-size:52px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
+    <div id="tab-wallet" class="p">
+        <h3>MY WALLET</h3>
+        <div class="bal-box">
+            <small>TOTAL BALANCE</small>
+            <h1 style="font-size: 40px; margin: 5px 0; color: var(--g);">$<span class="bal-text">0.0000</span></h1>
         </div>
-        <div style="width:100%; text-align:left;">
-            <label style="font-size:11px; margin-left:10px;">USDT TRC20 ADDR</label>
-            <input type="text" id="wd-addr" placeholder="T...">
-            <label style="font-size:11px; margin-left:10px;">AMOUNT</label>
-            <input type="number" id="wd-amt" placeholder="Min $10.00">
-            <p id="wd-msg" style="text-align:center; font-size:12px; color:#ff4757;"></p>
-            <button class="btn" onclick="withdraw()">WITHDRAW NOW</button>
+        <div style="text-align:left;">
+            <input type="text" id="addr" placeholder="TRC20 Address (T...)">
+            <input type="number" id="amt" placeholder="Amount (Min $10)">
+            <button class="btn" onclick="requestWithdraw()">WITHDRAW</button>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="ni" onclick="tab('home')">👥<span>Friends</span></div>
+        <div class="ni" onclick="tab('mining')">⛏️<span>Mining</span></div>
         <div class="ni" onclick="tab('tasks')">📋<span>Tasks</span></div>
+        <div class="ni" onclick="tab('friends')">👥<span>Friends</span></div>
         <div class="ni" onclick="tab('wallet')">👛<span>Wallet</span></div>
     </nav>
 </div>
