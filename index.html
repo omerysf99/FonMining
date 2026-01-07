@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI MINER PRO V20</title>
+    <title>PI MINER V21 - REFERRAL SYSTEM</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -17,9 +17,8 @@
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 80%); }
         
-        /* GHOST TRACKER (Sağ Üst) */
-        #ghost-tracker { display: none; position: absolute; top: 15px; right: 15px; background: var(--red); padding: 5px 12px; border-radius: 20px; font-size: 0.6rem; font-weight: 900; z-index: 2000; box-shadow: 0 0 15px rgba(255,71,87,0.4); border: 1px solid white; cursor: pointer; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        /* GHOST TRACKER */
+        #ghost-tracker { display: none; position: absolute; top: 15px; right: 15px; background: rgba(255,71,87,0.9); padding: 6px 12px; border-radius: 12px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; backdrop-filter: blur(5px); }
 
         .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 1000; }
         #ad-fill { width: 0%; height: 100%; background: var(--p); box-shadow: 0 0 10px var(--p); transition: linear 1s; }
@@ -29,8 +28,9 @@
         .box img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--s); }
 
         nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(5,2,15,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; z-index: 100; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; color: rgba(255,255,255,0.3); cursor: pointer; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; color: rgba(255,255,255,0.3); cursor: pointer; }
         .nav-btn.active { color: var(--s); font-weight: 900; }
+        .nav-btn i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
 
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
         .view.active { display: flex; animation: fadeIn 0.3s ease; }
@@ -44,16 +44,23 @@
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 12px; }
         .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; color: white; transition: 0.2s; }
         .btn-p { background: linear-gradient(90deg, var(--p), #6d28d9); }
+        .btn-s { background: var(--green); }
         .btn:active { transform: scale(0.96); }
         
         input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; color: white; margin: 10px 0; outline: none; }
+
+        /* Referral Styles */
+        .ref-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .ref-stat-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
+        .ref-stat-box h4 { font-size: 0.55rem; opacity: 0.5; margin-bottom: 5px; }
+        .ref-stat-box p { font-family: 'Orbitron'; color: var(--s); font-size: 1rem; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div id="ghost-tracker" onclick="exitGhost()">
-        LIVE: <span id="watching-name">User</span> (ID: <span id="watching-id">---</span>) ✕
+        👀 WATCHING: <span id="watching-name">User</span> <br> <small>Click to Return</small>
     </div>
 
     <div class="ad-timer"><div id="ad-fill"></div></div>
@@ -77,49 +84,59 @@
         </div>
     </div>
 
-    <div id="v-tasks" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem; color:var(--s);">EARN PI</h2>
+    <div id="v-earn" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem; color:var(--s);">PI MISSIONS</h2>
         
         <div class="glass" id="ref-input-box">
-            <p style="font-size:0.65rem; opacity:0.6;">ENTER INVITE CODE (+0.10 PI)</p>
-            <input type="text" id="ref-code-input" placeholder="Referral ID Here">
-            <button class="btn" style="background:var(--green); font-size:0.6rem; padding:8px;" onclick="applyRef()">SUBMIT CODE</button>
+            <p style="font-size:0.65rem; opacity:0.6;">HAVE A REFERRAL CODE? (+0.10 PI)</p>
+            <input type="text" id="ref-code-input" placeholder="Enter Friend's ID">
+            <button class="btn btn-s" style="font-size:0.6rem; padding:10px;" onclick="applyRef()">SUBMIT CODE</button>
         </div>
 
-        <div class="task-card" style="display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:18px; border-radius:18px; border:1px solid var(--p);">
-            <div><p style="font-weight:bold; font-size:0.85rem;">Join Fonix Community</p><span style="color:var(--green); font-size:0.7rem; font-weight:900;">+0.50 PI</span></div>
-            <button class="btn" style="width:auto; padding:8px 15px; font-size:0.6rem; background:var(--p);" onclick="doTask('https://t.me/FonixCommunity', 0.50)">JOIN</button>
+        <div class="glass" style="border: 1px solid var(--p);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><p style="font-weight:bold; font-size:0.8rem;">Join Fonix Community</p><span style="color:var(--green); font-size:0.65rem;">+0.50 PI</span></div>
+                <button class="btn" style="width:auto; padding:8px 15px; font-size:0.55rem; background:var(--p);" onclick="doTask('https://t.me/FonixCommunity', 0.50)">JOIN</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="v-friends" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:10px; font-size:1.3rem; color:var(--s);">FRIENDS</h2>
+        <p style="font-size:0.7rem; opacity:0.5; margin-bottom:20px;">Invite your friends and earn 0.25 PI for each!</p>
+        
+        <div class="glass" style="text-align:center; padding:30px 15px;">
+            <p style="font-size:0.6rem; opacity:0.5; margin-bottom:10px;">YOUR UNIQUE INVITE ID</p>
+            <h1 id="my-id" style="color:var(--s); letter-spacing:5px; font-size:2rem; font-family:'Orbitron'; margin-bottom:20px;">---</h1>
+            <button class="btn btn-p" onclick="shareRef()">INVITE A FRIEND</button>
+        </div>
+
+        <div class="ref-stat-grid">
+            <div class="ref-stat-box"><h4>TOTAL INVITES</h4><p id="ref-count">0</p></div>
+            <div class="ref-stat-box"><h4>REF EARNINGS</h4><p id="ref-earned">0.00</p></div>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
         <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">WALLET</h2>
         <div class="glass">
-            <p style="font-size:0.7rem; opacity:0.5; margin-bottom:10px;">WITHDRAW MIN: 30 PI</p>
-            <input type="text" id="w-addr" placeholder="Wallet Address">
+            <p style="font-size:0.65rem; opacity:0.5; margin-bottom:10px;">MINIMUM WITHDRAWAL: 30 PI</p>
+            <input type="text" id="w-addr" placeholder="Pi Wallet Address">
             <input type="number" id="w-amt" placeholder="Amount">
-            <button class="btn btn-p" onclick="sendWithdraw()">SEND PI</button>
-        </div>
-    </div>
-
-    <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px; font-size:1.3rem;">REFERRAL</h2>
-        <div class="glass" style="text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.5;">YOUR INVITE CODE</p>
-            <h1 id="my-id" style="color:var(--s); letter-spacing:4px; margin:15px 0; font-family:'Orbitron';">---</h1>
-            <button class="btn btn-p" onclick="shareRef()">SHARE LINK</button>
+            <button class="btn btn-p" onclick="sendWithdraw()">WITHDRAW PI</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">ADMIN PANEL</h2>
+        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1rem; margin-bottom:15px;">SYSTEM CONTROL</h2>
         <div id="adm-pulls"></div>
         <div id="adm-users" style="margin-top:15px;"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Mine</div>
-        <div class="nav-btn" onclick="tab('v-tasks', this)"><i>🎯</i>Earn</div>
+        <div class="nav-btn" onclick="tab('v-earn', this)"><i>🎯</i>Tasks</div>
+        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Friends</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💸</i>Wallet</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>⚙️</i>Admin</div>
     </nav>
@@ -141,7 +158,7 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Guest", hasRef: false };
+    let uData = { pi:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Guest", hasRef: false, refCount: 0, refEarned: 0 };
     const mRate = 0.0001;
     let offCheck = false;
 
@@ -154,7 +171,7 @@
                     if(diff > 2) {
                         const earned = diff * mRate;
                         cloud.uncl = (cloud.uncl || 0) + earned;
-                        document.getElementById('offline-info').innerText = `Back! You earned ${earned.toFixed(5)} PI`;
+                        document.getElementById('offline-info').innerText = `Offline Profit: +${earned.toFixed(5)} PI`;
                     }
                     offCheck = true;
                 }
@@ -165,7 +182,7 @@
 
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
         
-        // Loop
+        // Loops
         setInterval(() => { uData.uncl += mRate; document.getElementById('m-val').innerText = uData.uncl.toFixed(8); }, 1000);
         setInterval(() => { 
             if(activeUid === realUid) db.collection("users").doc(realUid).update({ uncl: uData.uncl, lastSync: Date.now() });
@@ -176,13 +193,13 @@
     function render() {
         document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
         document.getElementById('my-id').innerText = realUid;
+        document.getElementById('ref-count').innerText = uData.refCount || 0;
+        document.getElementById('ref-earned').innerText = (uData.refEarned || 0).toFixed(2);
         document.getElementById('ref-input-box').style.display = uData.hasRef ? 'none' : 'block';
         
-        // Ghost Tracker UI
         if(activeUid !== realUid) {
             document.getElementById('ghost-tracker').style.display = 'block';
             document.getElementById('watching-name').innerText = uData.username;
-            document.getElementById('watching-id').innerText = activeUid;
         } else {
             document.getElementById('ghost-tracker').style.display = 'none';
         }
@@ -196,13 +213,17 @@
 
     async function applyRef() {
         const code = document.getElementById('ref-code-input').value.trim();
-        if(code === realUid) return tg.showAlert("Cannot use own code!");
+        if(code === realUid) return tg.showAlert("Invalid operation.");
         const refDoc = await db.collection("users").doc(code).get();
         if(refDoc.exists) {
             await db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(0.10), hasRef: true });
-            await db.collection("users").doc(code).update({ pi: firebase.firestore.FieldValue.increment(0.25) });
-            tg.showAlert("Success! You got 0.10 PI and Friend got 0.25 PI.");
-        } else { tg.showAlert("Invalid Code!"); }
+            await db.collection("users").doc(code).update({ 
+                pi: firebase.firestore.FieldValue.increment(0.25),
+                refCount: firebase.firestore.FieldValue.increment(1),
+                refEarned: firebase.firestore.FieldValue.increment(0.25)
+            });
+            tg.showAlert("Success! Bonus PI Added.");
+        } else { tg.showAlert("User not found."); }
     }
 
     function doTask(url, reward) {
@@ -215,29 +236,28 @@
         if(amt >= 30 && uData.pi >= amt) {
             await db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr: document.getElementById('w-addr').value, amt, status: "pending" });
             await db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            tg.showAlert("Sent!");
+            tg.showAlert("Withdrawal request sent.");
         }
     }
 
-    // --- ADMIN ---
+    // ADMIN
     async function loadAdmin() {
-        const wBox = document.getElementById('adm-pulls');
         const uBox = document.getElementById('adm-users');
+        const wBox = document.getElementById('adm-pulls');
         const wSnap = await db.collection("withdrawals").where("status", "==", "pending").get();
-        wBox.innerHTML = wSnap.empty ? "No pending." : "";
+        wBox.innerHTML = wSnap.empty ? "All clear." : "";
         wSnap.forEach(doc => {
             const w = doc.data();
             wBox.innerHTML += `<div class="glass" style="font-size:0.6rem;">@${w.username}: ${w.amt} PI <button onclick="admPay('${doc.id}')">APPROVE</button></div>`;
         });
-        const uSnap = await db.collection("users").limit(10).get();
+        const uSnap = await db.collection("users").orderBy("pi", "desc").limit(10).get();
         uBox.innerHTML = "";
         uSnap.forEach(doc => {
-            uBox.innerHTML += `<div class="glass" style="font-size:0.6rem; display:flex; justify-content:space-between;">@${doc.data().username} <button onclick="enter('${doc.id}')">WATCH</button></div>`;
+            uBox.innerHTML += `<div class="glass" style="font-size:0.6rem; display:flex; justify-content:space-between;">@${doc.data().username} (${doc.data().pi.toFixed(2)}) <button onclick="enter('${doc.id}')">WATCH</button></div>`;
         });
     }
 
     async function admPay(id) { await db.collection("withdrawals").doc(id).update({ status: "paid" }); loadAdmin(); }
-
     function enter(id) { activeUid = id; offCheck = true; tab('v-home'); init(); }
     function exitGhost() { activeUid = realUid; offCheck = false; init(); }
 
@@ -252,7 +272,8 @@
     }
 
     function shareRef() {
-        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=Join me on PI Miner! Use my code: ${realUid}`);
+        const msg = `🚀 Start mining PI Coin now! \n💰 Use my Invite ID: ${realUid} to get a bonus!\n\nJoin here:`;
+        tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(msg)}`);
     }
 
     window.onload = init;
