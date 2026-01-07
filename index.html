@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Fonix Edition</title>
+    <title>Your Fantastic Pet - Pro Final</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -11,8 +11,8 @@
             --nav-bg: #8184f7;
             --dark-card: rgba(0, 0, 0, 0.4);
             --glass: rgba(255, 255, 255, 0.15);
+            --admin-red: #e74c3c;
             --success: #2ecc71;
-            --disabled: #a0a0a0;
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -24,29 +24,37 @@
             position: relative; display: flex; flex-direction: column; color: white;
         }
 
-        /* Header */
+        /* --- Ghost Mode Katmanı --- */
+        #ghost-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(231, 76, 60, 0.15); border: 5px dashed var(--admin-red);
+            z-index: 9999; display: none; pointer-events: all;
+        }
+        #ghost-overlay::after { content: "GHOST MODE: VIEW ONLY (DblClick to Exit)"; position: absolute; top: 50%; width: 100%; text-align: center; color: white; font-size: 14px; text-shadow: 2px 2px 4px #000; }
+
+        /* --- Header --- */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .balance-pill { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
         .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
 
-        /* Screen Management */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; position: relative; overflow-y: auto; }
+        /* --- Screens --- */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; overflow-y: auto; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* UI Cards */
+        /* --- UI Elements --- */
         .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
         .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
         .btn-yellow { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
-            width: 100%; padding: 15px; font-size: 18px; border-radius: 25px; 
+            width: 100%; padding: 16px; font-size: 18px; border-radius: 25px; 
             box-shadow: 0 5px 0 #ccaa00; cursor: pointer; margin-top: 10px;
         }
-        .btn-yellow:disabled { background: var(--disabled); box-shadow: 0 5px 0 #7a7a7a; color: #eee; cursor: not-allowed; }
+        .btn-yellow:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
         .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; outline: none; }
 
-        /* Mining Visuals */
-        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; }
+        /* --- Mining Area --- */
+        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
         .rotating { animation: fanRot 1.5s linear infinite; }
         @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -61,7 +69,7 @@
             font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
         }
 
-        /* Bottom Nav */
+        /* --- Nav Bar --- */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; font-size: 22px; transition: 0.3s; }
         .nav-item.active { opacity: 1; }
@@ -71,74 +79,37 @@
 </head>
 <body>
 
+<div id="ghost-overlay" ondblclick="exitGhost()"></div>
+
 <div id="app-container">
     <div class="header">
         <div class="balance-pill">
             <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
-            <b id="global-bal">0.0000</b>
+            <b id="main-bal">0.0000</b>
         </div>
-        <div id="stop-trigger" class="exit-btn" onclick="stopAndCongrats()">✖</div>
+        <div id="stop-btn" class="exit-btn" onclick="stopMining()">✖</div>
     </div>
 
-    <div id="screen-ref" class="screen">
-        <h2 style="margin:0 0 20px 0;">FRIENDS</h2>
-        <div class="card">
-            <h4>Claim Invitation Bonus</h4>
-            <p style="font-size:11px; opacity:0.8;">Her kullanıcı sadece bir kez bonus alabilir.</p>
-            <input type="text" id="ref-input" class="input-box" placeholder="Kod Gir">
-            <button id="ref-btn" class="btn-yellow" onclick="applyRef()">BONUSU AL ($0.05)</button>
-        </div>
-        <div class="card">
-            <h4>Invite Link</h4>
-            <p style="font-size:14px;">Code: <b>PET839247</b></p>
-            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareOnTG()">PAYLAŞ 🚀</button>
-        </div>
+    <div id="screen-login" class="screen active-screen" style="justify-content:center;">
+        <h1 style="margin-bottom:30px;">ENTER ID</h1>
+        <input type="text" id="login-id" class="input-box" placeholder="User or Admin ID" style="text-align:center;">
+        <button class="btn-yellow" onclick="handleLogin()">LOGIN</button>
     </div>
 
-    <div id="screen-tasks" class="screen">
-        <h2 style="margin-bottom:20px;">TASKS</h2>
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><h4 style="margin:0;">Fonix Community</h4><p style="margin:5px 0 0 0;">+ $0.0014</p></div>
-            <button id="task1-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doTask('https://t.me/FonixCommunity', 0.0014)">JOIN</button>
-        </div>
-    </div>
-
-    <div id="screen-home" class="screen active-screen">
+    <div id="screen-home" class="screen">
         <img src="yourfantastic.jpg" style="width:85%; border-radius:30px; margin-top:30px;">
         <h1 style="font-size:32px; margin:20px 0;">YOUR<br>FANTASTIC PET</h1>
         <button class="btn-yellow" onclick="startMining()">PLAY</button>
-    </div>
-
-    <div id="screen-stats" class="screen">
-        <h2 style="margin-bottom:20px;">STATISTICS</h2>
-        <div class="card"><h4>Total Earned</h4><span style="font-size:28px; color:var(--accent-yellow);">$<span id="st-total">0.0000</span></span></div>
-        <div class="card"><h4>Sessions</h4><span style="font-size:28px;" id="st-sess">0</span></div>
-    </div>
-
-    <div id="screen-wallet" class="screen">
-        <h2>WITHDRAW</h2>
-        <div class="card" style="text-align:center; padding:20px; background:rgba(255,255,255,0.05);">
-            <h4 style="opacity:0.6;">Balance</h4>
-            <p style="font-size:38px; color:var(--accent-yellow); margin:10px 0;">$<span id="w-bal">0.0000</span></p>
-        </div>
-        <div class="card">
-            <h4>Network</h4>
-            <select class="input-box"><option>USDT (BEP20)</option><option>USDT (TRC20)</option><option>TON</option></select>
-            <h4 style="margin-top:15px;">Address</h4>
-            <input type="text" id="wd-addr" class="input-box" placeholder="Ox...">
-            <h4 style="margin-top:15px;">Amount</h4>
-            <input type="number" id="wd-amt" class="input-box" placeholder="Min $1.00">
-            <button class="btn-yellow" style="margin-top:20px;" onclick="handleWithdraw()">CONFIRM</button>
-        </div>
     </div>
 
     <div id="screen-mining" class="screen">
         <div style="margin-top:10px;">
             <h1 style="font-size:50px; margin:0;">🐾 <span id="m-paws">0</span></h1>
             <h2 style="color:var(--accent-yellow); margin:0;">$<span id="m-usd">0.00000</span></h2>
-            <p style="font-size:12px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
         </div>
-        <div style="flex:1; display:flex; align-items:center;"><img src="pinix.jpg" class="fan-pet rotating"></div>
+        <div style="flex:1; display:flex; align-items:center;">
+            <img src="pinix.jpg" class="fan-pet rotating">
+        </div>
         <div class="stats-footer">
             <div class="stat-circle">⏰<br><span id="t-val">00:00</span></div>
             <div class="stat-circle" style="width:100px; height:100px; transform:translateY(-15px); font-size:14px;"><span id="p-val">0</span>%<br><small>COMPLETE</small></div>
@@ -151,37 +122,95 @@
         <div style="font-size:30px;">🐾 <span id="c-paws">0</span></div>
         <div style="color:var(--accent-yellow); font-size:20px;">$<span id="c-usd">0.0000</span></div>
         <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:160px; margin:25px 0;">
-        <h2 style="font-size:18px;">ADULTHOOD REACHED</h2>
         <button class="btn-yellow" onclick="goHome()">GREAT</button>
     </div>
 
-    <div id="main-nav" class="nav-bar">
+    <div id="screen-ref" class="screen">
+        <h2>FRIENDS</h2>
+        <div class="card">
+            <h4>Claim Bonus</h4>
+            <input type="text" id="ref-input" class="input-box" placeholder="Enter Ref Code">
+            <button id="ref-btn" class="btn-yellow" onclick="claimRef()">CLAIM $0.05</button>
+        </div>
+        <div class="card">
+            <h4>Invite Code: <b>PET839247</b></h4>
+            <button class="btn-yellow" style="background:#0088cc; color:white; box-shadow:0 5px 0 #005580;" onclick="shareTG()">SHARE ON TELEGRAM 🚀</button>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2>TASKS</h2>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><h4>Fonix Community</h4><p style="margin:5px 0 0 0;">+ $0.0014</p></div>
+            <button id="task-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doFonixTask()">JOIN</button>
+        </div>
+    </div>
+
+    <div id="screen-wallet" class="screen">
+        <h2>WITHDRAW</h2>
+        <div class="card" style="text-align:center;">
+            <p style="font-size:35px; color:var(--accent-yellow);">$<span id="w-bal">0.0000</span></p>
+        </div>
+        <div class="card">
+            <h4>Wallet Address</h4>
+            <input type="text" id="wd-addr" class="input-box" placeholder="USDT BEP20 Address">
+            <h4 style="margin-top:10px;">Amount</h4>
+            <input type="number" id="wd-amt" class="input-box" placeholder="Min $1.00">
+            <button class="btn-yellow" onclick="processWithdraw()">CONFIRM WITHDRAW</button>
+        </div>
+    </div>
+
+    <div id="screen-admin" class="screen">
+        <h2 style="color:var(--admin-red);">ADMIN DASHBOARD</h2>
+        <div class="card">
+            <h4>User Viewer (Ghost Mode)</h4>
+            <input type="text" id="target-id" class="input-box" placeholder="Enter Member ID">
+            <button class="btn-yellow" style="background:var(--admin-red); color:white; box-shadow:0 5px 0 #922b21;" onclick="enterGhost()">VIEW USER SCREEN</button>
+        </div>
+        <button class="btn-yellow" onclick="changeTab('home')">RETURN TO GAME</button>
+    </div>
+
+    <div id="main-nav" class="nav-bar" style="display:none;">
         <div class="nav-item" onclick="changeTab('ref')">👥</div>
         <div class="nav-item" onclick="changeTab('tasks')">🎁</div>
-        <div class="nav-item nav-center active" onclick="changeTab('home')">🐾</div>
-        <div class="nav-item" onclick="changeTab('stats')">📊</div>
+        <div class="nav-item nav-center" onclick="changeTab('home')">🐾</div>
+        <div id="nav-adm-btn" class="nav-item" style="display:none; color:var(--admin-red);" onclick="changeTab('admin')">⚙️</div>
         <div class="nav-item" onclick="changeTab('wallet')">👛</div>
     </div>
 </div>
 
 <script>
-    let bal = 0.0000;
-    let sess = 0;
-    let refTaken = false;
-    let taskTaken = false;
+    let bal = 0, isGhost = false, refUsed = false, taskDone = false;
     let cUSD = 0, timer, secs = 0;
     const SPEED = 0.000015;
+    const ADMIN_ID = "8392479231";
+
+    function handleLogin() {
+        const id = document.getElementById('login-id').value;
+        if(!id) return alert("Please enter an ID");
+        document.getElementById('screen-login').style.display = 'none';
+        document.getElementById('main-nav').style.display = 'flex';
+        
+        if(id === ADMIN_ID) {
+            document.getElementById('nav-adm-btn').style.display = 'flex';
+            changeTab('admin');
+        } else {
+            changeTab('home');
+        }
+    }
 
     function changeTab(t) {
+        if(isGhost && t === 'admin') return; // Ghost moddayken admin butonu dblclick ile çıkılır
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById('screen-'+t).classList.add('active-screen');
     }
 
     function startMining() {
+        if(isGhost) return;
         cUSD = 0; secs = 0;
         changeTab('mining');
         document.getElementById('main-nav').classList.add('nav-locked');
-        document.getElementById('stop-trigger').style.display = 'flex';
+        document.getElementById('stop-btn').style.display = 'flex';
         timer = setInterval(() => {
             secs++; cUSD += SPEED;
             document.getElementById('m-usd').innerText = cUSD.toFixed(5);
@@ -191,8 +220,8 @@
         }, 1000);
     }
 
-    function stopAndCongrats() {
-        clearInterval(timer); sess++;
+    function stopMining() {
+        clearInterval(timer);
         document.getElementById('c-usd').innerText = cUSD.toFixed(5);
         document.getElementById('c-paws').innerText = Math.floor(cUSD * 45000);
         changeTab('congrats');
@@ -201,49 +230,62 @@
     function goHome() {
         bal += cUSD; updateUI();
         document.getElementById('main-nav').classList.remove('nav-locked');
-        document.getElementById('stop-trigger').style.display = 'none';
+        document.getElementById('stop-btn').style.display = 'none';
         changeTab('home');
     }
 
-    function applyRef() {
-        if(refTaken) return;
+    function doFonixTask() {
+        if(isGhost || taskDone) return;
+        window.open('https://t.me/FonixCommunity', '_blank');
+        setTimeout(() => {
+            bal += 0.0014; taskDone = true;
+            document.getElementById('task-btn').disabled = true;
+            document.getElementById('task-btn').innerText = "DONE ✅";
+            updateUI();
+        }, 1500);
+    }
+
+    function claimRef() {
+        if(isGhost || refUsed) return;
         if(document.getElementById('ref-input').value.length > 2) {
-            bal += 0.05; refTaken = true;
+            bal += 0.05; refUsed = true;
             document.getElementById('ref-btn').disabled = true;
-            document.getElementById('ref-btn').innerText = "BONUS ALINDI ✅";
+            document.getElementById('ref-btn').innerText = "CLAIMED ✅";
             updateUI();
         }
     }
 
-    function doTask(url, reward) {
-        if(taskTaken) return;
-        window.open(url, '_blank');
-        setTimeout(() => {
-            bal += reward; taskTaken = true;
-            document.getElementById('task1-btn').disabled = true;
-            document.getElementById('task1-btn').innerText = "TAMAM ✅";
-            updateUI();
-            alert(`Ödül Eklendi: $${reward}`);
-        }, 2000);
-    }
-
-    function handleWithdraw() {
-        let a = parseFloat(document.getElementById('wd-amt').value);
-        if(a >= 1.0 && a <= bal) {
-            bal -= a; updateUI(); alert("Çekim talebi alındı!");
-        } else { alert("Geçersiz miktar veya bakiye yetersiz! (Min $1.00)"); }
-    }
-
-    function shareOnTG() {
-        const msg = encodeURIComponent("🐾 Fonix Mining! Kodum: PET839247\nKatıl: https://t.me/YourPetBot");
-        window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=${msg}`, "_blank");
+    function processWithdraw() {
+        if(isGhost) return;
+        const amt = parseFloat(document.getElementById('wd-amt').value);
+        if(amt >= 1.0 && amt <= bal) {
+            bal -= amt; updateUI(); alert("Withdrawal Requested!");
+        } else { alert("Insufficient Balance (Min $1.00)"); }
     }
 
     function updateUI() {
-        document.getElementById('global-bal').innerText = bal.toFixed(4);
+        document.getElementById('main-bal').innerText = bal.toFixed(4);
         document.getElementById('w-bal').innerText = bal.toFixed(4);
-        document.getElementById('st-total').innerText = bal.toFixed(4);
-        document.getElementById('st-sess').innerText = sess;
+    }
+
+    function shareTG() {
+        const msg = encodeURIComponent("🐾 Mining Your Fantastic Pet! Use code PET839247 for bonus!");
+        window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=${msg}`, "_blank");
+    }
+
+    /* --- ADMIN FUNCTIONS --- */
+    function enterGhost() {
+        const tid = document.getElementById('target-id').value;
+        if(!tid) return alert("Enter Member ID");
+        isGhost = true;
+        document.getElementById('ghost-overlay').style.display = 'block';
+        changeTab('home');
+    }
+
+    function exitGhost() {
+        isGhost = false;
+        document.getElementById('ghost-overlay').style.display = 'none';
+        changeTab('admin');
     }
 </script>
 </body>
