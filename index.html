@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp 2026</title>
+    <title>FonixApp - Ultimate</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -20,80 +20,84 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Telegram ID (Sizin admin ID'niz varsayılan olarak alındı)
         let myID = "8392479231"; 
         const botURL = "https://t.me/FonixMining2026Bot";
-        let stats = { balance: 0.0, invitedBy: "" };
+        let stats = { balance: 0.0, invitedBy: "", completedTasks: [] };
+        let liveEarn = 0, timer;
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                stats = userSnap.data();
-            } else {
-                await setDoc(userRef, { balance: 0.0, invitedBy: "" });
-            }
+            if (userSnap.exists()) stats = userSnap.data();
+            else await setDoc(userRef, { balance: 0.0, invitedBy: "", completedTasks: [] });
+            
             updateUI();
-            checkInviterStatus();
+            loadReferrals();
         }
 
-        // --- REFERANS ÖDÜL SİSTEMİ ---
+        // --- MINING MODU ---
+        window.startMining = () => {
+            tab('mining');
+            document.getElementById('nav-bar').style.display = 'none';
+            document.getElementById('header-bar').style.display = 'none';
+            liveEarn = 0;
+            document.getElementById('mining-fan').classList.add('spinning');
+            timer = setInterval(() => {
+                liveEarn += 0.00002;
+                document.getElementById('live-earn').innerText = liveEarn.toFixed(5);
+            }, 1000);
+        };
+
+        window.stopMining = async () => {
+            clearInterval(timer);
+            document.getElementById('mining-fan').classList.remove('spinning');
+            const animBox = document.getElementById('reward-anim');
+            document.getElementById('earned-amount').innerText = "+" + liveEarn.toFixed(5) + " USDT";
+            animBox.style.display = 'flex';
+
+            stats.balance += liveEarn;
+            await updateDoc(doc(db, "users", myID), { balance: stats.balance });
+            
+            setTimeout(() => {
+                animBox.style.display = 'none';
+                document.getElementById('nav-bar').style.display = 'flex';
+                document.getElementById('header-bar').style.display = 'flex';
+                updateUI(); tab('home');
+            }, 2500);
+        };
+
+        // --- REFERANS SİSTEMİ ---
         window.applyReferral = async () => {
-            const code = document.getElementById('inviter-code-input').value.trim();
-            const msg = document.getElementById('ref-msg');
-
-            if (code === myID) return msg.innerText = "Kendi kodunu kullanamazsın!";
-            if (stats.invitedBy) return msg.innerText = "Zaten bir referansın var!";
-
-            const inviterRef = doc(db, "users", code);
-            const inviterSnap = await getDoc(inviterRef);
-
-            if (inviterSnap.exists()) {
-                // 1. Davet edilene 0.05$ ver
+            const code = document.getElementById('ref-input').value.trim();
+            if (code === myID || stats.invitedBy) return;
+            const invRef = doc(db, "users", code);
+            const invSnap = await getDoc(invRef);
+            if (invSnap.exists()) {
                 stats.balance += 0.05;
                 stats.invitedBy = code;
-                await updateDoc(doc(db, "users", myID), { 
-                    balance: stats.balance, 
-                    invitedBy: code 
-                });
-
-                // 2. Davet edene 0.05$ ver
-                await updateDoc(inviterRef, { 
-                    balance: increment(0.05) 
-                });
-
-                msg.style.color = "#2ecc71";
-                msg.innerText = "Başarılı! İkiniz de 0.05$ kazandınız.";
-                setTimeout(() => { updateUI(); checkInviterStatus(); }, 2000);
-            } else {
-                msg.innerText = "Geçersiz ID! Kullanıcı bulunamadı.";
+                await updateDoc(doc(db, "users", myID), { balance: stats.balance, invitedBy: code });
+                await updateDoc(invRef, { balance: increment(0.05) });
+                alert("Bonus Alındı! +$0.05");
+                updateUI();
             }
         };
 
-        function checkInviterStatus() {
-            const area = document.getElementById('inviter-query-area');
-            if (stats.invitedBy) {
-                area.innerHTML = `<p style="color:var(--g); font-size:12px;">Sizi Davet Eden: ${stats.invitedBy} ✅</p>`;
-            }
+        async function loadReferrals() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            document.getElementById('ref-count').innerText = snap.size;
         }
 
         window.shareLink = () => {
-            const fullLink = `${botURL}?start=${myID}`;
-            const text = `🚀 Fonix Mining'e katıl, beraber kazanalım!\n💰 Davet kodum: ${myID}\nLink: ${fullLink}`;
-            if (navigator.share) {
-                navigator.share({ title: 'FonixApp', text: text });
-            } else {
-                navigator.clipboard.writeText(text);
-                alert("Link kopyalandı!");
-            }
+            const text = `🚀 Fonix Mining'e katıl! \nDavet kodum: ${myID}\nLink: ${botURL}?start=${myID}`;
+            navigator.clipboard.writeText(text);
+            alert("Referans linki kopyalandı!");
         };
 
-        // --- UI & TABS ---
         function updateUI() {
             document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
-            document.getElementById('display-my-id').innerText = myID;
-            document.getElementById('full-link-text').innerText = `${botURL}?start=${myID}`;
+            document.getElementById('my-id-display').innerText = myID;
+            if(stats.invitedBy) document.getElementById('ref-input-box').innerHTML = `<p style="color:var(--g)">Davet eden: ${stats.invitedBy} ✅</p>`;
         }
 
         window.tab = (id) => {
@@ -110,61 +114,94 @@
         #app { width: 100%; max-width: 410px; height: 95vh; background: var(--bg); border-radius: 40px; border: 6px solid #222; display: flex; flex-direction: column; position: relative; }
         .p { flex: 1; display: none; flex-direction: column; padding: 25px; text-align: center; overflow-y: auto; }
         .active { display: flex; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; margin-bottom: 15px; border: 1px solid #333; }
         .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; border: 1px solid #333; margin-bottom: 15px; }
-        input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #444; background: #111; color: #fff; margin-bottom: 10px; text-align: center; }
-        .nav { height: 80px; background: #161625; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
+        .nav { height: 85px; background: #161625; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
         .ni { opacity: 0.5; font-size: 20px; cursor: pointer; text-align: center; }
         .ni span { display: block; font-size: 9px; margin-top: 4px; }
+        #mining-fan { width: 220px; height: 220px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 8px solid var(--p); margin: 30px auto; box-shadow: 0 0 30px var(--p); }
+        .spinning { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:1000; }
+        input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #444; background: #111; color: #fff; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 900; color: var(--g);">FONIX 2026</span>
+    <div id="header-bar" style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 900; color: var(--g);">FONIX APP</span>
         <div style="background:#222; padding:5px 12px; border-radius:15px; font-size:12px;">🪙 <span class="bal-val">0.0000</span></div>
     </div>
 
     <div id="tab-home" class="p active">
-        <img src="yourfantastic.jpg" style="width:100%; border-radius:30px; margin-bottom:15px;">
-        <h2>WELCOME</h2>
-        <div id="inviter-query-area" class="card">
-            <p style="font-size: 11px; opacity: 0.7; margin: 0 0 10px 0;">SİZİ KİM DAVET ETTİ?</p>
-            <input type="number" id="inviter-code-input" placeholder="Referans ID Girin">
-            <button class="btn" style="padding:10px; font-size:12px;" onclick="applyReferral()">KODU UYGULA (+0.05$)</button>
-            <p id="ref-msg" style="font-size:10px; color:#ff4757; margin-top:5px;"></p>
+        <img src="yourfantastic.jpg" style="width:100%; border-radius:30px; margin-bottom:20px;">
+        <h2 style="margin:0;">READY TO MINE?</h2>
+        <p style="font-size: 13px; opacity: 0.6; margin-top: 10px;">Cloud v2.0 Engine is Active</p>
+        <div class="card" style="margin-top: 20px;">
+            <div style="display:flex; justify-content:space-between;"><span>Status:</span><span style="color:var(--g)">Online</span></div>
+            <div style="display:flex; justify-content:space-between; margin-top:5px;"><span>Rate:</span><span style="color:var(--g)">0.00002/s</span></div>
         </div>
         <div style="flex:1"></div>
-        <button class="btn" onclick="tab('friends')">ARKADAŞLARINI DAVET ET</button>
+        <button class="btn" onclick="startMining()">START MINING</button>
+    </div>
+
+    <div id="tab-mining" class="p">
+        <div style="margin-top: 30px;">
+            <p style="letter-spacing: 4px; color: var(--p); font-size: 11px;">MINING IN PROGRESS</p>
+            <h1 style="font-size: 50px; color: var(--g); margin: 10px 0;">$<span id="live-earn">0.00000</span></h1>
+        </div>
+        <div id="mining-fan"></div>
+        <div style="flex:1"></div>
+        <button class="btn" style="background: #ff4757; color: #fff;" onclick="stopMining()">STOP & COLLECT</button>
+    </div>
+
+    <div id="tab-tasks" class="p">
+        <h3>DAILY TASKS</h3>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="text-align:left"><b>Telegram Join</b><br><small style="color:var(--g)">+$0.10</small></div>
+            <button class="btn" style="width:70px; margin:0; padding:10px; font-size:12px;">GO</button>
+        </div>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="text-align:left"><b>Follow X.com</b><br><small style="color:var(--g)">+$0.15</small></div>
+            <button class="btn" style="width:70px; margin:0; padding:10px; font-size:12px;">GO</button>
+        </div>
     </div>
 
     <div id="tab-friends" class="p">
-        <h3>REFERRALS</h3>
-        <div class="card" style="border: 2px dashed var(--p);">
-            <small style="opacity: 0.5;">DAVET LİNKİNİZ</small>
-            <div id="full-link-text" style="font-size: 10px; color: var(--g); margin: 10px 0; word-break: break-all;">-</div>
-            
-            <small style="opacity: 0.5;">REFERANS KODUNUZ</small>
-            <div id="display-my-id" style="font-size: 24px; letter-spacing: 2px;">-</div>
+        <h3>FRIENDS</h3>
+        <div class="card" id="ref-input-box">
+            <small style="opacity:0.6">SİZİ KİM DAVET ETTİ?</small>
+            <input type="number" id="ref-input" placeholder="ID Girin">
+            <button class="btn" style="padding:10px; font-size:12px;" onclick="applyReferral()">BONUS AL ($0.05)</button>
         </div>
-        
-        <p style="font-size: 12px; opacity: 0.6;">Her başarılı davet için hem size hem arkadaşınıza <b>0.05$</b> eklenir.</p>
-        
-        <button class="btn" onclick="shareLink()">📤 LİNKİ PAYLAŞ</button>
+        <div class="card" style="border: 1px dashed var(--p);">
+            <small style="opacity:0.6">DAVET KODUNUZ</small>
+            <h2 id="my-id-display" style="margin:10px 0; color:var(--g); letter-spacing:2px;">-</h2>
+            <button class="btn" style="padding:10px; font-size:12px;" onclick="shareLink()">LİNKİ KOPYALA</button>
+        </div>
+        <p style="font-size:11px; opacity:0.5;">Toplam Referans: <span id="ref-count">0</span></p>
     </div>
 
     <div id="tab-wallet" class="p">
         <h3>WALLET</h3>
-        <div class="card">
-            <small>BAKİYE</small>
-            <h1 style="font-size: 40px; color: var(--g);">$<span class="bal-val">0.0000</span></h1>
+        <div class="card" style="background: linear-gradient(45deg, #1a1a3a, #0d0d1a);">
+            <small style="opacity:0.6">TOTAL BALANCE</small>
+            <h1 style="font-size: 45px; color: var(--g); margin: 10px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <button class="btn" style="opacity:0.5">PARA ÇEK (Min 10$)</button>
+        <input type="text" placeholder="USDT TRC20 Address">
+        <button class="btn" style="opacity:0.5">WITHDRAW (Min $10)</button>
     </div>
 
-    <nav class="nav">
+    <div id="reward-anim">
+        <h1 style="font-size: 70px; margin: 0;">🎉</h1>
+        <h2 id="earned-amount" style="font-size: 35px; color: var(--g);">+0.00000</h2>
+        <p>SUCCESSFULLY COLLECTED!</p>
+    </div>
+
+    <nav id="nav-bar" class="nav">
         <div class="ni" onclick="tab('home')">🏠<span>Home</span></div>
+        <div class="ni" onclick="tab('tasks')">📋<span>Tasks</span></div>
         <div class="ni" onclick="tab('friends')">👥<span>Friends</span></div>
         <div class="ni" onclick="tab('wallet')">👛<span>Wallet</span></div>
     </nav>
