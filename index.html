@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Stats & Share</title>
+    <title>Your Fantastic Pet - Ultimate Pro</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -11,41 +11,39 @@
             --nav-bg: #8184f7;
             --dark-card: rgba(0, 0, 0, 0.4);
             --glass: rgba(255, 255, 255, 0.15);
-            --success: #2ecc71;
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
         #app-container {
-            width: 100vw; height: calc(100vw * 16 / 9); max-width: 450px; max-height: 800px;
+            width: 100vw; height: 100vh; max-width: 450px;
             background: var(--bg-purple); background-image: radial-gradient(circle at center, #6a67e6 0%, #4a47b1 100%);
-            position: relative; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,1); color: white;
+            position: relative; display: flex; flex-direction: column; color: white;
         }
 
-        /* Header */
+        /* --- Global Header --- */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .coin-status { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
-        .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; }
+        .balance-pill { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
+        .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; }
 
-        /* Screens */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; text-align: center; position: relative; }
+        /* --- Screen Logic --- */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; position: relative; overflow-y: auto; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Cards & UI */
+        /* --- Components --- */
         .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
-        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-val { font-size: 24px; margin-top: 5px; display: block; }
-
+        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
         .btn-yellow { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
-            width: 85%; padding: 18px; font-size: 20px; border-radius: 25px; 
+            width: 90%; padding: 18px; font-size: 20px; border-radius: 25px; 
             box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin-top: 15px;
         }
+        .btn-yellow:active { transform: translateY(3px); box-shadow: 0 3px 0 #ccaa00; }
 
-        /* Mining Fan & Footer */
-        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 25px rgba(0,0,0,0.3); }
+        /* --- Mining Area --- */
+        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.3); }
         .rotating { animation: fanRot 1.5s linear infinite; }
         @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -59,39 +57,48 @@
             color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center;
             font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
         }
+        .stat-main { width: 105px; height: 105px; font-size: 15px; transform: translateY(-15px); }
 
-        /* Navigation */
+        /* --- Navigation --- */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 24px; }
-        .nav-item.active { opacity: 1; transform: scale(1.1); }
-        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; }
-        .nav-locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; font-size: 22px; }
+        .nav-item.active { opacity: 1; }
+        .nav-center { background: var(--accent-yellow); width: 65px; height: 65px; border-radius: 50%; transform: translateY(-25px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .nav-locked { pointer-events: none; opacity: 0.2; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
 <div id="app-container">
     <div class="header">
-        <div class="coin-status">
+        <div class="balance-pill">
             <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
-            <b id="top-bal">0.0000</b>
+            <b id="global-bal">0.0000</b>
         </div>
-        <div id="exit-mine" class="exit-btn" onclick="stopAndCongrats()">✖</div>
+        <div id="stop-trigger" class="exit-btn" onclick="stopAndCongrats()">✖</div>
     </div>
 
     <div id="screen-ref" class="screen">
-        <h2 style="margin:0 0 15px 0;">FRIENDS</h2>
+        <h2 style="margin:0 0 20px 0;">FRIENDS</h2>
         <div class="card">
-            <h4>Sizi Kim Davet Etti?</h4>
-            <input type="text" id="ref-input" style="width:100%; padding:12px; border-radius:12px; border:none; margin-top:10px;" placeholder="Kod Gir">
-            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="applyBonus()">KODU ONAYLA</button>
+            <h4>Who Invited You?</h4>
+            <input type="text" id="ref-input" style="width:100%; padding:12px; border-radius:12px; border:none; margin-top:10px;" placeholder="Enter Code">
+            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="applyRef()">CLAIM $0.05</button>
         </div>
         <div class="card">
-            <h4>Arkadaşlarını Davet Et</h4>
-            <p style="font-size:12px; margin:8px 0;">Kodun: <b id="my-code">PET839247</b></p>
-            <button class="btn-yellow" style="width:100%; padding:12px; font-size:16px; background: #0088cc; box-shadow: 0 6px 0 #005580; color: white;" onclick="shareOnTelegram()">
-                TELEGRAM'DA PAYLAŞ 🚀
-            </button>
+            <h4>Invite & Earn</h4>
+            <p style="font-size:14px;">Your Code: <b>PET839247</b></p>
+            <button class="btn-yellow" style="width:100%; padding:12px; font-size:14px; background:#0088cc; color:white; box-shadow: 0 6px 0 #005580;" onclick="shareOnTG()">SHARE ON TELEGRAM 🚀</button>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2 style="margin-bottom:20px;">TASKS</h2>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><h4>Join Community</h4><p style="margin:5px 0 0 0;">+ $0.10</p></div>
+                <button class="btn-yellow" style="width:70px; padding:8px; margin:0; font-size:12px;">GO</button>
+            </div>
         </div>
     </div>
 
@@ -101,130 +108,123 @@
         <button class="btn-yellow" onclick="startMining()">PLAY</button>
     </div>
 
+    <div id="screen-stats" class="screen">
+        <h2 style="margin-bottom:20px;">STATISTICS</h2>
+        <div class="card">
+            <h4>Total Earned</h4>
+            <span style="font-size:28px; color:var(--accent-yellow);">$<span id="st-total">0.0000</span></span>
+        </div>
+        <div class="card">
+            <h4>Mining Sessions</h4>
+            <span style="font-size:28px;" id="st-sessions">0</span>
+        </div>
+    </div>
+
+    <div id="screen-wallet" class="screen">
+        <h2>WALLET</h2>
+        <div class="card" style="text-align:center; padding:30px;">
+            <h4>Available Balance</h4>
+            <p style="font-size:40px; color:var(--accent-yellow); margin:10px 0;">$<span id="w-bal">0.0000</span></p>
+        </div>
+        <button class="btn-yellow" onclick="alert('Minimum withdrawal: $10')">WITHDRAW USDT</button>
+    </div>
+
     <div id="screen-mining" class="screen">
         <div style="margin-top:10px;">
             <h1 style="font-size:50px; margin:0;">🐾 <span id="m-paws">0</span></h1>
             <h2 style="color:var(--accent-yellow); margin:0;">$<span id="m-usd">0.00000</span></h2>
+            <p style="font-size:12px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
         </div>
         <div style="flex:1; display:flex; align-items:center;">
             <img src="pinix.jpg" class="fan-pet rotating">
         </div>
         <div class="stats-footer">
             <div class="stat-circle">⏰<br><span id="t-val">00:00</span></div>
-            <div class="stat-circle" style="width:100px; height:100px; transform:translateY(-15px); font-size:14px;"><span id="p-val">0</span>%<br><small>COMPLETE</small></div>
+            <div class="stat-circle stat-main"><span id="p-val">0</span>%<br><small>COMPLETE</small></div>
             <div class="stat-circle">⚡<br><span>77.6 GH/s</span></div>
         </div>
     </div>
 
     <div id="screen-congrats" class="screen" style="justify-content:center;">
-        <h1 style="color:var(--accent-yellow); font-size:40px;">TEBRİKLER!</h1>
+        <h1 style="color:var(--accent-yellow); font-size:45px; margin:0;">CONGRATS</h1>
         <div style="font-size:30px;">🐾 <span id="c-paws">0</span></div>
         <div style="color:var(--accent-yellow); font-size:20px;">$<span id="c-usd">0.0000</span></div>
-        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:150px; margin:20px 0;">
-        <button class="btn-yellow" onclick="goHome()">HARİKA</button>
-    </div>
-
-    <div id="screen-stats" class="screen">
-        <h2 style="margin-bottom:20px;">MY STATISTICS</h2>
-        <div class="card">
-            <h4>Toplam Kazanç</h4>
-            <span class="stat-val" style="color:var(--success);">$<span id="st-total">0.0000</span></span>
-        </div>
-        <div style="display:flex; gap:10px; width:100%;">
-            <div class="card" style="flex:1;">
-                <h4>Oturumlar</h4>
-                <span class="stat-val" id="st-sessions">0</span>
-            </div>
-            <div class="card" style="flex:1;">
-                <h4>Referanslar</h4>
-                <span class="stat-val" id="st-refs">0</span>
-            </div>
-        </div>
-        <div class="card">
-            <h4>En Yüksek Mining</h4>
-            <span class="stat-val">$<span id="st-max">0.0000</span></span>
-        </div>
+        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:160px; margin:25px 0;">
+        <h2 style="font-size:18px;">YOU HAVE REACHED ADULTHOOD</h2>
+        <button class="btn-yellow" onclick="goHome()">GREAT</button>
     </div>
 
     <div id="main-nav" class="nav-bar">
         <div class="nav-item" onclick="changeTab('ref')">👥</div>
-        <div class="nav-item">🎁</div>
+        <div class="nav-item" onclick="changeTab('tasks')">🎁</div>
         <div class="nav-item nav-center active" onclick="changeTab('home')">🐾</div>
         <div class="nav-item" onclick="changeTab('stats')">📊</div>
-        <div class="nav-item">👛</div>
+        <div class="nav-item" onclick="changeTab('wallet')">👛</div>
     </div>
 </div>
 
 <script>
-    let balance = 0.0000;
-    let sessions = 0;
-    let maxMining = 0;
-    let currentSessionUSD = 0;
+    let bal = 0.0000;
+    let sess = 0;
+    let cur_usd = 0;
     let timer;
-    let seconds = 0;
-    const RATE = 0.000015;
+    let secs = 0;
+    const SPEED = 0.000015;
 
-    function changeTab(tab) {
+    function changeTab(t) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById('screen-' + tab).classList.add('active-screen');
+        document.getElementById('screen-'+t).classList.add('active-screen');
     }
 
     function startMining() {
-        currentSessionUSD = 0; seconds = 0;
+        cur_usd = 0; secs = 0;
         changeTab('mining');
         document.getElementById('main-nav').classList.add('nav-locked');
-        document.getElementById('exit-mine').style.display = 'flex';
+        document.getElementById('stop-trigger').style.display = 'flex';
 
         timer = setInterval(() => {
-            seconds++;
-            currentSessionUSD += RATE;
-            document.getElementById('m-usd').innerText = currentSessionUSD.toFixed(5);
-            document.getElementById('m-paws').innerText = Math.floor(currentSessionUSD * 40000);
+            secs++;
+            cur_usd += SPEED;
+            document.getElementById('m-usd').innerText = cur_usd.toFixed(5);
+            document.getElementById('m-paws').innerText = Math.floor(cur_usd * 45000);
             
-            let m = Math.floor(seconds/60).toString().padStart(2,'0');
-            let s = (seconds%60).toString().padStart(2,'0');
+            let m = Math.floor(secs/60).toString().padStart(2,'0');
+            let s = (secs%60).toString().padStart(2,'0');
             document.getElementById('t-val').innerText = `${m}:${s}`;
-            document.getElementById('p-val').innerText = Math.min(100, Math.floor((seconds/120)*100));
+            document.getElementById('p-val').innerText = Math.min(100, Math.floor((secs/120)*100));
         }, 1000);
     }
 
     function stopAndCongrats() {
         clearInterval(timer);
-        sessions++;
-        if(currentSessionUSD > maxMining) maxMining = currentSessionUSD;
-        
-        document.getElementById('c-usd').innerText = currentSessionUSD.toFixed(5);
-        document.getElementById('c-paws').innerText = Math.floor(currentSessionUSD * 40000);
+        sess++;
+        document.getElementById('c-usd').innerText = cur_usd.toFixed(5);
+        document.getElementById('c-paws').innerText = Math.floor(cur_usd * 45000);
         changeTab('congrats');
     }
 
     function goHome() {
-        balance += currentSessionUSD;
+        bal += cur_usd;
         updateUI();
         document.getElementById('main-nav').classList.remove('nav-locked');
-        document.getElementById('exit-mine').style.display = 'none';
+        document.getElementById('stop-trigger').style.display = 'none';
         changeTab('home');
     }
 
-    function shareOnTelegram() {
-        const myCode = document.getElementById('my-code').innerText;
-        const shareLink = "https://t.me/YourPetBot?start=" + myCode;
-        const message = encodeURIComponent("🐾 Hey! Harika evcil hayvanımla mining yapıyorum. Sende katıl, kodumu gir ve anında $0.05 bonus kazan!\n\nDavet Kodum: " + myCode + "\nLink: " + shareLink);
-        window.open("https://t.me/share/url?url=" + shareLink + "&text=" + message, "_blank");
+    function shareOnTG() {
+        const msg = encodeURIComponent("🐾 Mining yapıyorum! Kodumu gir bonus kazan: PET839247\nLink: https://t.me/YourPetBot");
+        window.open(`https://t.me/share/url?url=https://t.me/YourPetBot&text=${msg}`, "_blank");
     }
 
     function updateUI() {
-        document.getElementById('top-bal').innerText = balance.toFixed(4);
-        document.getElementById('st-total').innerText = balance.toFixed(4);
-        document.getElementById('st-sessions').innerText = sessions;
-        document.getElementById('st-max').innerText = maxMining.toFixed(5);
+        document.getElementById('global-bal').innerText = bal.toFixed(4);
+        document.getElementById('w-bal').innerText = bal.toFixed(4);
+        document.getElementById('st-total').innerText = bal.toFixed(4);
+        document.getElementById('st-sessions').innerText = sess;
     }
 
-    function applyBonus() {
-        balance += 0.05;
-        updateUI();
-        document.getElementById('st-refs').innerText = "1";
-        alert("Bonus eklendi!");
+    function applyRef() {
+        bal += 0.05; updateUI(); alert("Bonus eklendi!");
     }
 </script>
 
