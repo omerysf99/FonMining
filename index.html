@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pet Elite v350</title>
+    <title>Pet Elite v350 - Congrats Edition</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -28,6 +28,7 @@
             else { stats = { balance: 0.0, ref: false, tsk: false }; await setDoc(ref, stats); }
             ui();
         }
+
         window.mine = (on) => {
             if(on) {
                 isM = true; tab('mining'); seconds = 0;
@@ -41,26 +42,43 @@
                     document.getElementById('m-ghs').innerText = ghs;
                 }, 1000);
             } else {
-                clearInterval(loop); stats.balance += live; live = 0;
+                // Madencilik durduğunda Congrats ekranını hazırla
+                clearInterval(loop);
+                document.getElementById('congrats-val').innerText = Math.floor(live * 850000);
+                document.getElementById('congrats-usd').innerText = live.toFixed(4);
+                stats.balance += live; live = 0;
                 updateDoc(doc(db, "users", uID), { balance: stats.balance });
-                isM = false; ui(); tab('home');
+                tab('congrats'); // Tebrik ekranına geç
             }
         };
+
+        window.closeCongrats = () => {
+            isM = false;
+            ui();
+            tab('home');
+        };
+
         window.shareTG = () => {
             const text = encodeURIComponent(`🐾 Pet Growth Mining Aktif! Kodum: ${uID}`);
             window.open(`https://t.me/share/url?url=https://yourpet.app&text=${text}`);
         };
+
         function ui() {
             document.getElementById('h-bal').innerText = stats.balance.toFixed(4);
             document.getElementById('w-bal').innerText = stats.balance.toFixed(4);
             document.getElementById('my-code').innerText = uID;
         }
+
         window.tab = (id) => {
-            if(isM && id !== 'mining') return;
             document.querySelectorAll('.p').forEach(x => x.classList.remove('a'));
             document.getElementById('p-'+id).classList.add('a');
-            document.querySelectorAll('.ni').forEach(n => n.classList.remove('act'));
-            if(id !== 'mining') document.getElementById('n-'+id).classList.add('act');
+            const nav = document.querySelector('.nav');
+            if(id === 'mining' || id === 'congrats') nav.style.display = 'none';
+            else {
+                nav.style.display = 'flex';
+                document.querySelectorAll('.ni').forEach(n => n.classList.remove('act'));
+                document.getElementById('n-'+id).classList.add('act');
+            }
         };
         window.onload = start;
     </script>
@@ -80,17 +98,17 @@
         .a { display: flex; }
         .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; }
         
+        /* Mining Box */
         .fan-box { position: relative; width: 200px; height: 200px; margin: 15px 0; }
-        .fan-img { 
-            width: 100%; height: 100%; border-radius: 50%;
-            background: url('pinix.jpg') center/cover;
-            border: 6px solid rgba(255,255,255,0.2);
-            animation: spin 0.8s linear infinite;
-            box-shadow: 0 0 25px var(--p);
-        }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 6px solid rgba(255,255,255,0.2); animation: spin 0.8s linear infinite; box-shadow: 0 0 25px var(--p); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        .m-stats { width: 100%; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 25px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        /* Congrats Screen Assets */
+        .congrats-img { width: 240px; margin: 30px 0; }
+        .congrats-title { color: var(--g); font-size: 32px; margin: 0; }
+        .congrats-sub { font-size: 14px; margin: 10px 0; }
+
+        .m-stats { width: 100%; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 25px; margin-top: 10px; }
         .m-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
         .val { color: var(--g); }
 
@@ -117,44 +135,30 @@
 
     <div id="p-mining" class="p">
         <h1 style="font-size: 40px; margin:0;">🐾 <span id="m-paws">0</span></h1>
-        <p style="font-size:14px; margin:0; opacity:0.8;">MINING ENGINE ACTIVE</p>
-        <div class="fan-box">
-            <div class="fan-img"></div>
-        </div>
+        <p style="font-size:14px; margin:0;">MINING ENGINE ACTIVE</p>
+        <div class="fan-box"><div class="fan-img"></div></div>
         <div class="m-stats">
-            <div class="m-row"><span>Mining Time:</span> <span class="val" id="m-time">0:00</span></div>
+            <div class="m-row"><span>Time:</span> <span class="val" id="m-time">0:00</span></div>
             <div class="m-row"><span>Earnings:</span> <span class="val">$<span id="m-usd">0.00000</span></span></div>
             <div class="m-row"><span>Hashrate:</span> <span class="val"><span id="m-ghs">0.00</span> GH/s</span></div>
         </div>
+    </div>
+
+    <div id="p-congrats" class="p">
+        <h1 class="congrats-title">CONGRATS</h1>
+        <h2 style="margin:5px 0;">🐾 <span id="congrats-val">0</span></h2>
+        <div style="color:var(--g); font-size:18px;">$<span id="congrats-usd">0.0000</span></div>
+        <img src="https://i.ibb.co/L5fX0yW/giftbox.png" class="congrats-img" alt="Congrats Gift"> 
+        <h3 style="margin:0;">YOU HAVE REACHED ADULTHOOD</h3>
+        <p class="congrats-sub">Hats off! Your pet has reached its ultimate form!</p>
         <div style="flex:1"></div>
-        <div style="font-size:10px; opacity:0.5; margin-bottom:10px;">Cloud Mining Synchronized</div>
+        <button class="btn" onclick="closeCongrats()">GREAT</button>
+        <div style="height:20px"></div>
     </div>
 
-    <div id="p-friends" class="p">
-        <h3>FRIENDS</h3>
-        <div style="width:100%; background:rgba(0,0,0,0.2); padding:20px; border-radius:30px;">
-            <p style="font-size:12px; margin:0;">DAVET KODUN</p>
-            <h2 id="my-code" style="color:var(--g); margin:10px 0;">-</h2>
-            <button class="btn" style="width:100%; padding:12px; font-size:14px;" onclick="shareTG()">PAYLAŞ</button>
-        </div>
-    </div>
-
-    <div id="p-tasks" class="p">
-        <h3>TASKS</h3>
-        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="text-align:left;"><b>Telegram Share</b><br><small style="color:var(--g)">+$0.0050</small></div>
-            <button class="btn" style="width:80px; padding:10px; font-size:11px;" onclick="shareTG()">GO</button>
-        </div>
-    </div>
-
-    <div id="p-wallet" class="p">
-        <h3>WALLET</h3>
-        <div style="margin:60px 0;">
-            <p style="opacity:0.6; font-size:12px;">AVAILABLE BALANCE</p>
-            <h1 style="font-size:52px; color:var(--g);">$<span id="w-bal">0.0000</span></h1>
-        </div>
-        <button class="btn">WITHDRAW</button>
-    </div>
+    <div id="p-friends" class="p"><h3>FRIENDS</h3><div id="my-code" style="color:var(--g); font-size:24px;">-</div></div>
+    <div id="p-tasks" class="p"><h3>TASKS</h3><button class="btn" onclick="shareTG()">SHARE</button></div>
+    <div id="p-wallet" class="p"><h3>WALLET</h3><h1 style="color:var(--g)">$<span id="w-bal">0.0000</span></h1></div>
 
     <nav class="nav">
         <div class="ni" id="n-friends" onclick="tab('friends')">👥</div>
