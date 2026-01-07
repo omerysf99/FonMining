@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Fan Mining</title>
+    <title>Your Fantastic Pet - Ultimate Version</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
             --accent-yellow: #ffcc00;
             --nav-bg: #8184f7;
-            --dark-card: rgba(0, 0, 0, 0.3);
+            --dark-card: rgba(0, 0, 0, 0.4);
             --glass: rgba(255, 255, 255, 0.15);
+            --success: #2ecc71;
+            --error: #ff4d4d;
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -22,116 +24,128 @@
             position: relative; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,1); color: white;
         }
 
-        /* Header UI */
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .balance-pill { background: var(--dark-card); padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--glass); font-size: 13px; }
-        .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; }
+        /* --- Global Header --- */
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .coin-status { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
+        .close-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; font-size: 18px; }
 
-        /* Screens */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; position: relative; }
+        /* --- Screens --- */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; text-align: center; position: relative; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Mining Central Area */
-        .mining-header { margin-top: 10px; }
-        .paws-count { font-size: 50px; margin: 0; line-height: 1; }
-        .usd-val { color: var(--accent-yellow); font-size: 18px; margin: 5px 0; }
+        /* --- Components --- */
+        .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
+        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
         
-        .fan-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .fan-pet { 
-            width: 240px; height: 240px; border-radius: 50%; border: 10px solid white; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: transform 0.1s linear;
-        }
-        .rotating { animation: fanRotate 2s linear infinite; }
-        @keyframes fanRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Bottom Stats Panel (Birebir Görseldeki Gibi) */
-        .stats-panel { 
-            width: 110%; background: rgba(255,255,255,0.1); padding: 20px 0; 
-            border-radius: 50% 50% 0 0; display: flex; justify-content: center; align-items: flex-end; gap: 15px;
-            position: absolute; bottom: 0; left: -5%;
-        }
-        .stat-circle { 
-            width: 70px; height: 70px; background: var(--accent-yellow); border-radius: 50%; 
-            color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
-        }
-        .stat-center { width: 100px; height: 100px; font-size: 14px; transform: translateY(-10px); }
-
-        /* Referral & Other Inputs */
-        .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; border: 1px solid var(--glass); text-align: left; margin-bottom: 10px; }
-        .input-box { width: 100%; padding: 12px; border-radius: 12px; border: none; margin-top: 10px; font-weight: bold; }
         .btn-yellow { 
             background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
             width: 85%; padding: 18px; font-size: 20px; border-radius: 25px; 
-            box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin-top: 15px;
         }
+        .btn-yellow:active { transform: translateY(3px); box-shadow: 0 3px 0 #ccaa00; }
+        
+        .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; }
 
-        /* Nav Bar */
-        .nav-bar { height: 80px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 30px 30px 0 0; z-index: 10; }
-        .nav-item { opacity: 0.5; font-size: 24px; cursor: pointer; }
-        .nav-item.active { opacity: 1; }
-        .nav-center { background: var(--accent-yellow); width: 60px; height: 60px; border-radius: 50%; transform: translateY(-20px); border: 4px solid #9ea1ff; display: flex; align-items: center; justify-content: center; }
-        .nav-locked { pointer-events: none; filter: grayscale(1); opacity: 0.3; }
+        /* --- Mining Stats Panel --- */
+        .stats-footer { 
+            width: 120%; background: rgba(255,255,255,0.1); padding: 25px 0 15px 0; 
+            border-radius: 50% 50% 0 0; display: flex; justify-content: center; align-items: flex-end; gap: 15px;
+            position: absolute; bottom: 0; left: -10%; z-index: 5;
+        }
+        .stat-circle { 
+            width: 75px; height: 75px; background: var(--accent-yellow); border-radius: 50%; 
+            color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
+        }
+        .stat-main { width: 105px; height: 105px; font-size: 15px; transform: translateY(-15px); }
+
+        /* --- Fan Animation --- */
+        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.2); }
+        .rotating { animation: fanRot 2s linear infinite; }
+        @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- Navigation --- */
+        .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 24px; }
+        .nav-item.active { opacity: 1; transform: scale(1.1); }
+        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .nav-locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
 <div id="app-container">
     <div class="header">
-        <div class="balance-pill">
-            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="18">
-            <span id="global-bal">0.0000</span>
+        <div class="coin-status">
+            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
+            <b id="head-bal">0.0000</b>
         </div>
-        <div class="exit-btn" id="mining-exit" style="display:none;" onclick="stopMining()">✖</div>
+        <div id="mining-close" class="close-btn" onclick="stopMining()">✖</div>
+    </div>
+
+    <div id="screen-ref" class="screen">
+        <h2 style="margin-top:0;">REFERRALS</h2>
+        <div class="card" id="ref-bonus-card">
+            <h4>Kim Davet Etti?</h4>
+            <input type="text" id="ref-code-input" class="input-box" placeholder="Davet Kodu Gir">
+            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="applyRefCode()">BONUSU AL (+$0.05)</button>
+        </div>
+        <div class="card">
+            <h4>Senin Kodun</h4>
+            <p style="font-size: 14px;">PET839247</p>
+            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="alert('Link Kopyalandı!')">LINKI KOPYALA</button>
+        </div>
+        <div class="card">
+            <h4>Kazanç Sistemi</h4>
+            <p style="font-size: 12px;">• Her davet: <b>$0.05</b><br>• Mining kazancı: <b>%10 Komisyon</b></p>
+        </div>
     </div>
 
     <div id="screen-home" class="screen active-screen">
-        <img src="yourfantastic.jpg" style="width:80%; border-radius:30px; margin-top:20px;">
-        <h1 style="font-size:30px; margin:20px 0;">YOUR<br>FANTASTIC PET</h1>
+        <img src="yourfantastic.jpg" style="width:85%; border-radius:30px; margin-top:30px;">
+        <h1 style="font-size:32px; margin:20px 0;">YOUR<br>FANTASTIC PET</h1>
         <button class="btn-yellow" onclick="startMining()">PLAY</button>
     </div>
 
     <div id="screen-mining" class="screen">
-        <div class="mining-header">
-            <p class="paws-count">🐾 <span id="live-paws">0</span></p>
-            <p class="usd-val">$<span id="live-usd">0.00000</span></p>
-            <p style="font-size:12px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
+        <div style="margin-top:10px;">
+            <h1 style="font-size:50px; margin:0;">🐾 <span id="live-paws">0</span></h1>
+            <h2 style="color:var(--accent-yellow); margin:0;">$<span id="live-usd">0.00000</span></h2>
+            <p style="font-size:14px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
         </div>
-
-        <div class="fan-container">
-            <img src="pinix.jpg" id="fan-pet" class="fan-pet rotating">
+        <div style="flex:1; display:flex; align-items:center;">
+            <img src="pinix.jpg" id="mining-pet" class="fan-pet rotating">
         </div>
-
-        <p style="margin-bottom:110px; font-size:11px; opacity:0.7;">TRANSFORMING LIVES, ONE PET AT A TIME</p>
-
-        <div class="stats-panel">
-            <div class="stat-circle">⏰<br><span id="min-time">00:00</span></div>
-            <div class="stat-circle stat-center"><span id="min-percent">0</span>%<br><small style="font-size:8px;">COMPLETE</small></div>
+        <p style="margin-bottom:120px; font-size:11px; opacity:0.7;">TRANSFORMING LIVES, ONE PET AT A TIME</p>
+        
+        <div class="stats-footer">
+            <div class="stat-circle">⏰<br><span id="m-time">00:00</span></div>
+            <div class="stat-circle stat-main"><span id="m-percent">0</span>%<br><small style="font-size:8px;">COMPLETE</small></div>
             <div class="stat-circle">⚡<br><span>77.6 GH/s</span></div>
         </div>
     </div>
 
     <div id="screen-congrats" class="screen" style="justify-content:center;">
         <h1 style="color:var(--accent-yellow); font-size:45px; margin:0;">CONGRATS</h1>
-        <div style="font-size:25px;">🐾 <span id="final-paws">0</span></div>
+        <div style="font-size:28px;">🐾 <span id="final-paws">0</span></div>
         <div style="color:var(--accent-yellow); font-size:20px;">$<span id="final-usd">0.0000</span></div>
-        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:150px; margin:25px 0;">
+        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:170px; margin:20px 0;">
         <h2 style="font-size:18px;">YOU HAVE REACHED ADULTHOOD</h2>
-        <button class="btn-yellow" onclick="claimAndGoHome()">GREAT</button>
+        <button class="btn-yellow" onclick="finishToHome()">GREAT</button>
     </div>
 
-    <div id="screen-ref" class="screen">
-        <h2 style="margin-top:0;">REFERRALS</h2>
-        <div class="card">
-            <h4>Sizi Kim Davet Etti?</h4>
-            <input type="text" id="ref-input" class="input-box" placeholder="Kod Gir (+$0.05)">
-            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px; margin-top:10px;" onclick="claimRef()">ONAYLA</button>
+    <div id="screen-wallet" class="screen">
+        <h2>WALLET</h2>
+        <div class="card" style="text-align:center; padding:30px;">
+            <h4>Bakiyen</h4>
+            <p style="font-size:35px; color:var(--accent-yellow); margin:10px 0;">$<span id="wall-bal">0.0000</span></p>
         </div>
         <div class="card">
-            <h4>Davet Linkin</h4>
-            <p style="font-size:12px;">t.me/YourPetBot?ref=PET839247</p>
-            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px; margin-top:10px;" onclick="alert('Kopyalandı!')">KOPYALA</button>
+            <h4>Çekim Yap (USDT)</h4>
+            <input type="number" id="wd-amt" class="input-box" placeholder="Miktar ($)">
+            <input type="text" class="input-box" placeholder="BEP20 Adresiniz">
+            <button class="btn-yellow" style="width:100%;" onclick="alert('Talep Alındı!')">ŞİMDİ ÇEK</button>
         </div>
     </div>
 
@@ -139,7 +153,7 @@
         <div class="nav-item" onclick="changeTab('ref')">👥</div>
         <div class="nav-item">🎁</div>
         <div class="nav-item nav-center active" onclick="changeTab('home')">🐾</div>
-        <div class="nav-item">👛</div>
+        <div class="nav-item" onclick="changeTab('wallet')">👛</div>
         <div class="nav-item">📊</div>
     </div>
 </div>
@@ -147,9 +161,8 @@
 <script>
     let balance = 0.0000;
     let sessionUSD = 0;
-    let sessionPaws = 0;
     let totalSecs = 0;
-    let minerInterval;
+    let minerLoop;
 
     function changeTab(tab) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
@@ -158,54 +171,55 @@
 
     function startMining() {
         sessionUSD = 0;
-        sessionPaws = 0;
         totalSecs = 0;
         changeTab('mining');
-        document.getElementById('main-nav').classList.add('nav-locked'); // Menüleri kilitle
-        document.getElementById('mining-exit').style.display = 'flex';
+        document.getElementById('main-nav').classList.add('nav-locked'); // Menü Kilidi
+        document.getElementById('mining-close').style.display = 'flex';
 
-        minerInterval = setInterval(() => {
+        minerLoop = setInterval(() => {
             totalSecs++;
-            sessionUSD += (0.0005 / 30);
-            sessionPaws = Math.floor(sessionUSD * 2800);
+            sessionUSD += (0.0005 / 20); // Test için hızlı kazanç
             
-            // UI Güncelleme
+            // UI Update
             document.getElementById('live-usd').innerText = sessionUSD.toFixed(5);
-            document.getElementById('live-paws').innerText = sessionPaws;
+            document.getElementById('live-paws').innerText = Math.floor(sessionUSD * 2600);
             
-            // Alt Panel Güncelleme
+            // Stats Update
             let m = Math.floor(totalSecs / 60).toString().padStart(2, '0');
             let s = (totalSecs % 60).toString().padStart(2, '0');
-            document.getElementById('min-time').innerText = `${m}:${s}`;
-            
-            let percent = Math.min(100, Math.floor((totalSecs / 120) * 100)); // 2 dkda %100
-            document.getElementById('min-percent').innerText = percent;
+            document.getElementById('m-time').innerText = `${m}:${s}`;
+            document.getElementById('m-percent').innerText = Math.min(100, Math.floor((totalSecs/60)*100));
         }, 1000);
     }
 
     function stopMining() {
-        clearInterval(minerInterval);
-        document.getElementById('final-paws').innerText = sessionPaws;
+        clearInterval(minerLoop);
+        document.getElementById('final-paws').innerText = Math.floor(sessionUSD * 2600);
         document.getElementById('final-usd').innerText = sessionUSD.toFixed(5);
-        changeTab('congrats'); // Congrats ekranı
+        changeTab('congrats'); // Congrats Ekranı
     }
 
-    function claimAndGoHome() {
+    function finishToHome() {
         balance += sessionUSD;
-        document.getElementById('global-bal').innerText = balance.toFixed(4);
-        document.getElementById('main-nav').classList.remove('nav-locked');
-        document.getElementById('mining-exit').style.display = 'none';
+        updateAllBalances();
+        document.getElementById('main-nav').classList.remove('nav-locked'); // Kilit Aç
+        document.getElementById('mining-close').style.display = 'none';
         changeTab('home');
     }
 
-    function claimRef() {
-        const code = document.getElementById('ref-input').value;
-        if(code.trim() !== "") {
+    function applyRefCode() {
+        const input = document.getElementById('ref-code-input').value;
+        if(input.length > 3) {
             balance += 0.05;
-            document.getElementById('global-bal').innerText = balance.toFixed(4);
-            alert("Referans Bonusu Alındı! +$0.05");
-            document.getElementById('ref-input').disabled = true;
+            updateAllBalances();
+            document.getElementById('ref-bonus-card').style.opacity = '0.5';
+            alert('Referans bonusu eklendi! +$0.05');
         }
+    }
+
+    function updateAllBalances() {
+        document.getElementById('head-bal').innerText = balance.toFixed(4);
+        document.getElementById('wall-bal').innerText = balance.toFixed(4);
     }
 </script>
 
