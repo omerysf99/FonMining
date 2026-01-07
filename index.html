@@ -42,22 +42,19 @@
                 isM = false; ui(); tab('home');
             }
         };
+        window.shareTG = () => {
+            const text = encodeURIComponent("Hey! Pet Growth ile madencilik yapıyorum. ID Kodum: " + uID);
+            window.open(`https://t.me/share/url?url=https://yourpet.app&text=${text}`);
+        };
         window.apply = async () => {
             if(stats.ref) return; stats.balance += 0.05; stats.ref = true;
             await updateDoc(doc(db, "users", uID), { balance: stats.balance, ref: true });
-            ui(); alert("Referans Bonusu Eklendi!");
-        };
-        window.doTsk = async () => {
-            if(stats.tsk) return; window.open('https://t.me/FonixCommunity');
-            stats.balance += 0.0014; stats.tsk = true;
-            await updateDoc(doc(db, "users", uID), { balance: stats.balance, tsk: true });
-            ui();
+            ui(); alert("Bonus Alındı!");
         };
         function ui() {
             document.getElementById('h-bal').innerText = stats.balance.toFixed(4);
             document.getElementById('w-bal').innerText = stats.balance.toFixed(4);
-            if(stats.ref) document.getElementById('r-box').innerHTML = "<b>AKTİF</b>";
-            if(stats.tsk) document.getElementById('t-btn').innerText = "OK";
+            document.getElementById('my-code').innerText = uID;
         }
         window.tab = (id) => {
             if(isM && id !== 'mining') return;
@@ -70,92 +67,97 @@
     </script>
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #5c59d3; }
-        * { box-sizing: border-box; font-family: 'Arial Black', Gadget, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; }
         #app {
             width: 100%; max-width: 410px; aspect-ratio: 9/16;
-            background: radial-gradient(circle, #6a67e6 0%, #4a47b1 100%);
+            background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%);
             border-radius: 45px; border: 10px solid #222; overflow: hidden;
             display: flex; flex-direction: column; color: #fff; position: relative;
         }
         .h { padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 9; }
-        .pill { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; font-size: 14px; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.1); }
+        .pill { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
         .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
         .a { display: flex; }
-        .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 0 #cc8e00; }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #cc8e00; }
+        .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; }
         
-        /* Mining Screen Assets */
-        .fan-container { position: relative; width: 280px; height: 280px; margin-top: 20px; }
-        .fan-base { width: 100%; height: 100%; background: url('fan-mining.png') center/contain no-repeat; animation: spin 0.8s linear infinite; }
-        .fan-glow { position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%; box-shadow: 0 0 40px rgba(255,255,255,0.2); pointer-events:none; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .stat-label { font-size: 42px; margin: 10px 0 0 0; }
-        .sub-label { color: var(--g); font-size: 18px; margin-bottom: 5px; }
-        
-        .nav { height: 90px; background: rgba(129, 132, 247, 0.8); display: flex; justify-content: space-around; align-items: center; border-radius: 35px 35px 0 0; }
+        /* Mining Screen UI */
+        .pet-img { width: 220px; margin: 20px 0; filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); }
+        .progress-circle { width: 140px; height: 140px; border-radius: 50%; border: 12px solid var(--g); display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .bottom-stats { display: flex; width: 100%; justify-content: space-around; position: absolute; bottom: 110px; }
+        .stat-pill { background: var(--g); color: #000; padding: 10px; border-radius: 50%; width: 65px; height: 65px; display: flex; flex-direction: column; justify-content: center; font-size: 10px; font-weight: bold; }
+
+        .nav { height: 90px; background: rgba(129, 132, 247, 0.6); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .ni { font-size: 20px; cursor: pointer; opacity: 0.5; flex: 1; display: flex; flex-direction: column; align-items: center; }
-        .act { opacity: 1; transform: scale(1.1); }
+        .act { opacity: 1; transform: scale(1.1); color: var(--g); }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="h">
-        <div class="pill">🪙 <span id="h-bal">0.0000</span></div>
-        <div onclick="mine(false)" style="cursor:pointer; background:var(--g); color:#000; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">X</div>
+        <div class="pill">💰 <span id="h-bal">0.0000</span></div>
+        <div onclick="mine(false)" style="background:var(--g); color:#000; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">X</div>
     </div>
 
     <div id="p-home" class="p a">
-        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-top:10px;">
-        <h2 style="margin:20px 0;">PET GROWTH</h2>
+        <img src="image_1fb445.png" class="pet-img" style="width: 260px;">
+        <h2 style="margin:10px 0;">PET GROWTH</h2>
+        <p style="opacity:0.6; font-size:12px;">CRAFTING UNFORGETTABLE P</p>
         <div style="flex:1"></div>
-        <button class="btn" onclick="mine(true)">MINING START</button>
+        <button class="btn" onclick="mine(true)">KAZIMA BAŞLA</button>
         <div style="height:20px"></div>
     </div>
 
     <div id="p-mining" class="p">
-        <h1 class="stat-label">🐾 <span id="m-paws">0</span></h1>
-        <div class="sub-label">$<span id="m-usd">0.0000</span></div>
-        <p style="font-size:12px; opacity:0.8;">PET GROWTH ACTIVE</p>
-        <div class="fan-container">
-            <div class="fan-base"></div>
-            <div class="fan-glow"></div>
+        <h1 style="font-size: 40px; margin:0;">🐾 <span id="m-paws">0</span></h1>
+        <div style="color:var(--g); margin-bottom:15px;">$<span id="m-usd">0.0000</span></div>
+        <p style="font-size:14px; margin:0;">PET GROWTH</p>
+        <img src="image_1fb445.png" class="pet-img">
+        <p style="font-size:11px; opacity:0.8; margin-bottom:30px;">CRAFTING UNFORGETTABLE P</p>
+        <div class="progress-circle">
+            <span style="font-size:24px;">94%</span>
+            <small style="font-size:8px; width:70px;">AWAY FROM EARNING</small>
         </div>
-        <p style="margin-top:20px; font-size:11px; letter-spacing:1px; opacity:0.7;">CRAFTING UNFORGETTABLE PET</p>
+        <div class="bottom-stats">
+            <div class="stat-pill">⏰<br>00:02:35</div>
+            <div class="stat-pill">⚡<br>77.69GC</div>
+        </div>
     </div>
 
     <div id="p-friends" class="p">
         <h3>FRIENDS</h3>
-        <div id="r-box" style="width:100%; background:rgba(0,0,0,0.2); padding:20px; border-radius:20px;">
-            <input type="text" placeholder="Enter Ref Code" style="width:100%; padding:15px; border-radius:15px; border:none; margin-bottom:10px; text-align:center;">
-            <button class="btn" style="width:100%; padding:10px;" onclick="apply()">CLAIM</button>
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:20px; border-radius:25px;">
+            <p style="margin:0 0 10px 0;">Senin Davet Kodun:</p>
+            <h2 id="my-code" style="color:var(--g); margin:0;">-</h2>
+            <hr style="opacity:0.2; margin:15px 0;">
+            <input type="text" placeholder="Referans Gir" style="width:100%; padding:15px; border-radius:15px; border:none; text-align:center;">
+            <button class="btn" style="width:100%; margin-top:10px; padding:12px;" onclick="apply()">BONUSU AL</button>
         </div>
     </div>
 
     <div id="p-tasks" class="p">
         <h3>TASKS</h3>
         <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="text-align:left;"><b>Telegram</b><br><small>$0.0014</small></div>
-            <button class="btn" id="t-btn" style="width:60px; padding:8px; font-size:12px;" onclick="doTsk()">GO</button>
+            <div style="text-align:left;"><b>Telegram'da Paylaş</b><br><small>Hızlı Kazanç</small></div>
+            <button class="btn" style="width:70px; padding:8px; font-size:12px;" onclick="shareTG()">PAYLAŞ</button>
         </div>
     </div>
 
     <div id="p-wallet" class="p">
         <h3>WALLET</h3>
-        <div style="margin:40px 0;">
-            <p style="opacity:0.6;">TOTAL BALANCE</p>
+        <div style="margin:50px 0;">
+            <p style="opacity:0.6;">CÜZDAN BAKİYESİ</p>
             <h1 style="font-size:48px; color:var(--g);">$<span id="w-bal">0.0000</span></h1>
         </div>
-        <button class="btn">WITHDRAW</button>
+        <button class="btn">PARAYI ÇEK</button>
     </div>
 
-    <div class="nav">
+    <nav class="nav">
         <div class="ni" id="n-friends" onclick="tab('friends')">👥</div>
         <div class="ni" id="n-tasks" onclick="tab('tasks')">📋</div>
         <div class="ni act" id="n-home" onclick="tab('home')">🐾</div>
         <div class="ni" id="n-wallet" onclick="tab('wallet')">👛</div>
-    </div>
+    </nav>
 </div>
 </body>
 </html>
