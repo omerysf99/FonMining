@@ -3,101 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX FAN MINER</title>
+    <title>PI NEBULA PRO</title>
     
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #0a0a0a; --accent: #8eff31; --yellow: #fbc02d; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; }
-        
-        body { 
-            background: var(--bg); color: white; overflow: hidden; height: 100vh;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+        :root { 
+            --bg-home: #4c3ba5; 
+            --bg-mine: #0a0a0a; 
+            --yellow: #fbc02d; 
+            --neon: #8eff31; 
+            --dark: #1a1a1a;
         }
 
-        #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; padding: 20px; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-home); color: white; overflow: hidden; height: 100vh; }
 
-        /* Üst Bilgi Paneli */
-        .top-info { text-align: center; margin-top: 20px; }
-        .level-text { font-size: 2rem; font-weight: 700; color: white; letter-spacing: 2px; }
-        .usd-val { color: var(--accent); font-family: 'Montserrat'; font-size: 1.2rem; margin-top: 5px; }
+        /* --- STAGE 1: ANA GİRİŞ --- */
+        #stage-home { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; text-align: center; padding: 20px;
+            background-image: radial-gradient(circle at 50% 30%, #5e48c2 0%, #2c1a74 100%);
+        }
+        .hero-img { width: 240px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5)); margin-bottom: 20px; }
+        .bal-display { font-family: 'Montserrat'; font-size: 2.8rem; color: var(--yellow); margin-bottom: 25px; text-shadow: 0 0 15px rgba(251, 192, 45, 0.3); }
 
-        /* MERKEZİ FAN ALANI */
-        .fan-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        /* --- STAGE 2: MADENCİLİK (PINIX FAN) --- */
+        #stage-mining { 
+            display: none; flex-direction: column; align-items: center; justify-content: space-around; 
+            height: 100vh; background: var(--bg-mine); padding: 20px;
+        }
+        .fan-container { position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; }
         .pinix-fan { 
-            width: 280px; height: 280px; border-radius: 50%;
-            border: 8px solid rgba(142, 255, 49, 0.1);
-            box-shadow: 0 0 50px rgba(142, 255, 49, 0.2);
-            object-fit: cover;
-            transition: 0.3s;
+            width: 100%; height: 100%; border-radius: 50%; border: 8px solid var(--neon); 
+            box-shadow: 0 0 40px rgba(142, 255, 49, 0.2); object-fit: cover;
         }
-        
-        /* Fan Dönüş Animasyonu */
-        .spinning { animation: rotateFan 2s linear infinite; }
+        .spinning { animation: rotateFan 1.5s linear infinite; }
         @keyframes rotateFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Alt İstatistikler (3'lü Panel) */
+        /* --- STAGE 3: ADMIN --- */
+        #stage-admin { display: none; height: 100vh; padding: 30px; background: #111; overflow-y: auto; }
+        .adm-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--yellow); }
+
+        /* --- BUTONLAR --- */
+        .btn-action { 
+            width: 85%; padding: 20px; border: none; border-radius: 50px; 
+            font-size: 1.5rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-play { background: var(--yellow); color: #2c1a74; box-shadow: 0 8px 0 #9e7500; }
+        .btn-stop { background: #ff3131; color: white; box-shadow: 0 8px 0 #b2102f; }
+        .btn-action:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+
+        /* --- STATS & UI --- */
         .stats-grid { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; 
-            margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; width: 100%; 
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; gap: 10px;
         }
-        .stat-item { text-align: center; }
-        .stat-label { font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; margin-top: 5px; }
-        .stat-val { font-size: 0.9rem; font-weight: 700; color: var(--accent); }
+        .stat-box { text-align: center; }
+        .stat-val { color: var(--neon); font-size: 1.1rem; font-weight: 700; display: block; }
+        .stat-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; }
 
-        /* Kontrol Butonları */
-        .btn-play { 
-            background: var(--accent); color: black; border: none; border-radius: 50px;
-            padding: 18px; font-size: 1.4rem; font-weight: 700; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(142, 255, 49, 0.3); transition: 0.2s;
-        }
-        .btn-play:active { transform: scale(0.95); }
-        .btn-stop { background: #ff3131; color: white; box-shadow: 0 10px 20px rgba(255, 49, 49, 0.3); }
+        header { position: absolute; top: 20px; width: 100%; padding: 0 25px; display: flex; justify-content: space-between; z-index: 50; }
+        .badge { background: rgba(0,0,0,0.3); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; }
 
-        /* Progress Bar */
-        .progress-container { width: 100%; height: 6px; background: #222; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: 0.5s; }
+        #ghost-alert { display:none; background: #ff1744; text-align: center; padding: 5px; font-weight: 900; font-size: 0.7rem; width: 100%; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="top-info">
-        <div class="level-text">LEVEL <span id="lvl-num">1</span></div>
-        <div class="usd-val">$ <span id="usd-amt">0.0037</span></div>
+    <div id="ghost-alert" onclick="exitGhost()">SPECTATING: <span id="g-name"></span> (EXIT)</div>
+
+    <div id="stage-home">
+        <header>
+            <div class="badge" style="color:var(--yellow)">LEVEL <span id="h-lvl">1</span></div>
+            <div class="badge" onclick="checkAdmin()">● ONLINE</div>
+        </header>
+        
+        <img src="yourfantastic.jpg" class="hero-img" onerror="this.src='https://via.placeholder.com/240?text=yourfantastic.jpg'">
+        <h1 style="line-height: 0.9; margin-bottom: 10px;">YOUR<br>FANTASTIC PET</h1>
+        <div class="bal-display" id="total-bal">0.00</div>
+        
+        <button class="btn-action btn-play" onclick="startMiningProcess()">PLAY / START</button>
+        <div style="margin-top:20px; opacity:0.3; font-size:0.7rem;">ID: 8392479231</div>
     </div>
 
-    <div class="fan-container">
-        <img src="pinix.jpg" id="fan-img" class="pinix-fan" onerror="this.src='https://via.placeholder.com/280?text=pinix.jpg+bulunamadi'">
-    </div>
-
-    <div class="progress-container">
-        <div id="p-bar" class="progress-bar"></div>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-item">
-            <div id="stat-time" class="stat-val">00:00</div>
-            <div class="stat-label">DAKİKA</div>
+    <div id="stage-mining">
+        <div style="text-align:center;">
+            <h2 style="color:var(--neon); letter-spacing:3px;">SYSTEM ACTIVE</h2>
+            <div style="font-size:0.7rem; opacity:0.4;">POWERING NEBULA CORE</div>
         </div>
-        <div class="stat-item">
-            <div id="stat-pi" class="stat-val">0.00</div>
-            <div class="stat-label">TOPLAM PI</div>
+
+        <div class="fan-container">
+            <img src="pinix.jpg" id="fan-img" class="pinix-fan spinning" onerror="this.src='https://via.placeholder.com/280?text=pinix.jpg'">
         </div>
-        <div class="stat-item">
-            <div id="stat-speed" class="stat-val">0.0005/s</div>
-            <div class="stat-label">HIZ</div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-val" id="m-time">00:00</span>
+                <span class="stat-lbl">DURATION</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-val" id="m-pi">0.0000</span>
+                <span class="stat-lbl">EARNED PI</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-val">0.0005/s</span>
+                <span class="stat-lbl">SPEED</span>
+            </div>
         </div>
+
+        <button class="btn-action btn-stop" onclick="stopMiningProcess()">STOP & COLLECT</button>
     </div>
 
-    <button id="action-btn" class="btn-play" onclick="toggleMining()">START MINING</button>
+    <div id="stage-admin">
+        <h2 style="color:var(--yellow); margin-bottom:20px;">ADMIN PANEL</h2>
+        <button class="btn-action btn-play" style="font-size:1rem; margin-bottom:20px;" onclick="add500()">+500 PI TO MY ACCOUNT</button>
+        <button class="btn-action btn-stop" style="font-size:1rem; margin-bottom:20px;" onclick="showHome()">BACK TO HOME</button>
+        <div id="adm-list"></div>
+    </div>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -109,81 +140,113 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
+    const ADMIN_ID = "8392479231";
+
+    let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
+    let activeUid = realUid;
+    let uData = { pi: 0, lvl: 1, username: tg.initDataUnsafe?.user?.username || "Guest" };
     
-    let isMining = false;
+    let miningInt = null;
     let seconds = 0;
     let sessionPi = 0;
-    let timerInt = null;
-    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_user";
 
-    function toggleMining() {
-        const btn = document.getElementById('action-btn');
-        const fan = document.getElementById('fan-img');
-        const pBar = document.getElementById('p-bar');
+    function init() {
+        tg.expand();
+        db.collection("users").doc(activeUid).onSnapshot(doc => {
+            if(doc.exists) { 
+                uData = doc.data(); 
+                document.getElementById('total-bal').innerText = uData.pi.toFixed(2);
+                document.getElementById('h-lvl').innerText = uData.lvl || 1;
+                if(activeUid !== realUid) {
+                    document.getElementById('ghost-alert').style.display = 'block';
+                    document.getElementById('g-name').innerText = uData.username;
+                } else {
+                    document.getElementById('ghost-alert').style.display = 'none';
+                }
+            } else { 
+                db.collection("users").doc(activeUid).set(uData); 
+            }
+        });
+    }
 
-        if (!isMining) {
-            // BAŞLAT
-            isMining = true;
-            btn.innerText = "STOP MINING";
-            btn.classList.add('btn-stop');
-            fan.classList.add('spinning');
-            pBar.style.width = "100%";
-            
-            timerInt = setInterval(() => {
-                seconds++;
-                sessionPi += 0.0005;
-                updateStats();
-            }, 1000);
-            
-            tg.HapticFeedback.impactOccurred('medium');
-        } else {
-            // DURDUR
-            stopAndSave();
+    // --- MİNİNG KONTROLLERİ ---
+    function startMiningProcess() {
+        if(activeUid !== realUid) return;
+        document.getElementById('stage-home').style.display = 'none';
+        document.getElementById('stage-mining').style.display = 'flex';
+        
+        seconds = 0; sessionPi = 0;
+        miningInt = setInterval(() => {
+            seconds++;
+            sessionPi += 0.0005;
+            updateMiningUI();
+        }, 1000);
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    function stopMiningProcess() {
+        clearInterval(miningInt);
+        db.collection("users").doc(realUid).update({
+            pi: firebase.firestore.FieldValue.increment(sessionPi)
+        }).then(() => {
+            document.getElementById('stage-mining').style.display = 'none';
+            document.getElementById('stage-home').style.display = 'flex';
+            tg.showAlert(`Kazanılan: ${sessionPi.toFixed(4)} PI hesaba eklendi!`);
+        });
+    }
+
+    function updateMiningUI() {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('m-time').innerText = `${m}:${s}`;
+        document.getElementById('m-pi').innerText = sessionPi.toFixed(4);
+    }
+
+    // --- ADMIN FONKSİYONLARI ---
+    function checkAdmin() {
+        if(realUid === ADMIN_ID) {
+            document.getElementById('stage-home').style.display = 'none';
+            document.getElementById('stage-admin').style.display = 'block';
+            loadUserList();
         }
     }
 
-    function stopAndSave() {
-        clearInterval(timerInt);
-        isMining = false;
-        
-        const btn = document.getElementById('action-btn');
-        const fan = document.getElementById('fan-img');
-        const pBar = document.getElementById('p-bar');
+    function showHome() {
+        document.getElementById('stage-admin').style.display = 'none';
+        document.getElementById('stage-home').style.display = 'flex';
+    }
 
-        btn.innerText = "START MINING";
-        btn.classList.remove('btn-stop');
-        fan.classList.remove('spinning');
-        pBar.style.width = "0%";
+    async function add500() {
+        await db.collection("users").doc(ADMIN_ID).update({ pi: firebase.firestore.FieldValue.increment(500) });
+        tg.showAlert("500 PI Eklendi Patron!");
+    }
 
-        // Firebase'e kaydet
-        db.collection("users").doc(uid).update({
-            pi: firebase.firestore.FieldValue.increment(sessionPi)
-        }).then(() => {
-            tg.showAlert(`Mining Tamamlandı!\nKazanç: ${sessionPi.toFixed(4)} PI`);
-            sessionPi = 0;
-            seconds = 0;
-            updateStats();
+    async function loadUserList() {
+        const snap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
+        const container = document.getElementById('adm-list');
+        container.innerHTML = "";
+        snap.forEach(doc => {
+            container.innerHTML += `
+                <div class="adm-card" onclick="ghostMode('${doc.id}')">
+                    <b>@${doc.data().username || 'NoName'}</b><br>
+                    <span>Balance: ${doc.data().pi.toFixed(2)} PI</span>
+                </div>`;
         });
     }
 
-    function updateStats() {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        document.getElementById('stat-time').innerText = 
-            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        document.getElementById('stat-pi').innerText = sessionPi.toFixed(4);
-        
-        // Dolar değerini güncelle (Örnek çarpan)
-        document.getElementById('usd-amt').innerText = (0.0037 + (sessionPi * 0.1)).toFixed(4);
+    function ghostMode(id) {
+        activeUid = id;
+        document.getElementById('stage-admin').style.display = 'none';
+        document.getElementById('stage-home').style.display = 'flex';
+        init();
     }
 
-    window.onload = () => {
-        tg.expand();
-        // İlk veriyi çek
-        db.collection("users").doc(uid).get().then(doc => {
-            if(!doc.exists) db.collection("users").doc(uid).set({pi:0, lvl:1});
-        });
-    };
+    function exitGhost() {
+        activeUid = realUid;
+        init();
+    }
+
+    window.onload = init;
 </script>
 </body>
 </html>
