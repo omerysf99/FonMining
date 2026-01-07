@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pet Master - 9:16 Cloud</title>
+    <title>Pet Elite - Pure Earn</title>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
@@ -22,170 +22,158 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- MASTER ADMIN KONTROLÜ ---
-        const MASTER_ID = "8392479231"; 
-        let currentUID = MASTER_ID; // Üretimde burası Telegram'dan gelir
-        let userLocal = { balance: 0.0, refUsed: false };
-        let sessionUSD = 0;
-        let isMining = false;
-        let timer;
+        // Kullanıcı Kimliği (Gerçek sistemde dinamik gelir)
+        let userID = "8392479231"; 
+        let localData = { balance: 0.0, refUsed: false };
+        let currentSession = 0;
+        let activeMining = false;
+        let clock;
 
-        async function initApp() {
-            const dRef = doc(db, "users", currentUID);
-            const snap = await getDoc(dRef);
+        async function boot() {
+            const userRef = doc(db, "users", userID);
+            const snap = await getDoc(userRef);
 
             if (snap.exists()) {
-                userLocal = snap.data();
+                localData = snap.data();
             } else {
-                userLocal = {
-                    balance: 0.0,
-                    refUsed: false,
-                    isAdmin: (currentUID === MASTER_ID),
-                    username: "@user_" + currentUID.slice(-4)
-                };
-                await setDoc(dRef, userLocal);
+                localData = { balance: 0.0, refUsed: false, username: "Player_" + userID.slice(-3) };
+                await setDoc(userRef, localData);
             }
-            updateScreenUI();
-            if(userLocal.isAdmin) loadMasterPanel();
+            uiSync();
         }
 
-        window.startWork = () => {
-            isMining = true;
-            changeTab('mining');
-            timer = setInterval(() => {
-                sessionUSD += 0.000015;
-                document.getElementById('m-val').innerText = sessionUSD.toFixed(5);
+        window.startMine = () => {
+            activeMining = true;
+            toggleTab('mining');
+            clock = setInterval(() => {
+                currentSession += 0.000025; // Kazanç hızı artırıldı
+                document.getElementById('m-display').innerText = currentSession.toFixed(5);
             }, 1000);
         };
 
-        window.stopWork = async () => {
-            clearInterval(timer);
-            userLocal.balance += sessionUSD;
-            sessionUSD = 0;
-            await updateDoc(doc(db, "users", currentUID), { balance: userLocal.balance });
-            isMining = false;
-            updateScreenUI();
-            changeTab('home');
+        window.stopMine = async () => {
+            clearInterval(clock);
+            localData.balance += currentSession;
+            currentSession = 0;
+            await updateDoc(doc(db, "users", userID), { balance: localData.balance });
+            activeMining = false;
+            uiSync();
+            toggleTab('home');
         };
 
-        window.applyRef = async () => {
-            if(userLocal.refUsed) return alert("Kod zaten kullanıldı!");
-            userLocal.balance += 0.05;
-            userLocal.refUsed = true;
-            await updateDoc(doc(db, "users", currentUID), { balance: userLocal.balance, refUsed: true });
-            updateScreenUI();
-            alert("$0.05 Eklendi!");
+        window.claimRef = async () => {
+            if(localData.refUsed) return;
+            localData.balance += 0.05;
+            localData.refUsed = true;
+            await updateDoc(doc(db, "users", userID), { balance: localData.balance, refUsed: true });
+            uiSync();
+            document.getElementById('ref-ui').innerHTML = "<b>KOD AKTİF: +$0.05 Alındı</b>";
         };
 
-        function loadMasterPanel() {
-            onSnapshot(collection(db, "users"), (s) => {
-                const l = document.getElementById('master-list');
-                l.innerHTML = "";
-                s.forEach(d => {
-                    const u = d.data();
-                    l.innerHTML += `<div class="adm-row">
-                        <span>${u.username}</span>
-                        <b style="color:#ffcc00">$${u.balance.toFixed(2)}</b>
-                    </div>`;
-                });
-            });
+        function uiSync() {
+            document.getElementById('top-val').innerText = localData.balance.toFixed(4);
+            document.getElementById('wall-val').innerText = localData.balance.toFixed(4);
+            if(localData.refUsed) document.getElementById('ref-ui').innerHTML = "<b>ÖDÜL ALINDI</b>";
         }
 
-        function updateScreenUI() {
-            document.getElementById('top-bal').innerText = userLocal.balance.toFixed(4);
-            document.getElementById('wall-bal').innerText = userLocal.balance.toFixed(4);
-        }
-
-        window.changeTab = (t) => {
-            if(isMining && t !== 'mining') return;
-            document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
-            document.getElementById('scr-'+t).classList.add('active');
+        window.toggleTab = (t) => {
+            if(activeMining && t !== 'mining') return;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-'+t).classList.add('active');
         };
 
-        window.onload = initApp;
+        window.onload = boot;
     </script>
 
     <style>
-        :root { --p: #5c59d3; --y: #ffcc00; --bg: #000; }
-        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; }
-        body, html { margin: 0; padding: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        :root { --main: #6c5ce7; --gold: #fbc531; --dark: #1e272e; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; }
 
-        /* 9:16 Aspect Ratio Container */
-        #mobile-frame {
-            aspect-ratio: 9 / 16;
-            height: 95vh;
-            background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%);
-            position: relative; border-radius: 40px; border: 8px solid #333;
-            display: flex; flex-direction: column; color: #fff; overflow: hidden;
+        #phone-shell {
+            width: 95vw; max-width: 420px; aspect-ratio: 9 / 16;
+            background: #0f0c29; background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+            border-radius: 45px; border: 10px solid #222; position: relative;
+            display: flex; flex-direction: column; color: white; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .bal-pill { background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
-        
-        .scr { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
-        .active { display: flex; }
+        .status-bar { padding: 25px 25px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .b-pill { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 40px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; font-weight: bold; }
 
-        .card { background: rgba(0,0,0,0.3); width: 100%; padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
-        .btn { background: var(--y); color: #000; border: none; width: 100%; padding: 15px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-        
-        .adm-row { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 5px; font-size: 12px; }
+        .page { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; position: relative; }
+        .active { display: flex; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .mining-img { width: 80%; aspect-ratio: 1; border-radius: 50%; border: 6px solid #fff; animation: rot 3s linear infinite; margin: 20px 0; }
-        @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hero-img { width: 90%; border-radius: 35px; margin: 20px 0; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1); }
+        .title { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -1px; background: linear-gradient(to right, #fff, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        nav { height: 70px; background: #8184f7; display: flex; justify-content: space-around; align-items: center; }
-        .nav-icon { font-size: 20px; cursor: pointer; opacity: 0.6; }
+        .card { background: rgba(255,255,255,0.05); width: 100%; padding: 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; }
+        .p-btn { background: var(--gold); color: #000; border: none; width: 100%; padding: 20px; border-radius: 25px; font-size: 18px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 0 #cc8e00; }
+        .p-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #cc8e00; }
+
+        .mine-circle { width: 240px; height: 240px; border-radius: 50%; border: 12px solid rgba(255,255,255,0.05); display: flex; justify-content: center; align-items: center; position: relative; margin: 40px 0; }
+        .mine-core { width: 85%; height: 85%; border-radius: 50%; background: url('pinix.jpg') center/cover; animation: spin 4s linear infinite; box-shadow: 0 0 50px rgba(108, 92, 231, 0.4); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .nav { height: 90px; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { font-size: 24px; cursor: pointer; opacity: 0.4; transition: 0.3s; }
+        .nav-item:hover { opacity: 1; transform: scale(1.2); }
     </style>
 </head>
 <body>
 
-<div id="mobile-frame">
-    <header>
-        <div class="bal-pill">🐾 <span id="top-bal">0.0000</span></div>
-        <div onclick="stopWork()" id="stop-btn" style="cursor:pointer; font-weight:bold; color:var(--y)">[X]</div>
-    </header>
+<div id="phone-shell">
+    <div class="status-bar">
+        <div class="b-pill">💰 <span id="top-val">0.0000</span></div>
+        <div onclick="stopMine()" style="cursor:pointer; font-size: 20px; opacity: 0.7;">✕</div>
+    </div>
 
-    <div id="scr-home" class="scr active">
-        <img src="yourfantastic.jpg" style="width:100%; border-radius:20px; margin-top:10px;">
-        <h2 style="margin:20px 0;">FANTASTIC PET</h2>
+    <div id="page-home" class="page active">
+        <img src="yourfantastic.jpg" class="hero-img">
+        <h1 class="title">FANTASTIC PET</h1>
+        <p style="opacity: 0.5; font-size: 14px; margin-top: 10px;">Cloud Mining Elite v2.0</p>
         <div style="flex:1"></div>
-        <button class="btn" onclick="startWork()">PLAY & EARN</button>
-    </div>
-
-    <div id="scr-friends" class="scr">
-        <h3>FRIENDS</h3>
-        <div class="card">
-            <p>Sizi kim getirdi?</p>
-            <input type="text" style="width:100%; padding:10px; border-radius:10px; margin-bottom:10px;">
-            <button class="btn" onclick="applyRef()">ONAYLA</button>
+        <div class="card" style="background:transparent; border:none;">
+            <button class="p-btn" onclick="startMine()">KAZIMA BAŞLA</button>
         </div>
-        <p>Kodun: <b>PET839247</b></p>
+        <div style="height:20px"></div>
     </div>
 
-    <div id="scr-admin" class="scr">
-        <h3 style="color:#ff4757;">MASTER PANEL</h3>
-        <div id="master-list" style="width:100%;"></div>
-    </div>
-
-    <div id="scr-wallet" class="scr">
-        <h3>WALLET</h3>
-        <div class="card">
-            <h1 style="color:var(--y);">$<span id="wall-bal">0.0000</span></h1>
+    <div id="page-friends" class="page">
+        <h2 class="title">FRIENDS</h2>
+        <div class="card" id="ref-ui">
+            <p style="margin-top:0;">Davet Kodun: <b>PET-ELITE</b></p>
+            <input type="text" placeholder="Referans Kodu Gir" style="width:100%; padding:15px; border-radius:15px; border:none; margin-bottom:15px; background:rgba(255,255,255,0.1); color:white; text-align:center;">
+            <button class="p-btn" style="padding:12px; font-size:14px;" onclick="claimRef()">ÖDÜLÜ AL</button>
         </div>
-        <button class="btn">PARA ÇEK</button>
+        <p style="font-size:12px; opacity:0.4; text-align:center; padding:0 20px;">Her davet edilen arkadaşın için mining hızı %5 artar.</p>
     </div>
 
-    <div id="scr-mining" class="scr">
-        <h2>KAZILIYOR...</h2>
-        <h1 style="color:var(--y);">$<span id="m-val">0.00000</span></h1>
-        <img src="pinix.jpg" class="mining-img">
+    <div id="page-wallet" class="page">
+        <h2 class="title">WALLET</h2>
+        <div class="card" style="text-align:center; padding:50px 20px;">
+            <span style="opacity:0.5; font-size:12px;">TOPLAM BAKİYE</span>
+            <h1 style="font-size:45px; color:var(--gold); margin:10px 0;">$<span id="wall-val">0.0000</span></h1>
+        </div>
+        <button class="p-btn" onclick="alert('Minimum Çekim: $1.00')">BAKİYEYİ ÇEK</button>
     </div>
 
-    <nav>
-        <div class="nav-icon" onclick="changeTab('friends')">👥</div>
-        <div class="nav-icon" onclick="changeTab('home')">🐾</div>
-        <div class="nav-icon" onclick="changeTab('admin')">⚙️</div>
-        <div class="nav-icon" onclick="changeTab('wallet')">👛</div>
+    <div id="page-mining" class="page">
+        <span style="color:var(--gold); font-weight:bold; letter-spacing:2px;">MINING ACTIVE</span>
+        <h1 style="font-size:45px; margin:10px 0;">$<span id="m-display">0.00000</span></h1>
+        <div class="mine-circle">
+            <div class="mine-core"></div>
+        </div>
+        <div style="width:100%; display:flex; justify-content:space-around; opacity:0.7; font-size:13px;">
+            <div>⚡ 124.5 GH/s</div>
+            <div>🛰️ Cloud Sync</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-item" onclick="toggleTab('friends')">👥</div>
+        <div class="nav-item" onclick="toggleTab('home')">🐾</div>
+        <div class="nav-item" onclick="toggleTab('wallet')">👛</div>
     </nav>
 </div>
 
