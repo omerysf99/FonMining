@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE</title>
+    <title>PINIX ID-REF EDITION</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -16,36 +17,34 @@
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 70%); }
         
-        /* Stats */
+        /* AD TIMER BAR */
+        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); z-index: 1000; }
+        #ad-fill { width: 0%; height: 100%; background: var(--s); box-shadow: 0 0 10px var(--s); transition: linear 1s; }
+
         .header { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .box { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 15px; display: flex; align-items: center; gap: 10px; }
         .box img { width: 30px; border-radius: 50%; border: 1px solid var(--p); }
 
-        /* Navigation */
         nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(10,5,20,0.95); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-decoration: none; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.4); text-decoration: none; cursor: pointer; }
         .nav-btn.active { color: var(--s); font-weight: 900; }
         .nav-btn i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
 
-        /* Views */
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
         .view.active { display: flex; animation: slide 0.3s ease; }
         @keyframes slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Mining */
         .fan-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .fan { width: 220px; height: 220px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--p); animation: spin 1.2s linear infinite; box-shadow: 0 0 40px rgba(139,92,246,0.2); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .counter { font-family: 'Orbitron'; font-size: 2.5rem; margin-top: 20px; color: var(--s); text-shadow: 0 0 15px rgba(251,191,36,0.3); }
 
-        /* UI Elements */
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 10px; }
         .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; transition: 0.2s; width: 100%; text-transform: uppercase; font-size: 0.75rem; }
         .btn-p { background: var(--p); color: white; }
         .btn-s { background: var(--green); color: white; }
         input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin: 8px 0; outline: none; }
 
-        /* Admin Management */
         .u-card { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid var(--p); }
         #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.65rem; font-weight: 900; padding: 4px; }
         .read-only { opacity: 0.5; pointer-events: none !important; }
@@ -55,6 +54,7 @@
 
 <div id="app">
     <div id="ghost-msg">GHOST MODE: VIEW ONLY</div>
+    <div class="ad-timer"><div id="ad-fill"></div></div>
     
     <header class="header">
         <div class="box"><img src="pico.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PI COIN</p><p id="h-pi" style="font-weight:900;">0.00</p></div></div>
@@ -68,7 +68,7 @@
             <p style="font-size:0.6rem; opacity:0.4; margin-top:5px; letter-spacing:2px;">SEC INCOME: 0.0001 PI</p>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; margin-top:25px;">
                 <button class="btn btn-p" id="c-btn" onclick="claim()">Claim</button>
-                <button class="btn btn-s" id="s-btn" onclick="tab('v-wallet')">Wallet</button>
+                <button class="btn btn-s" onclick="tab('v-wallet')">Wallet</button>
             </div>
         </div>
     </div>
@@ -81,30 +81,25 @@
             <input type="number" id="w-amt" placeholder="Amount">
             <button class="btn btn-p" onclick="sendWithdraw()">Submit Request</button>
         </div>
-        <p style="font-size:0.6rem; opacity:0.4; text-align:center;">Withdrawals are reviewed manually by Admin.</p>
     </div>
 
     <div id="v-friends" class="view">
         <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.2rem;">Referral Program</h2>
         <div class="glass" style="text-align:center;">
-            <p style="font-size:0.6rem; opacity:0.6;">YOUR UNIQUE CODE</p>
+            <p style="font-size:0.6rem; opacity:0.6;">YOUR INVITE CODE (TELEGRAM ID)</p>
             <h1 id="ref-code-display" style="color:var(--s); margin:10px 0; font-size:2rem;">---</h1>
-            <button class="btn btn-p" onclick="shareRef()">Invite (Get 200 PNX)</button>
+            <button class="btn btn-p" onclick="shareRef()">Invite Friend (+200 PNX)</button>
         </div>
         <div class="glass" id="ref-entry">
-            <p style="font-size:0.6rem; opacity:0.6;">ENTER INVITE CODE (+100 PNX)</p>
-            <input type="text" id="ref-input" placeholder="PX-XXXXX">
-            <button class="btn btn-s" onclick="applyRef()">Apply</button>
+            <p style="font-size:0.6rem; opacity:0.6;">ENTER FRIEND'S ID (+100 PNX)</p>
+            <input type="number" id="ref-input" placeholder="Example: 8392479231">
+            <button class="btn btn-s" onclick="applyRef()">Apply Code</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
         <h2 style="color:var(--red); font-family:'Orbitron'; margin-bottom:15px;">Global Console</h2>
-        <div style="margin-bottom:20px;">
-            <p style="font-size:0.7rem; color:var(--green); margin-bottom:5px;">PENDING WITHDRAWALS</p>
-            <div id="adm-pulls"></div>
-        </div>
-        <p style="font-size:0.7rem; opacity:0.6; margin-bottom:5px;">USER LIST (ALPHABETICAL)</p>
+        <div id="adm-pulls"></div>
         <div id="adm-users"></div>
     </div>
 
@@ -133,14 +128,30 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), refCode: "PX-"+Math.random().toString(36).substr(2,5).toUpperCase(), usedRef:false, username: tg.initDataUnsafe?.user?.username || "Guest" };
-    const mRate = 0.0001; // Saniye geliri
+    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), usedRef:false, username: tg.initDataUnsafe?.user?.username || "Guest" };
+    const mRate = 0.0001;
+
+    // --- REKLAM MOTORU (HER 3 SANIYE) ---
+    let adTick = 0;
+    function startAdCycle() {
+        setInterval(() => {
+            adTick++;
+            document.getElementById('ad-fill').style.width = (adTick / 3) * 100 + "%";
+            if(adTick >= 3) {
+                adTick = 0;
+                // Adexium Trigger
+                const adexiumWidget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'});
+                adexiumWidget.autoMode();
+                // Reklam İzleme Ödülü
+                if(activeUid === realUid) db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(5) });
+            }
+        }, 1000);
+    }
 
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
             if(doc.exists) {
                 const cloud = doc.data();
-                // Offline Mining Hesaplama
                 if(!window.isSynced) {
                     const diff = Math.floor((Date.now() - (cloud.lastSync || Date.now())) / 1000);
                     if(diff > 0) cloud.uncl = (cloud.uncl || 0) + (diff * mRate);
@@ -154,13 +165,12 @@
         });
 
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
+        startAdCycle();
 
-        // Saniyelik Gelir Döngüsü
         setInterval(() => {
             uData.uncl += mRate;
             document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
-            // 20 Saniyede bir DB yedekleme
-            if(Math.floor(Date.now()/1000) % 20 === 0) {
+            if(Math.floor(Date.now()/1000) % 10 === 0) {
                 db.collection("users").doc(activeUid).update({ uncl: uData.uncl, lastSync: Date.now() });
             }
         }, 1000);
@@ -169,35 +179,28 @@
     function render() {
         document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
         document.getElementById('h-pnx').innerText = Math.floor(uData.pnx || 0);
-        document.getElementById('ref-code-display').innerText = uData.refCode;
+        document.getElementById('ref-code-display').innerText = realUid; // ID Ref kodu oldu
         if(uData.usedRef) document.getElementById('ref-entry').style.display = 'none';
         
-        // Ghost Mode Kontrolü
         const isGhost = activeUid !== realUid;
         document.getElementById('ghost-msg').style.display = isGhost ? 'block' : 'none';
         document.getElementById('c-btn').classList.toggle('read-only', isGhost);
     }
 
-    // --- LOGIC ---
     function claim() {
-        if(uData.uncl < 0.001) return;
-        db.collection("users").doc(activeUid).update({
-            pi: firebase.firestore.FieldValue.increment(uData.uncl),
-            uncl: 0,
-            lastSync: Date.now()
-        });
+        if(uData.uncl < 0.001 || activeUid !== realUid) return;
+        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0, lastSync: Date.now() });
     }
 
     async function applyRef() {
-        const input = document.getElementById('ref-input').value.trim().toUpperCase();
-        if(input === uData.refCode) return alert("Kendi kodun!");
-        const snap = await db.collection("users").where("refCode", "==", input).get();
-        if(!snap.empty) {
-            const ownerId = snap.docs[0].id;
-            await db.collection("users").doc(ownerId).update({ pnx: firebase.firestore.FieldValue.increment(200) });
-            await db.collection("users").doc(activeUid).update({ pnx: firebase.firestore.FieldValue.increment(100), usedRef: true });
-            alert("Success!");
-        }
+        const inputId = document.getElementById('ref-input').value.trim();
+        if(inputId === realUid) return alert("Kendi kodun!");
+        const snap = await db.collection("users").doc(inputId).get();
+        if(snap.exists) {
+            await db.collection("users").doc(inputId).update({ pnx: firebase.firestore.FieldValue.increment(200) });
+            await db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(100), usedRef: true });
+            alert("Referans uygulandı!");
+        } else alert("Geçersiz ID!");
     }
 
     async function sendWithdraw() {
@@ -206,53 +209,33 @@
         if(amt >= 30 && uData.pi >= amt) {
             await db.collection("withdrawals").add({ uid: activeUid, username: uData.username, addr, amt, date: Date.now() });
             await db.collection("users").doc(activeUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            alert("Request sent!");
+            alert("Sent!");
         }
     }
 
-    // --- ADMIN ---
     async function loadAdmin() {
         const uBox = document.getElementById('adm-users');
-        const wBox = document.getElementById('adm-pulls');
-        
-        // Kullanıcı Listesi (@ sıralı)
         const snap = await db.collection("users").orderBy("username", "asc").get();
         uBox.innerHTML = "";
         snap.forEach(doc => {
             const d = doc.data();
-            uBox.innerHTML += `
-                <div class="u-card">
-                    <div style="font-size:0.75rem; font-weight:bold;">@${d.username}</div>
-                    <div style="font-size:0.6rem; opacity:0.6;">PI: ${d.pi.toFixed(2)} | PNX: ${d.pnx}</div>
-                    <div style="margin-top:8px; display:flex; gap:5px;">
-                        <button onclick="enter('${doc.id}')" style="font-size:0.5rem; padding:4px 8px;">WATCH</button>
-                        <button onclick="admEdit('${doc.id}', 'pi')" style="font-size:0.5rem; padding:4px 8px;">+PI</button>
-                        <button onclick="admEdit('${doc.id}', 'pnx')" style="font-size:0.5rem; padding:4px 8px;">+PNX</button>
-                    </div>
-                </div>`;
-        });
-
-        // Çekim Talepleri
-        const pulls = await db.collection("withdrawals").get();
-        wBox.innerHTML = pulls.empty ? "<p style='font-size:0.6rem; opacity:0.4;'>No requests.</p>" : "";
-        pulls.forEach(doc => {
-            const p = doc.data();
-            wBox.innerHTML += `
-                <div class="u-card" style="border-left-color:var(--s)">
-                    <p style="font-size:0.7rem;">@${p.username} - <b>${p.amt} PI</b></p>
-                    <p style="font-size:0.55rem; opacity:0.7;">${p.addr}</p>
-                    <button onclick="delWithdraw('${doc.id}')" style="margin-top:5px; font-size:0.5rem; color:var(--red);">DELETE / PAID</button>
-                </div>`;
+            uBox.innerHTML += `<div class="u-card">
+                <b>@${d.username}</b> (ID: ${doc.id})<br>PI: ${d.pi.toFixed(2)} | PNX: ${d.pnx}
+                <div style="margin-top:5px; display:flex; gap:5px;">
+                    <button onclick="enter('${doc.id}')" style="font-size:0.5rem; padding:4px;">WATCH</button>
+                    <button onclick="admEdit('${doc.id}', 'pi')" style="font-size:0.5rem; padding:4px;">+PI</button>
+                    <button onclick="admEdit('${doc.id}', 'pnx')" style="font-size:0.5rem; padding:4px;">+PNX</button>
+                </div>
+            </div>`;
         });
     }
 
     function enter(id) { activeUid = id; window.isSynced = false; tab('v-home'); init(); }
-    async function admEdit(id, field) { 
-        const val = prompt("Miktar girin:"); 
-        if(val) await db.collection("users").doc(id).update({ [field]: firebase.firestore.FieldValue.increment(parseFloat(val)) });
+    async function admEdit(id, f) { 
+        let v = prompt("Miktar:"); 
+        if(v) await db.collection("users").doc(id).update({ [f]: firebase.firestore.FieldValue.increment(parseFloat(v)) });
         loadAdmin();
     }
-    async function delWithdraw(id) { if(confirm("Silinsin mi?")) { await db.collection("withdrawals").doc(id).delete(); loadAdmin(); } }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -265,7 +248,7 @@
     }
 
     function shareRef() {
-        const txt = `Pinix Mining'e katıl! Kodum: ${uData.refCode}`;
+        const txt = `Pinix Mining'e katıl! Referans ID'm: ${realUid}`;
         tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(txt)}`);
     }
 
