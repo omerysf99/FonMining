@@ -3,133 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE V5</title>
+    <title>PINIX GEP SUPREME</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #8b5cf6; --secondary: #fbbf24; --bg: #05010d;
-            --card: #130a24; --green: #10b981; --red: #ef4444; --border: rgba(255,255,255,0.1);
+            --primary: #8b5cf6; --secondary: #fbbf24; --bg: #030008;
+            --card: rgba(20, 10, 40, 0.7); --green: #10b981; --red: #ef4444; --border: rgba(255,255,255,0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-user-select: none; }
         body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; margin: auto; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at top, #1e0d3d 0%, var(--bg) 90%); }
+        
+        /* GEP BACKGROUND */
+        #app { 
+            width: 100%; max-width: 450px; height: 100vh; margin: auto; position: relative; 
+            display: flex; flex-direction: column; 
+            background: radial-gradient(circle at 50% -20%, #2e1065 0%, var(--bg) 85%); 
+        }
 
-        /* HEADER */
-        .top-nav { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        .coin-icon { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--primary); }
+        /* 2s AD BAR */
+        .ad-progress { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 1000; }
+        #ad-fill { width: 0%; height: 100%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
 
-        /* MINING FAN SYSTEM */
-        .fan-box { width: 260px; height: 260px; position: relative; margin: 40px auto; display: flex; align-items: center; justify-content: center; }
-        .fan-layer { 
+        /* HEADER STATS */
+        .header { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .stat-box { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px; 
+            padding: 10px; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(10px);
+        }
+        .icon { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+
+        /* MINING ENGINE V2 */
+        .mining-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fan-stage { width: 260px; height: 260px; position: relative; display: flex; align-items: center; justify-content: center; }
+        
+        .fan-blade { 
             position: absolute; width: 100%; height: 100%; 
-            background: url('pinix.jpg') center/cover; 
-            border-radius: 50%; border: 4px solid var(--primary);
-            animation: spin 1.5s linear infinite; /* Daha hızlı dönüş */
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.4);
-            z-index: 1;
+            background: url('pinix.jpg') center/cover; border-radius: 50%; 
+            border: 5px solid var(--primary); animation: fastSpin 1.2s linear infinite; 
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.2); z-index: 1;
         }
-        .core-layer { 
-            position: absolute; width: 65px; height: 65px; 
-            background: url('pico.jpg') center/cover; 
-            border-radius: 50%; border: 3px solid #fff;
-            z-index: 2; /* Fanın üstünde sabit durur */
-            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        .fan-core { 
+            position: absolute; width: 70px; height: 70px; 
+            background: url('pico.jpg') center/cover; border-radius: 50%; 
+            border: 3px solid #fff; z-index: 2; box-shadow: 0 0 20px rgba(0,0,0,0.5); 
         }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fastSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* AD PROGRESS (2s) */
-        .ad-bar { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 100; }
-        #ad-fill { width: 0%; height: 100%; background: var(--secondary); transition: linear; }
-
-        /* VIEWS */
-        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: flex; }
-        .pi-val { font-size: 3rem; font-weight: 900; font-family: 'Orbitron'; color: var(--secondary); text-align: center; margin-bottom: 20px; }
+        .pi-counter { 
+            font-size: 3.2rem; font-weight: 900; font-family: 'Orbitron'; 
+            color: var(--secondary); margin-top: 25px; letter-spacing: -1px;
+        }
 
         /* UI ELEMENTS */
-        .btn { padding: 16px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; width: 100%; transition: 0.2s; }
-        .btn-p { background: var(--primary); color: white; }
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
+        .view.active { display: flex; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn { 
+            padding: 16px; border-radius: 18px; border: none; font-weight: 800; 
+            text-transform: uppercase; cursor: pointer; transition: 0.2s; font-size: 0.8rem;
+        }
+        .btn-p { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
         .btn-s { background: var(--green); color: white; }
-        .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        
+        /* ADMIN LIST */
+        .admin-item { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 15px; 
+            padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+        }
+        .admin-info b { font-size: 0.9rem; color: #fff; display: block; }
+        .admin-info span { font-size: 0.7rem; color: var(--secondary); font-family: 'Orbitron'; }
 
         /* NAV */
-        nav { position: absolute; bottom: 0; width: 100%; height: 85px; background: #0b021a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border); padding-bottom: 15px; }
-        .nav-item { color: rgba(255,255,255,0.3); text-align: center; font-size: 0.65rem; flex: 1; }
-        .nav-item.active { color: var(--secondary); }
-        .nav-item i { display: block; font-size: 1.5rem; margin-bottom: 3px; font-style: normal; }
-
-        .admin-tag { position: absolute; top: 12px; right: 12px; background: var(--red); font-size: 0.6rem; padding: 5px 10px; border-radius: 8px; font-weight: 900; cursor: pointer; display: none; z-index: 1000; }
+        nav { 
+            position: absolute; bottom: 0; width: 100%; height: 85px; 
+            background: rgba(5, 2, 15, 0.95); display: flex; justify-content: space-around; 
+            align-items: center; border-top: 1px solid var(--border); padding-bottom: 15px;
+        }
+        .nav-link { color: rgba(255,255,255,0.3); font-size: 0.65rem; text-align: center; flex: 1; }
+        .nav-link.active { color: var(--secondary); font-weight: 800; }
+        .nav-link i { display: block; font-size: 1.6rem; margin-bottom: 4px; font-style: normal; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="ad-bar"><div id="ad-fill"></div></div>
-    <div class="admin-tag" id="adm-tag" onclick="tab('v-admin')">ADMIN</div>
-
-    <header class="top-nav">
-        <div class="stat-card">
-            <img src="pico.jpg" class="coin-icon">
-            <div><span style="font-size:0.5rem; opacity:0.5;">PI COIN</span><p id="pi-head" style="font-weight:800; font-size:0.8rem;">0.0000</p></div>
+    <div class="ad-progress"><div id="ad-fill"></div></div>
+    
+    <header class="header">
+        <div class="stat-box">
+            <img src="pico.jpg" class="icon">
+            <div><p style="font-size:0.5rem; opacity:0.5;">PI BALANCE</p><p id="h-pi" style="font-weight:800; font-size:0.85rem;">0.0000</p></div>
         </div>
-        <div class="stat-card">
-            <img src="pinix.jpg" class="coin-icon">
-            <div><span style="font-size:0.5rem; opacity:0.5;">PINIX</span><p id="pnx-head" style="font-weight:800; font-size:0.8rem;">0</p></div>
+        <div class="stat-box">
+            <img src="pinix.jpg" class="icon">
+            <div><p style="font-size:0.5rem; opacity:0.5;">PNX ASSET</p><p id="h-pnx" style="font-weight:800; font-size:0.85rem;">0</p></div>
         </div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="fan-box">
-            <div class="fan-layer"></div>
-            <div class="core-layer"></div>
-        </div>
-        <div class="pi-val" id="mining-live">0.00000000</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-            <button class="btn btn-p" onclick="doClaim()">Claim</button>
-            <button class="btn btn-s" onclick="tab('v-swap')">Swap</button>
+        <div class="mining-wrap">
+            <div class="fan-stage">
+                <div class="fan-blade"></div>
+                <div class="fan-core"></div>
+            </div>
+            <div class="pi-counter" id="m-val">0.00000000</div>
+            <p style="opacity:0.4; font-size:0.75rem; margin-top:5px; letter-spacing:2px;">GEP ENGINE STABLE</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; width:100%; margin-top:30px;">
+                <button class="btn btn-p" onclick="claim()">Claim</button>
+                <button class="btn btn-s" onclick="tab('v-swap')">Swap</button>
+            </div>
         </div>
     </div>
 
     <div id="v-swap" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Swap</h2>
-        <div class="glass">
-            <label style="font-size:0.7rem; opacity:0.5;">PAY PINIX</label>
-            <input type="number" id="sw-in" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; border-radius:10px; margin:10px 0;" placeholder="100" oninput="document.getElementById('sw-out').value = (this.value/100).toFixed(4)">
-            <p style="text-align:center; font-size:1.2rem;">↓</p>
-            <label style="font-size:0.7rem; opacity:0.5;">RECEIVE PI</label>
-            <input type="text" id="sw-out" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; border-radius:10px; margin:10px 0;" readonly>
-            <button class="btn btn-s" onclick="executeSwap()">Swap Now</button>
-        </div>
-    </div>
-
-    <div id="v-ref" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">Affiliate</h2>
-        <div class="glass" style="text-align:center;">
-            <p style="opacity:0.5; font-size:0.8rem;">REF CODE</p>
-            <h1 id="ref-ui" style="color:var(--secondary); font-size:2.5rem; margin:15px 0;">---</h1>
-            <button class="btn btn-p" onclick="share()">Invite</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:20px;">GEP Swap</h2>
+        <div class="stat-box" style="flex-direction:column; padding:20px; gap:15px;">
+            <input type="number" id="sin" placeholder="PINIX Miktarı" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.5); color:white;" oninput="document.getElementById('sout').value = (this.value/100).toFixed(4)">
+            <p style="font-size:1.5rem;">↓</p>
+            <input type="text" id="sout" placeholder="PI Karşılığı" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white;" readonly>
+            <button class="btn btn-s" style="width:100%" onclick="doSwap()">Swap Execute</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron';">Admin</h2>
-        <div id="adm-list" style="margin-top:15px;"></div>
+        <h2 style="color:var(--red); font-family:'Orbitron'; margin-bottom:15px;">Global Console</h2>
+        <div id="adm-list">Yükleniyor...</div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
-        <div class="nav-item" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
-        <div class="nav-item" onclick="tab('v-ref', this)"><i>👥</i>Ref</div>
-        <div class="nav-item" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>⚙️</i>Admin</div>
+        <div class="nav-link active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
+        <div class="nav-link" onclick="tab('v-swap', this)"><i>⇆</i>Swap</div>
+        <div class="nav-link" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>🛠️</i>Admin</div>
     </nav>
 </div>
 
@@ -145,84 +158,94 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    const MY_ADMIN = "8392479231";
+    const ADMIN_ID = "8392479231";
 
-    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "user_dev";
-    let userData = { pi: 0, pnx: 0, uncl: 0, ref: "PX-"+uid.substring(0,5) };
+    let myId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "test_88";
+    let activeId = myId;
+    let data = { pi: 0, pnx: 0, uncl: 0, username: tg.initDataUnsafe?.user?.username || "Guest" };
 
     function init() {
-        db.collection("users").doc(uid).onSnapshot(doc => {
+        db.collection("users").doc(activeId).onSnapshot(doc => {
             if(doc.exists) {
-                userData = doc.data();
+                data = doc.data();
                 render();
             } else {
-                db.collection("users").doc(uid).set(userData);
+                db.collection("users").doc(activeId).set(data);
             }
         });
-        if(uid === MY_ADMIN) {
-            document.getElementById('adm-tag').style.display='block';
-            document.getElementById('adm-nav').style.display='block';
-        }
-        startMining();
-        startAdLoop();
-    }
 
-    // 2 SANİYEDE BİR REKLAM
-    function startAdLoop() {
+        if(myId === ADMIN_ID) document.getElementById('adm-nav').style.display = 'block';
+        
+        // 2s REKLAM DÖNGÜSÜ
         let t = 0;
         setInterval(() => {
-            t++;
-            document.getElementById('ad-fill').style.width = (t/2)*100 + '%';
-            if(t >= 2) {
-                t = 0;
-                const widget = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
-                widget.autoMode();
-                db.collection("users").doc(uid).update({ pnx: firebase.firestore.FieldValue.increment(5) });
+            if(activeId === myId) {
+                t++;
+                document.getElementById('ad-fill').style.width = (t/2)*100 + '%';
+                if(t >= 2) {
+                    t = 0;
+                    const ad = new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'});
+                    ad.autoMode();
+                    db.collection("users").doc(myId).update({ pnx: firebase.firestore.FieldValue.increment(5) });
+                }
             }
         }, 1000);
-    }
 
-    function startMining() {
         setInterval(() => {
-            userData.uncl += 0.0001;
-            document.getElementById('mining-live').innerText = userData.uncl.toFixed(8);
+            data.uncl += 0.0001;
+            document.getElementById('m-val').innerText = data.uncl.toFixed(8);
         }, 1000);
-    }
-
-    function doClaim() {
-        if(userData.uncl < 0.001) return alert("Min 0.001 PI");
-        db.collection("users").doc(uid).update({
-            pi: firebase.firestore.FieldValue.increment(userData.uncl),
-            uncl: 0
-        });
-        userData.uncl = 0;
     }
 
     function render() {
-        document.getElementById('pi-head').innerText = (userData.pi || 0).toFixed(4);
-        document.getElementById('pnx-head').innerText = Math.floor(userData.pnx || 0);
-        document.getElementById('ref-ui').innerText = userData.ref;
+        document.getElementById('h-pi').innerText = (data.pi || 0).toFixed(4);
+        document.getElementById('h-pnx').innerText = Math.floor(data.pnx || 0);
+    }
+
+    async function loadAdmin() {
+        const list = document.getElementById('adm-list');
+        list.innerHTML = "Sıralanıyor...";
+        // @kullaniciadi ile alfabetik sıralama (A-Z)
+        const snap = await db.collection("users").orderBy("username", "asc").get();
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            list.innerHTML += `
+                <div class="admin-item">
+                    <img src="${d.photo || 'pico.jpg'}" style="width:40px; height:40px; border-radius:50%">
+                    <div class="admin-info" style="flex:1">
+                        <b>@${d.username || doc.id}</b>
+                        <span>PI: ${Number(d.pi).toFixed(2)} | PNX: ${d.pnx}</span>
+                    </div>
+                    <button onclick="enterAccount('${doc.id}')" style="background:var(--primary); color:white; border:none; padding:8px; border-radius:8px; font-size:0.6rem;">GİR</button>
+                </div>`;
+        });
+    }
+
+    function enterAccount(id) {
+        activeId = id;
+        alert("GEP Ghost Mode: " + id);
+        tab('v-home');
+        init();
+    }
+
+    function claim() {
+        if(data.uncl < 0.001) return;
+        db.collection("users").doc(activeId).update({
+            pi: firebase.firestore.FieldValue.increment(data.uncl),
+            uncl: 0
+        });
+        data.uncl = 0;
     }
 
     function tab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(el) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
         if(id === 'v-admin') loadAdmin();
-    }
-
-    async function loadAdmin() {
-        const list = document.getElementById('adm-list');
-        list.innerHTML = "Loading...";
-        const snap = await db.collection("users").get();
-        list.innerHTML = "";
-        snap.forEach(doc => {
-            const d = doc.data();
-            list.innerHTML += `<div class="glass" style="font-size:0.7rem;">@${d.username || doc.id}<br>PI: ${Number(d.pi).toFixed(2)} | PNX: ${d.pnx}</div>`;
-        });
     }
 
     window.onload = init;
