@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEBULA FOREST - V68</title>
+    <title>FANTASTIC PET & MINER - V69</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,159 +12,128 @@
     
     <style>
         :root { 
-            --accent: #a3e635; 
-            --bg-dark: #0a0f0d;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #ffcc00; 
+            --forest-green: #a3e635;
+            --bg-blue: #5c67f2;
+            --card-bg: rgba(255, 255, 255, 0.1);
         }
 
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background: #000 url('https://w0.peakpx.com/wallpaper/340/320/HD-wallpaper-dark-forest-trees-fog-nature.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white; 
-            overflow: hidden; 
-            height: 100vh; 
-        }
+        body { background: var(--bg-blue); color: white; overflow: hidden; height: 100vh; }
 
-        .view { display: none; height: 100vh; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 110px; position: relative; z-index: 10; }
+        /* VIEWS */
+        .view { display: none; height: 100vh; flex-direction: column; padding-bottom: 110px; position: relative; z-index: 10; }
         .view.active { display: flex; }
-        .overlay-dark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1; }
 
-        /* ANA SAYFA (ESKİ STİL) */
-        #v-home { align-items: center; justify-content: center; text-align: center; }
-        .hero-img-classic { width: 180px; filter: drop-shadow(0 0 20px var(--accent)); margin-bottom: 20px; }
-        .bal-classic { font-family: 'Montserrat'; font-size: 3.5rem; color: var(--accent); margin-bottom: 30px; }
+        /* --- ANA EKRAN (Görsel 7: Your Fantastic Pet) --- */
+        #v-home { 
+            background: url('https://i.ibb.co/68vM3D7/fantastic-pets-bg.png') no-repeat center center; 
+            background-size: cover; 
+            align-items: center; 
+            justify-content: flex-end;
+            padding: 40px 20px 140px;
+        }
+        .home-char { width: 90%; max-width: 350px; margin-bottom: 20px; }
+        .btn-play { width: 85%; padding: 18px; border-radius: 20px; background: #ffcc00; color: #7c4dff; font-weight: 900; border: none; font-size: 1.4rem; box-shadow: 0 6px 0 #e6b800; margin-bottom: 15px; cursor: pointer; }
+        .btn-night { width: 85%; padding: 12px; border-radius: 20px; background: #6b4cff; color: #fff; font-weight: 700; border: 2px solid #8e74ff; font-size: 1rem; cursor: pointer; }
 
-        /* MINING EKRANI (YENİ - GÖRSELDEKİ GİBİ) */
+        /* --- MINING EKRANI (Görsel 4 & 5 + pinix.jpg) --- */
         #mining-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000 url('https://w0.peakpx.com/wallpaper/340/320/HD-wallpaper-dark-forest-trees-fog-nature.jpg') no-repeat center center;
             background-size: cover; z-index: 2000; display: none; flex-direction: column; align-items: center; padding: 40px 20px;
         }
-        .char-img { width: 90%; max-width: 320px; margin: 20px 0; filter: drop-shadow(0 0 30px rgba(163, 230, 53, 0.2)); }
-        .level-tag { font-family: 'Montserrat'; font-size: 1.8rem; margin-bottom: 5px; }
-        .usd-tag { color: var(--accent); font-size: 1.1rem; opacity: 0.9; margin-bottom: 30px; }
+        .m-level { font-family: 'Montserrat'; font-size: 1.8rem; margin-top: 10px; }
+        .m-balance { color: var(--forest-green); font-size: 1.2rem; margin-bottom: 20px; }
         
-        .progress-box { width: 85%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; margin-bottom: 10px; }
-        .progress-fill { height: 100%; background: var(--accent); width: 45%; border-radius: 10px; box-shadow: 0 0 15px var(--accent); transition: width 0.5s; }
-        .progress-text { font-size: 0.6rem; opacity: 0.6; letter-spacing: 1px; margin-bottom: 40px; }
-
-        .mining-btns { display: flex; gap: 20px; width: 100%; justify-content: center; }
-        .m-btn { 
-            width: 85px; height: 85px; border-radius: 50%; background: var(--accent); border: 5px solid rgba(0,0,0,0.2);
-            color: #000; font-weight: 900; font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s;
+        .m-char-container { position: relative; width: 260px; height: 260px; margin: 20px 0; }
+        .pinix-fan { 
+            position: absolute; width: 100%; height: 100%; border-radius: 50%; 
+            border: 5px solid rgba(163, 230, 53, 0.3); 
+            animation: rotate var(--spin-speed, 3s) linear infinite;
+            z-index: 1;
         }
-        .m-btn:active { transform: scale(0.95); }
+        .char-overlay { position: absolute; width: 80%; top: 10%; left: 10%; z-index: 2; }
 
-        /* OFFERWALL (GÖRSEL 1) */
-        .section-title { font-size: 0.9rem; margin: 15px 0 10px; display: flex; align-items: center; gap: 8px; font-weight: 700; opacity: 0.8; }
-        .offer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .offer-card { background: var(--card-bg); border-radius: 15px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); position: relative; backdrop-filter: blur(8px); }
-        .offer-card .icon-box { width: 45px; height: 45px; background: #2d3748; border-radius: 12px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .offer-card span { font-size: 0.6rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8; }
-        .offer-card b { color: #fbbf24; font-size: 0.75rem; display: block; margin-top: 4px; }
+        .m-progress-box { width: 80%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 30px; }
+        .m-progress-fill { height: 100%; background: var(--forest-green); width: 45%; border-radius: 10px; box-shadow: 0 0 15px var(--forest-green); }
 
-        /* WITHDRAW (GÖRSEL 3) */
-        .provider-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-        .provider-card { background: var(--card-bg); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .provider-card img { height: 22px; margin-bottom: 8px; filter: brightness(1.1); }
-        .provider-card small { font-size: 0.5rem; color: #94a3b8; display: block; line-height: 1.2; }
+        .m-btns { display: flex; gap: 15px; }
+        .m-circle-btn { 
+            width: 75px; height: 75px; border-radius: 50%; background: var(--forest-green); color: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.6rem; font-weight: 900; border: 4px solid rgba(0,0,0,0.2);
+        }
 
-        /* NAVBAR */
-        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); }
-        .nav-item { text-align: center; opacity: 0.4; transition: 0.3s; color: white; }
+        /* --- OFFERWALL & WITHDRAW (Görsel 1 & 3) --- */
+        .content-view { padding: 20px; overflow-y: auto; }
+        .offer-card { background: var(--card-bg); border-radius: 15px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+        .offer-card b { color: #fbbf24; font-size: 0.8rem; }
+        
+        .provider-card { background: var(--card-bg); border-radius: 15px; padding: 15px 5px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .provider-card img { height: 25px; margin-bottom: 8px; }
+
+        /* NAV */
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { text-align: center; opacity: 0.5; color: white; font-size: 0.7rem; }
         .nav-item.active { opacity: 1; color: var(--accent); }
-        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .center-nav { background: var(--accent); width: 60px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
 
-        .btn-start { width: 80%; padding: 20px; border-radius: 50px; background: var(--accent); color: #000; font-weight: 900; border: none; font-size: 1.2rem; box-shadow: 0 10px 20px rgba(163, 230, 53, 0.3); cursor: pointer; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="overlay-dark"></div>
 
     <div id="v-home" class="view active">
-        <img src="yourfantastic.jpg" class="hero-img-classic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/606/606611.png'">
-        <div class="bal-classic">$<span id="main-bal">0.0037</span></div>
-        <button class="btn-start" onclick="openMining()">MINING'I BAŞLAT</button>
+        <img src="https://i.ibb.co/L6S9YvM/character-nebula.png" class="home-char" alt="Fantastic Pets">
+        <button class="btn-play" onclick="openMining()">PLAY</button>
+        <button class="btn-night" onclick="tg.showAlert('Night Session: Double Earnings Active!')">NIGHT SESSION <br><small>DOUBLE YOUR EARNINGS</small></button>
     </div>
 
     <div id="mining-screen">
-        <div style="width:100%; display:flex; justify-content:flex-end;"><button onclick="closeMining()" style="background:none; border:none; color:white; font-size:1.5rem; font-weight:bold;">✕</button></div>
+        <div style="width:100%; display:flex; justify-content:flex-end;"><button onclick="closeMining()" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button></div>
         
-        <div class="level-tag">LEVEL 1</div>
-        <div class="usd-tag">$<span id="mining-bal">0.0037</span></div>
+        <div class="m-level">LEVEL 1</div>
+        <div class="m-balance">$<span id="m-bal-val">0.0037</span></div>
 
-        <img src="https://i.ibb.co/L6S9YvM/character-nebula.png" class="char-img" alt="Nebula Character">
-
-        <div class="progress-box">
-            <div class="progress-fill" id="p-bar"></div>
+        <div class="m-char-container">
+            <img src="pinix.jpg" class="pinix-fan" onerror="this.src='https://via.placeholder.com/260/a3e635/000?text=PINIX+FAN'">
+            <img src="https://i.ibb.co/L6S9YvM/character-nebula.png" class="char-overlay">
         </div>
-        <div class="progress-text">45% AWAY FROM COINS</div>
 
-        <div class="mining-btns">
-            <div class="m-btn" style="background:rgba(163,230,53,0.15); color:var(--accent); border-color:var(--accent);">🕒<br>BOOST</div>
-            <div class="m-btn" id="mining-trigger" onclick="toggleMining()">⚡<br>START<br>MINING</div>
-            <div class="m-btn" style="background:rgba(163,230,53,0.15); color:var(--accent); border-color:var(--accent);">🎁<br>BONUS</div>
+        <div class="m-progress-box"><div class="m-progress-fill" id="m-fill"></div></div>
+        <p style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 30px;">45% AWAY FROM COINS</p>
+
+        <div class="m-btns">
+            <div class="m-circle-btn" style="background: rgba(163,230,53,0.2); color: var(--forest-green);">🕒<br>BOOST</div>
+            <div class="m-circle-btn" id="m-trigger" onclick="toggleMining()" style="width:90px; height:90px; background:var(--forest-green); color:#000;">⚡<br>START</div>
+            <div class="m-circle-btn" style="background: rgba(163,230,53,0.2); color: var(--forest-green);">🎁<br>BONUS</div>
         </div>
     </div>
 
-    <div id="v-tasks" class="view">
-        <h2 style="text-align: center; font-family: 'Montserrat'; margin-bottom:10px;">OFFERWALL</h2>
-        
-        <div class="section-title">🔥 Hot Offers</div>
-        <div class="offer-grid">
-            <div class="offer-card"><div class="icon-box">🌰</div><span>The Nuts Heist</span><b>💰 2000</b></div>
-            <div class="offer-card"><div class="icon-box">📱</div><span>Givvy's Weekly</span><b>💰 2000</b></div>
-            <div class="offer-card"><div class="icon-box">🐦</div><span>Follow Givvy</span><b>💰 2000</b></div>
-        </div>
-
-        <div class="section-title">🏷️ Task Offers</div>
-        <div class="offer-grid">
-            <div class="offer-card"><div class="icon-box">📢</div><span>TyrAds</span><b>💰 180M</b></div>
-            <div class="offer-card"><div class="icon-box">🎯</div><span>GeeMee</span><b>💰 180M</b></div>
-            <div class="offer-card"><div class="icon-box">📦</div><span>Lootably</span><b>💰 200M</b></div>
-        </div>
-
-        <div class="section-title">📋 Survey Offers</div>
-        <div class="offer-grid">
-            <div class="offer-card"><div class="icon-box">📊</div><span>Pollfish</span><b>💰 200M</b></div>
-            <div class="offer-card"><div class="icon-box">🔬</div><span>Bitlabs</span><b>💰 150M</b></div>
-            <div class="offer-card"><div class="icon-box">🔎</div><span>CPX Research</span><b>💰 170M</b></div>
+    <div id="v-tasks" class="view content-view">
+        <h2 style="text-align: center; margin-bottom: 20px;">OFFERWALL</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div class="offer-card"><span>The Nuts Heist</span><br><b>💰 2000</b></div>
+            <div class="offer-card"><span>Givvy Weekly</span><br><b>💰 2000</b></div>
+            <div class="offer-card"><span>Follow X</span><br><b>💰 2000</b></div>
         </div>
     </div>
 
-    <div id="v-wallet" class="view">
-        <h2 style="text-align: center; font-family: 'Montserrat';">WITHDRAW</h2>
-        <p style="font-size: 0.6rem; text-align: center; opacity: 0.6; margin: 10px 0;">Top 3 providers in your country 🇹🇷</p>
-        
-        <div class="provider-grid">
-            <div class="provider-card" onclick="tg.showAlert('Papara seçildi. Min: 5$')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Papara_logo.svg">
-                <small>MIN 0.35 USD<br>1-2 business days</small>
-            </div>
-            <div class="provider-card" onclick="tg.showAlert('Binance seçildi. Min: 5$')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Binance_logo.svg">
-                <small>MIN 0.35 USD<br>Instant payment</small>
-            </div>
-            <div class="provider-card" onclick="tg.showAlert('Payeer seçildi. Min: 5$')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Payeer_logo.svg">
-                <small>MIN 0.35 USD<br>1 business day</small>
-            </div>
-        </div>
-
-        <div class="section-title" style="margin-top: 30px;">Other Providers</div>
-        <div class="provider-grid">
-            <div class="provider-card"><img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Tether_Logo.svg"><small>USDT TRC20</small></div>
-            <div class="provider-card"><div style="font-size:1.5rem;">+</div><small>Add new</small></div>
+    <div id="v-wallet" class="view content-view">
+        <h2 style="text-align: center; margin-bottom: 10px;">WITHDRAW</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div class="provider-card" onclick="tg.showAlert('Min: 5$')"><img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Papara_logo.svg"><br><small>Papara</small></div>
+            <div class="provider-card" onclick="tg.showAlert('Min: 5$')"><img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Binance_logo.svg"><br><small>Binance</small></div>
+            <div class="provider-card" onclick="tg.showAlert('Min: 5$')"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Payeer_logo.svg"><br><small>Payeer</small></div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item" onclick="showTab('v-tasks', this)"><i>🎁</i>Offers</div>
-        <div class="nav-item active" onclick="showTab('v-home', this)"><i>🌿</i>Forest</div>
-        <div class="nav-item" onclick="showTab('v-wallet', this)"><i>💳</i>Wallet</div>
+        <div class="nav-item" onclick="showTab('v-tasks', this)"><i>🎁</i><br>Offers</div>
+        <div class="center-nav" onclick="showTab('v-home', this)">🐾</div>
+        <div class="nav-item" onclick="showTab('v-wallet', this)"><i>💳</i><br>Wallet</div>
     </nav>
 
 <script>
@@ -173,63 +142,56 @@
 
     let balance = 0.0037;
     let isMining = false;
-    let miningInt;
+    let mTimeout;
 
     function showTab(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+        if(el.classList.contains('nav-item')) el.classList.add('active');
     }
 
-    // --- MINING MANTİĞI ---
     function openMining() {
         document.getElementById('mining-screen').style.display = 'flex';
-        document.getElementById('mining-bal').innerText = balance.toFixed(4);
+        document.getElementById('m-bal-val').innerText = balance.toFixed(4);
     }
 
     function closeMining() {
         document.getElementById('mining-screen').style.display = 'none';
-        document.getElementById('main-bal').innerText = balance.toFixed(4);
     }
 
     function toggleMining() {
+        const btn = document.getElementById('m-trigger');
         if(!isMining) {
             isMining = true;
-            document.getElementById('mining-trigger').innerHTML = "🛑<br>STOP<br>MINING";
-            document.getElementById('mining-trigger').style.background = "#ff3131";
-            document.getElementById('mining-trigger').style.color = "#fff";
-            startRandomEarnings();
+            btn.innerHTML = "🛑<br>STOP";
+            btn.style.background = "#ff3131";
+            runMining();
         } else {
             isMining = false;
-            document.getElementById('mining-trigger').innerHTML = "⚡<br>START<br>MINING";
-            document.getElementById('mining-trigger').style.background = "var(--accent)";
-            document.getElementById('mining-trigger').style.color = "#000";
-            clearTimeout(miningInt);
+            btn.innerHTML = "⚡<br>START";
+            btn.style.background = "var(--forest-green)";
+            clearTimeout(mTimeout);
         }
     }
 
-    function startRandomEarnings() {
+    function runMining() {
         if(!isMining) return;
+        let rand = Math.floor(Math.random() * (6000 - 3000 + 1) + 3000); // 3-6 saniye
         
-        // 3-6 saniye arası rastgele süre
-        let randTime = Math.floor(Math.random() * (6000 - 3000 + 1) + 3000);
-        
-        miningInt = setTimeout(() => {
+        mTimeout = setTimeout(() => {
             balance += 0.0001;
-            document.getElementById('mining-bal').innerText = balance.toFixed(4);
+            document.getElementById('m-bal-val').innerText = balance.toFixed(4);
             tg.HapticFeedback.notificationOccurred('success');
             
-            // Progress barı rastgele hareket ettir
-            document.getElementById('p-bar').style.width = Math.floor(Math.random() * 40 + 30) + "%";
+            // Progress bar hareketi
+            document.getElementById('m-fill').style.width = Math.floor(Math.random() * 50 + 20) + "%";
             
-            startRandomEarnings();
-        }, randTime);
+            runMining();
+        }, rand);
     }
 
-    window.onload = () => {
-        document.getElementById('main-bal').innerText = balance.toFixed(4);
-    };
+    // Admin ID: 8392479231 kontrolü buraya eklenebilir.
 </script>
 </body>
 </html>
