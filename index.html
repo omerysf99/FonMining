@@ -3,152 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA - FINAL MASTER</title>
+    <title>PI NEBULA - MINING PRO</title>
     
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --bg-deep: #4c3ba5; 
-            --accent: #fbc02d; 
-            --yellow-gradient: linear-gradient(180deg, #ffee58 0%, #fbc02d 100%);
-            --glass: rgba(255, 255, 255, 0.1);
-        }
-
+        :root { --bg: #4c3ba5; --yellow: #fbc02d; --dark: #2c1a74; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Fredoka', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: var(--bg-deep); 
-            color: white; 
-            overflow: hidden; 
-            height: 100vh;
+            background: var(--bg); color: white; overflow: hidden; height: 100vh;
             background-image: radial-gradient(circle at 50% 30%, #5e48c2 0%, #2c1a74 100%);
         }
 
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; }
 
-        /* Header */
-        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        .stat-box { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
-        .coin-img { width: 24px; height: 24px; background: gold; border-radius: 50%; box-shadow: 0 0 10px gold; }
+        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .score-pill { background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+        .coin { width: 20px; height: 20px; background: gold; border-radius: 50%; box-shadow: 0 0 10px gold; }
 
-        /* Main Content & Views */
-        .view { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 110px; flex-direction: column; }
+        .view { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .view.active { display: flex; }
 
-        /* Home View Specifics */
-        #v-home { align-items: center; justify-content: center; text-align: center; }
-        .name-tag { background: var(--accent); color: #2c1a74; padding: 5px 15px; border-radius: 15px; font-weight: 700; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; }
-        .hero-img { width: 80%; max-width: 280px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); transition: transform 0.1s; margin-bottom: 10px; }
-        .main-title { font-size: 2.5rem; line-height: 0.9; font-weight: 700; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        .balance-text { font-family: 'Montserrat', sans-serif; font-size: 2.2rem; color: var(--accent); margin-bottom: 25px; }
+        /* MADENCİLİK EKRANI ÖZEL */
+        #v-mining { background: rgba(0,0,0,0.8); z-index: 100; }
+        .mining-pulse { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--yellow); animation: pulse 1.5s infinite; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
 
-        /* Buttons */
-        .btn-yellow { 
-            background: var(--yellow-gradient); border: none; border-radius: 25px; 
-            padding: 18px; color: #2c1a74; font-size: 1.4rem; font-weight: 700; 
-            width: 85%; box-shadow: 0 8px 0 #9e7500; cursor: pointer; transition: 0.1s; margin-bottom: 15px;
+        /* ANA EKRAN */
+        .pet-name { background: var(--yellow); color: var(--dark); padding: 4px 12px; border-radius: 10px; font-weight: 700; margin-bottom: 10px; }
+        .hero-img { width: 250px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5)); margin-bottom: 15px; }
+        .bal-val { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; color: var(--yellow); margin-bottom: 20px; }
+
+        /* BUTONLAR */
+        .btn-big { 
+            background: linear-gradient(180deg, #ffee58 0%, #fbc02d 100%); border: none; border-radius: 25px; 
+            padding: 20px; color: var(--dark); font-size: 1.5rem; font-weight: 700; width: 80%;
+            box-shadow: 0 8px 0 #9e7500; cursor: pointer; transition: 0.1s;
         }
-        .btn-yellow:active { transform: translateY(4px); box-shadow: 0 4px 0 #9e7500; }
-        .btn-sub { background: rgba(255,255,255,0.1); border: 2px solid var(--accent); border-radius: 20px; padding: 12px; color: white; width: 85%; font-size: 0.9rem; font-weight: 600; }
+        .btn-big:active { transform: translateY(4px); box-shadow: 0 4px 0 #9e7500; }
+        .btn-stop { background: #ff1744; box-shadow: 0 8px 0 #b2102f; color: white; margin-top: 20px; }
 
-        /* Cards for Lists */
-        .glass-card { background: var(--glass); padding: 15px; border-radius: 20px; margin-bottom: 10px; width: 100%; border: 1px solid rgba(255,255,255,0.1); }
-
-        /* Bottom Navigation */
-        nav { 
-            position: absolute; bottom: 0; width: 100%; height: 90px; 
-            background: rgba(106, 83, 207, 0.7); backdrop-filter: blur(15px);
-            border-radius: 35px 35px 0 0; display: flex; justify-content: space-around; align-items: center;
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.5; color: white; cursor: pointer; flex: 1; }
-        .nav-item.active { opacity: 1; color: var(--accent); }
-        .nav-item i { font-size: 1.4rem; }
-        .center-btn { 
-            width: 75px; height: 75px; background: var(--accent); border-radius: 50%; 
-            margin-top: -50px; border: 6px solid #332288; display: flex; 
-            align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        #ghost-bar { display:none; background: #ff1744; text-align: center; padding: 5px; font-size: 0.7rem; font-weight: 900; position: sticky; top: 0; z-index: 100; }
+        /* NAV */
+        nav { height: 90px; background: rgba(106, 83, 207, 0.7); backdrop-filter: blur(10px); border-radius: 30px 30px 0 0; display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { opacity: 0.5; font-size: 0.7rem; color: white; text-align: center; }
+        .nav-item.active { opacity: 1; color: var(--yellow); }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="ghost-bar" onclick="exitGhost()">SPECTATING: <span id="g-user"></span> (EXIT)</div>
-
     <header>
-        <div class="stat-box">
-            <div class="coin-img"></div>
-            <div id="top-bal" style="font-weight:700;">0.00</div>
+        <div class="score-pill">
+            <div class="coin"></div>
+            <div id="top-bal">0.00</div>
         </div>
-        <div class="stat-box" id="adm-trigger" style="display:none; color:gold;">ADM 👑</div>
+        <div id="status-tag" style="font-size: 0.7rem; color: #00ff00;">● ONLINE</div>
     </header>
 
     <div id="v-home" class="view active">
-        <div class="name-tag">Nebula Guardian</div>
-        <img src="https://i.ibb.co/LkhYhH3/pets.png" class="hero-img" id="main-pet">
-        <h1 class="main-title">YOUR<br>FANTASTIC PET</h1>
-        <div class="balance-text" id="main-bal">0.00</div>
-        <button class="btn-yellow" onclick="tapAction()">PLAY</button>
-        <button class="btn-sub" onclick="alert('Night Session Active!')">NIGHT SESSION</button>
+        <div class="pet-name">Nebula Guardian</div>
+        <img src="yourfantastic.jpg" class="hero-img" onerror="this.src='https://via.placeholder.com/250?text=yourfantastic.jpg+Not+Found'">
+        <h1 style="line-height: 0.9; margin-bottom: 10px;">YOUR<br>FANTASTIC PET</h1>
+        <div class="bal-val" id="main-bal">0.00</div>
+        <button class="btn-big" onclick="startMining()">PLAY / START</button>
     </div>
 
-    <div id="v-friends" class="view">
-        <h2 style="margin-bottom:20px;">Invite Friends</h2>
-        <div class="glass-card" style="text-align:center;">
-            <p style="font-size:1.2rem; color:gold;">Get 10.00 PI</p>
-            <p style="font-size:0.8rem; opacity:0.7;">Per active referral</p>
-        </div>
-        <button class="btn-yellow" style="margin-top:auto;" onclick="alert('Invite link copied!')">INVITE A FRIEND</button>
-    </div>
-
-    <div id="v-tasks" class="view">
-        <h2 style="margin-bottom:20px;">Daily Tasks</h2>
-        <div class="glass-card" onclick="alert('Task Completed!')">
-            <b>Follow on X</b><br><small>+5.00 PI</small>
-        </div>
-        <div class="glass-card" onclick="alert('Task Completed!')">
-            <b>Join Telegram Channel</b><br><small>+2.00 PI</small>
-        </div>
-    </div>
-
-    <div id="v-wallet" class="view">
-        <h2 style="margin-bottom:20px;">Wallet</h2>
-        <div class="glass-card">
-            <label style="font-size:0.7rem; opacity:0.6;">Withdraw Address</label>
-            <input type="text" placeholder="G..." style="width:100%; padding:12px; border-radius:12px; border:none; background:rgba(0,0,0,0.3); color:white; margin-top:5px;">
-        </div>
-        <div class="glass-card">
-            <label style="font-size:0.7rem; opacity:0.6;">Amount</label>
-            <input type="number" placeholder="Min 500" style="width:100%; padding:12px; border-radius:12px; border:none; background:rgba(0,0,0,0.3); color:white; margin-top:5px;">
-        </div>
-        <button class="btn-yellow" onclick="alert('Request Sent!')">WITHDRAW</button>
+    <div id="v-mining" class="view">
+        <div class="mining-pulse">⛏️</div>
+        <h2 style="color:var(--yellow)">MINING IN PROGRESS</h2>
+        <div class="bal-val" id="session-bal" style="font-size: 3.5rem;">0.0000</div>
+        <p style="opacity: 0.7;">Kazılan puanlar durdurunca hesaba geçer.</p>
+        <button class="btn-big btn-stop" onclick="stopMining()">STOP MINING</button>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:gold;">Admin Panel</h2>
-        <div class="glass-card" style="background:gold; color:black; text-align:center;" onclick="adminAdd()">
-            <b>ADD 500 PI TO ME</b>
-        </div>
-        <div id="adm-list" style="margin-top:10px;"></div>
+        <h2>ADMIN CONTROL</h2>
+        <button class="btn-big" style="font-size: 1rem; margin-top: 10px;" onclick="add500()">ADD 500 PI</button>
+        <div id="user-list" style="width:100%; margin-top: 20px;"></div>
     </div>
 
-    <nav>
-        <div class="nav-item" onclick="tab('v-friends', this)">👥<span>Friends</span></div>
-        <div class="nav-item" onclick="tab('v-tasks', this)">🎁<span>Tasks</span></div>
-        <div class="center-btn" onclick="tab('v-home', this)">🐾</div>
-        <div class="nav-item" onclick="tab('v-wallet', this)">💳<span>Wallet</span></div>
-        <div id="nav-adm" class="nav-item" style="display:none;" onclick="tab('v-admin', this)">⚙️<span>Admin</span></div>
+    <nav id="main-nav">
+        <div class="nav-item" onclick="tab('v-home')">🐾<br>Home</div>
+        <div class="nav-item" onclick="tab('v-wallet')">💳<br>Wallet</div>
+        <div id="adm-nav" class="nav-item" style="display:none;" onclick="tab('v-admin')">⚙️<br>Admin</div>
     </nav>
 </div>
 
 <script>
-    // --- CONFIG & FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -160,81 +105,69 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    const ADMIN_ID = "8392479231";
+    const MY_ID = "8392479231";
 
-    let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_user";
-    let activeUid = realUid;
-    let userData = { pi: 0, username: tg.initDataUnsafe?.user?.username || "Guest" };
+    let uid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_user";
+    let uData = { pi: 0, username: tg.initDataUnsafe?.user?.username || "Guest" };
+    let miningInt = null;
+    let sessionPi = 0;
 
     function init() {
         tg.expand();
-        // Veriyi Dinle
-        db.collection("users").doc(activeUid).onSnapshot(doc => {
-            if(doc.exists) { 
-                userData = doc.data(); 
-                updateUI(); 
-            } else { 
-                db.collection("users").doc(activeUid).set(userData); 
-            }
+        db.collection("users").doc(uid).onSnapshot(doc => {
+            if(doc.exists) { uData = doc.data(); updateUI(); }
+            else { db.collection("users").doc(uid).set(uData); }
         });
-
-        if(realUid === ADMIN_ID) {
-            document.getElementById('nav-adm').style.display = 'flex';
-            document.getElementById('adm-trigger').style.display = 'block';
-        }
+        if(uid === MY_ID) document.getElementById('adm-nav').style.display = 'block';
     }
 
-    function tapAction() {
-        if(activeUid !== realUid) return;
+    function startMining() {
+        tab('v-mining');
+        document.getElementById('main-nav').style.pointerEvents = 'none'; // Kazım yaparken menüyü kitle
+        document.getElementById('main-nav').style.opacity = '0.3';
         
-        // Animasyon
-        const img = document.getElementById('main-pet');
-        img.style.transform = "scale(0.95)";
-        setTimeout(() => img.style.transform = "scale(1)", 100);
+        sessionPi = 0;
+        miningInt = setInterval(() => {
+            sessionPi += 0.00052; // Kazım hızı
+            document.getElementById('session-bal').innerText = sessionPi.toFixed(4);
+        }, 100);
+    }
 
-        tg.HapticFeedback.impactOccurred('medium');
-        
-        db.collection("users").doc(realUid).update({
-            pi: firebase.firestore.FieldValue.increment(0.01)
+    function stopMining() {
+        clearInterval(miningInt);
+        // Bakiyeyi Firebas'e aktar
+        db.collection("users").doc(uid).update({
+            pi: firebase.firestore.FieldValue.increment(sessionPi)
+        }).then(() => {
+            tab('v-home');
+            document.getElementById('main-nav').style.pointerEvents = 'auto';
+            document.getElementById('main-nav').style.opacity = '1';
+            tg.showAlert("Mining bitti! Bakiyenize " + sessionPi.toFixed(2) + " PI eklendi.");
         });
     }
 
     function updateUI() {
-        document.getElementById('top-bal').innerText = userData.pi.toFixed(2);
-        document.getElementById('main-bal').innerText = userData.pi.toFixed(2);
-        
-        if(activeUid !== realUid) {
-            document.getElementById('ghost-bar').style.display = 'block';
-            document.getElementById('g-user').innerText = userData.username;
-        } else {
-            document.getElementById('ghost-bar').style.display = 'none';
-        }
+        document.getElementById('top-bal').innerText = uData.pi.toFixed(2);
+        document.getElementById('main-bal').innerText = uData.pi.toFixed(2);
     }
 
-    function tab(id, el) {
+    function tab(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(el) el.classList.add('active');
         if(id === 'v-admin') loadAdmin();
     }
 
-    // --- ADMIN ---
-    async function adminAdd() {
-        await db.collection("users").doc(ADMIN_ID).update({ pi: firebase.firestore.FieldValue.increment(500) });
+    async function add500() {
+        await db.collection("users").doc(MY_ID).update({ pi: firebase.firestore.FieldValue.increment(500) });
     }
 
     async function loadAdmin() {
-        const snap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
-        const list = document.getElementById('adm-list');
-        list.innerHTML = "";
+        const snap = await db.collection("users").orderBy("pi", "desc").limit(15).get();
+        const list = document.getElementById('user-list'); list.innerHTML = "";
         snap.forEach(doc => {
-            list.innerHTML += `<div class="glass-card" onclick="ghostMode('${doc.id}')">@${doc.data().username || 'NoName'} - ${doc.data().pi.toFixed(2)} PI</div>`;
+            list.innerHTML += `<div style="padding:10px; background:rgba(0,0,0,0.2); margin-bottom:5px; border-radius:10px;">@${doc.data().username}: ${doc.data().pi.toFixed(2)}</div>`;
         });
     }
-
-    function ghostMode(id) { activeUid = id; tab('v-home'); init(); }
-    function exitGhost() { activeUid = realUid; init(); }
 
     window.onload = init;
 </script>
