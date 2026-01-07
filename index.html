@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA V40 - SUPREME ADMIN</title>
+    <title>PI NEBULA V42 - EMPIRE EDITION</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,75 +12,109 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p: #a855f7; --s: #fbbf24; --bg: #030008; --card: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); --red: #ff4757; --green: #00ff88; }
+        :root { 
+            --p: #a855f7; --p-glow: rgba(168, 85, 247, 0.4); 
+            --s: #fbbf24; --bg: #030008; 
+            --card: rgba(255, 255, 255, 0.05); 
+            --border: rgba(255, 255, 255, 0.1);
+            --red: #ff4757; --green: #00ff88;
+        }
+
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; background-image: radial-gradient(circle at 50% -20%, #2e1065 0%, #030008 80%); }
         #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; }
 
-        /* HEADER & UI */
+        /* PROGRESS BAR */
         .fuel-container { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.5); z-index: 1000; }
-        #fuel-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--p), var(--s)); transition: width 1s linear; }
+        #fuel-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--p), var(--s)); box-shadow: 0 0 10px var(--p); transition: width 1s linear; }
+
+        /* HEADER */
         .header { padding: 30px 20px 10px; display: flex; justify-content: space-between; align-items: center; }
         .balance-card { background: var(--card); border: 1px solid var(--border); padding: 8px 18px; border-radius: 15px; backdrop-filter: blur(10px); }
+        .balance-val { font-family: 'Orbitron'; font-weight: 900; color: var(--s); font-size: 1.1rem; }
+
+        /* VIEWS */
         .view { display: none; flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
         .view.active { display: flex; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MINER */
-        .fan { width: 180px; height: 180px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--border); margin: 20px auto; }
-        .fan.spinning { animation: spin 3s linear infinite; border-color: var(--p); box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); }
+        /* MINER AREA */
+        .fan-box { width: 180px; height: 180px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--border); margin: 20px auto; transition: 0.5s; }
+        .fan-box.spinning { animation: spin 3s linear infinite; border-color: var(--p); box-shadow: 0 0 30px var(--p-glow); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* BUTTONS & GLASS */
-        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+        .btn { padding: 14px; border-radius: 14px; border: none; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.2s; }
         .btn-p { background: linear-gradient(135deg, #a855f7, #7e22ce); color: white; }
         .btn-s { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; }
+        .btn:active { transform: scale(0.96); }
         .glass-box { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-bottom: 15px; }
 
-        /* ADMIN SPECIFIC */
-        .user-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .user-img { width: 40px; height: 40px; border-radius: 50%; background: #222; object-fit: cover; border: 1px solid var(--p); }
-        #ghost-overlay { display: none; position: absolute; top: 65px; left: 50%; transform: translateX(-50%); background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; animation: pulse 1s infinite; cursor: pointer; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* LIST ITEMS */
+        .row { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .pfp { width: 40px; height: 40px; border-radius: 50%; background: #222; border: 1px solid var(--p); }
+
+        /* GHOST MODE OVERLAY */
+        #ghost-alert { display: none; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: var(--red); padding: 5px 15px; border-radius: 20px; font-size: 0.6rem; font-weight: 900; z-index: 2000; border: 1px solid white; cursor: pointer; }
 
         /* NAVBAR */
-        nav { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 65px; background: rgba(15, 7, 32, 0.8); backdrop-filter: blur(20px); display: flex; border-radius: 20px; border: 1px solid var(--border); }
+        nav { position: absolute; bottom: 15px; left: 15px; right: 15px; height: 65px; background: rgba(15, 7, 32, 0.8); backdrop-filter: blur(20px); display: flex; border-radius: 20px; border: 1px solid var(--border); z-index: 1000; }
         .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 0.6rem; font-weight: bold; color: white; }
         .nav-btn.active { opacity: 1; color: var(--p); }
 
-        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin-bottom: 10px; }
+        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin-bottom: 10px; outline: none; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="fuel-bar-cont" class="fuel-container"><div id="fuel-bar"></div></div>
-    <div id="ghost-overlay" onclick="exitGhost()">İZLENİYOR: <span id="ghost-name">...</span> (ÇIK ✕)</div>
+    <div class="fuel-container"><div id="fuel-bar"></div></div>
+    <div id="ghost-alert" onclick="exitGhost()">İZLEME MODU: <span id="ghost-target">...</span> (ÇIK ✕)</div>
     
     <header class="header">
         <div>
-            <p style="font-family:'Orbitron'; font-size: 0.8rem; font-weight:900;">PI NEBULA</p>
+            <p style="font-family:'Orbitron'; font-size: 0.8rem; font-weight:900;">PI NEBULA <small style="color:var(--p)">V42</small></p>
             <p id="time-text" style="font-size: 0.6rem; color: var(--red);">SÜRE: 30s</p>
         </div>
-        <div class="balance-card"><div id="h-pi" style="font-family:'Orbitron'; color:var(--s); font-weight:900;">0.00</div></div>
+        <div class="balance-card">
+            <div id="h-pi" class="balance-val">0.00</div>
+        </div>
     </header>
 
     <div id="v-home" class="view active">
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-            <div id="fan-obj" class="fan spinning"></div>
+            <div id="fan-obj" class="fan-box spinning"></div>
             <div id="m-val" style="font-family:'Orbitron'; font-size:2.4rem; font-weight:900; margin-bottom:5px;">0.00000000</div>
-            <p id="status-badge" style="color:var(--green); font-size:0.7rem; font-weight:900;">MADENCİLİK AKTİF</p>
+            <p id="status-tag" style="color:var(--green); font-size:0.7rem; font-weight:900; letter-spacing:1px;">MADENCİLİK AKTİF</p>
+            
             <div style="width:100%; margin-top:30px;">
                 <button id="btn-claim" class="btn btn-p" onclick="claim()">Pİ TOPLA</button>
-                <button id="btn-ad" class="btn btn-s" onclick="watchAd()" style="display:none;">SÜREYİ YENİLE (+30SN)</button>
+                <button id="btn-ad" class="btn btn-s" onclick="watchAd()" style="display:none;">REKLAM İZLE (+30SN)</button>
             </div>
+        </div>
+    </div>
+
+    <div id="v-earn" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px;">GÖREVLER</h2>
+        <div class="glass-box" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <p style="font-weight:800;">Kanala Katıl</p>
+                <p style="font-size:0.7rem; opacity:0.6;">+0.25 PI Ödül</p>
+            </div>
+            <button id="task-btn" onclick="doTask('tg_join', 0.25, 'https://t.me/FonixCommunty')" class="btn btn-s" style="width:auto; padding:8px 15px;">KATIL</button>
+        </div>
+        <div class="glass-box">
+            <p style="font-size:0.7rem; margin-bottom:8px;">Referans Kodu Gir</p>
+            <input type="text" id="ref-input" placeholder="ID Girin">
+            <button class="btn btn-p" onclick="applyRef()">ONAYLA</button>
         </div>
     </div>
 
     <div id="v-friends" class="view">
         <h2 style="font-family:'Orbitron'; margin-bottom:15px;">REFERANSLAR</h2>
-        <div class="glass-box" style="text-align:center;">
-            <p style="font-size:0.7rem; opacity:0.6;">KODUN: <b id="my-id">...</b></p>
+        <div class="glass-box" style="text-align:center; border: 1px dashed var(--p);">
+            <p style="font-size:0.6rem; opacity:0.6;">KODUNU PAYLAŞ</p>
+            <h1 id="my-id" style="font-family:'Orbitron'; color:var(--s); letter-spacing:3px;">---</h1>
         </div>
         <div id="ref-list"></div>
     </div>
@@ -88,24 +122,30 @@
     <div id="v-wallet" class="view">
         <h2 style="font-family:'Orbitron'; margin-bottom:15px;">CÜZDAN</h2>
         <div class="glass-box">
-            <input type="text" id="w-addr" placeholder="Cüzdan Adresi">
+            <input type="text" id="w-addr" placeholder="Pi Adresi (G...)">
             <input type="number" id="w-amt" placeholder="Miktar (Min 500)">
-            <button class="btn btn-p" onclick="withdraw()">TALEP GÖNDER</button>
+            <button class="btn btn-p" onclick="requestWithdraw()">ÇEKİM TALEBİ</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
         <h2 style="color:var(--red); font-family:'Orbitron';">ADMİN PANEL</h2>
         
-        <p style="font-size:0.7rem; color:var(--s); margin:15px 0 5px;">💰 ÖDEME TALEPLERİ</p>
+        <div class="glass-box" style="border: 2px solid var(--s); background: rgba(251, 191, 36, 0.1); margin-top:15px;">
+            <p style="font-size:0.7rem; font-weight:900; color:var(--s); margin-bottom:10px;">👑 KURUCU ÖZEL</p>
+            <button class="btn btn-s" onclick="addAdminBonus()">HESABIMA 500 PI EKLE</button>
+        </div>
+
+        <p style="font-size:0.7rem; color:var(--s); margin:20px 0 5px;">💰 ÖDEME TALEPLERİ</p>
         <div id="adm-withdraws" class="glass-box" style="padding:0;"></div>
 
-        <p style="font-size:0.7rem; color:var(--p); margin:15px 0 5px;">👥 ÜYELER (İZLEMEK İÇİN TIKLA)</p>
+        <p style="font-size:0.7rem; color:var(--p); margin:20px 0 5px;">👥 ÜYELER (İZLEMEK İÇİN TIKLA)</p>
         <div id="adm-users" class="glass-box" style="padding:0;"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)">EV</div>
+        <div class="nav-btn" onclick="tab('v-earn', this)">GÖREV</div>
         <div class="nav-btn" onclick="tab('v-friends', this)">REF</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)">CÜZDAN</div>
         <div class="nav-btn" id="adm-nav" style="display:none;" onclick="tab('v-admin', this)">ADMİN</div>
@@ -113,6 +153,7 @@
 </div>
 
 <script>
+    // FIREBASE SETUP
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -124,23 +165,30 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const tg = window.Telegram.WebApp;
-    const MY_ID = "8392479231";
+    const MY_ID = "8392479231"; // SENİN ADMIN ID'N
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", photo: tg.initDataUnsafe?.user?.photo_url || "" };
+    let uData = { pi:0, uncl:0, username: tg.initDataUnsafe?.user?.username || "Guest", photo: tg.initDataUnsafe?.user?.photo_url || "", tasks: {} };
     let fuel = 30;
     let isMining = true;
 
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
-            if(doc.exists) { uData = doc.data(); updateUI(); }
-            else { db.collection("users").doc(activeUid).set(uData); }
+            if(doc.exists) { 
+                uData = doc.data(); 
+                document.getElementById('h-pi').innerText = uData.pi.toFixed(2);
+                checkTaskUI();
+            } else { 
+                db.collection("users").doc(activeUid).set(uData); 
+            }
         });
 
         if(realUid === MY_ID) document.getElementById('adm-nav').style.display = 'flex';
         document.getElementById('my-id').innerText = realUid;
+        loadRefs();
         
+        // Madencilik Motoru
         setInterval(() => {
             if(isMining && fuel > 0) {
                 fuel--;
@@ -153,28 +201,18 @@
         }, 1000);
     }
 
-    function updateUI() {
-        document.getElementById('h-pi').innerText = uData.pi.toFixed(2);
-        if(activeUid !== realUid) {
-            document.getElementById('ghost-overlay').style.display = 'block';
-            document.getElementById('ghost-name').innerText = uData.username;
-        } else {
-            document.getElementById('ghost-overlay').style.display = 'none';
-        }
-    }
-
     function updateStatus() {
         const fan = document.getElementById('fan-obj');
-        const badge = document.getElementById('status-badge');
+        const tag = document.getElementById('status-tag');
         if(isMining) {
-            fan.classList.add('spinning'); badge.innerText = "MADENCİLİK AKTİF";
+            fan.classList.add('spinning'); tag.innerText = "MADENCİLİK AKTİF"; tag.style.color = "var(--green)";
             document.getElementById('btn-claim').style.display = 'block';
             document.getElementById('btn-ad').style.display = 'none';
         } else {
-            fan.classList.remove('spinning'); badge.innerText = "SÜRE BİTTİ";
+            fan.classList.remove('spinning'); tag.innerText = "SÜRE BİTTİ"; tag.style.color = "var(--red)";
             document.getElementById('btn-claim').style.display = 'none';
             document.getElementById('btn-ad').style.display = 'block';
-            watchAd();
+            watchAd(); 
         }
     }
 
@@ -185,55 +223,104 @@
         } catch(e) { fuel = 30; isMining = true; updateStatus(); }
     }
 
-    // --- ADMIN PANEL FUNCTIONS ---
+    function claim() {
+        if(uData.uncl < 0.001 || activeUid !== realUid) return;
+        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
+    }
+
+    // --- GÖREVLER ---
+    async function doTask(id, reward, url) {
+        if(uData.tasks && uData.tasks[id]) return alert("Zaten yapıldı!");
+        window.open(url, '_blank');
+        const upd = {}; upd[`tasks.${id}`] = true; upd['pi'] = firebase.firestore.FieldValue.increment(reward);
+        await db.collection("users").doc(realUid).update(upd);
+        alert("Ödül Alındı!");
+    }
+
+    function checkTaskUI() {
+        if(uData.tasks && uData.tasks.tg_join) {
+            const b = document.getElementById('task-btn');
+            b.innerText = "OK ✅"; b.disabled = true; b.style.opacity = "0.5";
+        }
+    }
+
+    // --- REFERANS ---
+    async function applyRef() {
+        const rId = document.getElementById('ref-input').value;
+        if(rId === realUid || uData.invitedBy) return alert("Geçersiz!");
+        const rDoc = await db.collection("users").doc(rId).get();
+        if(rDoc.exists) {
+            await db.collection("users").doc(realUid).update({ invitedBy: rId });
+            await db.collection("users").doc(rId).update({ pi: firebase.firestore.FieldValue.increment(1.0) });
+            alert("Referans eklendi!");
+        }
+    }
+
+    async function loadRefs() {
+        const snap = await db.collection("users").where("invitedBy", "==", realUid).get();
+        const div = document.getElementById('ref-list');
+        div.innerHTML = snap.empty ? "<p style='text-align:center; opacity:0.5; padding:20px;'>Henüz kimse yok.</p>" : "";
+        snap.forEach(doc => {
+            div.innerHTML += `<div class="row"><div class="pfp"></div><span>@${doc.data().username}</span></div>`;
+        });
+    }
+
+    // --- ADMİN ÖZEL ---
+    async function addAdminBonus() {
+        if(realUid === MY_ID) {
+            await db.collection("users").doc(MY_ID).update({ pi: firebase.firestore.FieldValue.increment(500) });
+            alert("500 PI Eklendi Patron!");
+        }
+    }
+
     async function loadAdmin() {
-        // Üyeleri Listele
+        // Üyeler & Kim kimi getirdi
         const uSnap = await db.collection("users").orderBy("pi", "desc").get();
-        const uDiv = document.getElementById('adm-users');
-        uDiv.innerHTML = "";
+        const uDiv = document.getElementById('adm-users'); uDiv.innerHTML = "";
         uSnap.forEach(doc => {
             const d = doc.data();
             uDiv.innerHTML += `
-                <div class="user-row" onclick="ghostMode('${doc.id}')">
-                    <img src="${d.photo || 'https://via.placeholder.com/40'}" class="user-img">
+                <div class="row" onclick="ghostMode('${doc.id}')">
+                    <img src="${d.photo || ''}" class="pfp">
                     <div style="flex:1">
-                        <div style="font-size:0.8rem; font-weight:bold;">@${d.username}</div>
-                        <div style="font-size:0.6rem; opacity:0.6;">ID: ${doc.id}</div>
+                        <b>@${d.username}</b><br>
+                        <small style="color:var(--s)">Davet Eden: ${d.invitedBy || 'Yok'}</small>
                     </div>
-                    <div style="color:var(--s); font-weight:900;">${d.pi.toFixed(2)}</div>
+                    <div style="font-weight:900;">${d.pi.toFixed(2)}</div>
                 </div>`;
         });
 
-        // Ödemeleri Listele
+        // Ödemeler
         const wSnap = await db.collection("withdrawals").where("status","==","pending").get();
-        const wDiv = document.getElementById('adm-withdraws');
-        wDiv.innerHTML = "";
+        const wDiv = document.getElementById('adm-withdraws'); wDiv.innerHTML = "";
         wSnap.forEach(doc => {
             wDiv.innerHTML += `
-                <div class="user-row">
-                    <div style="flex:1">
-                        <b>@${doc.data().username}</b><br><small>${doc.data().amt} PI - ${doc.data().addr}</small>
-                    </div>
-                    <button class="btn btn-s" style="width:60px; padding:5px;" onclick="approvePay('${doc.id}')">OK</button>
+                <div class="row">
+                    <div style="flex:1"><b>@${doc.data().username}</b><br><small>${doc.data().amt} PI - ${doc.data().addr}</small></div>
+                    <button class="btn btn-s" style="width:50px; padding:5px;" onclick="approvePay('${doc.id}')">OK</button>
                 </div>`;
         });
     }
 
-    function ghostMode(id) { activeUid = id; tab('v-home', document.querySelector('.nav-btn')); init(); }
-    function exitGhost() { activeUid = realUid; init(); }
+    function ghostMode(id) { 
+        activeUid = id; 
+        document.getElementById('ghost-alert').style.display = 'block';
+        tab('v-home', document.querySelector('.nav-btn')); 
+        init(); 
+    }
+    function exitGhost() { activeUid = realUid; document.getElementById('ghost-alert').style.display = 'none'; init(); }
 
     async function approvePay(id) {
         await db.collection("withdrawals").doc(id).update({status: "paid"});
-        alert("Ödeme Onaylandı!"); loadAdmin();
+        loadAdmin();
     }
 
-    function withdraw() {
+    function requestWithdraw() {
         const amt = parseFloat(document.getElementById('w-amt').value);
-        const addr = document.getElementById('w-addr').value;
         if(amt >= 500 && uData.pi >= amt) {
-            db.collection("withdrawals").add({ uid: realUid, username: uData.username, amt: amt, addr: addr, status: "pending" });
+            db.collection("withdrawals").add({ uid: realUid, username: uData.username, amt: amt, addr: document.getElementById('w-addr').value, status: "pending" });
             db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            alert("Talep Gönderildi!");
+            alert("Talebiniz iletildi!");
         }
     }
 
@@ -243,11 +330,6 @@
         document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
         if(id === 'v-admin') loadAdmin();
-    }
-
-    function claim() {
-        if(uData.uncl < 0.001 || activeUid !== realUid) return;
-        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0 });
     }
 
     window.onload = init;
