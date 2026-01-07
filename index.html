@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PINIX ULTIMATE V15</title>
+    <title>PINIX PRO V16</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -12,121 +12,125 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.08); --red: #ff4757; --green: #2ed573; }
+        :root { --p: #8b5cf6; --s: #fbbf24; --bg: #05010a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.1); --red: #ff4757; --green: #2ed573; }
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; -webkit-user-select:none; }
         body { background: var(--bg); color: white; overflow: hidden; height: 100vh; }
-        #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 70%); }
+        #app { width:100%; max-width:450px; height:100vh; margin:auto; position:relative; display:flex; flex-direction:column; background: radial-gradient(circle at 50% 0%, #1e103d 0%, var(--bg) 75%); }
         
-        /* AD TIMER BAR */
-        .ad-timer-top { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.1); z-index: 1000; }
-        #ad-fill-top { width: 0%; height: 100%; background: var(--s); box-shadow: 0 0 15px var(--s); transition: linear 1s; }
+        /* AD BAR (Ödülsüz) */
+        .ad-timer { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 1000; }
+        #ad-fill { width: 0%; height: 100%; background: var(--p); transition: linear 1s; opacity: 0.5; }
 
-        .header { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .header { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .box { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 15px; display: flex; align-items: center; gap: 10px; }
         .box img { width: 30px; border-radius: 50%; border: 1px solid var(--p); }
 
-        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(10,5,20,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; z-index: 100; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.4); cursor: pointer; }
+        nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: rgba(5,2,15,0.98); display: flex; border-top: 1px solid var(--border); padding-bottom: 10px; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: rgba(255,255,255,0.3); }
         .nav-btn.active { color: var(--s); font-weight: 900; }
-        .nav-btn i { font-size: 1.3rem; margin-bottom: 3px; font-style: normal; }
 
         .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 90px; }
-        .view.active { display: flex; animation: slide 0.3s ease; }
-        @keyframes slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .fan-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .fan { width: 200px; height: 200px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--p); animation: spin 1.2s linear infinite; box-shadow: 0 0 40px rgba(139,92,246,0.2); }
+        .fan { width: 180px; height: 180px; background: url('pinix.jpg') center/cover; border-radius: 50%; border: 4px solid var(--p); animation: spin 1.5s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .counter { font-family: 'Orbitron'; font-size: 2.2rem; margin-top: 15px; color: var(--s); }
+        .counter { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--s); margin: 15px 0; }
 
         .glass { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 12px; }
-        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.7rem; transition: 0.2s; }
-        .btn-p { background: var(--p); color: white; }
-        .btn-s { background: var(--green); color: white; }
-        .btn:active { transform: scale(0.95); }
-        input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; margin: 8px 0; outline: none; }
-
-        .u-card { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid var(--p); }
-        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.6rem; font-weight: 900; padding: 4px; }
-        .read-only { opacity: 0.5; pointer-events: none !important; }
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.7rem; color: white; transition: 0.2s; }
+        .btn-p { background: var(--p); }
+        .btn-s { background: var(--green); }
+        .btn-task { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 8px 15px; width: auto; font-size: 0.6rem; }
         
-        /* Reward Animation */
-        .reward-pop { position: absolute; color: var(--s); font-weight: 900; animation: popUp 1s forwards; pointer-events: none; }
-        @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+        /* TASK CARDS */
+        .task-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .task-info p { font-size: 0.75rem; font-weight: bold; }
+        .task-info span { font-size: 0.6rem; color: var(--green); }
+
+        #ghost-msg { display: none; background: var(--s); color: black; text-align: center; font-size: 0.6rem; font-weight: 900; padding: 3px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="ghost-msg">ADMIN VIEWING MODE</div>
-    <div class="ad-timer-top"><div id="ad-fill-top"></div></div>
+    <div id="ghost-msg">GHOST MODE ACTIVE</div>
+    <div class="ad-timer"><div id="ad-fill"></div></div>
     
     <header class="header">
-        <div class="box"><img src="pico.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PI COIN</p><p id="h-pi" style="font-weight:900;">0.00</p></div></div>
-        <div class="box"><img src="pinix.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PNX ASSET</p><p id="h-pnx" style="font-weight:900;">0</p></div></div>
+        <div class="box"><img src="pico.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PI COIN</p><p id="h-pi">0.00</p></div></div>
+        <div class="box"><img src="pinix.jpg"><div><p style="font-size:0.5rem; opacity:0.5;">PNX ASSET</p><p id="h-pnx">0</p></div></div>
     </header>
 
     <div id="v-home" class="view active">
         <div class="fan-wrap">
             <div class="fan"></div>
             <div class="counter" id="m-val">0.00000000</div>
-            <div class="glass" style="width:100%; margin-top:20px; text-align:center; border-color:var(--s);">
-                <p style="font-size:0.6rem; color:var(--s); font-weight:900;">NON-STOP AD MINING</p>
-                <p style="font-size:0.5rem; opacity:0.6;">Automatic +5 PNX every 3 seconds</p>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width:100%; margin-top:10px;">
-                <button class="btn btn-p" id="claim-btn" onclick="claim()">Claim PI</button>
-                <button class="btn btn-s" style="background:#f59e0b;" onclick="manualAd()">⚡ TURBO AD</button>
-            </div>
+            <button class="btn btn-p" onclick="claim()" style="max-width:200px;">Claim Profits</button>
+        </div>
+    </div>
+
+    <div id="v-tasks" class="view">
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.1rem;">Earning Tasks</h2>
+        
+        <div class="task-card">
+            <div class="task-info"><p>Follow Telegram Channel</p><span>+50 PNX</span></div>
+            <button class="btn btn-task" onclick="doTask('https://t.me/yourchannel', 50)">GO</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info"><p>Follow on X (Twitter)</p><span>+30 PNX</span></div>
+            <button class="btn btn-task" onclick="doTask('https://x.com/yourprofile', 30)">GO</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-info"><p>Invite Friend (Referral)</p><span>+100 PNX</span></div>
+            <button class="btn btn-task" onclick="tab('v-friends')">INVITE</button>
         </div>
     </div>
 
     <div id="v-wallet" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.2rem;">FINANCIAL HUB</h2>
-        <div class="glass" style="background: linear-gradient(135deg, rgba(139,92,246,0.1), transparent);">
-            <p style="font-size:0.6rem; color:var(--s);">CONVERT ASSETS (1000 PNX = 1 PI)</p>
-            <button class="btn btn-s" style="margin-top:10px;" onclick="swapPNX()">SWAP 1000 PNX</button>
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.1rem;">Asset Management</h2>
+        
+        <div class="glass" style="border-color: var(--s);">
+            <p style="font-size:0.6rem; color:var(--s); font-weight:900;">PNX TO PI SWAP</p>
+            <p style="font-size:0.5rem; opacity:0.6; margin-bottom:10px;">Rate: 100 PNX = 1 PI</p>
+            <button class="btn btn-s" onclick="swapPNX()">CONVERT 100 PNX</button>
         </div>
+
         <div class="glass">
-            <p style="font-size:0.7rem; opacity:0.6;">WITHDRAW PI (MIN 30)</p>
-            <input type="text" id="w-addr" placeholder="Pi Wallet Address">
+            <p style="font-size:0.6rem; opacity:0.5;">WITHDRAW PI (MIN 30)</p>
+            <input type="text" id="w-addr" placeholder="Wallet Address">
             <input type="number" id="w-amt" placeholder="Amount">
-            <button class="btn btn-p" id="w-btn" onclick="processWithdraw()">SEND REQUEST</button>
+            <button class="btn btn-p" onclick="sendWithdraw()">Withdraw</button>
         </div>
     </div>
 
     <div id="v-friends" class="view">
-        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.2rem;">REFERRALS</h2>
+        <h2 style="font-family:'Orbitron'; margin-bottom:15px; font-size:1.1rem;">Referral</h2>
         <div class="glass" style="text-align:center;">
-            <p style="font-size:0.6rem; opacity:0.6;">YOUR UNIQUE INVITE ID</p>
-            <h1 id="my-id-display" style="color:var(--s); margin:10px 0; font-size:1.8rem;">---</h1>
-            <button class="btn btn-p" onclick="shareRef()">INVITE FRIENDS (+200 PNX)</button>
-        </div>
-        <div class="glass" id="ref-box">
-            <p style="font-size:0.6rem; opacity:0.6;">ENTER INVITER'S ID</p>
-            <input type="number" id="ref-input" placeholder="Example: 8392479231">
-            <button class="btn btn-s" onclick="applyRef()">APPLY ID</button>
+            <p style="font-size:0.5rem; opacity:0.5;">YOUR ID</p>
+            <h3 id="my-id" style="color:var(--s); letter-spacing:2px; font-size:1.5rem;">---</h3>
+            <button class="btn btn-p" style="margin-top:10px;" onclick="shareRef()">Share Link</button>
         </div>
     </div>
 
     <div id="v-admin" class="view">
-        <h2 style="color:var(--red); font-family:'Orbitron'; margin-bottom:15px;">ADMIN CONSOLE</h2>
-        <p style="font-size:0.7rem; color:var(--s); margin-bottom:5px;">PENDING WITHDRAWALS</p>
-        <div id="adm-pulls" style="margin-bottom:20px;"></div>
-        <p style="font-size:0.7rem; opacity:0.5; margin-bottom:5px;">USER DATABASE</p>
-        <div id="adm-users"></div>
+        <h2 style="color:var(--red); font-family:'Orbitron'; font-size:1.1rem;">Admin Console</h2>
+        <div id="adm-pulls" style="margin-top:15px;"></div>
+        <div id="adm-users" style="margin-top:15px;"></div>
     </div>
 
     <nav>
         <div class="nav-btn active" onclick="tab('v-home', this)"><i>🏠</i>Home</div>
+        <div class="nav-btn" onclick="tab('v-tasks', this)"><i>📋</i>Tasks</div>
         <div class="nav-btn" onclick="tab('v-wallet', this)"><i>💳</i>Wallet</div>
-        <div class="nav-btn" onclick="tab('v-friends', this)"><i>👥</i>Friends</div>
         <div class="nav-btn" onclick="tab('v-admin', this)" id="adm-nav" style="display:none;"><i>🛠️</i>Admin</div>
     </nav>
 </div>
 
 <script>
-    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
         authDomain: "fonix-b4de6.firebaseapp.com",
@@ -142,22 +146,19 @@
     
     let realUid = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "dev_test";
     let activeUid = realUid;
-    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), usedRef:false, username: tg.initDataUnsafe?.user?.username || "Guest" };
+    let uData = { pi:0, pnx:0, uncl:0, lastSync: Date.now(), username: tg.initDataUnsafe?.user?.username || "Guest" };
     const mRate = 0.0001;
 
-    // --- NON-STOP AD ENGINE ---
-    let adTick = 0;
-    function startAdEngine() {
+    // --- REKLAM DÖNGÜSÜ (ÖDÜLSÜZ) ---
+    let adTime = 0;
+    function runAds() {
         setInterval(() => {
-            if(activeUid !== realUid) return;
-            adTick++;
-            document.getElementById('ad-fill-top').style.width = (adTick / 3) * 100 + "%";
-            
-            if(adTick >= 3) {
-                adTick = 0;
+            adTime++;
+            document.getElementById('ad-fill').style.width = (adTime/3)*100 + "%";
+            if(adTime >= 3) {
+                adTime = 0;
                 new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'push-like'}).autoMode();
-                db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(5) });
-                showRewardAnim("+5 PNX");
+                // Ödül satırı kaldırıldı. Sadece reklam gösterilir.
             }
         }, 1000);
     }
@@ -165,136 +166,75 @@
     function init() {
         db.collection("users").doc(activeUid).onSnapshot(doc => {
             if(doc.exists) {
-                const cloud = doc.data();
-                if(!window.isSynced) {
-                    const diff = Math.floor((Date.now() - (cloud.lastSync || Date.now())) / 1000);
-                    if(diff > 0) cloud.uncl = (cloud.uncl || 0) + (diff * mRate);
-                    window.isSynced = true;
-                }
-                uData = cloud;
+                uData = doc.data();
                 render();
             } else {
                 db.collection("users").doc(activeUid).set(uData);
             }
         });
-
         if(realUid === ADMIN_ID) document.getElementById('adm-nav').style.display = 'flex';
-        startAdEngine();
-
+        runAds();
         setInterval(() => {
             uData.uncl += mRate;
             document.getElementById('m-val').innerText = uData.uncl.toFixed(8);
-            if(Math.floor(Date.now()/1000) % 10 === 0) {
-                db.collection("users").doc(activeUid).update({ uncl: uData.uncl, lastSync: Date.now() });
-            }
         }, 1000);
     }
 
     function render() {
         document.getElementById('h-pi').innerText = (uData.pi || 0).toFixed(2);
         document.getElementById('h-pnx').innerText = Math.floor(uData.pnx || 0);
-        document.getElementById('my-id-display').innerText = realUid;
-        if(uData.usedRef) document.getElementById('ref-box').style.display = 'none';
-        
-        const isGhost = activeUid !== realUid;
-        document.getElementById('ghost-msg').style.display = isGhost ? 'block' : 'none';
-        document.getElementById('claim-btn').classList.toggle('read-only', isGhost);
+        document.getElementById('my-id').innerText = realUid;
+        document.getElementById('ghost-msg').style.display = activeUid !== realUid ? 'block' : 'none';
     }
 
-    // --- LOGIC FUNCTIONS ---
+    // --- LOGIC ---
     function claim() {
         if(uData.uncl < 0.001 || activeUid !== realUid) return;
-        db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(uData.uncl), uncl: 0, lastSync: Date.now() });
-        tg.HapticFeedback.notificationOccurred('success');
+        db.collection("users").doc(realUid).update({
+            pi: firebase.firestore.FieldValue.increment(uData.uncl),
+            uncl: 0,
+            lastSync: Date.now()
+        });
+    }
+
+    function doTask(url, reward) {
+        tg.openLink(url);
+        // Basitlik için tıklandığı an ödül verir, gerçek botlarda kontrol mekanizması eklenir.
+        db.collection("users").doc(realUid).update({
+            pnx: firebase.firestore.FieldValue.increment(reward)
+        });
+        tg.showAlert("Task Completed! +" + reward + " PNX");
     }
 
     async function swapPNX() {
-        if(uData.pnx < 1000) return tg.showAlert("Min 1000 PNX required!");
-        await db.collection("users").doc(activeUid).update({
-            pnx: firebase.firestore.FieldValue.increment(-1000),
+        if(uData.pnx < 100) return tg.showAlert("Min 100 PNX required!");
+        await db.collection("users").doc(realUid).update({
+            pnx: firebase.firestore.FieldValue.increment(-100),
             pi: firebase.firestore.FieldValue.increment(1)
         });
-        tg.showAlert("Successfully swapped 1 PI!");
+        tg.showAlert("Swapped! 1 PI added to wallet.");
     }
 
-    function manualAd() {
-        new AdexiumWidget({wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', adFormat: 'interstitial'}).autoMode();
-        db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(25) });
-        showRewardAnim("+25 PNX");
-    }
-
-    async function applyRef() {
-        const rid = document.getElementById('ref-input').value.trim();
-        if(rid === realUid || uData.usedRef) return;
-        const target = await db.collection("users").doc(rid).get();
-        if(target.exists) {
-            await db.collection("users").doc(rid).update({ pnx: firebase.firestore.FieldValue.increment(200) });
-            await db.collection("users").doc(realUid).update({ pnx: firebase.firestore.FieldValue.increment(100), usedRef: true });
-            tg.showAlert("Welcome reward added!");
-        }
-    }
-
-    async function processWithdraw() {
+    async function sendWithdraw() {
         const amt = parseFloat(document.getElementById('w-amt').value);
         const addr = document.getElementById('w-addr').value;
         if(amt >= 30 && uData.pi >= amt) {
-            document.getElementById('w-btn').innerText = "SENDING...";
-            await db.collection("withdrawals").add({ uid: activeUid, username: uData.username, addr, amt, status: "pending", date: Date.now() });
-            await db.collection("users").doc(activeUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
-            tg.showAlert("Withdrawal request sent!");
-            document.getElementById('w-btn').innerText = "SEND REQUEST";
-        } else {
-            tg.showAlert("Check amount and balance!");
+            await db.collection("withdrawals").add({ uid: realUid, username: uData.username, addr, amt, status: "pending", date: Date.now() });
+            await db.collection("users").doc(realUid).update({ pi: firebase.firestore.FieldValue.increment(-amt) });
+            tg.showAlert("Request sent!");
         }
     }
 
-    // --- ADMIN SYSTEM ---
+    // --- ADMIN ---
     async function loadAdmin() {
         const uBox = document.getElementById('adm-users');
         const wBox = document.getElementById('adm-pulls');
-        
-        // Load Withdrawals
-        const wSnap = await db.collection("withdrawals").where("status", "==", "pending").get();
-        wBox.innerHTML = wSnap.empty ? "<p style='font-size:0.6rem; opacity:0.4;'>No requests.</p>" : "";
-        wSnap.forEach(doc => {
+        const pulls = await db.collection("withdrawals").where("status", "==", "pending").get();
+        wBox.innerHTML = "";
+        pulls.forEach(doc => {
             const w = doc.data();
-            wBox.innerHTML += `
-                <div class="u-card" style="border-left-color:var(--s)">
-                    <p style="font-size:0.7rem;">@${w.username} - <b>${w.amt} PI</b></p>
-                    <p style="font-size:0.5rem; opacity:0.6;">${w.addr}</p>
-                    <button onclick="admPay('${doc.id}', 'paid')" style="font-size:0.5rem; color:var(--green); margin-top:5px; background:none; border:1px solid var(--green); padding:3px;">CONFIRM PAID</button>
-                </div>`;
+            wBox.innerHTML += `<div class="glass" style="font-size:0.6rem;">@${w.username} - ${w.amt} PI<br>${w.addr}<br><button onclick="confirmPay('${doc.id}')">MARK PAID</button></div>`;
         });
-
-        // Load Users
-        const uSnap = await db.collection("users").orderBy("pi", "desc").limit(20).get();
-        uBox.innerHTML = "";
-        uSnap.forEach(doc => {
-            const d = doc.data();
-            uBox.innerHTML += `
-                <div class="u-card">
-                    <b>@${d.username}</b><br>
-                    <span style="font-size:0.6rem;">PI: ${d.pi.toFixed(2)} | PNX: ${d.pnx}</span>
-                    <div style="margin-top:5px; display:flex; gap:4px;">
-                        <button onclick="enter('${doc.id}')" style="font-size:0.5rem; flex:1;">WATCH</button>
-                        <button onclick="admEdit('${doc.id}', 'pi')" style="font-size:0.5rem; flex:1;">+PI</button>
-                    </div>
-                </div>`;
-        });
-    }
-
-    async function admPay(id, status) {
-        if(confirm("Mark as paid?")) {
-            await db.collection("withdrawals").doc(id).update({ status });
-            loadAdmin();
-        }
-    }
-
-    function enter(id) { activeUid = id; window.isSynced = false; tab('v-home'); init(); }
-    async function admEdit(id, f) { 
-        let v = prompt("Amount:"); 
-        if(v) await db.collection("users").doc(id).update({ [f]: firebase.firestore.FieldValue.increment(parseFloat(v)) });
-        loadAdmin();
     }
 
     function tab(id, el) {
@@ -307,18 +247,8 @@
         if(id === 'v-admin') loadAdmin();
     }
 
-    function showRewardAnim(txt) {
-        const el = document.createElement('div');
-        el.className = 'reward-pop';
-        el.innerText = txt;
-        el.style.left = '50%';
-        el.style.top = '50%';
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1000);
-    }
-
     function shareRef() {
-        const txt = `Join Pinix Mining! Use my ID to get bonus: ${realUid}`;
+        const txt = `Join Pinix! My ID: ${realUid}`;
         tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/FonixMining2026Bot&text=${encodeURIComponent(txt)}`);
     }
 
