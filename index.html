@@ -43,13 +43,8 @@
             }
         };
         window.shareTG = () => {
-            const text = encodeURIComponent(`🐾 Pet Growth'da madencilik yapıyorum! Davet Kodum: ${uID}`);
+            const text = encodeURIComponent(`🐾 Pet Growth Madenciliği! ID: ${uID}`);
             window.open(`https://t.me/share/url?url=https://yourpet.app&text=${text}`);
-        };
-        window.apply = async () => {
-            if(stats.ref) return; stats.balance += 0.05; stats.ref = true;
-            await updateDoc(doc(db, "users", uID), { balance: stats.balance, ref: true });
-            ui(); alert("Referans Bonusu Alındı!");
         };
         function ui() {
             document.getElementById('h-bal').innerText = stats.balance.toFixed(4);
@@ -81,20 +76,25 @@
         .a { display: flex; }
         .btn { background: var(--g); color: #000; border: none; width: 85%; padding: 18px; border-radius: 30px; font-weight: 800; cursor: pointer; }
         
-        /* Visual Match Elements */
-        .pet-img { width: 230px; margin: 15px 0; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
-        .progress-circle { 
-            width: 150px; height: 150px; border-radius: 50%; 
-            background: conic-gradient(var(--g) 94%, transparent 0);
-            display: flex; align-items: center; justify-content: center; position: relative; margin-top: 10px;
+        /* Mining Screen Assets */
+        .fan-box { position: relative; width: 220px; height: 220px; margin: 20px 0; }
+        .fan-img { 
+            width: 100%; height: 100%; border-radius: 50%;
+            background: url('pinix.jpg') center/cover;
+            border: 8px solid rgba(255,255,255,0.1);
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px var(--p);
         }
-        .progress-circle::after { content: "94%"; position: absolute; width: 120px; height: 120px; background: #5c59d3; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; }
-        .progress-circle small { font-size: 8px; z-index: 2; margin-top: 35px; width: 80px; line-height: 1; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        .bottom-stats { display: flex; width: 100%; justify-content: space-around; position: absolute; bottom: 110px; }
-        .stat-pill { background: var(--g); color: #000; padding: 10px; border-radius: 50%; width: 70px; height: 70px; display: flex; flex-direction: column; justify-content: center; font-size: 9px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .progress-circle { 
+            width: 130px; height: 130px; border-radius: 50%; 
+            background: conic-gradient(var(--g) 94%, transparent 0);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .progress-circle::after { content: "94%"; position: absolute; width: 105px; height: 105px; background: #5c59d3; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-        .nav { height: 95px; background: rgba(129, 132, 247, 0.4); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav { height: 95px; background: rgba(129, 132, 247, 0.4); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; backdrop-filter: blur(10px); }
         .ni { font-size: 22px; cursor: pointer; opacity: 0.5; flex: 1; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
         .act { opacity: 1; transform: scale(1.15); color: var(--g); }
     </style>
@@ -107,8 +107,8 @@
     </div>
 
     <div id="p-home" class="p a">
-        <img src="image_1fb445.png" class="pet-img">
-        <h2 style="margin:5px 0;">PET GROWTH</h2>
+        <img src="yourfantastic.jpg" style="width:90%; border-radius:30px; margin-top:10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h2 style="margin:15px 0 5px 0;">PET GROWTH</h2>
         <p style="opacity:0.6; font-size:11px; letter-spacing:1px;">CRAFTING UNFORGETTABLE PET</p>
         <div style="flex:1"></div>
         <button class="btn" onclick="mine(true)">MINING START</button>
@@ -119,35 +119,30 @@
         <h1 style="font-size: 44px; margin:0;">🐾 <span id="m-paws">0</span></h1>
         <div style="color:var(--g); font-size:18px; margin-bottom:10px;">$<span id="m-usd">0.0000</span></div>
         <p style="font-size:14px; margin:0;">PET GROWTH</p>
-        <img src="image_1fb445.png" class="pet-img">
-        <p style="font-size:10px; opacity:0.8; margin-bottom:20px;">CRAFTING UNFORGETTABLE PET</p>
-        <div class="progress-circle">
-            <small>AWAY FROM EARNING 1COIN</small>
+        <div class="fan-box">
+            <div class="fan-img"></div>
         </div>
-        <div class="bottom-stats">
-            <div class="stat-pill">⏰<br>00:02:35</div>
-            <div class="stat-pill">⚡<br>77.69GC/s</div>
+        <div class="progress-circle" style="margin-bottom:20px;"></div>
+        <div style="display:flex; width:100%; justify-content:space-around; margin-top:10px;">
+            <div style="background:var(--g); color:#000; padding:10px; border-radius:50%; width:65px; height:65px; font-size:9px; font-weight:bold;">⏰<br>00:02:35</div>
+            <div style="background:var(--g); color:#000; padding:10px; border-radius:50%; width:65px; height:65px; font-size:9px; font-weight:bold;">⚡<br>77.69GC</div>
         </div>
     </div>
 
     <div id="p-friends" class="p">
         <h3>FRIENDS</h3>
         <div style="width:100%; background:rgba(0,0,0,0.2); padding:20px; border-radius:30px; border:1px solid rgba(255,255,255,0.1);">
-            <p style="margin:0 0 10px 0; font-size:12px;">SENİN DAVET KODUN</p>
-            <h2 id="my-code" style="color:var(--g); margin:0; letter-spacing:2px;">-</h2>
+            <p style="margin:0 0 10px 0; font-size:12px;">DAVET KODUN</p>
+            <h2 id="my-code" style="color:var(--g); margin:0;">-</h2>
             <hr style="opacity:0.1; margin:15px 0;">
-            <button class="btn" style="width:100%; padding:12px; font-size:14px;" onclick="shareTG()">TELEGRAM'DA PAYLAŞ</button>
-        </div>
-        <div style="width:100%; margin-top:15px; background:rgba(255,255,255,0.05); padding:15px; border-radius:20px;">
-            <input type="text" placeholder="Kod Gir" style="width:100%; padding:12px; border-radius:12px; border:none; text-align:center; margin-bottom:10px;">
-            <button class="btn" style="width:100%; padding:10px; font-size:12px;" onclick="apply()">KODU ONAYLA</button>
+            <button class="btn" style="width:100%; padding:12px; font-size:14px;" onclick="shareTG()">TELEGRAM PAYLAŞ</button>
         </div>
     </div>
 
     <div id="p-tasks" class="p">
         <h3>TASKS</h3>
-        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.1);">
-            <div style="text-align:left;"><b>Telegram Share</b><br><small style="color:var(--g)">+$0.0050</small></div>
+        <div style="width:100%; background:rgba(0,0,0,0.2); padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="text-align:left;"><b>Social Share</b><br><small style="color:var(--g)">+$0.0050</small></div>
             <button class="btn" style="width:80px; padding:10px; font-size:11px;" onclick="shareTG()">DO IT</button>
         </div>
     </div>
@@ -158,7 +153,7 @@
             <p style="opacity:0.6; font-size:12px;">TOTAL EARNINGS</p>
             <h1 style="font-size:52px; color:var(--g);">$<span id="w-bal">0.0000</span></h1>
         </div>
-        <button class="btn" onclick="alert('Minimum withdraw: $10.00')">WITHDRAW NOW</button>
+        <button class="btn">WITHDRAW</button>
     </div>
 
     <nav class="nav">
