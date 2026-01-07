@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI NEBULA PRO - V56</title>
+    <title>PI NEBULA PRO - V57</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -32,23 +32,15 @@
 
         /* --- MINING EKRANI --- */
         #v-mining { background: var(--bg-mine); align-items: center; justify-content: space-between; padding: 40px 20px; }
-        
         .fan-box { position: relative; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
-        .pinix-fan { width: 100%; height: 100%; border-radius: 50%; border: 5px solid var(--neon); box-shadow: 0 0 40px rgba(142, 255, 49, 0.15); object-fit: cover; }
+        .pinix-fan { width: 100%; height: 100%; border-radius: 50%; border: 5px solid var(--neon); box-shadow: 0 0 40px rgba(142,255,49,0.2); object-fit: cover; }
         .spinning { animation: rotateFan 1.2s linear infinite; }
         @keyframes rotateFan { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- İSTATİSTİK KUTUCUKLARI --- */
-        .mining-stats { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin: 20px 0;
-        }
-        .stat-card { 
-            background: var(--glass); border: 1px solid rgba(255,255,255,0.1); 
-            padding: 15px 5px; border-radius: 15px; text-align: center;
-        }
-        .stat-card span { display: block; }
+        .mining-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin: 20px 0; }
+        .stat-card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; border-radius: 15px; text-align: center; }
         .st-val { color: var(--neon); font-family: 'Montserrat'; font-size: 1rem; font-weight: 900; margin-bottom: 5px; }
-        .st-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+        .st-lbl { font-size: 0.6rem; opacity: 0.5; text-transform: uppercase; }
 
         /* --- NAV & BUTTONS --- */
         nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(44, 26, 116, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
@@ -107,9 +99,9 @@
         <button class="btn btn-stop" onclick="stopMining()">STOP & COLLECT</button>
     </div>
 
-    <div id="v-friends" class="view"><h2>Friends Section</h2></div>
-    <div id="v-tasks" class="view"><h2>Tasks Section</h2></div>
-    <div id="v-wallet" class="view"><h2>Wallet Section</h2></div>
+    <div id="v-friends" class="view"><h2>Friends</h2></div>
+    <div id="v-tasks" class="view"><h2>Tasks</h2></div>
+    <div id="v-wallet" class="view"><h2>Wallet</h2></div>
 
     <nav id="bottom-nav">
         <div class="nav-item" onclick="showTab('v-friends', this)">👥<br>Friends</div>
@@ -164,20 +156,20 @@
         document.getElementById('bottom-nav').style.display = 'none';
         document.getElementById('ui-header').style.display = 'none';
 
+        // Sayaçları her başlangıçta sıfırla
         seconds = 0;
         sessionPi = 0;
+        document.getElementById('st-time').innerText = "0s";
+        document.getElementById('st-earned').innerText = "0.0000";
+        document.getElementById('mine-cycle-text').innerText = "Döngü: 0/30 saniye";
         
         miningInt = setInterval(() => {
             seconds++;
-            
-            // 1. Süre Güncelleme
             document.getElementById('st-time').innerText = seconds + "s";
             
-            // 2. GH/s Hız Güncelleme (1-7 arası rastgele dalgalanma)
             let randomGhs = (Math.random() * (7 - 1) + 1).toFixed(2);
             document.getElementById('st-ghs').innerText = randomGhs;
 
-            // 3. 30 Saniye Döngü Kontrolü
             let cyclePos = seconds % 30;
             document.getElementById('mine-cycle-text').innerText = `Döngü: ${cyclePos}/30 saniye`;
 
@@ -192,16 +184,25 @@
 
     function stopMining() {
         clearInterval(miningInt);
+        
+        // Veritabanına kaydet
         db.collection("users").doc(uid).update({
             pi: firebase.firestore.FieldValue.increment(sessionPi)
         }).then(() => {
+            // Arayüzü eski haline getir
             document.getElementById('bottom-nav').style.display = 'flex';
             document.getElementById('ui-header').style.display = 'flex';
             showTab('v-home', document.querySelectorAll('.nav-item')[2]);
-            tg.showAlert(`Mining Tamamlandı!\nOturum Kazancı: ${sessionPi.toFixed(4)} PI`);
-            // Statları sıfırla
+            
+            tg.showAlert(`Kazanılan PI Hesaba Eklendi!`);
+
+            // KRİTİK: Mining ekranındaki değerleri görsel olarak SIFIRLA
+            seconds = 0;
+            sessionPi = 0;
             document.getElementById('st-time').innerText = "0s";
             document.getElementById('st-earned').innerText = "0.0000";
+            document.getElementById('st-ghs').innerText = "0.00";
+            document.getElementById('mine-cycle-text').innerText = "Döngü Sıfırlandı";
         });
     }
 
