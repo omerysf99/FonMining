@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pet Pro - Cloud Master</title>
+    <title>Pet Master - 9:16 Cloud</title>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, query, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase Yapılandırması
         const firebaseConfig = {
             apiKey: "AIzaSyApwj-8tB4qxqe8yJ9uP7XuKfEdT2lwYv4",
             authDomain: "fonix-b4de6.firebaseapp.com",
@@ -23,248 +22,170 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- UYGULAMA DEĞİŞKENLERİ ---
-        // Not: Gerçekte Telegram UID'si buraya dinamik gelir. Test için senin ID'ni sabitliyoruz.
-        let currentUser = "8392479231"; 
-        let userData = { balance: 0.0, refUsed: false, isAdmin: false, username: "Guest" };
-        let sessionBal = 0;
-        let miningActive = false;
-        let mainTimer;
+        // --- MASTER ADMIN KONTROLÜ ---
+        const MASTER_ID = "8392479231"; 
+        let currentUID = MASTER_ID; // Üretimde burası Telegram'dan gelir
+        let userLocal = { balance: 0.0, refUsed: false };
+        let sessionUSD = 0;
+        let isMining = false;
+        let timer;
 
-        /* --- VERİ TABANI SİNKRONİZASYONU --- */
-        async function syncData() {
-            const docRef = doc(db, "users", currentUser);
-            const snap = await getDoc(docRef);
+        async function initApp() {
+            const dRef = doc(db, "users", currentUID);
+            const snap = await getDoc(dRef);
 
             if (snap.exists()) {
-                userData = snap.data();
+                userLocal = snap.data();
             } else {
-                // Yeni Kullanıcı Başlangıç Verisi
-                userData = {
+                userLocal = {
                     balance: 0.0,
                     refUsed: false,
-                    isAdmin: (currentUser === "8392479231"),
-                    username: "@user_" + currentUser.slice(-4),
-                    regDate: new Date().toISOString()
+                    isAdmin: (currentUID === MASTER_ID),
+                    username: "@user_" + currentUID.slice(-4)
                 };
-                await setDoc(docRef, userData);
+                await setDoc(dRef, userLocal);
             }
-            refreshUI();
-            if(userData.isAdmin) startAdminObserver();
+            updateScreenUI();
+            if(userLocal.isAdmin) loadMasterPanel();
         }
 
-        /* --- BAKİYE GÜNCELLEME --- */
-        async function cloudUpdate(newBalance) {
-            const docRef = doc(db, "users", currentUser);
-            await updateDoc(docRef, { balance: newBalance });
-        }
-
-        /* --- REFERANS SİSTEMİ --- */
-        window.useRef = async function() {
-            if(userData.refUsed) return alert("Zaten bir kod kullandınız!");
-            const input = document.getElementById('ref-code-input').value;
-            if(input.trim().length > 3) {
-                userData.balance += 0.05;
-                userData.refUsed = true;
-                await updateDoc(doc(db, "users", currentUser), { 
-                    balance: userData.balance, 
-                    refUsed: true 
-                });
-                refreshUI();
-                alert("Tebrikler! $0.05 hesabınıza tanımlandı.");
-            }
+        window.startWork = () => {
+            isMining = true;
+            changeTab('mining');
+            timer = setInterval(() => {
+                sessionUSD += 0.000015;
+                document.getElementById('m-val').innerText = sessionUSD.toFixed(5);
+            }, 1000);
         };
 
-        /* --- MINING MOTORU --- */
-        window.toggleMining = async function(action) {
-            if(action === 'start') {
-                miningActive = true;
-                tab('mining');
-                document.getElementById('stop-btn').style.display = 'flex';
-                mainTimer = setInterval(() => {
-                    sessionBal += 0.000015;
-                    document.getElementById('m-usd').innerText = sessionBal.toFixed(5);
-                    document.getElementById('m-paws').innerText = Math.floor(sessionBal * 550000);
-                }, 1000);
-            } else {
-                clearInterval(mainTimer);
-                userData.balance += sessionBal;
-                sessionBal = 0;
-                await cloudUpdate(userData.balance);
-                miningActive = false;
-                document.getElementById('stop-btn').style.display = 'none';
-                refreshUI();
-                tab('home');
-            }
+        window.stopWork = async () => {
+            clearInterval(timer);
+            userLocal.balance += sessionUSD;
+            sessionUSD = 0;
+            await updateDoc(doc(db, "users", currentUID), { balance: userLocal.balance });
+            isMining = false;
+            updateScreenUI();
+            changeTab('home');
         };
 
-        /* --- ADMIN GÖZLEMCİSİ --- */
-        function startAdminObserver() {
-            const q = query(collection(db, "users"), limit(20));
-            onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('admin-user-list');
-                list.innerHTML = "";
-                snapshot.forEach((uDoc) => {
-                    const u = uDoc.data();
-                    list.innerHTML += `
-                        <div class="user-row">
-                            <div class="u-info">
-                                <span class="u-name">${u.username}</span>
-                                <span class="u-bal">$${u.balance.toFixed(3)}</span>
-                            </div>
-                            <button class="ban-btn" onclick="alert('Ban yetkisi aktif: ${u.username}')">BAN</button>
-                        </div>`;
+        window.applyRef = async () => {
+            if(userLocal.refUsed) return alert("Kod zaten kullanıldı!");
+            userLocal.balance += 0.05;
+            userLocal.refUsed = true;
+            await updateDoc(doc(db, "users", currentUID), { balance: userLocal.balance, refUsed: true });
+            updateScreenUI();
+            alert("$0.05 Eklendi!");
+        };
+
+        function loadMasterPanel() {
+            onSnapshot(collection(db, "users"), (s) => {
+                const l = document.getElementById('master-list');
+                l.innerHTML = "";
+                s.forEach(d => {
+                    const u = d.data();
+                    l.innerHTML += `<div class="adm-row">
+                        <span>${u.username}</span>
+                        <b style="color:#ffcc00">$${u.balance.toFixed(2)}</b>
+                    </div>`;
                 });
             });
         }
 
-        function refreshUI() {
-            document.getElementById('main-balance').innerText = userData.balance.toFixed(4);
-            document.getElementById('wallet-balance').innerText = userData.balance.toFixed(4);
+        function updateScreenUI() {
+            document.getElementById('top-bal').innerText = userLocal.balance.toFixed(4);
+            document.getElementById('wall-bal').innerText = userLocal.balance.toFixed(4);
         }
 
-        // Global Navigasyon
-        window.tab = (t) => {
-            if(miningActive && t !== 'mining') return;
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        window.changeTab = (t) => {
+            if(isMining && t !== 'mining') return;
+            document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
             document.getElementById('scr-'+t).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-            const idx = { 'friends':0, 'tasks':1, 'home':2, 'admin':3, 'wallet':4 }[t];
-            if(idx !== undefined) document.querySelectorAll('.nav-item')[idx].classList.add('nav-active');
         };
 
-        window.onload = syncData;
+        window.onload = initApp;
     </script>
 
     <style>
-        :root {
-            --bg: #5c59d3;
-            --accent: #ffcc00;
-            --nav: #8184f7;
-            --card: rgba(0, 0, 0, 0.5);
-            --glass: rgba(255, 255, 255, 0.15);
+        :root { --p: #5c59d3; --y: #ffcc00; --bg: #000; }
+        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; }
+        body, html { margin: 0; padding: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+
+        /* 9:16 Aspect Ratio Container */
+        #mobile-frame {
+            aspect-ratio: 9 / 16;
+            height: 95vh;
+            background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%);
+            position: relative; border-radius: 40px; border: 8px solid #333;
+            display: flex; flex-direction: column; color: #fff; overflow: hidden;
         }
 
-        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; background: #000; height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .bal-pill { background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+        
+        .scr { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
+        .active { display: flex; }
 
-        #container {
-            width: 100%; max-width: 480px; background: radial-gradient(circle, #6a67e6, #4a47b1);
-            position: relative; display: flex; flex-direction: column; color: white;
-        }
+        .card { background: rgba(0,0,0,0.3); width: 100%; padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
+        .btn { background: var(--y); color: #000; border: none; width: 100%; padding: 15px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        
+        .adm-row { display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 5px; font-size: 12px; }
 
-        /* Header */
-        header { padding: 18px; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
-        .bal-pill { background: var(--card); padding: 10px 18px; border-radius: 30px; border: 1px solid var(--glass); display: flex; align-items: center; gap: 8px; }
-        #stop-btn { background: var(--accent); color: #000; width: 34px; height: 34px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; }
+        .mining-img { width: 80%; aspect-ratio: 1; border-radius: 50%; border: 6px solid #fff; animation: rot 3s linear infinite; margin: 20px 0; }
+        @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Screens */
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
-        .active { display: flex; animation: fade 0.3s ease; }
-        @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Components */
-        .ui-card { background: var(--card); width: 100%; padding: 22px; border-radius: 25px; margin-bottom: 15px; border: 1px solid var(--glass); }
-        .main-btn { background: linear-gradient(180deg, #ffe066, #ffcc00); color: #333; border: none; width: 100%; padding: 18px; border-radius: 28px; font-size: 18px; cursor: pointer; box-shadow: 0 5px 0 #ccaa00; }
-        .main-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ccaa00; }
-        .input-box { width: 100%; padding: 15px; border-radius: 15px; border: none; background: #fff; color: #000; font-weight: bold; text-align: center; margin: 12px 0; outline: none; }
-
-        /* Admin Styles */
-        .user-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.08); padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid var(--glass); }
-        .u-info { display: flex; flex-direction: column; }
-        .u-name { font-size: 14px; }
-        .u-bal { font-size: 11px; color: var(--accent); }
-        .ban-btn { background: #ff4757; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 10px; }
-
-        /* Animation */
-        .pet-anim { width: 220px; height: 220px; border: 8px solid #fff; border-radius: 50%; animation: spin 2.5s linear infinite; box-shadow: 0 0 30px rgba(0,0,0,0.3); }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Navbar */
-        .navbar { height: 90px; background: var(--nav); display: flex; justify-content: space-around; align-items: center; border-radius: 35px 35px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.5; cursor: pointer; transition: 0.3s; }
-        .nav-active { opacity: 1; transform: scale(1.1); }
-        .nav-center { background: var(--accent); width: 65px; height: 65px; border-radius: 50%; transform: translateY(-25px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1 !important; box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+        nav { height: 70px; background: #8184f7; display: flex; justify-content: space-around; align-items: center; }
+        .nav-icon { font-size: 20px; cursor: pointer; opacity: 0.6; }
     </style>
 </head>
 <body>
 
-<div id="container">
+<div id="mobile-frame">
     <header>
-        <div class="bal-pill">
-            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
-            <span id="main-balance">0.0000</span>
-        </div>
-        <div id="stop-btn" onclick="toggleMining('stop')">✖</div>
+        <div class="bal-pill">🐾 <span id="top-bal">0.0000</span></div>
+        <div onclick="stopWork()" id="stop-btn" style="cursor:pointer; font-weight:bold; color:var(--y)">[X]</div>
     </header>
 
-    <main id="scr-home" class="screen active">
-        <img src="yourfantastic.jpg" style="width: 88%; border-radius: 30px; margin-top: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
-        <h1 style="text-align: center; font-size: 32px; margin: 25px 0 5px 0;">YOUR FANTASTIC PET</h1>
-        <p style="opacity: 0.7; font-size: 14px;">Kazanç Hızı: $0.000015 / Saniye</p>
+    <div id="scr-home" class="scr active">
+        <img src="yourfantastic.jpg" style="width:100%; border-radius:20px; margin-top:10px;">
+        <h2 style="margin:20px 0;">FANTASTIC PET</h2>
         <div style="flex:1"></div>
-        <button class="main-btn" onclick="toggleMining('start')">MINING BAŞLAT</button>
-        <div style="height: 30px;"></div>
-    </main>
+        <button class="btn" onclick="startWork()">PLAY & EARN</button>
+    </div>
 
-    <section id="scr-friends" class="screen">
-        <h2 style="margin-top: 0;">FRIENDS</h2>
-        <div class="ui-card">
-            <h4 style="margin:0; color:var(--accent);">SIZI KIM DAVET ETTI?</h4>
-            <p style="font-size: 11px; margin: 5px 0;">Kod kullanın, karşılıklı <b>$0.05</b> kazanın.</p>
-            <input type="text" id="ref-code-input" class="input-box" placeholder="Referans Kodu Gir">
-            <button class="main-btn" style="padding: 12px; font-size: 14px;" onclick="useRef()">KODU ONAYLA</button>
+    <div id="scr-friends" class="scr">
+        <h3>FRIENDS</h3>
+        <div class="card">
+            <p>Sizi kim getirdi?</p>
+            <input type="text" style="width:100%; padding:10px; border-radius:10px; margin-bottom:10px;">
+            <button class="btn" onclick="applyRef()">ONAYLA</button>
         </div>
-        <div class="ui-card" style="text-align: center;">
-            <p style="margin: 0; font-size: 13px;">Senin Kodun: <b>PET839247</b></p>
-        </div>
-    </section>
+        <p>Kodun: <b>PET839247</b></p>
+    </div>
 
-    <section id="scr-tasks" class="screen">
-        <h2>GÖREVLER</h2>
-        <div class="ui-card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h4 style="margin:0;">Fonix Community</h4>
-                <p style="color:var(--accent); margin:0;">+ $0.0014</p>
-            </div>
-            <button class="main-btn" style="width: 80px; padding:10px; font-size:12px; margin:0;" onclick="window.open('https://t.me/FonixCommunity')">KATIL</button>
-        </div>
-    </section>
+    <div id="scr-admin" class="scr">
+        <h3 style="color:#ff4757;">MASTER PANEL</h3>
+        <div id="master-list" style="width:100%;"></div>
+    </div>
 
-    <section id="scr-admin" class="screen">
-        <h2 style="color: #ff4757; margin-top: 0;">ADMIN PANEL</h2>
-        <div id="admin-user-list" style="width: 100%;">
-            </div>
-    </section>
-
-    <section id="scr-wallet" class="screen">
-        <h2>CÜZDAN</h2>
-        <div class="ui-card" style="text-align: center; padding: 40px 20px;">
-            <p style="margin: 0; opacity: 0.6; font-size: 12px;">MEVCUT BAKİYE</p>
-            <h1 style="font-size: 48px; color: var(--accent); margin: 10px 0;">$<span id="wallet-balance">0.0000</span></h1>
+    <div id="scr-wallet" class="scr">
+        <h3>WALLET</h3>
+        <div class="card">
+            <h1 style="color:var(--y);">$<span id="wall-bal">0.0000</span></h1>
         </div>
-        <button class="main-btn">PARA ÇEK</button>
-    </section>
+        <button class="btn">PARA ÇEK</button>
+    </div>
 
-    <section id="scr-mining" class="screen">
-        <h1 style="font-size: 55px; margin: 0;">🐾 <span id="m-paws">0</span></h1>
-        <h2 style="color: var(--accent); margin: 0;">$<span id="m-usd">0.00000</span></h2>
-        <div style="flex:1; display:flex; align-items:center;">
-            <img src="pinix.jpg" class="pet-anim">
-        </div>
-        <div style="width: 100%; display: flex; justify-content: space-around; margin-bottom: 20px;">
-            <div style="text-align:center;">⚡ 77.6 GH/s</div>
-            <div style="text-align:center;">🔋 Active</div>
-        </div>
-    </section>
+    <div id="scr-mining" class="scr">
+        <h2>KAZILIYOR...</h2>
+        <h1 style="color:var(--y);">$<span id="m-val">0.00000</span></h1>
+        <img src="pinix.jpg" class="mining-img">
+    </div>
 
-    <nav class="navbar">
-        <div class="nav-item" onclick="tab('friends')">👥<span style="font-size:10px;">Friends</span></div>
-        <div class="nav-item" onclick="tab('tasks')">🎁<span style="font-size:10px;">Tasks</span></div>
-        <div class="nav-item nav-center nav-active" onclick="tab('home')">🐾</div>
-        <div class="nav-item" style="color: #ff4757;" onclick="tab('admin')">⚙️<span style="font-size:10px;">Admin</span></div>
-        <div class="nav-item" onclick="tab('wallet')">👛<span style="font-size:10px;">Wallet</span></div>
+    <nav>
+        <div class="nav-icon" onclick="changeTab('friends')">👥</div>
+        <div class="nav-icon" onclick="changeTab('home')">🐾</div>
+        <div class="nav-icon" onclick="changeTab('admin')">⚙️</div>
+        <div class="nav-icon" onclick="changeTab('wallet')">👛</div>
     </nav>
 </div>
 
