@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp - Mining Center</title>
+    <title>FonixApp - Telegram Web3</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -21,101 +21,69 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Kullanıcı ID (Sabit ID'niz: 8392479231)
-        let uID = "8392479231"; 
-        let stats = { balance: 0.0, completedTasks: [], invitedBy: "" };
-        let liveSession = 0, isMining = false, loop;
+        // KULLANICI BİLGİSİ (Sizin Admin ID: 8392479231)
+        // Normalde bu ID Telegram WebApp'ten otomatik alınır.
+        let telegramID = "8392479231"; 
+        let stats = { balance: 0.0, invitedBy: "", referralCode: telegramID };
+        let liveEarn = 0, isMining = false, timer;
 
         async function init() {
-            const ref = doc(db, "users", uID);
-            const snap = await getDoc(ref);
-            if (snap.exists()) stats = snap.data();
-            else await setDoc(ref, stats);
-            
+            const userRef = doc(db, "users", telegramID);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                stats = userSnap.data();
+            } else {
+                // Yeni kullanıcı için referans kodu = telegramid
+                stats.referralCode = telegramID;
+                await setDoc(userRef, stats);
+            }
             updateUI();
-            loadRefs();
-            renderTasks();
+            loadReferrals();
         }
 
-        // --- MINING MOTORU (0.00002 USDT/sn) ---
+        // MINING ENGINE (Saniyede 0.00002 USDT)
         window.toggleMining = async () => {
             const btn = document.getElementById('m-btn');
+            const fan = document.getElementById('mining-fan');
+
             if(!isMining) {
                 isMining = true;
                 btn.innerText = "STOP & COLLECT";
                 btn.style.background = "#ff4757";
-                loop = setInterval(() => {
-                    liveSession += 0.00002;
-                    document.getElementById('live-val').innerText = liveSession.toFixed(5);
+                fan.classList.add('spinning');
+                timer = setInterval(() => {
+                    liveEarn += 0.00002;
+                    document.getElementById('live-earn').innerText = liveEarn.toFixed(5);
                 }, 1000);
             } else {
-                clearInterval(loop);
+                clearInterval(timer);
                 isMining = false;
-                stats.balance += liveSession;
-                liveSession = 0;
+                fan.classList.remove('spinning');
+                stats.balance += liveEarn;
+                liveEarn = 0;
                 btn.innerText = "START MINING";
                 btn.style.background = "var(--g)";
-                document.getElementById('live-val').innerText = "0.00000";
-                await updateDoc(doc(db, "users", uID), { balance: stats.balance });
+                document.getElementById('live-earn').innerText = "0.00000";
+                await updateDoc(doc(db, "users", telegramID), { balance: stats.balance });
                 updateUI();
             }
         };
 
-        // --- GÖREVLER ---
-        const taskData = [
-            { id: "t1", name: "Join Telegram", reward: 0.10, url: "https://t.me" },
-            { id: "t2", name: "Follow X.com", reward: 0.15, url: "https://x.com" }
-        ];
-
-        function renderTasks() {
-            const list = document.getElementById('task-list');
-            list.innerHTML = "";
-            taskData.forEach(t => {
-                const isDone = stats.completedTasks.includes(t.id);
-                list.innerHTML += `<div class="card">
-                    <div style="text-align:left"><b>${t.name}</b><br><small style="color:var(--g)">+$${t.reward}</small></div>
-                    <button class="s-btn" onclick="${isDone ? '' : `doTask('${t.id}',${t.reward},'${t.url}')`}" ${isDone ? 'disabled' : ''}>${isDone ? 'DONE' : 'GO'}</button>
-                </div>`;
-            });
-        }
-
-        window.doTask = async (id, rew, url) => {
-            window.open(url, '_blank');
-            setTimeout(async () => {
-                stats.completedTasks.push(id);
-                stats.balance += rew;
-                await updateDoc(doc(db, "users", uID), { balance: stats.balance, completedTasks: stats.completedTasks });
-                updateUI(); renderTasks();
-            }, 2000);
-        };
-
-        // --- CÜZDAN & ÇEKİM ---
-        window.requestWithdraw = async () => {
-            const addr = document.getElementById('addr').value;
-            const amt = parseFloat(document.getElementById('amt').value);
-            if(addr.startsWith('T') && amt >= 10 && amt <= stats.balance) {
-                stats.balance -= amt;
-                await updateDoc(doc(db, "users", uID), { balance: stats.balance });
-                await addDoc(collection(db, "withdrawals"), { uID, addr, amt, date: new Date().toISOString() });
-                alert("Talebiniz Alındı!");
-                updateUI();
-            } else { alert("Hata: Bilgileri kontrol edin (Min $10)"); }
-        };
-
-        async function loadRefs() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", uID));
+        async function loadReferrals() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", telegramID));
             const snap = await getDocs(q);
             document.getElementById('ref-count').innerText = snap.size;
             const list = document.getElementById('ref-list');
             list.innerHTML = "";
             snap.forEach(d => {
-                list.innerHTML += `<div class="card">👤 User_${d.id.slice(-4)} <span style="color:var(--g)">+$0.05</span></div>`;
+                list.innerHTML += `<div class="card">👤 User_${d.id} <span style="color:var(--g)">+$0.05</span></div>`;
             });
         }
 
         function updateUI() {
-            document.querySelectorAll('.bal-text').forEach(el => el.innerText = stats.balance.toFixed(4));
-            document.getElementById('user-code').innerText = uID;
+            document.querySelectorAll('.bal-val').forEach(el => el.innerText = stats.balance.toFixed(4));
+            document.getElementById('my-ref-code').innerText = telegramID;
         }
 
         window.tab = (id) => {
@@ -127,76 +95,77 @@
     </script>
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0d0d1a; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; }
-        #phone { width: 100%; max-width: 410px; height: 95vh; background: var(--bg); border-radius: 40px; border: 6px solid #222; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        #app { width: 100%; max-width: 410px; height: 95vh; background: var(--bg); border-radius: 40px; border: 6px solid #222; position: relative; display: flex; flex-direction: column; overflow: hidden; }
         .p { flex: 1; display: none; flex-direction: column; padding: 25px; overflow-y: auto; text-align: center; }
         .active { display: flex; }
-        .bal-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; margin-bottom: 20px; border: 1px solid #333; }
-        .card { background: rgba(255,255,255,0.07); padding: 15px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
-        .s-btn { background: var(--p); color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
-        input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #444; background: #111; color: #fff; margin-bottom: 10px; text-align: center; }
+        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; }
+        .card { background: rgba(255,255,255,0.07); padding: 15px; border-radius: 18px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
         .nav { height: 80px; background: #161625; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
         .ni { opacity: 0.5; font-size: 20px; cursor: pointer; text-align: center; }
-        .ni span { display: block; font-size: 10px; margin-top: 4px; font-weight: bold; }
+        .ni span { display: block; font-size: 10px; margin-top: 4px; }
         .ni:hover { opacity: 1; color: var(--g); }
-        .fan { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--p); margin: 20px auto; animation: spin 1.5s linear infinite; box-shadow: 0 0 20px var(--p); }
+        
+        /* Mining Fan Styling */
+        #mining-fan { width: 200px; height: 200px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 6px solid var(--p); margin: 30px auto; transition: 0.3s; box-shadow: 0 0 20px var(--p); }
+        .spinning { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="phone">
+<div id="app">
     <div style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 900; color: var(--g); font-size: 18px;">FONIX APP</span>
-        <div style="background:#222; padding:5px 12px; border-radius:15px; font-size:12px;">🪙 <span class="bal-text">0.0000</span></div>
+        <span style="font-weight: 900; color: var(--g);">FONIX APP</span>
+        <div style="background:#222; padding:5px 12px; border-radius:15px; font-size:12px;">🪙 <span class="bal-val">0.0000</span></div>
     </div>
 
-    <div id="tab-mining" class="p active">
-        <div class="bal-box">
-            <small style="opacity: 0.5;">SESSION PROFIT</small>
-            <h1 style="font-size: 42px; margin: 5px 0; color: var(--g);">$<span id="live-val">0.00000</span></h1>
+    <div id="tab-home" class="p active">
+        <img src="yourfantastic.jpg" style="width:100%; border-radius:30px; margin-bottom:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <h2>WELCOME BACK</h2>
+        <p style="font-size: 12px; opacity: 0.6;">Start mining and invite friends to earn more USDT.</p>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="tab('mining')">GO TO MINING</button>
+    </div>
+
+    <div id="tab-mining" class="p">
+        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:25px; border:1px solid #333;">
+            <small style="opacity:0.5">CURRENT SESSION</small>
+            <h1 style="font-size:40px; margin:5px 0; color:var(--g)">$<span id="live-earn">0.00000</span></h1>
         </div>
-        <div class="fan"></div>
-        <p style="font-size: 13px; opacity: 0.6;">Saniyede 0.00002 USDT üretiliyor</p>
+        
+        <div id="mining-fan"></div>
+        
+        <p style="font-size:13px; opacity:0.7">Saniyede 0.00002 USDT</p>
         <div style="flex:1"></div>
         <button id="m-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
-    <div id="tab-tasks" class="p">
-        <h3>DAILY MISSIONS</h3>
-        <div id="task-list"></div>
-    </div>
-
     <div id="tab-friends" class="p">
         <h3>FRIENDS</h3>
-        <div style="background:rgba(123, 102, 255, 0.1); padding:15px; border-radius:20px; border:1px dashed var(--p); margin-bottom:20px;">
-            <small>REFERRAL CODE</small>
-            <h2 id="user-code" style="margin:5px 0; color:var(--g)">-</h2>
+        <div style="background:rgba(123, 102, 255, 0.1); padding:20px; border-radius:25px; border:2px dashed var(--p); margin-bottom:25px;">
+            <small>YOUR REFERRAL CODE</small>
+            <h1 id="my-ref-code" style="margin:10px 0; color:var(--g); letter-spacing:3px;">-</h1>
         </div>
         <div style="text-align:left;">
-            <p style="font-size:12px; opacity:0.6;">MY REFERRALS (<span id="ref-count">0</span>)</p>
+            <p style="font-size:12px; opacity:0.6;">TOTAL REFERRALS: <span id="ref-count">0</span></p>
             <div id="ref-list"></div>
         </div>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h3>MY WALLET</h3>
-        <div class="bal-box">
-            <small>TOTAL BALANCE</small>
-            <h1 style="font-size: 40px; margin: 5px 0; color: var(--g);">$<span class="bal-text">0.0000</span></h1>
+        <h3>WALLET</h3>
+        <div style="background:rgba(255,255,255,0.05); padding:30px; border-radius:30px; margin-bottom:20px;">
+            <small>AVAILABLE BALANCE</small>
+            <h1 style="font-size:45px; color:var(--g); margin:10px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <div style="text-align:left;">
-            <input type="text" id="addr" placeholder="TRC20 Address (T...)">
-            <input type="number" id="amt" placeholder="Amount (Min $10)">
-            <button class="btn" onclick="requestWithdraw()">WITHDRAW</button>
-        </div>
+        <button class="btn" onclick="alert('Withdrawals process manually')">WITHDRAW</button>
     </div>
 
     <nav class="nav">
+        <div class="ni" onclick="tab('home')">🏠<span>Home</span></div>
         <div class="ni" onclick="tab('mining')">⛏️<span>Mining</span></div>
-        <div class="ni" onclick="tab('tasks')">📋<span>Tasks</span></div>
         <div class="ni" onclick="tab('friends')">👥<span>Friends</span></div>
         <div class="ni" onclick="tab('wallet')">👛<span>Wallet</span></div>
     </nav>
