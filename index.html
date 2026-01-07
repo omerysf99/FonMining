@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Pro Mining</title>
+    <title>Your Fantastic Pet - Mining</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -11,120 +11,179 @@
             --text-white: #ffffff;
         }
 
+        * { box-sizing: border-box; }
+
         body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Arial', sans-serif;
-            background-color: var(--bg-purple);
-            color: var(--text-white);
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #1a1a1a;
             display: flex; justify-content: center; align-items: center;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
         }
 
-        #game-container {
-            width: 100%; max-width: 400px; height: 95vh;
+        /* 9:16 Oranı İçin Konteynır */
+        #app-container {
+            width: 100vw;
+            height: calc(100vw * 16 / 9);
+            max-width: 450px;
+            max-height: 800px;
             background: linear-gradient(180deg, #6a67e6 0%, #4a47b1 100%);
-            border-radius: 40px; position: relative;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 20px; box-sizing: border-box;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
 
         /* Üst Panel */
-        .top-bar {
-            width: 100%; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; font-size: 14px;
+        .header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
         }
-        .admin-id { background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 15px; }
-
-        /* Ana Görsel Alanı */
-        .hero-section {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .pet-emoji { font-size: 70px; margin-bottom: 10px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2)); }
-        
-        .title {
-            font-size: 36px; font-weight: 900; text-align: center; line-height: 0.9;
-            margin-bottom: 30px; text-transform: uppercase;
+        .admin-id {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
         }
 
-        /* Buton */
+        /* Ana Ekran Görseli */
+        .hero-image {
+            width: 100%;
+            height: 60%;
+            background-image: url('yourfantastic.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Yazı Alanı */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Play Butonu */
         .play-btn {
-            background: var(--accent-yellow); color: #444; border: none;
-            width: 80%; padding: 20px; font-size: 28px; font-weight: bold;
-            border-radius: 25px; cursor: pointer;
-            box-shadow: 0 8px 0 #d4aa00; transition: 0.1s;
+            background-color: var(--accent-yellow);
+            color: #444;
+            border: none;
+            width: 80%;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: 900;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #d4aa00;
+            transition: 0.1s;
         }
-        .play-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #d4aa00; }
+        .play-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #d4aa00;
+        }
 
         /* Mining Ekranı */
         #mining-screen {
-            display: none; flex-direction: column; align-items: center; width: 100%;
+            display: none;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .balance-box {
-            background: rgba(255,255,255,0.15); width: 85%; padding: 25px;
-            border-radius: 30px; border: 1px solid rgba(255,255,255,0.2);
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            border-radius: 30px;
+            width: 85%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #usdt-balance {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--accent-yellow);
+            margin: 15px 0;
+        }
+
+        .mining-anim {
+            width: 100px;
+            height: 100px;
+            border: 8px solid rgba(255,255,255,0.1);
+            border-top: 8px solid var(--accent-yellow);
+            border-radius: 50%;
             margin-top: 40px;
-        }
-        #usdt-amount { font-size: 38px; font-weight: bold; color: var(--accent-yellow); margin: 10px 0; }
-        
-        .loader {
-            width: 120px; height: 120px; border: 10px solid #ffffff22;
-            border-top: 10px solid var(--accent-yellow); border-radius: 50%;
-            margin-top: 50px; animation: spin 1.5s linear infinite;
+            animation: spin 2s linear infinite;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* Alt Navigasyon */
         .nav-bar {
-            width: 90%; background: rgba(0,0,0,0.2); height: 60px;
-            border-radius: 20px; display: flex; justify-content: space-around;
-            align-items: center; margin-top: auto; margin-bottom: 10px;
+            height: 70px;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 24px;
         }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div class="top-bar">
+<div id="app-container">
+    <div class="header">
         <div class="admin-id">ID: 8392479231</div>
-        <div style="color:var(--accent-yellow)">🔔</div>
+        <div style="color: var(--accent-yellow)">🔔</div>
     </div>
 
-    <div id="start-screen" class="hero-section">
-        <div class="pet-emoji">🐶</div>
-        <h1 class="title">YOUR<br>FANTASTIC PET</h1>
-        <button class="play-btn" onclick="startMining()">PLAY</button>
-    </div>
-
-    <div id="mining-screen" class="hero-section">
-        <div class="balance-box">
-            <div style="font-size: 12px; opacity: 0.8;">CÜZDAN BAKİYESİ</div>
-            <div id="usdt-amount">0.00000</div>
-            <div style="font-size: 14px; color: #adff2f;">● Madencilik Aktif</div>
+    <div id="start-screen" style="height: 100%; display: flex; flex-direction: column;">
+        <div class="hero-image"></div>
+        <div class="content">
+            <button class="play-btn" onclick="startMining()">PLAY</button>
         </div>
-        <div class="loader"></div>
-        <p style="margin-top: 20px; opacity: 0.7;">Her 50 saniyede +0.0005 USDT</p>
+    </div>
+
+    <div id="mining-screen">
+        <div class="balance-card">
+            <div style="font-size: 14px; opacity: 0.8;">CÜZDAN (USDT)</div>
+            <div id="usdt-balance">0.00000</div>
+            <div style="color: #00ff00; font-size: 12px;">● MADENCİLİK AKTİF</div>
+        </div>
+        <div class="mining-anim"></div>
+        <p style="margin-top: 25px; opacity: 0.7;">Hız: 50s / 0.0005 USDT</p>
     </div>
 
     <div class="nav-bar">
-        <span>🏠</span><span>🎁</span><span style="font-size: 30px;">🐾</span><span>💳</span><span>⚙️</span>
+        <span>🏠</span><span>🎁</span><span style="font-size: 35px;">🐾</span><span>👛</span><span>👤</span>
     </div>
 </div>
 
 <script>
-    let currentBalance = 0.00000;
-    // 50 saniyede 0.0005 ise, 1 saniyede 0.00001 artar.
-    const perSecondRate = 0.0005 / 50; 
+    let balance = 0.00000;
+    // 50 saniyede 0.0005 artış demek, saniyede 0.00001 artış demektir.
+    const tickRate = 0.0005 / 50; 
 
     function startMining() {
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('mining-screen').style.display = 'flex';
 
         setInterval(() => {
-            currentBalance += perSecondRate;
-            // Bakiyeyi 5 ondalık basamakla göster
-            document.getElementById('usdt-amount').innerText = currentBalance.toFixed(5);
+            balance += tickRate;
+            // Bakiyeyi 5 ondalık basamakla gösteriyoruz
+            document.getElementById('usdt-balance').innerText = balance.toFixed(5);
         }, 1000);
     }
 </script>
