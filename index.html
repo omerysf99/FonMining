@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp - Task Master</title>
+    <title>FonixApp - Ultimate Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -28,7 +28,6 @@
         let myID = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "8392479231";
         let stats = { balance: 0.0, invitedBy: "", completedTasks: [] };
         
-        // Görev Listesi (Buradan yeni görev ekleyebilirsin)
         const taskList = [
             { id: "task1", title: "Join Telegram Channel", reward: 0.10, url: "https://t.me/FonixMining2026Bot" },
             { id: "task2", title: "Follow us on X", reward: 0.15, url: "https://x.com" },
@@ -48,13 +47,51 @@
             updateUI();
             renderTasks();
             loadReferrals();
+            checkInviterStatus();
+        }
+
+        // --- REFERANS ÖDÜL SİSTEMİ ---
+        window.applyReferral = async () => {
+            const code = document.getElementById('inviter-code-input').value.trim();
+            const msg = document.getElementById('ref-msg');
+
+            if (!code || code === myID) {
+                msg.innerText = "Geçersiz kod!";
+                return;
+            }
+
+            const inviterRef = doc(db, "users", code);
+            const inviterSnap = await getDoc(inviterRef);
+
+            if (inviterSnap.exists()) {
+                // Her iki tarafa da 0.05$ ver
+                await updateDoc(doc(db, "users", myID), { 
+                    balance: increment(0.05),
+                    invitedBy: code 
+                });
+                await updateDoc(inviterRef, { 
+                    balance: increment(0.05) 
+                });
+
+                tg.HapticFeedback.notificationOccurred('success');
+                alert("Başarılı! İkiniz de 0.05$ kazandınız.");
+                location.reload(); // Verileri yenilemek için
+            } else {
+                msg.innerText = "Kullanıcı bulunamadı!";
+            }
+        };
+
+        function checkInviterStatus() {
+            const area = document.getElementById('ref-input-box');
+            if (stats.invitedBy) {
+                area.innerHTML = `<div style="color:var(--g); font-size:13px; padding:10px;">Sizi Davet Eden: <b>${stats.invitedBy}</b> ✅</div>`;
+            }
         }
 
         // --- TASK MOTORU ---
         function renderTasks() {
             const container = document.getElementById('tasks-container');
             container.innerHTML = "";
-            
             taskList.forEach(task => {
                 const isDone = stats.completedTasks.includes(task.id);
                 container.innerHTML += `
@@ -66,27 +103,22 @@
                         <button class="s-btn" id="btn-${task.id}" onclick="${isDone ? '' : `completeTask('${task.id}', ${task.reward}, '${task.url}')`}" ${isDone ? 'disabled' : ''}>
                             ${isDone ? '✅ DONE' : 'GO'}
                         </button>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
         window.completeTask = async (id, reward, url) => {
             window.open(url, '_blank');
             const btn = document.getElementById(`btn-${id}`);
-            btn.innerText = "VERIFYING...";
-            
-            // 3 saniye bekleme simülasyonu
+            btn.innerText = "WAIT...";
             setTimeout(async () => {
                 if(!stats.completedTasks.includes(id)) {
                     stats.balance += reward;
                     stats.completedTasks.push(id);
-                    
                     await updateDoc(doc(db, "users", myID), { 
                         balance: stats.balance,
                         completedTasks: arrayUnion(id)
                     });
-                    
                     tg.HapticFeedback.notificationOccurred('success');
                     updateUI();
                     renderTasks();
@@ -94,7 +126,7 @@
             }, 3000);
         };
 
-        // --- DİĞER FONKSİYONLAR ---
+        // --- MINING MOTORU ---
         let liveEarn = 0, timer;
         window.startMining = () => {
             tab('mining');
@@ -157,6 +189,7 @@
         .nav { height: 85px; background: #161625; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; }
         .ni { opacity: 0.5; font-size: 20px; cursor: pointer; text-align: center; }
         .ni span { display: block; font-size: 9px; margin-top: 4px; }
+        input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #444; background: #111; color: #fff; text-align: center; margin-bottom: 10px; font-family: sans-serif; }
         #mining-fan { width: 200px; height: 200px; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 6px solid var(--p); margin: 30px auto; }
         .spinning { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -193,32 +226,39 @@
 
     <div id="tab-tasks" class="p">
         <h3 style="margin-bottom:20px;">QUESTS</h3>
-        <div id="tasks-container">
-            </div>
+        <div id="tasks-container"></div>
     </div>
 
     <div id="tab-friends" class="p">
         <h3>FRIENDS</h3>
+        
+        <div class="card" id="ref-input-box">
+            <small style="opacity:0.6; display:block; margin-bottom:10px;">SİZİ KİM DAVET ETTİ?</small>
+            <input type="number" id="inviter-code-input" placeholder="Referans ID Girin">
+            <button class="s-btn" style="width:100%" onclick="applyReferral()">KODU ONAYLA (+0.05$)</button>
+            <p id="ref-msg" style="font-size:10px; color:#ff4757; margin-top:5px;"></p>
+        </div>
+
         <div class="card" style="border: 1px dashed var(--p);">
-            <small>YOUR ID</small>
+            <small>SENİN DAVET KODUN</small>
             <h2 id="my-id-display" style="color:var(--g); margin:10px 0;">-</h2>
         </div>
-        <p style="font-size:12px; opacity:0.5;">Referrals: <span id="ref-count">0</span></p>
+        <p style="font-size:12px; opacity:0.5;">Toplam Referans: <span id="ref-count">0</span></p>
     </div>
 
     <div id="tab-wallet" class="p">
         <h3>WALLET</h3>
         <div class="card">
-            <small>BALANCE</small>
+            <small>BAKİYE</small>
             <h1 style="font-size: 40px; color: var(--g);">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <button class="btn" style="opacity:0.5">WITHDRAW</button>
+        <button class="btn" style="opacity:0.5">PARA ÇEK (Min 10$)</button>
     </div>
 
     <div id="reward-anim">
         <h1 style="font-size: 70px; margin: 0;">💰</h1>
         <h2 id="earned-amount" style="font-size: 35px; color: var(--g);">+0.00000</h2>
-        <p>SUCCESS!</p>
+        <p>BAŞARIYLA TOPLANDI!</p>
     </div>
 
     <nav id="nav-bar" class="nav">
