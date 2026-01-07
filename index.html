@@ -3,252 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Your Fantastic Pet - Ultimate</title>
+    <title>Pet Pro - Admin Elite</title>
     
     <style>
         :root {
-            --bg-purple: #5c59d3;
-            --accent-yellow: #ffcc00;
+            --bg-main: #5c59d3;
+            --gold: #ffcc00;
             --nav-bg: #8184f7;
-            --dark-card: rgba(0, 0, 0, 0.5);
-            --glass: rgba(255, 255, 255, 0.2);
-            --admin-red: #ff4757;
-            --success: #2ed573;
-            --text-main: #ffffff;
+            --card-dark: rgba(0, 0, 0, 0.55);
+            --glass: rgba(255, 255, 255, 0.18);
+            --danger: #ff4757;
+            --safe: #2ed573;
         }
 
         * { box-sizing: border-box; font-family: 'Arial Black', sans-serif; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 
-        #app-wrapper {
+        #app-shell {
             width: 100vw; height: 100vh; max-width: 480px;
-            background: radial-gradient(circle at top, #6a67e6 0%, #4a47b1 100%);
-            position: relative; display: flex; flex-direction: column; color: var(--text-main);
+            background: radial-gradient(circle at center, #6a67e6 0%, #4a47b1 100%);
+            position: relative; display: flex; flex-direction: column; color: #fff;
         }
 
-        /* --- REFERRAL MODAL (Açılış Sorusu) --- */
-        #ref-modal {
+        /* --- GHOST MODE OVERLAY --- */
+        #ghost-mask {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 20000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center;
-        }
-
-        /* --- GHOST MODE --- */
-        #ghost-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 71, 87, 0.15); border: 8px dashed var(--admin-red);
+            background: rgba(255, 71, 87, 0.12); border: 8px dashed var(--danger);
             z-index: 99999; display: none; pointer-events: all;
         }
-        #ghost-overlay::after {
-            content: "CANLI İZLEME MODU\n(Çıkış için Çift Tıkla)";
-            position: absolute; top: 45%; width: 100%; text-align: center; font-size: 18px; white-space: pre; text-shadow: 0 4px 10px #000;
+        #ghost-mask::after {
+            content: "ADMIN: CANLI İZLEME\n(Çıkış için Çift Tıkla)";
+            position: absolute; top: 45%; width: 100%; text-align: center; font-size: 18px; white-space: pre; text-shadow: 0 4px 12px #000;
         }
 
-        /* --- UI COMPONENTS --- */
-        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .balance-box { background: var(--dark-card); padding: 12px 20px; border-radius: 35px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* --- UI ELEMENTS --- */
+        .top-bar { padding: 18px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .bal-pill { background: var(--card-dark); padding: 12px 22px; border-radius: 40px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--glass); }
         
-        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
-        .active-screen { display: flex; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .view { flex: 1; display: none; flex-direction: column; align-items: center; padding: 22px; overflow-y: auto; }
+        .view-active { display: flex; animation: viewIn 0.3s ease-out; }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: var(--dark-card); width: 100%; padding: 20px; border-radius: 25px; margin-bottom: 15px; border: 1px solid var(--glass); }
+        .ui-card { background: var(--card-dark); width: 100%; padding: 22px; border-radius: 28px; margin-bottom: 15px; border: 1px solid var(--glass); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         
-        .btn-yellow { 
+        .btn-gold { 
             background: linear-gradient(180deg, #ffe066 0%, #ffcc00 100%);
-            color: #333; border: none; width: 100%; padding: 18px; font-size: 18px; 
-            border-radius: 30px; box-shadow: 0 6px 0 #ccaa00; cursor: pointer; transition: 0.1s;
+            color: #222; border: none; width: 100%; padding: 18px; font-size: 19px; 
+            border-radius: 32px; box-shadow: 0 6px 0 #ccaa00; cursor: pointer;
         }
-        .btn-yellow:active { transform: translateY(4px); box-shadow: 0 2px 0 #ccaa00; }
+        .btn-gold:active { transform: translateY(4px); box-shadow: 0 2px 0 #ccaa00; }
 
-        .input-style {
-            width: 100%; padding: 16px; border-radius: 15px; border: none; background: #fff;
-            color: #222; font-weight: bold; text-align: center; margin: 15px 0; outline: none; font-size: 16px;
-        }
+        .field { width: 100%; padding: 16px; border-radius: 16px; border: none; background: #fff; color: #111; font-weight: 800; text-align: center; margin: 12px 0; outline: none; }
 
-        /* --- ADMIN LIST --- */
-        .user-row {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px;
-            margin-bottom: 10px; border: 1px solid var(--glass);
-        }
-        .user-meta { display: flex; align-items: center; gap: 12px; }
-        .user-img { width: 55px; height: 55px; border-radius: 50%; border: 3px solid var(--accent-yellow); object-fit: cover; }
-        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 5px; margin-top: 4px; display: inline-block; }
+        /* --- ADMIN LISTING --- */
+        .row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.08); padding: 15px; border-radius: 22px; margin-bottom: 12px; border: 1px solid var(--glass); }
+        .u-pic { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--gold); }
+        .u-meta { flex: 1; margin-left: 15px; }
 
-        /* --- MINING ANIMATION --- */
-        .mining-circle { width: 250px; height: 250px; border-radius: 50%; border: 10px solid #fff; box-shadow: 0 0 40px rgba(0,0,0,0.5); margin: 30px 0; position: relative; }
-        .pet-spin { width: 100%; height: 100%; border-radius: 50%; animation: spin 3s linear infinite; object-fit: cover; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* --- MINING VISUALS --- */
+        .fan-frame { width: 240px; height: 240px; border-radius: 50%; border: 10px solid #fff; box-shadow: 0 0 45px rgba(0,0,0,0.5); margin: 35px 0; position: relative; overflow: hidden; }
+        .fan-img { width: 100%; height: 100%; object-fit: cover; animation: fanSpin 2.5s linear infinite; }
+        @keyframes fanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- NAV BAR --- */
-        .nav { height: 100px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 45px 45px 0 0; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.6; transition: 0.3s; cursor: pointer; }
-        .nav-btn.active { opacity: 1; transform: translateY(-5px); }
-        .nav-main { background: var(--accent-yellow); width: 75px; height: 75px; border-radius: 50%; transform: translateY(-30px); border: 6px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        /* --- NAVBAR --- */
+        .bottom-nav { height: 95px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 42px 42px 0 0; }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.55; transition: 0.3s; cursor: pointer; font-size: 22px; }
+        .nav-link.on { opacity: 1; transform: scale(1.1); }
+        .nav-prime { background: var(--gold); width: 72px; height: 72px; border-radius: 50%; transform: translateY(-28px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body onload="init()">
 
-    <div id="ref-modal">
-        <h1 style="color:var(--accent-yellow); font-size:28px;">HOŞ GELDİN!</h1>
-        <p>Sizi kim referans getirdi?<br><small>(Geçerli bir kod girerseniz <b>$0.05</b> kazanırsınız!)</small></p>
-        <input type="text" id="initial-ref-code" class="input-style" placeholder="Referans Kodu Girin">
-        <button class="btn-yellow" onclick="submitReferral()">BAŞLA & KAZAN</button>
-        <p onclick="closeRef()" style="margin-top:20px; font-size:12px; opacity:0.6; cursor:pointer;">Kodum yok, direkt başla</p>
-    </div>
+    <div id="ghost-mask" ondblclick="killGhost()"></div>
 
-    <div id="ghost-overlay" ondblclick="exitGhost()"></div>
-
-    <div id="app-wrapper">
-        <header class="header">
-            <div class="balance-box">
-                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="24">
-                <span id="global-bal">0.0000</span>
+    <div id="app-shell">
+        <header class="top-bar">
+            <div class="bal-pill">
+                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="22">
+                <span id="bal-total">0.0000</span>
             </div>
-            <div id="mining-stop" style="display:none; cursor:pointer; font-size:26px;" onclick="stopMining()">✖</div>
+            <div id="stop-mining" style="display:none; cursor:pointer; font-size:26px; background:var(--gold); color:#000; width:35px; height:35px; border-radius:50%; text-align:center; line-height:35px;" onclick="stopMining()">✖</div>
         </header>
 
-        <main id="scr-home" class="screen active-screen">
-            <img src="yourfantastic.jpg" style="width: 88%; border-radius: 35px; box-shadow: 0 15px 30px rgba(0,0,0,0.4);">
-            <h1 style="font-size: 34px; margin: 25px 0 5px 0; text-align: center;">YOUR FANTASTIC PET</h1>
-            <p style="opacity: 0.8; letter-spacing: 1px;">Kazanç: $0.000015 / Saniye</p>
+        <main id="view-home" class="view view-active">
+            <img src="yourfantastic.jpg" style="width: 86%; border-radius: 38px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top:15px;">
+            <h1 style="font-size: 34px; margin: 30px 0 5px 0; text-align: center;">YOUR FANTASTIC PET</h1>
+            <p style="opacity: 0.7;">Mining Speed: $0.000015 / Sec</p>
             <div style="flex:1"></div>
-            <button class="btn-yellow" onclick="startMining()">OYUNU BAŞLAT</button>
-            <div style="height:30px"></div>
+            <button class="btn-gold" onclick="startMining()">START MINING</button>
+            <div style="height:35px"></div>
         </main>
 
-        <section id="scr-friends" class="screen">
-            <h2>ARKADAŞLAR</h2>
-            <div class="card">
-                <h4 style="margin:0;">SENİN DAVET KODUN</h4>
-                <input type="text" class="input-style" value="PET839247" readonly>
-                <p style="font-size:12px; opacity:0.7;">Her başarılı davet için hem sen hem arkadaşın <b>$0.05</b> kazanırsınız!</p>
-                <button class="btn-yellow" style="font-size:14px; padding:12px;" onclick="copyCode()">KODU KOPYALA</button>
+        <section id="view-friends" class="view">
+            <h2>REFERRAL</h2>
+            <div class="ui-card">
+                <h4 style="margin:0; color:var(--gold);">SIZI KIM GETIRDI?</h4>
+                <p style="font-size:12px; margin:8px 0;">Kod girin, karşılıklı <b>$0.05</b> kazanın.</p>
+                <input type="text" id="ref-input-field" class="field" placeholder="Referans Kodu">
+                <button id="ref-apply-btn" class="btn-gold" style="font-size:14px; padding:12px;" onclick="applyReferral()">KODU ONAYLA</button>
+            </div>
+            <div class="ui-card">
+                <p style="margin:0; font-size:13px;">Senin Kodun: <b>PET839247</b></p>
+                <button class="btn-gold" style="margin-top:15px; background:#0088cc; color:#fff; box-shadow:0 6px 0 #005580;" onclick="share()">ARKADAŞLARINA GÖNDER</button>
             </div>
         </section>
 
-        <section id="scr-tasks" class="screen">
-            <h2>GÖREVLER</h2>
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                <div><h4>Telegram Katılım</h4><p style="color:var(--accent-yellow); margin:0;">+ $0.0014</p></div>
-                <button id="t-btn" class="btn-yellow" style="width:80px; margin:0; padding:10px; font-size:12px;" onclick="doTask()">KATIL</button>
+        <section id="view-tasks" class="view">
+            <h2>TASKS</h2>
+            <div class="ui-card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div><h4>Telegram Join</h4><p style="color:var(--gold); margin:0;">+ $0.0014</p></div>
+                <button id="tsk-btn" class="btn-gold" style="width:85px; margin:0; padding:10px; font-size:12px;" onclick="doTask()">KATIL</button>
             </div>
         </section>
 
-        <section id="scr-admin" class="screen">
-            <h2 style="color:var(--admin-red);">YÖNETİM PANELİ</h2>
-            <div id="user-list-root" style="width:100%;"></div>
+        <section id="view-admin" class="view">
+            <h2 style="color:var(--danger);">MASTER COMMAND</h2>
+            <div id="directory" style="width:100%;"></div>
         </section>
 
-        <section id="scr-wallet" class="screen">
-            <h2>CÜZDAN</h2>
-            <div class="card" style="text-align:center; padding:40px 20px;">
-                <p style="margin:0; opacity:0.6;">TOPLAM BAKİYE</p>
-                <h1 style="font-size:48px; color:var(--accent-yellow); margin:10px 0;">$<span id="wall-val">0.0000</span></h1>
+        <section id="view-wallet" class="view">
+            <h2>WALLET</h2>
+            <div class="ui-card" style="text-align:center; padding:45px 20px;">
+                <p style="margin:0; opacity:0.6; font-size:12px;">AVAILABLE BALANCE</p>
+                <h1 style="font-size:50px; color:var(--gold); margin:10px 0;">$<span id="wall-val">0.0000</span></h1>
             </div>
-            <button class="btn-yellow" onclick="alert('Minimum çekim $1.00')">PARA ÇEK</button>
+            <button class="btn-gold" onclick="alert('Min. Withdrawal: $1.00')">WITHDRAW FUNDS</button>
         </section>
 
-        <section id="scr-mining" class="screen">
-            <h1 style="font-size:55px; margin:0;">🐾 <span id="paws-cnt">0</span></h1>
-            <h2 style="color:var(--accent-yellow); margin:0;">$<span id="usd-cnt">0.00000</span></h2>
-            <div class="mining-circle">
-                <img src="pinix.jpg" class="pet-spin">
+        <section id="view-mining" class="view">
+            <h1 style="font-size:55px; margin:0;">🐾 <span id="m-paws">0</span></h1>
+            <h2 style="color:var(--gold); margin:0;">$<span id="m-usd">0.00000</span></h2>
+            <div class="fan-frame">
+                <img src="pinix.jpg" class="fan-img">
             </div>
-            <div style="width:100%; display:flex; justify-content:space-around;">
-                <div style="text-align:center;">⏰<br><span id="m-time">00:00</span></div>
+            <div style="width:100%; display:flex; justify-content:space-around; font-size:14px;">
+                <div style="text-align:center;">⏱️<br><span id="m-timer">00:00</span></div>
                 <div style="text-align:center;">⚡<br>77.6 GH/s</div>
-                <div style="text-align:center;">🔋<br><span id="m-perc">0</span>%</div>
+                <div style="text-align:center;">🔥<br><span id="m-perc">0</span>%</div>
             </div>
         </section>
 
-        <nav class="nav">
-            <div class="nav-btn" onclick="nav('friends')">👥<span style="font-size:10px;">Friends</span></div>
-            <div class="nav-btn" onclick="nav('tasks')">🎁<span style="font-size:10px;">Tasks</span></div>
-            <div class="nav-btn nav-main" onclick="nav('home')">🐾</div>
-            <div class="nav-btn" style="color:var(--admin-red)" onclick="nav('admin')">⚙️<span style="font-size:10px;">Admin</span></div>
-            <div class="nav-btn" onclick="nav('wallet')">👛<span style="font-size:10px;">Wallet</span></div>
+        <nav class="bottom-nav">
+            <div class="nav-link" onclick="tab('friends')">👥<br><small style="font-size:9px;">Friends</small></div>
+            <div class="nav-link" onclick="tab('tasks')">🎁<br><small style="font-size:9px;">Tasks</small></div>
+            <div class="nav-link nav-prime on" onclick="tab('home')">🐾</div>
+            <div class="nav-link" style="color:var(--danger)" onclick="tab('admin')">⚙️<br><small style="font-size:9px;">Admin</small></div>
+            <div class="nav-link" onclick="tab('wallet')">👛<br><small style="font-size:9px;">Wallet</small></div>
         </nav>
     </div>
 
     <script>
         let balance = 0.0000;
-        let mineData = { usd: 0, sec: 0 };
-        let isGhost = false;
-        let timer;
+        let session = { usd: 0, sec: 0 };
+        let ghost = false;
+        let clock;
+
+        const ADMIN_ID = "8392479231";
 
         let users = [
-            { id: "U1", user: "@ahmet_crypto", img: "https://i.pravatar.cc/150?u=1", ban: false, bal: 0.15 },
-            { id: "U2", user: "@merve_mining", img: "https://i.pravatar.cc/150?u=2", ban: false, bal: 0.05 },
-            { id: "U3", user: "@can_fer", img: "https://i.pravatar.cc/150?u=3", ban: true, bal: 0.00 },
-            { id: "U4", user: "@8392479231_admin", img: "https://i.pravatar.cc/150?u=8392479231", ban: false, bal: 99.9 }
+            { id: "101", name: "@onur_crypto", pic: "https://i.pravatar.cc/150?u=1", ban: false, cash: 0.12 },
+            { id: "102", name: "@asli_mine", pic: "https://i.pravatar.cc/150?u=2", ban: false, cash: 0.05 },
+            { id: "103", name: "@bot_account", pic: "https://i.pravatar.cc/150?u=3", ban: true, cash: 0.00 },
+            { id: "8392479231", name: "@admin_kral", pic: "https://i.pravatar.cc/150?u=8392479231", ban: false, cash: 88.50 }
         ];
 
         function init() {
             renderUsers();
-            updateUI();
+            syncUI();
         }
 
-        function submitReferral() {
-            const code = document.getElementById('initial-ref-code').value;
-            if(code.length > 3) {
-                balance += 0.05; // Yeni üyeye 0.05$
-                alert("Referans kabul edildi! $0.05 hesabınıza eklendi. Referans sahibine de $0.05 gönderildi.");
+        function applyReferral() {
+            const val = document.getElementById('ref-input-field').value;
+            if(val.trim() !== "") {
+                balance += 0.05;
+                alert("Referans Başarılı! $0.05 Kazandın. Arkadaşına da $0.05 gönderildi.");
+                document.getElementById('ref-apply-btn').disabled = true;
+                document.getElementById('ref-apply-btn').innerText = "KOD KULLANILDI";
+                syncUI();
             }
-            closeRef();
         }
 
-        function closeRef() {
-            document.getElementById('ref-modal').style.display = 'none';
-            updateUI();
-        }
-
-        function nav(s) {
-            if(isGhost && s !== 'admin') return;
-            document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active-screen'));
-            document.getElementById('scr-'+s).classList.add('active-screen');
+        function tab(t) {
+            if(ghost && t !== 'admin') return;
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('view-active'));
+            document.getElementById('view-'+t).classList.add('view-active');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('on'));
+            event.currentTarget.classList.add('on');
         }
 
         function startMining() {
-            nav('mining');
-            document.getElementById('mining-stop').style.display = 'block';
-            timer = setInterval(() => {
-                mineData.sec++;
-                mineData.usd += 0.000015;
-                document.getElementById('usd-cnt').innerText = mineData.usd.toFixed(5);
-                document.getElementById('paws-cnt').innerText = Math.floor(mineData.usd * 500000);
-                document.getElementById('m-perc').innerText = Math.min(100, Math.floor((mineData.sec/120)*100));
-                let m = Math.floor(mineData.sec/60), s = mineData.sec%60;
-                document.getElementById('m-time').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            tab('mining');
+            document.getElementById('stop-mining').style.display = 'block';
+            clock = setInterval(() => {
+                session.sec++;
+                session.usd += 0.000015;
+                document.getElementById('m-usd').innerText = session.usd.toFixed(5);
+                document.getElementById('m-paws').innerText = Math.floor(session.usd * 520000);
+                document.getElementById('m-perc').innerText = Math.min(100, Math.floor((session.sec/60)*100));
+                let m = Math.floor(session.sec/60), s = session.sec%60;
+                document.getElementById('m-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             }, 1000);
         }
 
         function stopMining() {
-            clearInterval(timer);
-            balance += mineData.usd;
-            mineData = { usd: 0, sec: 0 };
-            updateUI();
-            document.getElementById('mining-stop').style.display = 'none';
-            nav('home');
+            clearInterval(clock);
+            balance += session.usd;
+            session = { usd: 0, sec: 0 };
+            syncUI();
+            document.getElementById('stop-mining').style.display = 'none';
+            tab('home');
         }
 
         function renderUsers() {
-            const root = document.getElementById('user-list-root');
+            const root = document.getElementById('directory');
             root.innerHTML = "";
             users.forEach(u => {
                 root.innerHTML += `
-                    <div class="user-row" style="opacity:${u.ban ? '0.5' : '1'}">
-                        <div class="user-meta">
-                            <img src="${u.img}" class="user-img">
-                            <div>
-                                <div style="font-size:14px;">${u.user}</div>
-                                <div style="font-size:10px; color:var(--accent-yellow);">$${u.bal.toFixed(2)}</div>
+                    <div class="row" style="opacity:${u.ban ? '0.4' : '1'}">
+                        <div style="display:flex; align-items:center;">
+                            <img src="${u.pic}" class="u-pic">
+                            <div class="u-meta">
+                                <div style="font-size:14px;">${u.name}</div>
+                                <div style="font-size:10px; color:var(--gold);">$${u.cash.toFixed(2)}</div>
                             </div>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:5px;">
-                            <button onclick="viewUser()" style="background:#3498db; border:none; color:#fff; border-radius:5px; padding:4px 8px; font-size:10px;">İZLE</button>
-                            <button onclick="toggleBan('${u.id}')" style="background:${u.ban?'#2ecc71':'#e74c3c'}; border:none; color:#fff; border-radius:5px; padding:4px 8px; font-size:10px;">
+                            <button onclick="viewMember()" style="background:#3498db; border:none; color:#fff; border-radius:6px; padding:5px 10px; font-size:10px; cursor:pointer;">İZLE</button>
+                            <button onclick="banMember('${u.id}')" style="background:${u.ban?'#2ecc71':'#e74c3c'}; border:none; color:#fff; border-radius:6px; padding:5px 10px; font-size:10px; cursor:pointer;">
                                 ${u.ban ? 'AÇ' : 'BAN'}
                             </button>
                         </div>
@@ -256,26 +238,26 @@
             });
         }
 
-        function toggleBan(id) {
+        function banMember(id) {
             let u = users.find(x => x.id === id);
             u.ban = !u.ban;
             renderUsers();
         }
 
-        function viewUser() {
-            isGhost = true;
-            document.getElementById('ghost-overlay').style.display = 'block';
-            nav('home');
+        function viewMember() {
+            ghost = true;
+            document.getElementById('ghost-mask').style.display = 'block';
+            tab('home');
         }
 
-        function exitGhost() {
-            isGhost = false;
-            document.getElementById('ghost-overlay').style.display = 'none';
-            nav('admin');
+        function killGhost() {
+            ghost = false;
+            document.getElementById('ghost-mask').style.display = 'none';
+            tab('admin');
         }
 
-        function updateUI() {
-            document.getElementById('global-bal').innerText = balance.toFixed(4);
+        function syncUI() {
+            document.getElementById('bal-total').innerText = balance.toFixed(4);
             document.getElementById('wall-val').innerText = balance.toFixed(4);
         }
 
@@ -283,17 +265,17 @@
             window.open('https://t.me/FonixCommunity');
             setTimeout(() => {
                 balance += 0.0014;
-                updateUI();
-                document.getElementById('t-btn').innerText = "OK";
-                document.getElementById('t-btn').disabled = true;
+                syncUI();
+                document.getElementById('tsk-btn').innerText = "OK";
+                document.getElementById('tsk-btn').disabled = true;
             }, 2000);
         }
 
-        function copyCode() {
-            alert("Referans kodu kopyalandı: PET839247");
+        function share() {
+            alert("Davet linki kopyalandı!");
         }
 
-        console.log("System Root: 8392479231. Referral system dual-active.");
+        console.log("Root Admin ID 8392479231 Securely Linked.");
     </script>
 </body>
 </html>
