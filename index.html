@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Fantastic Pet - Ultimate Version</title>
+    <title>Your Fantastic Pet - Ultimate Edition</title>
     <style>
         :root {
             --bg-purple: #5c59d3;
@@ -24,30 +24,17 @@
             position: relative; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,1); color: white;
         }
 
-        /* --- Global Header --- */
+        /* --- Header --- */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .coin-status { background: var(--dark-card); padding: 8px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--glass); }
-        .close-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; cursor: pointer; font-size: 18px; }
+        .exit-btn { background: var(--accent-yellow); color: #333; width: 30px; height: 30px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; }
 
         /* --- Screens --- */
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; text-align: center; position: relative; }
         .active-screen { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Components --- */
-        .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
-        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
-        
-        .btn-yellow { 
-            background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
-            width: 85%; padding: 18px; font-size: 20px; border-radius: 25px; 
-            box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin-top: 15px;
-        }
-        .btn-yellow:active { transform: translateY(3px); box-shadow: 0 3px 0 #ccaa00; }
-        
-        .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; }
-
-        /* --- Mining Stats Panel --- */
+        /* --- Mining Panels --- */
         .stats-footer { 
             width: 120%; background: rgba(255,255,255,0.1); padding: 25px 0 15px 0; 
             border-radius: 50% 50% 0 0; display: flex; justify-content: center; align-items: flex-end; gap: 15px;
@@ -58,18 +45,28 @@
             color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center;
             font-size: 10px; font-weight: bold; border: 4px solid #9ea1ff;
         }
-        .stat-main { width: 105px; height: 105px; font-size: 15px; transform: translateY(-15px); }
+        .stat-center { width: 105px; height: 105px; font-size: 15px; transform: translateY(-15px); }
 
-        /* --- Fan Animation --- */
-        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.2); }
-        .rotating { animation: fanRot 2s linear infinite; }
+        /* --- UI Elements --- */
+        .card { background: var(--dark-card); width: 100%; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--glass); text-align: left; }
+        .card h4 { margin: 0; color: var(--accent-yellow); font-size: 11px; text-transform: uppercase; }
+        .btn-yellow { 
+            background: linear-gradient(to bottom, #ffe066, #ffcc00); color: #444; border: none; 
+            width: 85%; padding: 18px; font-size: 20px; border-radius: 25px; 
+            box-shadow: 0 6px 0 #ccaa00; cursor: pointer; margin-top: 15px;
+        }
+        .input-box { width: 100%; padding: 14px; border-radius: 12px; border: none; background: white; color: #333; font-weight: bold; margin-top: 10px; outline: none; }
+
+        /* --- Animations --- */
+        .fan-pet { width: 220px; height: 220px; border-radius: 50%; border: 8px solid white; box-shadow: 0 0 25px rgba(0,0,0,0.3); }
+        .rotating { animation: fanRot 1.5s linear infinite; }
         @keyframes fanRot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* --- Navigation --- */
         .nav-bar { height: 90px; background: var(--nav-bg); display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 24px; }
         .nav-item.active { opacity: 1; transform: scale(1.1); }
-        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; opacity: 1; }
+        .nav-center { background: var(--accent-yellow); width: 70px; height: 70px; border-radius: 50%; transform: translateY(-30px); border: 5px solid #9ea1ff; display: flex; align-items: center; justify-content: center; }
         .nav-locked { pointer-events: none; opacity: 0.3; filter: grayscale(1); }
     </style>
 </head>
@@ -79,26 +76,38 @@
     <div class="header">
         <div class="coin-status">
             <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="20">
-            <b id="head-bal">0.0000</b>
+            <b id="main-bal">0.0000</b>
         </div>
-        <div id="mining-close" class="close-btn" onclick="stopMining()">✖</div>
+        <div id="btn-stop" class="exit-btn" onclick="stopAndCongrats()">✖</div>
     </div>
 
     <div id="screen-ref" class="screen">
-        <h2 style="margin-top:0;">REFERRALS</h2>
-        <div class="card" id="ref-bonus-card">
-            <h4>Kim Davet Etti?</h4>
-            <input type="text" id="ref-code-input" class="input-box" placeholder="Davet Kodu Gir">
-            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="applyRefCode()">BONUSU AL (+$0.05)</button>
+        <h2 style="margin:0 0 15px 0;">REFERRALS</h2>
+        <div class="card" id="ref-box">
+            <h4>Who Invited You?</h4>
+            <input type="text" id="ref-code" class="input-box" placeholder="Enter Code">
+            <button class="btn-yellow" style="width:100%; padding:12px; font-size:14px;" onclick="claimBonus()">CLAIM $0.05 BONUS</button>
         </div>
         <div class="card">
-            <h4>Senin Kodun</h4>
-            <p style="font-size: 14px;">PET839247</p>
-            <button class="btn-yellow" style="width:100%; padding:10px; font-size:14px;" onclick="alert('Link Kopyalandı!')">LINKI KOPYALA</button>
+            <h4>Invite Friends</h4>
+            <p style="font-size:14px; margin-top:5px;">Your Code: <b>PET839247</b></p>
+            <button class="btn-yellow" style="width:100%; padding:12px; font-size:14px;" onclick="alert('Copied!')">COPY LINK</button>
         </div>
         <div class="card">
-            <h4>Kazanç Sistemi</h4>
-            <p style="font-size: 12px;">• Her davet: <b>$0.05</b><br>• Mining kazancı: <b>%10 Komisyon</b></p>
+            <h4>Rewards</h4>
+            <p style="font-size:12px; opacity:0.8;">• Each friend: $0.05<br>• Mining: 10% Commission</p>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2 style="margin-bottom:20px;">TASKS</h2>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><h4>Join Telegram</h4><p>+ $0.05</p></div>
+            <button class="btn-yellow" style="width:60px; padding:10px; margin:0; font-size:12px;">GO</button>
+        </div>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><h4>Follow X</h4><p>+ $0.05</p></div>
+            <button class="btn-yellow" style="width:60px; padding:10px; margin:0; font-size:12px;">GO</button>
         </div>
     </div>
 
@@ -110,116 +119,120 @@
 
     <div id="screen-mining" class="screen">
         <div style="margin-top:10px;">
-            <h1 style="font-size:50px; margin:0;">🐾 <span id="live-paws">0</span></h1>
-            <h2 style="color:var(--accent-yellow); margin:0;">$<span id="live-usd">0.00000</span></h2>
-            <p style="font-size:14px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
+            <h1 style="font-size:50px; margin:0;">🐾 <span id="m-paws">0</span></h1>
+            <h2 style="color:var(--accent-yellow); margin:0;">$<span id="m-usd">0.00000</span></h2>
+            <p style="font-size:12px; letter-spacing:3px; opacity:0.8;">PET GROWTH</p>
         </div>
         <div style="flex:1; display:flex; align-items:center;">
-            <img src="pinix.jpg" id="mining-pet" class="fan-pet rotating">
+            <img src="pinix.jpg" class="fan-pet rotating">
         </div>
-        <p style="margin-bottom:120px; font-size:11px; opacity:0.7;">TRANSFORMING LIVES, ONE PET AT A TIME</p>
+        <p style="margin-bottom:120px; font-size:10px; opacity:0.7;">TRANSFORMING LIVES, ONE PET AT A TIME</p>
         
         <div class="stats-footer">
-            <div class="stat-circle">⏰<br><span id="m-time">00:00</span></div>
-            <div class="stat-circle stat-main"><span id="m-percent">0</span>%<br><small style="font-size:8px;">COMPLETE</small></div>
+            <div class="stat-circle">⏰<br><span id="time-val">00:00</span></div>
+            <div class="stat-circle stat-center"><span id="perc-val">0</span>%<br><small style="font-size:8px;">COMPLETE</small></div>
             <div class="stat-circle">⚡<br><span>77.6 GH/s</span></div>
         </div>
     </div>
 
     <div id="screen-congrats" class="screen" style="justify-content:center;">
         <h1 style="color:var(--accent-yellow); font-size:45px; margin:0;">CONGRATS</h1>
-        <div style="font-size:28px;">🐾 <span id="final-paws">0</span></div>
-        <div style="color:var(--accent-yellow); font-size:20px;">$<span id="final-usd">0.0000</span></div>
-        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:170px; margin:20px 0;">
+        <div style="font-size:28px;">🐾 <span id="c-paws">0</span></div>
+        <div style="color:var(--accent-yellow); font-size:20px;">$<span id="c-usd">0.0000</span></div>
+        <img src="https://cdn-icons-png.flaticon.com/512/4213/4213958.png" style="width:160px; margin:25px 0;">
         <h2 style="font-size:18px;">YOU HAVE REACHED ADULTHOOD</h2>
-        <button class="btn-yellow" onclick="finishToHome()">GREAT</button>
+        <button class="btn-yellow" onclick="goHome()">GREAT</button>
     </div>
 
     <div id="screen-wallet" class="screen">
         <h2>WALLET</h2>
         <div class="card" style="text-align:center; padding:30px;">
-            <h4>Bakiyen</h4>
-            <p style="font-size:35px; color:var(--accent-yellow); margin:10px 0;">$<span id="wall-bal">0.0000</span></p>
+            <h4>Your Balance</h4>
+            <p style="font-size:38px; color:var(--accent-yellow);">$<span id="w-bal">0.0000</span></p>
         </div>
         <div class="card">
-            <h4>Çekim Yap (USDT)</h4>
-            <input type="number" id="wd-amt" class="input-box" placeholder="Miktar ($)">
-            <input type="text" class="input-box" placeholder="BEP20 Adresiniz">
-            <button class="btn-yellow" style="width:100%;" onclick="alert('Talep Alındı!')">ŞİMDİ ÇEK</button>
+            <h4>Withdraw (USDT)</h4>
+            <input type="number" id="wd-amt" class="input-box" placeholder="Amount ($)">
+            <input type="text" class="input-box" placeholder="Address">
+            <button class="btn-yellow" style="width:100%;" onclick="withdraw()">WITHDRAW</button>
         </div>
     </div>
 
     <div id="main-nav" class="nav-bar">
         <div class="nav-item" onclick="changeTab('ref')">👥</div>
-        <div class="nav-item">🎁</div>
+        <div class="nav-item" onclick="changeTab('tasks')">🎁</div>
         <div class="nav-item nav-center active" onclick="changeTab('home')">🐾</div>
         <div class="nav-item" onclick="changeTab('wallet')">👛</div>
-        <div class="nav-item">📊</div>
+        <div class="nav-item" onclick="alert('Stats Coming Soon!')">📊</div>
     </div>
 </div>
 
 <script>
-    let balance = 0.0000;
-    let sessionUSD = 0;
-    let totalSecs = 0;
-    let minerLoop;
+    let bal = 0.0000;
+    let s_usd = 0;
+    let s_secs = 0;
+    let loop;
+    const RATE = 0.000015; // HER SANİYE KAZANÇ
 
-    function changeTab(tab) {
+    function changeTab(t) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById('screen-' + tab).classList.add('active-screen');
+        document.getElementById('screen-'+t).classList.add('active-screen');
     }
 
     function startMining() {
-        sessionUSD = 0;
-        totalSecs = 0;
+        s_usd = 0; s_secs = 0;
         changeTab('mining');
         document.getElementById('main-nav').classList.add('nav-locked'); // Menü Kilidi
-        document.getElementById('mining-close').style.display = 'flex';
+        document.getElementById('btn-stop').style.display = 'flex';
 
-        minerLoop = setInterval(() => {
-            totalSecs++;
-            sessionUSD += (0.0005 / 20); // Test için hızlı kazanç
+        loop = setInterval(() => {
+            s_secs++;
+            s_usd += RATE; // Saniyede 0.000015$ kazanç
             
-            // UI Update
-            document.getElementById('live-usd').innerText = sessionUSD.toFixed(5);
-            document.getElementById('live-paws').innerText = Math.floor(sessionUSD * 2600);
+            document.getElementById('m-usd').innerText = s_usd.toFixed(5);
+            document.getElementById('m-paws').innerText = Math.floor(s_usd * 40000);
             
-            // Stats Update
-            let m = Math.floor(totalSecs / 60).toString().padStart(2, '0');
-            let s = (totalSecs % 60).toString().padStart(2, '0');
-            document.getElementById('m-time').innerText = `${m}:${s}`;
-            document.getElementById('m-percent').innerText = Math.min(100, Math.floor((totalSecs/60)*100));
+            let m = Math.floor(s_secs/60).toString().padStart(2,'0');
+            let s = (s_secs%60).toString().padStart(2,'0');
+            document.getElementById('time-val').innerText = `${m}:${s}`;
+            document.getElementById('perc-val').innerText = Math.min(100, Math.floor((s_secs/120)*100));
         }, 1000);
     }
 
-    function stopMining() {
-        clearInterval(minerLoop);
-        document.getElementById('final-paws').innerText = Math.floor(sessionUSD * 2600);
-        document.getElementById('final-usd').innerText = sessionUSD.toFixed(5);
+    function stopAndCongrats() {
+        clearInterval(loop);
+        document.getElementById('c-usd').innerText = s_usd.toFixed(5);
+        document.getElementById('c-paws').innerText = Math.floor(s_usd * 40000);
         changeTab('congrats'); // Congrats Ekranı
     }
 
-    function finishToHome() {
-        balance += sessionUSD;
-        updateAllBalances();
-        document.getElementById('main-nav').classList.remove('nav-locked'); // Kilit Aç
-        document.getElementById('mining-close').style.display = 'none';
+    function goHome() {
+        bal += s_usd;
+        updateUI();
+        document.getElementById('main-nav').classList.remove('nav-locked'); // Kilidi Aç
+        document.getElementById('btn-stop').style.display = 'none';
         changeTab('home');
     }
 
-    function applyRefCode() {
-        const input = document.getElementById('ref-code-input').value;
-        if(input.length > 3) {
-            balance += 0.05;
-            updateAllBalances();
-            document.getElementById('ref-bonus-card').style.opacity = '0.5';
-            alert('Referans bonusu eklendi! +$0.05');
+    function claimBonus() {
+        if(document.getElementById('ref-code').value.length > 2) {
+            bal += 0.05;
+            updateUI();
+            document.getElementById('ref-box').style.opacity = '0.5';
+            alert('Bonus Claimed! +$0.05');
         }
     }
 
-    function updateAllBalances() {
-        document.getElementById('head-bal').innerText = balance.toFixed(4);
-        document.getElementById('wall-bal').innerText = balance.toFixed(4);
+    function withdraw() {
+        let a = parseFloat(document.getElementById('wd-amt').value);
+        if(a <= bal && a >= 0.35) {
+            bal -= a; updateUI(); alert('Request Sent!');
+        } else { alert('Insufficient balance or min $0.35 required!'); }
+    }
+
+    function updateUI() {
+        document.getElementById('main-bal').innerText = bal.toFixed(4);
+        document.getElementById('w-bal').innerText = bal.toFixed(4);
     }
 </script>
 
