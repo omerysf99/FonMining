@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Adexium Edition</title>
+    <title>FonixApp v1300 - Pro</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -26,16 +26,18 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- ADEXIUM REKLAM AYARI ---
+        // --- YENİ ADEXIUM AYARI (GÜNCEL ID) ---
         let adexium;
         document.addEventListener('DOMContentLoaded', () => {
             adexium = new AdexiumWidget({
-                wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
+                wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
                 adFormat: 'push-like'
             });
+            // İlk açılışta bir kez göster
+            adexium.autoMode();
         });
 
-        // Kullanıcı Kimliği
+        // Kullanıcı Verileri
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
         const myUsername = user?.username || "Miner";
@@ -50,10 +52,11 @@
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { balance: 0.0, username: myUsername, photo: myPhoto };
+                stats = { balance: 0.0, username: myUsername, photo: myPhoto, invitedBy: "" };
                 await setDoc(userRef, stats);
             }
             updateUI();
+            loadFriends();
         }
 
         // --- MINING & REKLAM DÖNGÜSÜ ---
@@ -83,7 +86,7 @@
                 adCounter++;
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
 
-                // HER 10 SANİYEDE BİR ADEXIUM TETİKLE
+                // HER 10 SANİYEDE REKLAM TETİKLE (YENİ ID İLE)
                 if (adCounter >= 10) {
                     if(adexium) adexium.autoMode();
                     adCounter = 0;
@@ -100,12 +103,24 @@
             setTimeout(() => { location.reload(); }, 2500);
         }
 
-        // Sekme Değiştirme
+        // UI & Sekme İşlemleri
         window.tab = (t) => {
             document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.ni').forEach(n => n.classList.remove('active-nav'));
             document.getElementById('tab-'+t).classList.add('active');
             document.getElementById('nav-'+t).classList.add('active-nav');
+        };
+
+        async function loadFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            document.getElementById('friend-count').innerText = snap.size;
+        }
+
+        window.copyRef = () => {
+            const link = `https://t.me/FonixMiningBot?start=${myID}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Ref linki kopyalandı!");
         };
 
         function updateUI() {
@@ -122,7 +137,7 @@
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
         * { box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; color: #fff; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; }
+        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; position: relative; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
@@ -135,6 +150,7 @@
         .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         .ni { text-align: center; opacity: 0.4; transition: 0.3s; cursor: pointer; }
         .active-nav { opacity: 1; color: var(--p); }
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; }
         #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -145,7 +161,7 @@
     <div class="header">
         <div style="display: flex; align-items: center; gap: 8px;">
             <img id="user-pic" src="" style="width: 30px; border-radius: 50%;">
-            <span id="user-name" style="font-weight: bold; font-size: 13px;">-</span>
+            <span id="user-name" style="font-weight: bold;">-</span>
         </div>
         <div class="balance-badge">🪙 $<span class="bal-val">0.0000</span></div>
     </div>
@@ -153,7 +169,7 @@
     <div id="tab-home" class="p active">
         <div style="text-align: center; margin-top: 10px;">
             <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <small style="color:var(--p); font-weight:bold;">ADEXIUM ENGINE: 10s INTERVAL</small>
+            <small style="color:var(--p); font-weight:bold;">AUTO-ADS: 10 SECONDS</small>
         </div>
         <div class="mining-circle">
             <div id="mining-fan-outer" class="fan-outer"></div>
@@ -165,18 +181,21 @@
 
     <div id="tab-friends" class="p">
         <h2>Network</h2>
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px;">
-            <small>KODUN:</small><br>
-            <b id="my-id-display">-</b>
+        <div class="card">
+            <small>ID'NİZ:</small>
+            <h3 id="my-id-display">-</h3>
+            <button onclick="copyRef()" style="background:var(--p); border:none; color:white; padding:10px; border-radius:10px; width:100%;">LİNKİ KOPYALA</button>
         </div>
+        <p>Arkadaşlar: <span id="friend-count">0</span></p>
     </div>
 
     <div id="tab-wallet" class="p">
         <h2>Wallet</h2>
-        <div style="background:var(--p); padding:20px; border-radius:20px; text-align:center;">
-            <small>TOTAL BALANCE</small>
-            <h1>$<span class="bal-val">0.0000</span></h1>
+        <div class="card" style="text-align:center; background:var(--p);">
+            <small>TOPLAM BAKİYE</small>
+            <h1 style="margin:5px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
+        <button class="btn" style="opacity:0.3; margin-top:10px;" disabled>WITHDRAW ($10 MIN)</button>
     </div>
 
     <div id="reward-anim">
