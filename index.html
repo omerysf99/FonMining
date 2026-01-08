@@ -9,7 +9,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -29,55 +29,64 @@
         const myID = user?.id ? user.id.toString() : "8392479231";
         const myName = user?.username || user?.first_name || "Koala";
         
-        let stats = { usdt: 0, kls: 0, hasUsedCode: false };
+        let stats = { usdt: 0, kls: 0 };
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-
-            if (snap.exists()) {
-                stats = snap.data();
-            } else {
-                stats = { usdt: 0, kls: 0, hasUsedCode: false, username: myName, photo: user?.photo_url || "" };
-                await setDoc(userRef, stats);
-            }
+            if (snap.exists()) stats = snap.data();
             updateUI();
         }
 
         function updateUI() {
             document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
             document.querySelectorAll('.ui-kls').forEach(e => e.innerText = stats.kls.toFixed(2));
-            document.getElementById('my-id-display').innerText = myID;
         }
 
-        // --- ÖDEME TALEBİ (WITHDRAW) ---
+        // --- ANİMASYONLU BİLDİRİM FONKSİYONU ---
+        window.showNotify = (type, msg) => {
+            const card = document.getElementById('withdraw-card');
+            const status = document.getElementById('status-msg');
+            
+            status.innerText = msg;
+            status.className = "status-text " + (type === 'error' ? 'err-txt' : 'ok-txt');
+            
+            if(type === 'error') {
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
+            } else {
+                card.classList.add('bounce');
+                setTimeout(() => card.classList.remove('bounce'), 500);
+            }
+        };
+
         window.requestWithdraw = async () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const address = document.getElementById('wallet-address').value.trim();
 
-            if (amount < 10 || isNaN(amount)) return tg.showAlert("Minimum çekim $10.00");
-            if (address.length < 10) return tg.showAlert("Geçerli bir cüzdan adresi girin!");
-            if (amount > stats.usdt) return tg.showAlert("Yetersiz bakiye!");
+            if (isNaN(amount) || amount < 10) {
+                showNotify('error', '❌ Hata: Minimum çekim $10.00 olmalı!');
+                return;
+            }
+            if (address.length < 10) {
+                showNotify('error', '❌ Hata: Geçersiz cüzdan adresi!');
+                return;
+            }
+            if (amount > stats.usdt) {
+                showNotify('error', '❌ Hata: Yetersiz bakiye!');
+                return;
+            }
 
             try {
-                // Talebi Kaydet
                 await addDoc(collection(db, "withdrawals"), {
-                    userId: myID,
-                    username: myName,
-                    amount: amount,
-                    address: address,
-                    status: "pending",
-                    date: new Date().toISOString()
+                    userId: myID, amount, address, status: "pending", date: new Date().toISOString()
                 });
-
-                // Bakiyeden Düş
                 await updateDoc(doc(db, "users", myID), { usdt: increment(-amount) });
                 stats.usdt -= amount;
                 updateUI();
-                
-                tg.showAlert("Ödeme talebiniz alındı! 24 saat içinde kontrol edilecektir.");
+                showNotify('success', '✅ Başarılı! Talebiniz alındı.');
             } catch (e) {
-                tg.showAlert("Hata oluştu, tekrar deneyin.");
+                showNotify('error', '❌ Sistem Hatası!');
             }
         };
 
@@ -92,21 +101,38 @@
     </script>
 
     <style>
-        :root { --p: #70a1ff; --v: #6c5ce7; --y: #f7d348; --d: #0a0b1e; }
-        body { margin: 0; background: var(--d); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; }
+        :root { --p: #70a1ff; --v: #6c5ce7; --y: #f7d348; --err: #ff4757; --ok: #2ed573; --d: #0a0b1e; }
+        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; }
         
-        /* Layout */
         #app { height: 100vh; display: flex; flex-direction: column; }
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
         .active { display: flex; }
 
-        /* Card Designs */
-        .card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .main-card { background: linear-gradient(135deg, var(--v), #341f97); text-align: center; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.3); }
+        .card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .main-card { background: linear-gradient(135deg, var(--v), #341f97); text-align: center; }
 
         /* Wallet Form */
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 10px 0; box-sizing: border-box; }
-        .btn-pay { width: 100%; background: var(--y); color: #000; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--v); }
+        .btn-pay { width: 100%; background: var(--y); color: #000; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+
+        /* ANİMASYONLAR */
+        .shake { animation: shakeAnim 0.5s ease-in-out; border-color: var(--err) !important; }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .bounce { animation: bounceAnim 0.5s ease-in-out; border-color: var(--ok) !important; }
+        @keyframes bounceAnim {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .status-text { font-size: 13px; font-weight: bold; text-align: center; margin-top: 10px; height: 20px; }
+        .err-txt { color: var(--err); }
+        .ok-txt { color: var(--ok); }
 
         /* Navbar */
         .nav { height: 80px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
@@ -114,62 +140,56 @@
         .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); transition: 0.3s; }
         .n-icon { font-size: 24px; display: block; margin-bottom: 5px; }
 
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .stat-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; text-align: center; }
+        .welcome-box { text-align: center; margin-top: 40px; }
+        .logo-circle { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--y); margin-bottom: 20px; box-shadow: 0 0 20px rgba(247, 211, 72, 0.4); }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div id="p-main" class="page active">
-        <div class="card main-card">
-            <small style="opacity:0.8">TOPLAM BAKİYE</small>
-            <h1 style="font-size: 42px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
+        <div class="welcome-box">
+            <img src="koalasmining.jpg" class="logo-circle">
+            <h1 style="margin:0;">KOALAS HUB</h1>
+            <p style="opacity:0.6;">Topluluğun kalbine hoş geldin!</p>
+        </div>
+
+        <div class="card main-card" style="margin-top:30px;">
+            <small style="opacity:0.8">HESAP ÖZETİ</small>
+            <h1 style="font-size: 38px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
             <div style="font-size: 14px; opacity: 0.9;">🪙 <span class="ui-kls">0.00</span> KLS Token</div>
-        </div>
-
-        <div class="stat-grid">
-            <div class="stat-item">
-                <small>Kullanıcı ID</small>
-                <div id="my-id-display" style="color:var(--y); font-weight:bold;">...</div>
-            </div>
-            <div class="stat-item">
-                <small>Rank</small>
-                <div style="color:var(--p); font-weight:bold;">Koala Member</div>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top:20px;">
-            <h3>Duyurular</h3>
-            <p style="font-size:13px; opacity:0.7;">Koala ekosistemi büyüyor! Arkadaşlarını davet et, çekilebilir USDT kazan.</p>
         </div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2>Cüzdan Ayarları</h2>
-        <div class="card">
-            <small>Kullanılabilir:</small>
-            <h2 style="color:var(--y); margin:5px 0;">$<span class="ui-usdt">0.0000</span></h2>
-        </div>
-
-        <div class="card">
-            <h3>Para Çekme (Withdraw)</h3>
-            <label style="font-size:12px;">Miktar (Min $10):</label>
-            <input type="number" id="withdraw-amount" placeholder="10.00">
+        <h2>Cüzdan İşlemleri</h2>
+        <div class="card" id="withdraw-card">
+            <h3 style="margin-top:0;">Para Çekme</h3>
+            <label style="font-size:12px; opacity:0.6;">Çekilecek Miktar ($):</label>
+            <input type="number" id="withdraw-amount" placeholder="Örn: 10.50">
             
-            <label style="font-size:12px;">TON veya USDT Adresi:</label>
-            <input type="text" id="wallet-address" placeholder="Adresinizi buraya yapıştırın...">
+            <label style="font-size:12px; opacity:0.6;">Cüzdan Adresi (TON/USDT):</label>
+            <input type="text" id="wallet-address" placeholder="UQ... adresinizi girin">
             
             <button class="btn-pay" onclick="requestWithdraw()">ÖDEME TALEBİ OLUŞTUR</button>
+            <div id="status-msg" class="status-text"></div>
         </div>
-        <p style="text-align:center; font-size:11px; opacity:0.5;">Talepler incelendikten sonra cüzdanınıza iletilir.</p>
+        
+        <div class="card" style="opacity:0.7;">
+            <h4 style="margin:0;">İşlem Kuralları</h4>
+            <ul style="font-size:12px; padding-left:20px; margin-top:10px;">
+                <li>Minimum çekim limiti $10.00'dır.</li>
+                <li>Talepler 24 saat içinde manuel onaylanır.</li>
+                <li>Hatalı adres girişlerinden platform sorumlu değildir.</li>
+            </ul>
+        </div>
     </div>
 
     <div id="p-friends" class="page">
         <h2>Arkadaşlar</h2>
         <div class="card">
-            <p>Arkadaşlarını davet ederek her biri için <b>$0.05</b> kazan!</p>
-        </div>
+            <p>Arkadaşlarını davet et, ödülleri topla!</p>
+            </div>
     </div>
 
     <nav class="nav">
