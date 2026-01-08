@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas: Pro Infinite Mining</title>
+    <title>Koalas Ultra Miner</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -29,172 +29,224 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        
-        let stats = { kls_bal: 0, usdt_bal: 0, hasUsedCode: false };
-        let isMining = false, miningInterval, adTimer = 0;
-        let sKLS = 0, sUSDT = 0;
+        const myName = user?.username || user?.first_name || "Koala_User";
+        const myPhoto = user?.photo_url || "https://ui-avatars.com/api/?name=" + myName;
+
+        let stats = { main_kls: 0, main_usdt: 0, pending_kls: 0, pending_usdt: 0, hasUsedCode: false };
+        let isMining = false, adTimer = 0;
 
         async function init() {
-            const userSnap = await getDoc(doc(db, "users", myID));
-            if (userSnap.exists()) stats = userSnap.data();
+            new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
+            const userRef = doc(db, "users", myID);
+            const snap = await getDoc(userRef);
+
+            if (snap.exists()) {
+                stats = snap.data();
+            } else {
+                stats = { main_kls: 0, main_usdt: 0, pending_kls: 0, pending_usdt: 0, username: myName, photo: myPhoto, invitedBy: "" };
+                await setDoc(userRef, stats);
+            }
             updateUI();
+            loadFriends();
         }
 
-        window.toggleMining = () => {
-            const btn = document.getElementById('mine-btn');
-            if (!isMining) {
-                isMining = true;
-                btn.innerText = "MINING ACTIVE...";
-                btn.style.background = "#ff4757";
-                document.getElementById('fan-img').classList.add('fan-spin');
-                
-                miningInterval = setInterval(() => {
-                    sKLS += 0.01;
-                    sUSDT += 0.00001;
-                    adTimer++;
+        // --- OTOMATİK MİNİNG SİSTEMİ ---
+        window.startMining = () => {
+            if(isMining) return;
+            isMining = true;
+            document.getElementById('start-overlay').style.display = 'none';
+            document.getElementById('fan-img').classList.add('fan-spin');
+            
+            setInterval(async () => {
+                stats.pending_kls += 0.005;
+                stats.pending_usdt += 0.000005;
+                adTimer++;
 
-                    document.getElementById('live-kls').innerText = sKLS.toFixed(3);
-                    document.getElementById('live-usdt').innerText = "$" + sUSDT.toFixed(6);
-                    document.getElementById('ad-progress').style.width = (adTimer / 30 * 100) + "%";
+                updateUI();
 
-                    // 30 Saniyede Bir Reklam
-                    if (adTimer >= 30) {
-                        autoClaim();
-                    }
-                }, 1000);
-            }
+                // 30 Saniyede Bir Reklam
+                if (adTimer >= 30) {
+                    adTimer = 0;
+                    show_10432457().then(() => {
+                        updateDoc(doc(db, "users", myID), { 
+                            pending_kls: stats.pending_kls, 
+                            pending_usdt: stats.pending_usdt 
+                        });
+                    });
+                }
+            }, 1000);
         };
 
-        async function autoClaim() {
-            clearInterval(miningInterval);
-            document.getElementById('fan-img').classList.remove('fan-spin');
+        // --- WALLET CLAIM ---
+        window.claimToMain = async () => {
+            if (stats.pending_usdt <= 0) return tg.showAlert("Birikmiş ödül yok!");
             
-            // Reklamı Göster
-            show_10432457().then(() => finalizeAdCycle()).catch(() => finalizeAdCycle());
-        }
+            const k = stats.pending_kls;
+            const u = stats.pending_usdt;
 
-        async function finalizeAdCycle() {
-            // Veritabanı Güncelle
-            await updateDoc(doc(db, "users", myID), { 
-                kls_bal: increment(sKLS), 
-                usdt_bal: increment(sUSDT) 
+            stats.main_kls += k;
+            stats.main_usdt += u;
+            stats.pending_kls = 0;
+            stats.pending_usdt = 0;
+
+            await updateDoc(doc(db, "users", myID), {
+                main_kls: increment(k),
+                main_usdt: increment(u),
+                pending_kls: 0,
+                pending_usdt: 0
             });
 
-            // Animasyon ve Reset
             createRain();
-            sKLS = 0; sUSDT = 0; adTimer = 0;
-            
-            // 3 saniye sonra kazıma devam et
-            setTimeout(() => {
-                document.getElementById('rain-layer').style.display = 'none';
-                isMining = false;
-                toggleMining();
-            }, 3000);
-        }
+            tg.showAlert("Ödüller ana bakiyeye aktarıldı!");
+            updateUI();
+        };
 
-        function createRain() {
-            const layer = document.getElementById('rain-layer');
-            layer.style.display = 'block';
-            for(let i=0; i<30; i++) {
-                const d = document.createElement('div');
-                d.className = 'drop'; d.innerText = Math.random() > 0.5 ? '🪙' : '💵';
-                d.style.left = Math.random() * 95 + 'vw';
-                layer.appendChild(d);
-                setTimeout(() => d.remove(), 2000);
-            }
+        // --- FRIENDS ---
+        async function loadFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            const list = document.getElementById('friends-list');
+            list.innerHTML = "";
+            document.getElementById('f-count').innerText = snap.size;
+            snap.forEach(d => {
+                const data = d.data();
+                list.innerHTML += `<div class="f-item"><img src="${data.photo}"><span>@${data.username}</span><b>+$0.05</b></div>`;
+            });
         }
 
         function updateUI() {
-            document.getElementById('total-kls').innerText = stats.kls_bal.toFixed(2);
-            document.getElementById('total-usdt').innerText = stats.usdt_bal.toFixed(4);
+            document.querySelectorAll('.ui-main-kls').forEach(e => e.innerText = stats.main_kls.toFixed(2));
+            document.querySelectorAll('.ui-main-usdt').forEach(e => e.innerText = stats.main_usdt.toFixed(4));
+            document.getElementById('ui-pending-kls').innerText = stats.pending_kls.toFixed(4);
+            document.getElementById('ui-pending-usdt').innerText = stats.pending_usdt.toFixed(6);
+            document.getElementById('ad-bar').style.width = (adTimer / 30 * 100) + "%";
         }
 
-        window.showTab = (name) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + name).classList.add('active');
+        window.showTab = (n) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('p-'+n).classList.add('active');
+            document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('n-on'));
+            event.currentTarget.classList.add('n-on');
         };
+
+        function createRain() {
+            const r = document.getElementById('rain');
+            r.style.display = 'block';
+            for(let i=0; i<30; i++) {
+                const d = document.createElement('div');
+                d.className = 'drop'; d.innerText = '🪙';
+                d.style.left = Math.random()*95+'vw';
+                r.appendChild(d);
+                setTimeout(() => d.remove(), 2000);
+            }
+        }
 
         window.onload = init;
     </script>
 
     <style>
-        :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --dark: #120a3d; }
-        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --d: #0a0520; }
+        body { margin: 0; background: var(--d); color: #fff; font-family: 'Arial Rounded MT Bold', sans-serif; overflow: hidden; }
         
-        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.4); border-bottom: 2px solid var(--p); }
-        .tab-content { display: none; flex-direction: column; align-items: center; padding: 20px; height: calc(100vh - 130px); overflow-y: auto; }
+        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.5); border-bottom: 1px solid #333; }
+        .page { display: none; height: calc(100vh - 135px); flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
 
-        /* Mining Ekranı Gelişmiş */
-        .fan-area { width: 260px; height: 260px; position: relative; display: flex; justify-content: center; align-items: center; margin: 20px 0; }
-        .fan-glow { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, var(--b) 0%, transparent 70%); opacity: 0.3; filter: blur(20px); }
+        /* Ana Sayfa Overlay */
+        #start-overlay { position: absolute; inset: 0; background: var(--d); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* Arka planı kaldırılmış ve yuvarlak fan */
-        .fan-frame { width: 200px; height: 200px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; z-index: 2; box-shadow: 0 0 20px var(--b); }
+        /* Mining Ekranı */
+        .fan-box { width: 240px; height: 240px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; box-shadow: 0 0 40px var(--b); margin: 30px 0; }
         .fan-img { width: 100%; height: 100%; object-fit: cover; }
         .fan-spin { animation: spin 2s linear infinite; }
+        @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .mining-vals { text-align: center; background: rgba(0,0,0,0.4); padding: 15px 40px; border-radius: 30px; border: 1px solid var(--p); }
+        .ad-wrap { width: 80%; height: 6px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden; }
+        #ad-bar { width: 0; height: 100%; background: var(--y); transition: 1s linear; }
 
-        .live-stats { text-align: center; z-index: 5; background: rgba(0,0,0,0.5); padding: 10px 30px; border-radius: 50px; border: 1px solid var(--p); }
-        #live-kls { font-size: 40px; color: var(--y); font-weight: 900; display: block; }
-        #live-usdt { color: #00ffaa; font-weight: bold; }
+        /* Wallet & Friends */
+        .card { width: 100%; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; text-align: center; }
+        .btn-claim { width: 100%; padding: 18px; border-radius: 15px; border: none; background: var(--y); font-weight: 900; font-size: 16px; cursor: pointer; color: #000; }
+        .f-item { width: 100%; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 12px; margin-bottom: 8px; }
+        .f-item img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--b); }
 
-        /* Reklam Barı */
-        .ad-bar-wrap { width: 80%; height: 6px; background: #222; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        #ad-progress { height: 100%; width: 0%; background: var(--y); transition: 1s linear; }
+        /* Nav */
+        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 11px; }
+        .n-on { opacity: 1; color: var(--y); transform: scale(1.1); }
 
-        .btn-mine { width: 85%; padding: 20px; border-radius: 20px; border: none; background: var(--y); color: var(--dark); font-size: 20px; font-weight: 900; cursor: pointer; border-bottom: 5px solid #b89610; }
-
-        /* Navigasyon */
-        .nav { height: 70px; display: flex; justify-content: space-around; align-items: center; background: #000; position: fixed; bottom: 0; width: 100%; }
-        .nav-btn { background: none; border: none; color: #fff; font-size: 11px; opacity: 0.6; }
-
-        #rain-layer { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 100; }
+        #rain { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 100; }
         .drop { position: absolute; top: -50px; font-size: 30px; animation: fall 2s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+        @keyframes fall { to { transform: translateY(110vh); } }
     </style>
 </head>
 <body>
 
+    <div id="rain"></div>
+
+    <div id="start-overlay">
+        <img src="koalasmining.jpg" style="width:150px; border-radius:50%; margin-bottom:30px; border:5px solid var(--y);">
+        <h1 style="margin-bottom:10px;">KOALAS MINER</h1>
+        <p style="opacity:0.6; margin-bottom:40px;">Ready to earn KLS & USDT?</p>
+        <button class="btn-claim" style="width:200px; font-size:24px;" onclick="startMining()">PLAY</button>
+    </div>
+
     <div class="header">
-        <div>🪙 <span id="total-kls">0.00</span></div>
-        <div>💵 $<span id="total-usdt">0.0000</span></div>
+        <div>🪙 <span class="ui-main-kls">0.00</span></div>
+        <div>💵 $<span class="ui-main-usdt">0.0000</span></div>
     </div>
 
-    <div id="tab-mining" class="tab-content active">
-        <div class="live-stats">
-            <span id="live-kls">0.000</span>
-            <span id="live-usdt">$0.000000</span>
+    <div id="p-mining" class="page active">
+        <div class="mining-vals">
+            <small style="color:var(--y)">PENDING REWARDS</small>
+            <h2 id="ui-pending-kls" style="margin:5px 0; font-size:32px;">0.0000</h2>
+            <div id="ui-pending-usdt" style="color:#00ffaa;">$0.000000</div>
+        </div>
+        
+        <div class="fan-box">
+            <img id="fan-img" src="koalasmining.jpg" class="fan-img">
         </div>
 
-        <div class="fan-area">
-            <div class="fan-glow"></div>
-            <div class="fan-frame">
-                <img id="fan-img" src="koalasmining.jpg" class="fan-img">
-            </div>
-        </div>
-
-        <div style="font-size: 12px; opacity: 0.8;">NEXT REWARD CYCLE</div>
-        <div class="ad-bar-wrap">
-            <div id="ad-progress"></div>
-        </div>
-
-        <button id="mine-btn" class="btn-mine" onclick="toggleMining()">START MINING</button>
-        <p style="font-size: 10px; margin-top: 10px; opacity: 0.5;">Auto-claim every 30 seconds</p>
+        <small style="opacity:0.5;">Next Ad Cycle</small>
+        <div class="ad-wrap"><div id="ad-bar"></div></div>
+        <p style="font-size:12px; margin-top:15px; color:var(--b);">Mining is active in background...</p>
     </div>
 
-    <div id="tab-friends" class="tab-content">
-        <h2>Friends Panel</h2>
+    <div id="p-friends" class="page">
+        <h2>Friends (<span id="f-count">0</span>)</h2>
+        <div class="card">
+            <small>Your Referral Link</small>
+            <div id="ref-link" style="font-size:11px; background:#000; padding:10px; border-radius:10px; margin-top:5px;" onclick="navigator.clipboard.writeText(this.innerText); alert('Copied!')">https://t.me/BotUser?start=8392479231</div>
+        </div>
+        <div id="friends-list" style="width:100%"></div>
+    </div>
+
+    <div id="p-wallet" class="page">
+        <h2>Wallet</h2>
+        <div class="card" style="background:var(--p);">
+            <p>Main Balance</p>
+            <h1>$<span class="ui-main-usdt">0.00</span></h1>
         </div>
 
-    <div id="rain-layer"></div>
+        <div class="card">
+            <p>Unclaimed Mining Rewards</p>
+            <h3 style="color:var(--y);">$<span id="ui-pending-usdt-wallet">0.0000</span></h3>
+            <button class="btn-claim" style="margin-top:10px;" onclick="claimToMain()">CLAIM TO MAIN BALANCE</button>
+        </div>
+    </div>
 
     <nav class="nav">
-        <button class="nav-btn" onclick="showTab('mining')">⛏️<br>Mining</button>
-        <button class="nav-btn" onclick="showTab('friends')">👥<br>Friends</button>
-        <button class="nav-btn" onclick="showTab('wallet')">💰<br>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('mining')">⛏️<br>Mining</button>
+        <button class="n-btn" onclick="showTab('friends')">👥<br>Friends</button>
+        <button class="n-btn" onclick="showTab('wallet')">💰<br>Wallet</button>
     </nav>
 
+    <script>
+        // Sync pending values for wallet tab
+        setInterval(() => {
+            document.getElementById('ui-pending-usdt-wallet').innerText = stats.pending_usdt.toFixed(6);
+        }, 1000);
+    </script>
 </body>
 </html>
