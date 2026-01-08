@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX ADS v502</title>
+    <title>FONIX PRO v503</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -29,8 +29,8 @@
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         
-        const DAILY_LIMIT = 50;
         let stats = { usdt: 0, adsToday: 0, lastAdDate: "" };
+        let friendCount = 0;
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -39,59 +39,66 @@
 
             if (snap.exists()) {
                 stats = snap.data();
-                // Gün değiştiyse limiti sıfırla
                 if (stats.lastAdDate !== today) {
                     stats.adsToday = 0;
                     stats.lastAdDate = today;
                     await updateDoc(userRef, { adsToday: 0, lastAdDate: today });
                 }
             } else {
-                stats = { usdt: 0, adsToday: 0, lastAdDate: today, username: user?.username || "User", invitedBy: tg.initDataUnsafe?.start_param || "" };
+                stats = { usdt: 0, adsToday: 0, lastAdDate: today, username: user?.username || "Miner", invitedBy: tg.initDataUnsafe?.start_param || "" };
                 await setDoc(userRef, stats);
                 if(stats.invitedBy) await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.10) });
             }
+            
+            await fetchFriends();
             updateUI();
         }
 
+        async function fetchFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            friendCount = snap.size;
+            document.getElementById('ref-count-val').innerText = friendCount;
+        }
+
         function updateUI() {
-            document.getElementById('balance').innerText = stats.usdt.toFixed(4);
+            document.querySelectorAll('.ui-balance').forEach(e => e.innerText = stats.usdt.toFixed(4));
             document.getElementById('ad-count').innerText = stats.adsToday;
-            document.getElementById('ad-limit').innerText = DAILY_LIMIT;
-            
-            const progress = (stats.adsToday / DAILY_LIMIT) * 100;
+            const progress = (stats.adsToday / 50) * 100;
             document.getElementById('limit-bar').style.width = progress + "%";
             document.getElementById('ref-link').innerText = `https://t.me/FonixMiningBot?start=${myID}`;
-
-            const btn = document.getElementById('main-ad-btn');
-            if(stats.adsToday >= DAILY_LIMIT) {
-                btn.innerText = "LIMIT REACHED";
-                btn.style.opacity = "0.5";
-                btn.onclick = null;
-            }
         }
 
         window.watchAd = () => {
-            if(stats.adsToday >= DAILY_LIMIT) return tg.showAlert("Günlük izleme limitine ulaştınız!");
+            if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
+            window.showAdexora().then(async () => {
+                const reward = 0.05;
+                stats.usdt += reward;
+                stats.adsToday += 1;
+                await updateDoc(doc(db, "users", myID), { usdt: increment(reward), adsToday: increment(1) });
+                updateUI();
+            }).catch(() => tg.showAlert("Reklam yüklenemedi."));
+        };
 
-            tg.HapticFeedback.impactOccurred('medium');
-            window.showAdexora()
-                .then(async () => {
-                    const reward = 0.05; // Her reklam $0.05 kazandırır
-                    stats.usdt += reward;
-                    stats.adsToday += 1;
-                    
-                    const userRef = doc(db, "users", myID);
-                    await updateDoc(userRef, { 
-                        usdt: increment(reward), 
-                        adsToday: increment(1) 
-                    });
-                    
-                    updateUI();
-                    tg.showAlert(`Tebrikler! $${reward} hesabınıza eklendi.`);
-                })
-                .catch(() => {
-                    tg.showAlert("Reklam şu an hazır değil. Lütfen 5 saniye sonra tekrar deneyin.");
-                });
+        window.processWithdraw = () => {
+            const amount = parseFloat(document.getElementById('withdraw-amt').value);
+            const address = document.getElementById('wallet-adr').value;
+
+            if (!amount || amount < 10) return tg.showAlert("Minimum çekim 10 USDT.");
+            if (amount > stats.usdt) return tg.showAlert("Yetersiz bakiye.");
+            if (address.length < 10) return tg.showAlert("Geçerli bir adres girin.");
+
+            // KRAL İSTEDİĞİN MANTIK BURADA: 5$ için 2 Ref (1$ = 0.4 Ref)
+            const requiredRefs = Math.ceil((amount / 5) * 2);
+            
+            if (friendCount < requiredRefs) {
+                tg.showAlert(`Yetersiz Referans!\n\n${amount}$ çekmek için en az ${requiredRefs} aktif referansınız olmalı.\nŞu anki: ${friendCount}`);
+                return;
+            }
+
+            tg.showConfirm(`${amount} USDT çekim talebi onaylansın mı?`, (ok) => {
+                if(ok) tg.showAlert("Talebiniz alındı! 24 saat içinde kontrol edilecektir.");
+            });
         };
 
         window.switchTab = (id, btn) => {
@@ -106,94 +113,122 @@
     </script>
 
     <style>
-        :root { --main: #00ffcc; --dark: #07070a; --glass: rgba(255,255,255,0.03); }
-        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
-        .app-container { height: 100vh; display: flex; flex-direction: column; padding: 25px; box-sizing: border-box; }
-        .tab-page { display: none; flex: 1; animation: slideUp 0.3s ease; }
+        :root { --main: #00ffcc; --bg: #050508; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        .app-shell { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
         .on { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Card Designs */
-        .premium-card { background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; padding: 30px; text-align: center; margin-bottom: 20px; }
-        .balance-text { font-family: 'Syncopate'; font-size: 36px; font-weight: 700; color: var(--main); margin: 10px 0; }
+        /* Arkaplan Efekti */
+        .glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, rgba(0,255,204,0.05) 0%, transparent 40%); z-index: -1; }
 
-        /* Action Button */
-        .watch-btn { background: #fff; color: #000; border: none; width: 100%; height: 180px; border-radius: 40px; font-family: 'Syncopate'; font-weight: 700; font-size: 16px; letter-spacing: 2px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 15px 40px rgba(0,255,204,0.1); transition: 0.3s; }
-        .watch-btn:active { transform: scale(0.95); background: var(--main); }
-        .watch-btn span { font-size: 40px; margin-bottom: 10px; }
+        /* Kartlar */
+        .glass-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .glass-card::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%); }
+        
+        .bal-val { font-family: 'Syncopate'; font-size: 32px; font-weight: 700; color: var(--main); text-shadow: 0 0 20px rgba(0,255,204,0.2); margin: 10px 0; }
 
-        /* Limit Bar */
-        .limit-box { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; margin-top: 20px; }
-        .bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 10px 0; overflow: hidden; }
-        #limit-bar { width: 0%; height: 100%; background: var(--main); transition: 0.5s; }
+        /* Butonlar */
+        .primary-btn { width: 100%; padding: 20px; border-radius: 18px; border: none; font-family: 'Syncopate'; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; background: #fff; color: #000; }
+        .primary-btn:active { transform: scale(0.97); background: var(--main); }
+        .ad-zone { height: 150px; background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%); color: #000; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px 0; }
 
-        /* Nav */
-        .nav-bar { position: fixed; bottom: 30px; left: 25px; right: 25px; background: rgba(15,15,20,0.9); backdrop-filter: blur(20px); border-radius: 25px; height: 75px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 9px; font-family: 'Syncopate'; }
+        /* Inputlar */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 10px; opacity: 0.4; margin-bottom: 8px; font-family: 'Syncopate'; }
+        .input-group input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 15px; padding: 15px; color: #fff; outline: none; box-sizing: border-box; }
+
+        /* Navigasyon */
+        .nav-dock { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(10,10,15,0.9); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 24px; height: 75px; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 9px; font-family: 'Syncopate'; transition: 0.3s; }
         .on-nav { opacity: 1; color: var(--main); }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="glow"></div>
+
+<div class="app-shell">
     <div id="home" class="tab-page on">
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <b style="font-family: 'Syncopate'; font-size: 11px; letter-spacing: 1px;">FONIX ADS</b>
-            <div style="font-size: 10px; color: var(--main);">v502 PRO</div>
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <span style="font-family: 'Syncopate'; font-size: 10px; color: var(--main);">NETWORK_ACTIVE</span>
+            <div style="background: rgba(0,255,204,0.1); padding: 5px 12px; border-radius: 50px; font-size: 9px; border: 1px solid var(--main);">DAILY: <span id="ad-count">0</span>/50</div>
+        </header>
+
+        <div class="glass-card">
+            <small style="opacity: 0.5; font-size: 9px; letter-spacing: 2px;">AVAILABLE ASSETS</small>
+            <div class="bal-val">$<span class="ui-balance">0.0000</span></div>
+            <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 15px; overflow: hidden;">
+                <div id="limit-bar" style="height: 100%; background: var(--main); width: 0%; transition: 0.5s;"></div>
+            </div>
         </div>
 
-        <div class="premium-card">
-            <small style="opacity: 0.4; letter-spacing: 2px;">TOTAL EARNINGS</small>
-            <div class="balance-text">$<span id="balance">0.0000</span></div>
+        <div class="ad-zone" onclick="watchAd()">
+            <span style="font-size: 32px; margin-bottom: 10px;">⚡</span>
+            <span style="font-family: 'Syncopate'; font-weight: 700;">WATCH AD & EARN</span>
+            <small style="margin-top: 5px; opacity: 0.7;">$0.05 PER SESSION</small>
         </div>
 
-        <button id="main-ad-btn" class="watch-btn" onclick="watchAd()">
-            <span>🎬</span>
-            WATCH AD
-            <small style="font-size: 9px; opacity: 0.5; margin-top: 8px;">EARN $0.05 PER VIEW</small>
-        </button>
-
-        <div class="limit-box">
-            <div style="display:flex; justify-content: space-between; font-size: 10px; font-family: 'Syncopate';">
-                <span>DAILY LIMIT</span>
-                <span><span id="ad-count">0</span> / <span id="ad-limit">50</span></span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="glass-card" style="margin:0; padding:15px; text-align:center;">
+                <small style="opacity:0.4; font-size: 8px;">NODES</small>
+                <div id="ref-count-val" style="font-size: 18px; font-weight: 800; color: var(--main);">0</div>
             </div>
-            <div class="bar-wrap">
-                <div id="limit-bar"></div>
+            <div class="glass-card" style="margin:0; padding:15px; text-align:center;">
+                <small style="opacity:0.4; font-size: 8px;">LEVEL</small>
+                <div style="font-size: 18px; font-weight: 800;">ELITE</div>
             </div>
-            <center><small style="font-size: 10px; opacity: 0.3;">Limits reset every 24 hours</small></center>
         </div>
     </div>
 
     <div id="ref" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 18px;">NETWORK</h2>
-        <div class="premium-card">
-            <small style="opacity:0.4;">INVITE LINK</small>
-            <div id="ref-link" style="font-size: 10px; background: #000; padding: 20px; border-radius: 15px; margin: 15px 0; word-break: break-all;">...</div>
-            <button class="watch-btn" style="height: 60px; font-size: 12px;" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">COPY LINK</button>
+        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">NETWORK</h2>
+        <div class="glass-card">
+            <small style="opacity:0.5; font-size: 9px;">UNIQUE INVITE LINK</small>
+            <div id="ref-link" style="font-size: 10px; background: #000; padding: 18px; border-radius: 15px; margin: 15px 0; word-break: break-all; border: 1px solid #222;">...</div>
+            <button class="primary-btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">SHARE LINK</button>
         </div>
-        <div class="premium-card" style="background: rgba(0, 255, 204, 0.05);">
-            <small>REFERRAL BONUS</small>
-            <div style="font-size: 20px; font-weight: 800; color: var(--main);">$0.10 USDT</div>
+        <div class="glass-card" style="background: rgba(0,255,204,0.05);">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <b style="display:block; font-size: 14px;">BONUS REWARD</b>
+                    <small style="opacity:0.6;">$0.10 Per active node</small>
+                </div>
+                <div style="font-size: 20px; font-weight: 800; color: var(--main);">$0.10</div>
+            </div>
         </div>
     </div>
 
     <div id="wallet" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 18px;">WALLET</h2>
-        <div class="premium-card" style="text-align: left;">
-            <label style="opacity: 0.4; font-size: 10px;">WITHDRAWAL AMOUNT</label>
-            <input type="number" placeholder="Min 10.00" style="width:100%; background:none; border:none; border-bottom: 1px solid #333; color:#fff; font-size: 20px; padding: 15px 0; outline:none; font-family: 'Syncopate';">
-            <br><br>
-            <label style="opacity: 0.4; font-size: 10px;">USDT ADDRESS (TON)</label>
-            <input type="text" placeholder="UQ..." style="width:100%; background:none; border:none; border-bottom: 1px solid #333; color:#fff; font-size: 14px; padding: 15px 0; outline:none;">
-            <button class="watch-btn" style="height: 60px; margin-top: 30px; font-size: 12px; background: var(--main);">WITHDRAW FUNDS</button>
+        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">WITHDRAWAL</h2>
+        <div class="glass-card">
+            <div class="input-group">
+                <label>USDT AMOUNT (MIN 10$)</label>
+                <input type="number" id="withdraw-amt" placeholder="10.00">
+            </div>
+            <div class="input-group">
+                <label>USDT ADDRESS (TON NETWORK)</label>
+                <input type="text" id="wallet-adr" placeholder="UQ...">
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed var(--border);">
+                <small style="font-size: 9px; opacity: 0.5; display: block; margin-bottom: 5px;">VERIFICATION REQUIREMENT:</small>
+                <span style="font-size: 11px; color: var(--main);">● Every $5 withdrawal requires 2 active referrals.</span>
+            </div>
+
+            <button class="primary-btn" onclick="processWithdraw()">CONFIRM TRANSACTION</button>
+        </div>
+
+        <div class="glass-card" style="border-style: dashed; opacity: 0.5;">
+            <center><small>No recent transactions</small></center>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎬<br>ADS</button>
+    <div class="nav-dock">
+        <button class="nav-btn on-nav" onclick="switchTab('home', this)">⚡<br>EARN</button>
         <button class="nav-btn" onclick="switchTab('ref', this)">🛰️<br>NET</button>
-        <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>CASH</button>
+        <button class="nav-btn" onclick="switchTab('wallet', this)">💎<br>CASH</button>
     </div>
 </div>
 
