@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX MATRIX v510</title>
+    <title>FONIX MATRIX v511</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     
@@ -11,95 +11,73 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Firebase Ayarları
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
             authDomain: "fonixapp.firebaseapp.com",
             projectId: "fonixapp",
-            storageBucket: "fonixapp.firebasestorage.app",
-            messagingSenderId: "980255542194",
             appId: "1:980255542194:web:883a3f7a8fc05fee6332ab"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const tg = window.Telegram.WebApp;
+        const myID = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "8392479231"; 
 
-        // Kullanıcı Kimliği
-        const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231"; 
-
-        // Kart Tanımları (Görsele Uygun)
-        const CARDS_DATA = {
-            common: [
-                { id: 'com_1', name: 'Hedgehog Miner', img: 'https://i.ibb.co/L6vjGND/hedgehog.png', clr: '#32FF7E' },
-                { id: 'com_2', name: 'USB Pickaxe #2', img: 'https://i.ibb.co/m0fXf8z/pickaxe.png', clr: '#32FF7E' },
-                { id: 'com_3', name: 'COMMON #3', img: 'https://i.ibb.co/L6vjGND/hedgehog.png', clr: '#32FF7E' }
-            ],
-            epic: [
-                { id: 'epic_1', name: 'Quantum Drill', img: 'https://i.ibb.co/3WqPzK6/drill.png', clr: '#A335EE' },
-                { id: 'epic_2', name: 'EPIC #2', img: 'https://i.ibb.co/3WqPzK6/drill.png', clr: '#A335EE' },
-                { id: 'epic_3', name: 'EPIC #3', img: 'https://i.ibb.co/3WqPzK6/drill.png', clr: '#A335EE' }
-            ],
-            legendary: [
-                { id: 'leg_1', name: 'LEGENDARY #1', img: 'https://i.ibb.co/0f3fL4X/titan.png', clr: '#FF9F43' },
-                { id: 'leg_2', name: 'LEGENDARY #2', img: 'https://i.ibb.co/0f3fL4X/titan.png', clr: '#FF9F43' },
-                { id: 'leg_3', name: 'LEGENDARY #3', img: 'https://i.ibb.co/0f3fL4X/titan.png', clr: '#FF9F43' }
-            ],
-            og: [
-                { id: 'og_1', name: 'OG SERIE #1', img: 'https://i.ibb.co/L6vjGND/hedgehog.png', clr: '#48DBFB' },
-                { id: 'og_2', name: 'OG SERIE #2', img: 'https://i.ibb.co/L6vjGND/hedgehog.png', clr: '#48DBFB' },
-                { id: 'og_3', name: 'OG SERIE #3', img: 'https://i.ibb.co/L6vjGND/hedgehog.png', clr: '#48DBFB' }
-            ]
+        // Kart Verileri ve SVG İkonları
+        const ICONS = {
+            miner: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>`,
+            drill: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10,2L4,8L10,14L11.5,12.5L7.5,8.5H14A4,4 0 0,1 18,12.5A4,4 0 0,1 14,16.5H12V18.5H14A6,6 0 0,0 20,12.5A6,6 0 0,0 14,6.5H7.5L11.5,2.5L10,2Z"/></svg>`,
+            og: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>`
         };
+
+        const TIERS = [
+            { id: 'com', name: 'COMMON', clr: '#32FF7E', cards: ['Hedgehog Miner', 'USB Pickaxe', 'Nano Bot'], icon: ICONS.miner },
+            { id: 'epic', name: 'EPIC', clr: '#A335EE', cards: ['Quantum Drill', 'Laser Core', 'Cyber Chip'], icon: ICONS.drill },
+            { id: 'leg', name: 'LEGENDARY', clr: '#FF9F43', cards: ['Solar Titan', 'Nebula Rig', 'Void Engine'], icon: ICONS.drill },
+            { id: 'og', name: 'OG SERIES', clr: '#48DBFB', cards: ['Founder OG', 'Alpha Tester', 'King Admin'], icon: ICONS.og }
+        ];
 
         let stats = { usdt: 0, ton: 0, inventory: [] };
 
         async function init() {
             const snap = await getDoc(doc(db, "users", myID));
             if (snap.exists()) stats = snap.data();
-            else {
-                stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [], lastAdDate: new Date().toDateString() };
-                await setDoc(doc(db, "users", myID), stats);
-            }
             updateUI();
         }
 
         function updateUI() {
-            document.getElementById('usdt-v').innerText = stats.usdt.toFixed(5);
-            document.getElementById('ton-v').innerText = stats.ton.toFixed(6);
+            document.getElementById('u-v').innerText = stats.usdt.toFixed(5);
+            document.getElementById('t-v').innerText = stats.ton.toFixed(6);
             
             const matrix = document.getElementById('album-matrix');
             matrix.innerHTML = "";
 
-            Object.entries(CARDS_DATA).forEach(([tier, cards]) => {
-                let row = document.createElement('div');
-                row.className = 'tier-row';
-                row.innerHTML = `<div class="tier-label">${tier.toUpperCase()}</div>`;
+            TIERS.forEach(t => {
+                let section = document.createElement('div');
+                section.className = 'tier-section';
+                section.innerHTML = `<div class="tier-head">${t.name}</div>`;
                 
                 let grid = document.createElement('div');
-                grid.className = 'cards-grid';
+                grid.className = 'grid';
 
-                cards.forEach((card, idx) => {
-                    const owned = stats.inventory?.includes(card.id);
+                t.cards.forEach((name, i) => {
+                    const cID = `${t.id}_${i+1}`;
+                    const owned = stats.inventory?.includes(cID);
                     grid.innerHTML += `
-                        <div class="card-box ${owned ? 'owned' : 'locked'}" style="--c: ${card.clr}">
-                            <div class="card-num">#${idx + 1}</div>
-                            <div class="card-art">
-                                <img src="${card.img}">
-                                ${!owned ? '<span class="lock">🔒</span>' : ''}
-                            </div>
-                            <div class="card-info">${owned ? card.name : tier.toUpperCase() + ' #' + (idx + 1)}</div>
+                        <div class="card ${owned ? 'owned' : 'locked'}" style="--c: ${t.clr}">
+                            <div class="card-num">#${i+1}</div>
+                            <div class="card-art">${t.icon} ${!owned ? '<i>🔒</i>' : ''}</div>
+                            <div class="card-label">${owned ? name : t.name + ' #' + (i+1)}</div>
                         </div>
                     `;
                 });
-                row.appendChild(grid);
-                matrix.appendChild(row);
+                section.appendChild(grid);
+                matrix.appendChild(section);
             });
         }
 
         window.switchTab = (id, btn) => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('on'));
             btn.classList.add('on');
@@ -109,92 +87,91 @@
     </script>
 
     <style>
-        :root { --bg: #121417; --surface: #1B1E23; --accent: #00FFCC; --border: #2D323A; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        :root { --bg: #0B0E11; --sur: #15191E; --acc: #00FFCC; --bor: #23282F; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
         
         .app { height: 100vh; display: flex; flex-direction: column; }
 
-        /* Header */
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-family: 'Syncopate'; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .stats { display: flex; gap: 8px; }
-        .stat-box { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px; min-width: 90px; }
-        .stat-box label { font-size: 7px; color: #888; font-weight: 800; display: block; margin-bottom: 2px; }
-        .stat-box span { font-family: 'Syncopate'; font-size: 11px; color: var(--accent); }
+        /* Header UI - Görseldeki Gibi */
+        .head { padding: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .logo { font-family: 'Syncopate'; font-size: 15px; font-weight: 800; }
+        .stats { display: flex; gap: 10px; }
+        .s-box { background: var(--sur); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--bor); min-width: 95px; border-bottom: 2px solid var(--acc); }
+        .s-box label { font-size: 7px; color: #666; font-weight: 800; display: block; margin-bottom: 2px; }
+        .s-box span { font-family: 'Syncopate'; font-size: 10px; color: var(--acc); }
 
-        /* Tabs */
         .content { flex: 1; overflow-y: auto; padding: 15px; }
-        .tab { display: none; }
-        .active { display: block; animation: fade 0.3s; }
+        .page { display: none; }
+        .active { display: block; }
 
-        /* Album Grid */
-        .album-title { font-family: 'Syncopate'; font-size: 14px; text-align: center; margin-bottom: 25px; 
-            border-bottom: 2px solid var(--accent); width: fit-content; margin: 0 auto 20px; padding-bottom: 5px; }
-        .tier-row { margin-bottom: 25px; }
-        .tier-label { font-size: 10px; opacity: 0.5; font-family: 'Syncopate'; margin-bottom: 12px; letter-spacing: 1px; }
-        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        /* Album Mimarisi */
+        .title-line { font-family: 'Syncopate'; font-size: 13px; text-align: center; margin: 0 auto 25px; 
+            border-bottom: 2px solid var(--acc); width: 80px; padding-bottom: 8px; }
+        
+        .tier-section { margin-bottom: 25px; }
+        .tier-head { font-size: 9px; opacity: 0.4; font-family: 'Syncopate'; margin-bottom: 12px; letter-spacing: 1px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
-        .card-box { aspect-ratio: 1/1.3; border-radius: 12px; border: 1px solid var(--border); background: #15181D; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 5px; position: relative; }
-        .card-num { position: absolute; top: 10px; right: 10px; font-size: 8px; font-weight: 800; color: var(--c); }
-        .card-art { width: 70%; position: relative; }
-        .card-art img { width: 100%; height: auto; object-fit: contain; }
-        .card-info { font-size: 8px; font-weight: 800; text-align: center; color: var(--c); }
+        .card { aspect-ratio: 1/1.3; background: #1A1F26; border-radius: 10px; border: 1px solid #2D343D; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
+            padding: 10px 5px; position: relative; transition: 0.3s; }
+        
+        .card-num { position: absolute; top: 8px; right: 8px; font-size: 8px; font-weight: 800; color: var(--c); opacity: 0.8; }
+        .card-art { width: 50%; color: var(--c); position: relative; margin-top: 15px; }
+        .card-art i { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-style: normal; font-size: 18px; filter: grayscale(1); }
+        .card-label { font-size: 7.5px; font-weight: 700; text-align: center; height: 20px; color: #fff; }
 
-        .owned { border-color: var(--c); box-shadow: inset 0 0 15px rgba(255,255,255,0.02), 0 0 10px var(--c); }
-        .locked { filter: grayscale(1); opacity: 0.3; }
-        .lock { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 20px; }
+        /* Durumlar */
+        .owned { border-color: var(--c); box-shadow: 0 0 15px rgba(0, 255, 204, 0.05), inset 0 0 10px rgba(255,255,255,0.02); }
+        .owned .card-label { color: var(--c); }
+        .locked { opacity: 0.25; filter: grayscale(1); }
 
-        /* Bottom Nav */
-        .nav { height: 75px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-family: 'Syncopate'; font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .on { opacity: 1; color: var(--accent); }
-        .icon { font-size: 20px; }
+        /* Nav */
+        .nav { height: 75px; background: #111418; border-top: 1px solid var(--bor); display: flex; justify-content: space-around; align-items: center; }
+        .n-btn { background: none; border: none; color: #555; font-family: 'Syncopate'; font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .on { color: var(--acc); }
+        .n-icon { font-size: 22px; }
 
-        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <div class="header">
-        <div class="logo">🚀 FONIX <span style="font-size: 8px; opacity: 0.5;">MATRIX v510</span></div>
+    <div class="head">
+        <div class="logo">FONIX<br><span style="font-size: 7px; opacity: 0.4;">MATRIX v511</span></div>
         <div class="stats">
-            <div class="stat-box"><label>USDT ASSETS</label><span id="usdt-v">0.00000</span></div>
-            <div class="stat-box"><label>TON NETWORK</label><span id="ton-v" style="color: #00ccff">0.000000</span></div>
+            <div class="s-box"><label>USDT ASSETS</label>$<span id="u-v">0.00000</span></div>
+            <div class="s-box" style="border-bottom-color: #0088cc;"><label>TON NETWORK</label><span id="t-v" style="color:#0088cc">0.000000</span></div>
         </div>
     </div>
 
     <div class="content">
-        <div id="home" class="tab">
-            <div style="text-align: center; margin-top: 50px;">
-                <div style="font-size: 60px;">🎁</div>
-                <h2 style="font-family: 'Syncopate'; color: var(--accent);">GIFT CHEST</h2>
-                <button onclick="tg.showAlert('Yakında!')" style="background: var(--accent); border:none; padding:15px 30px; border-radius:12px; font-family:'Syncopate';">SANDIĞI AÇ</button>
+        <div id="home" class="page">
+            <div style="text-align:center; padding-top:100px;">
+                <div style="font-size:60px; margin-bottom:20px;">🎁</div>
+                <button onclick="tg.showAlert('Yakında!')" style="background:var(--acc); border:none; padding:15px 40px; border-radius:30px; font-family:'Syncopate'; font-weight:800;">OPEN CHEST</button>
             </div>
         </div>
 
-        <div id="album" class="tab active">
-            <div class="album-title">ALBUM</div>
+        <div id="album" class="page active">
+            <div class="title-line">ALBUM</div>
             <div id="album-matrix"></div>
         </div>
 
-        <div id="cash" class="tab">
-            <div class="album-title">CASH</div>
-            <p style="text-align: center; opacity: 0.5;">Çekim talepleri inceleniyor...</p>
+        <div id="cash" class="page">
+            <div class="title-line">CASH</div>
+            <div style="background:var(--sur); padding:20px; border-radius:15px; border:1px solid var(--bor);">
+                <input type="text" placeholder="Wallet Address" style="width:100%; background:#000; border:1px solid #333; padding:15px; border-radius:10px; color:#fff; outline:none;">
+                <button style="width:100%; margin-top:15px; background:var(--acc); padding:15px; border:none; border-radius:10px; font-family:'Syncopate';">WITHDRAW</button>
+            </div>
         </div>
     </div>
 
     <div class="nav">
-        <button class="n-btn" onclick="switchTab('home', this)">
-            <span class="icon">🎁</span><span>HOME</span>
-        </button>
-        <button class="n-btn on" onclick="switchTab('album', this)">
-            <span class="icon">🚀</span><span>ALBUM</span>
-        </button>
-        <button class="n-btn" onclick="switchTab('cash', this)">
-            <span class="icon">💰</span><span>CASH</span>
-        </button>
+        <button class="n-btn" onclick="switchTab('home', this)"><span class="n-icon">🏠</span>HOME</button>
+        <button class="n-btn on" onclick="switchTab('album', this)"><span class="n-icon">🚀</span>ALBUM</button>
+        <button class="n-btn" onclick="switchTab('cash', this)"><span class="n-icon">💰</span>CASH</button>
     </div>
 </div>
 
