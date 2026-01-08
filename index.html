@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Mining v319 Pro</title>
+    <title>FONIX MINING 2026 PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -23,200 +25,235 @@
         const db = getFirestore(app);
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.enableClosingConfirmation();
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         
-        let stats = { usdt: 0, kls: 0 };
+        let stats = { usdt: 0, friends: 0 };
         let isMining = false;
-        let adProgress = 0;
-        let miningTimer;
+        let adTicks = 0;
+        let minerLoop;
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-            if (snap.exists()) stats = snap.data();
-            else {
-                stats = { usdt: 0, username: user?.username || "User", invitedBy: tg.initDataUnsafe?.start_param || "" };
+            if (snap.exists()) {
+                stats = snap.data();
+            } else {
+                stats = { usdt: 0, username: user?.username || "Guest", invitedBy: tg.initDataUnsafe?.start_param || "" };
                 await setDoc(userRef, stats);
+                if(stats.invitedBy) await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.05) });
             }
             updateUI();
+            fetchFriends();
         }
 
         function updateUI() {
-            document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(5));
+            document.querySelectorAll('.ui-balance').forEach(e => e.innerText = stats.usdt.toFixed(6));
+            document.getElementById('ref-link').innerText = `https://t.me/FonixMining2026Bot?start=${myID}`;
         }
 
-        // --- MINING PANEL KONTROLÜ ---
         window.openMining = () => {
-            document.getElementById('mining-overlay').style.display = 'flex';
-            startMiningLogic();
+            document.getElementById('mining-screen').classList.add('active-screen');
+            tg.HapticFeedback.impactOccurred('medium');
+            startMining();
         };
 
         window.closeMining = () => {
-            stopMiningLogic();
-            document.getElementById('mining-overlay').style.display = 'none';
+            document.getElementById('mining-screen').classList.remove('active-screen');
+            stopMining();
             saveData();
         };
 
-        function startMiningLogic() {
+        function startMining() {
             if(isMining) return;
             isMining = true;
-            miningTimer = setInterval(() => {
+            minerLoop = setInterval(() => {
+                adTicks++;
                 stats.usdt += 0.00005;
-                adProgress += 3.33; // 30 saniyede bir %100 olur
+                document.getElementById('live-usdt').innerText = stats.usdt.toFixed(6);
                 
-                document.getElementById('prog-bar').style.width = adProgress + "%";
-                document.getElementById('live-earn').innerText = stats.usdt.toFixed(5);
+                let progress = (adTicks / 30) * 100;
+                document.getElementById('ad-progress').style.width = progress + "%";
                 
-                if(adProgress >= 100) {
-                    stopMiningLogic();
-                    triggerAd();
+                // Simüle loglar
+                const logs = ["Verifying block...", "Hash found: 0x72a...", "Latency: 24ms", "Node Istanbul active"];
+                document.getElementById('miner-logs').innerHTML = `> ${logs[Math.floor(Math.random()*logs.length)]}`;
+
+                if(adTicks >= 30) {
+                    stopMining();
+                    runAd();
                 }
-                updateUI();
             }, 1000);
         }
 
-        function stopMiningLogic() {
+        function stopMining() {
             isMining = false;
-            clearInterval(miningTimer);
+            clearInterval(minerLoop);
         }
 
-        function triggerAd() {
+        function runAd() {
             window.showAdexora().then(async () => {
-                adProgress = 0;
+                adTicks = 0;
                 await saveData();
-                startMiningLogic();
+                startMining();
             }).catch(() => {
-                tg.showAlert("Ad error! Retrying...");
-                adProgress = 90;
-                startMiningLogic();
+                adTicks = 25; // Hata durumunda hemen tekrar deneme
+                startMining();
             });
         }
 
         async function saveData() {
             await updateDoc(doc(db, "users", myID), { usdt: stats.usdt });
+            updateUI();
         }
 
-        window.showTab = (t, b) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('p-' + t).classList.add('active');
-            document.querySelectorAll('.n-btn').forEach(btn => btn.classList.remove('n-on'));
-            b.classList.add('n-on');
+        async function fetchFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            document.getElementById('friend-count').innerText = snap.size;
+        }
+
+        window.showTab = (tab, el) => {
+            document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('p-' + tab).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            el.classList.add('active-nav');
+            tg.HapticFeedback.selectionChanged();
         };
 
         window.onload = init;
     </script>
+
     <style>
-        :root { --p: #6c5ce7; --y: #f7d348; --d: #08080c; --card: rgba(255,255,255,0.06); }
-        body { margin: 0; background: var(--d); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; user-select: none; }
-        #app { height: 100vh; display: flex; flex-direction: column; }
-        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
-        .active { display: flex; flex-direction: column; }
+        :root { --main: #00f2ff; --bg: #050508; --card: rgba(255,255,255,0.03); --accent: #7000ff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
         
-        /* Dashboard Tasarımı */
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
-        .hero-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; position: relative; overflow: hidden; }
-        .hero-card::after { content: ''; position: absolute; top: -50%; right: -20%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        /* Layout */
+        #main-app { height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .app-page { display: none; flex: 1; padding: 25px; overflow-y: auto; padding-bottom: 100px; }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Mining Overlay */
-        #mining-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--d); z-index: 100; display: none; flex-direction: column; padding: 30px; box-sizing: border-box; }
-        .mining-circle { width: 180px; height: 180px; border-radius: 50%; border: 4px solid var(--y); margin: 40px auto; display: flex; align-items: center; justify-content: center; position: relative; animation: pulse 2s infinite; }
-        .prog-container { width: 100%; height: 8px; background: #222; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        #prog-bar { height: 100%; width: 0%; background: var(--y); transition: 0.3s; }
+        /* UI Elements */
+        .glass-card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; padding: 20px; backdrop-filter: blur(10px); margin-bottom: 20px; }
+        .balance-label { font-size: 12px; letter-spacing: 2px; opacity: 0.5; font-family: 'Orbitron'; color: var(--main); }
+        .balance-value { font-size: 42px; font-weight: 700; font-family: 'Orbitron'; margin: 10px 0; text-shadow: 0 0 20px rgba(0,242,255,0.3); }
 
-        .btn { width: 100%; background: var(--y); color: #000; border: none; padding: 18px; border-radius: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .nav { height: 75px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 10px; }
-        .n-on { opacity: 1; color: var(--y); }
+        /* Mining Screen */
+        #mining-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; padding: 30px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .active-screen { transform: translateY(0) !important; }
+        .hex-container { width: 220px; height: 220px; margin: 40px auto; border: 2px solid var(--main); border-radius: 40px; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(0,242,255,0.1); }
+        .hex-content { transform: rotate(-45deg); text-align: center; }
+        .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        #ad-progress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--main), var(--accent)); transition: 1s linear; }
 
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247, 211, 72, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(247, 211, 72, 0); } 100% { box-shadow: 0 0 0 0 rgba(247, 211, 72, 0); } }
+        /* Buttons */
+        .action-btn { width: 100%; padding: 20px; border-radius: 20px; border: none; font-weight: 700; font-family: 'Orbitron'; cursor: pointer; transition: 0.2s; background: linear-gradient(135deg, var(--main), var(--accent)); color: #000; letter-spacing: 1px; }
+        .action-btn:active { transform: scale(0.96); }
+
+        /* Navigation */
+        .bottom-nav { position: absolute; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(15,15,20,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; z-index: 10; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; color: #fff; text-decoration: none; font-size: 10px; font-weight: 700; }
+        .active-nav { opacity: 1; color: var(--main); }
+        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+
+        .log-box { font-family: monospace; font-size: 12px; color: #00ff00; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; height: 100px; }
     </style>
 </head>
 <body>
-<div id="app">
-    <div id="p-home" class="page active">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <div><small style="opacity:0.5;">Welcome back,</small><br><b>Fonix Miner</b></div>
-            <img src="koalasmining.jpg" style="width: 45px; border-radius: 12px; border: 2px solid var(--y);">
-        </div>
 
-        <div class="card hero-card">
-            <small style="opacity: 0.8;">TOTAL ASSETS</small>
-            <h1 style="font-size: 40px; margin: 5px 0;">$<span class="ui-usdt">0.00000</span></h1>
-            <div style="font-size: 12px; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 20px; display: inline-block;">
-                Status: Professional Miner ✅
+<div id="main-app">
+    <div id="p-home" class="app-page active">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div>
+                <span style="opacity:0.4; font-size: 14px;">SYSTEM_STATUS:</span><br>
+                <b style="color: #00ff00;">ONLINE</b>
+            </div>
+            <div style="text-align: right;">
+                <span id="friend-count" style="font-family: 'Orbitron'; color: var(--main);">0</span><br>
+                <small style="opacity:0.4;">NODES</small>
             </div>
         </div>
 
-        <div class="card" style="text-align: center;">
-            <p style="font-size: 14px; opacity: 0.7;">Ready to start your daily session?</p>
-            <button class="btn" onclick="openMining()">🚀 Play Mining</button>
+        <div class="glass-card" style="text-align: center;">
+            <div class="balance-label">TOTAL CAPITAL</div>
+            <div class="balance-value">$<span class="ui-balance">0.000000</span></div>
+            <div style="font-size: 12px; color: var(--main); opacity: 0.6;">NETWORK: FONIX_CHAIN_v4</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="card" style="margin:0; padding:15px;"><small>Hashrate</small><br><b>45.2 MH/s</b></div>
-            <div class="card" style="margin:0; padding:15px;"><small>Efficiency</small><br><b style="color:#2ed573;">99.4%</b></div>
+        <div class="glass-card" style="background: rgba(112, 0, 255, 0.05); border-color: rgba(112, 0, 255, 0.2);">
+            <h3 style="margin: 0; font-family: 'Orbitron'; font-size: 16px;">MINING POWER</h3>
+            <p style="font-size: 13px; opacity: 0.6;">Saniyede $0.00005 üretim kapasitesi saptandı. Başlatmak için hazır.</p>
+            <button class="action-btn" onclick="openMining()">LAUNCH MINER</button>
         </div>
     </div>
 
-    <div id="mining-overlay">
-        <div style="display: flex; justify-content: space-between;">
-            <b style="color: var(--y);">LIVE MINING</b>
-            <button onclick="closeMining()" style="background:none; border:none; color:#fff; font-size: 20px;">✕</button>
+    <div id="p-ref" class="app-page">
+        <h2 style="font-family: 'Orbitron'; color: var(--main);">NETWORK</h2>
+        <div class="glass-card">
+            <small style="opacity:0.5;">YOUR ACCESS KEY</small>
+            <div id="ref-link" style="font-size: 11px; padding: 15px; background: #000; border-radius: 12px; margin: 10px 0; word-break: break-all; opacity: 0.7; border: 1px dashed #333;">...</div>
+            <button class="action-btn" style="background: #fff; color: #000;" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">COPY LINK</button>
+        </div>
+    </div>
+
+    <div id="p-wallet" class="app-page">
+        <h2 style="font-family: 'Orbitron'; color: var(--main);">WALLET</h2>
+        <div class="glass-card">
+            <label style="font-size: 12px; opacity: 0.5;">AMOUNT (MIN $10)</label>
+            <input type="number" id="w-amt" placeholder="0.00" style="width:100%; background:none; border:none; border-bottom: 2px solid #333; color: #fff; font-size: 24px; padding: 15px 0; outline: none;">
+            <br><br>
+            <label style="font-size: 12px; opacity: 0.5;">USDT ADDRESS (TON)</label>
+            <input type="text" placeholder="Paste address..." style="width:100%; background:none; border:none; border-bottom: 2px solid #333; color: #fff; font-size: 16px; padding: 15px 0; outline: none;">
+            <br><br>
+            <button class="action-btn" onclick="tg.showAlert('Processing request...')">CONFIRM TRANSACTION</button>
+        </div>
+    </div>
+
+    <div id="mining-screen">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: 'Orbitron'; font-size: 14px; color: var(--main);">MINING_IN_PROGRESS</div>
+            <button onclick="closeMining()" style="background:none; border:1px solid #333; color:#fff; border-radius: 50%; width: 40px; height: 40px;">✕</button>
         </div>
 
-        <div class="mining-circle">
-            <div style="text-align: center;">
-                <small style="opacity:0.6;">Current Session</small><br>
-                <b style="font-size: 22px;">$<span id="live-earn">0.00000</span></b>
+        <div class="hex-container">
+            <div class="hex-content">
+                <span style="font-size: 12px; opacity:0.5;">EARNED</span><br>
+                <b style="font-size: 24px; font-family: 'Orbitron';">$<span id="live-usdt">0.000000</span></b>
             </div>
         </div>
 
-        <div class="card" style="background:rgba(255,255,255,0.02);">
-            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:10px;">
-                <span>Next Bonus Ad</span>
-                <span id="prog-text">Progress</span>
+        <div class="glass-card" style="background: rgba(0,0,0,0.4);">
+            <div style="display:flex; justify-content:space-between; font-size: 11px; margin-bottom: 8px;">
+                <span>BUFFERING AD...</span>
+                <span id="prog-val">AUTO</span>
             </div>
-            <div class="prog-container">
-                <div id="prog-bar"></div>
+            <div class="progress-track">
+                <div id="ad-progress"></div>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size: 12px; opacity: 0.7; margin-top: 15px;">
-                <span>🌡️ Temp: 42°C</span>
-                <span>⚡ Power: 120W</span>
-                <span>🛰️ Node: Istanbul</span>
-                <span>🔗 Ping: 12ms</span>
-            </div>
+            <div class="log-box" id="miner-logs">> Initializing kernel...</div>
         </div>
 
-        <p style="text-align:center; font-size: 11px; opacity:0.4; margin-top: auto;">
-            Mining utilizes cloud nodes. Keep the app open for maximum rewards.
+        <p style="text-align: center; font-size: 12px; opacity: 0.3; margin-top: auto;">
+            POWERED BY FONIX CLOUD ENGINE 2026
         </p>
     </div>
 
-    <div id="p-friends" class="page">
-        <h2>Network</h2>
-        <div class="card">
-            <small style="color:var(--p);">YOUR REFERRAL LINK</small>
-            <div id="ref-link" style="font-size: 10px; background:#000; padding:15px; border-radius:12px; margin:10px 0; color:#555; word-break:all;"></div>
-            <button class="btn" style="padding:12px; font-size:14px;" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Copied!')">Copy Link</button>
+    <div class="bottom-nav">
+        <div class="nav-item active-nav" onclick="showTab('home', this)">
+            <span class="nav-icon">⚡</span><span>HOME</span>
+        </div>
+        <div class="nav-item" onclick="showTab('ref', this)">
+            <span class="nav-icon">🛰️</span><span>NETWORK</span>
+        </div>
+        <div class="nav-item" onclick="showTab('wallet', this)">
+            <span class="nav-icon">💎</span><span>WALLET</span>
         </div>
     </div>
-
-    <div id="p-wallet" class="page">
-        <h2>Wallet</h2>
-        <div class="card">
-            <input type="number" id="w-amt" placeholder="Amount ($10 Min)" style="width:100%; padding:15px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:12px;">
-            <input type="text" placeholder="USDT (TON) Address" style="width:100%; padding:15px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:12px;">
-            <button class="btn" onclick="tg.showAlert('Reviewing request...')">Withdraw Funds</button>
-        </div>
-    </div>
-
-    <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('home', this)">🏠<br>Hub</button>
-        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Ref</button>
-        <button class="n-btn" onclick="showTab('wallet', this)">💰<br>Wallet</button>
-    </nav>
 </div>
+
 </body>
 </html>
