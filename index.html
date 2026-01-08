@@ -1,209 +1,146 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas Pro Hub</title>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+<div id="p-friends" class="page">
+    <div class="f-header">
+        <h2>Referral System</h2>
+        <p style="opacity:0.6; font-size:13px;">Arkadaşlarını davet et, her biri için <b style="color:var(--y)">$0.05</b> kazan!</p>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
-            authDomain: "fonixapp.firebaseapp.com",
-            projectId: "fonixapp",
-            storageBucket: "fonixapp.firebasestorage.app",
-            messagingSenderId: "980255542194",
-            appId: "1:980255542194:web:883a3f7a8fc05fee6332ab"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231";
-        const myName = user?.username || user?.first_name || "Koala";
-        
-        let stats = { usdt: 0, kls: 0 };
-
-        async function init() {
-            const userRef = doc(db, "users", myID);
-            const snap = await getDoc(userRef);
-            if (snap.exists()) stats = snap.data();
-            updateUI();
-        }
-
-        function updateUI() {
-            document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
-            document.querySelectorAll('.ui-kls').forEach(e => e.innerText = stats.kls.toFixed(2));
-        }
-
-        // --- ANİMASYONLU BİLDİRİM FONKSİYONU ---
-        window.showNotify = (type, msg) => {
-            const card = document.getElementById('withdraw-card');
-            const status = document.getElementById('status-msg');
-            
-            status.innerText = msg;
-            status.className = "status-text " + (type === 'error' ? 'err-txt' : 'ok-txt');
-            
-            if(type === 'error') {
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 500);
-            } else {
-                card.classList.add('bounce');
-                setTimeout(() => card.classList.remove('bounce'), 500);
-            }
-        };
-
-        window.requestWithdraw = async () => {
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const address = document.getElementById('wallet-address').value.trim();
-
-            if (isNaN(amount) || amount < 10) {
-                showNotify('error', '❌ Hata: Minimum çekim $10.00 olmalı!');
-                return;
-            }
-            if (address.length < 10) {
-                showNotify('error', '❌ Hata: Geçersiz cüzdan adresi!');
-                return;
-            }
-            if (amount > stats.usdt) {
-                showNotify('error', '❌ Hata: Yetersiz bakiye!');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "withdrawals"), {
-                    userId: myID, amount, address, status: "pending", date: new Date().toISOString()
-                });
-                await updateDoc(doc(db, "users", myID), { usdt: increment(-amount) });
-                stats.usdt -= amount;
-                updateUI();
-                showNotify('success', '✅ Başarılı! Talebiniz alındı.');
-            } catch (e) {
-                showNotify('error', '❌ Sistem Hatası!');
-            }
-        };
-
-        window.showTab = (name) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('p-' + name).classList.add('active');
-            document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('n-on'));
-            event.currentTarget.classList.add('n-on');
-        };
-
-        window.onload = init;
-    </script>
-
-    <style>
-        :root { --p: #70a1ff; --v: #6c5ce7; --y: #f7d348; --err: #ff4757; --ok: #2ed573; --d: #0a0b1e; }
-        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; }
-        
-        #app { height: 100vh; display: flex; flex-direction: column; }
-        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
-        .active { display: flex; }
-
-        .card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        .main-card { background: linear-gradient(135deg, var(--v), #341f97); text-align: center; }
-
-        /* Wallet Form */
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--v); }
-        .btn-pay { width: 100%; background: var(--y); color: #000; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
-
-        /* ANİMASYONLAR */
-        .shake { animation: shakeAnim 0.5s ease-in-out; border-color: var(--err) !important; }
-        @keyframes shakeAnim {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
-        }
-
-        .bounce { animation: bounceAnim 0.5s ease-in-out; border-color: var(--ok) !important; }
-        @keyframes bounceAnim {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .status-text { font-size: 13px; font-weight: bold; text-align: center; margin-top: 10px; height: 20px; }
-        .err-txt { color: var(--err); }
-        .ok-txt { color: var(--ok); }
-
-        /* Navbar */
-        .nav { height: 80px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 11px; }
-        .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); transition: 0.3s; }
-        .n-icon { font-size: 24px; display: block; margin-bottom: 5px; }
-
-        .welcome-box { text-align: center; margin-top: 40px; }
-        .logo-circle { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--y); margin-bottom: 20px; box-shadow: 0 0 20px rgba(247, 211, 72, 0.4); }
-    </style>
-</head>
-<body>
-
-<div id="app">
-    <div id="p-main" class="page active">
-        <div class="welcome-box">
-            <img src="koalasmining.jpg" class="logo-circle">
-            <h1 style="margin:0;">KOALAS HUB</h1>
-            <p style="opacity:0.6;">Topluluğun kalbine hoş geldin!</p>
+    <div class="stat-grid" style="margin-bottom: 20px;">
+        <div class="stat-item" style="border: 1px solid rgba(255,255,255,0.1);">
+            <small>Total Friends</small>
+            <div id="f-count" style="font-size:24px; font-weight:bold; color:var(--y);">0</div>
         </div>
-
-        <div class="card main-card" style="margin-top:30px;">
-            <small style="opacity:0.8">HESAP ÖZETİ</small>
-            <h1 style="font-size: 38px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
-            <div style="font-size: 14px; opacity: 0.9;">🪙 <span class="ui-kls">0.00</span> KLS Token</div>
+        <div class="stat-item" style="border: 1px solid rgba(255,255,255,0.1);">
+            <small>Total Earned</small>
+            <div id="f-earned" style="font-size:24px; font-weight:bold; color:var(--ok);">$0.00</div>
         </div>
     </div>
 
-    <div id="p-wallet" class="page">
-        <h2>Cüzdan İşlemleri</h2>
-        <div class="card" id="withdraw-card">
-            <h3 style="margin-top:0;">Para Çekme</h3>
-            <label style="font-size:12px; opacity:0.6;">Çekilecek Miktar ($):</label>
-            <input type="number" id="withdraw-amount" placeholder="Örn: 10.50">
-            
-            <label style="font-size:12px; opacity:0.6;">Cüzdan Adresi (TON/USDT):</label>
-            <input type="text" id="wallet-address" placeholder="UQ... adresinizi girin">
-            
-            <button class="btn-pay" onclick="requestWithdraw()">ÖDEME TALEBİ OLUŞTUR</button>
-            <div id="status-msg" class="status-text"></div>
-        </div>
-        
-        <div class="card" style="opacity:0.7;">
-            <h4 style="margin:0;">İşlem Kuralları</h4>
-            <ul style="font-size:12px; padding-left:20px; margin-top:10px;">
-                <li>Minimum çekim limiti $10.00'dır.</li>
-                <li>Talepler 24 saat içinde manuel onaylanır.</li>
-                <li>Hatalı adres girişlerinden platform sorumlu değildir.</li>
-            </ul>
-        </div>
+    <div class="card" style="background: rgba(108, 92, 231, 0.1); border: 1px dashed var(--v);">
+        <small style="color:var(--v); font-weight:bold; margin-bottom:10px;">DAVET LİNKİN</small>
+        <div id="ref-link-display" class="ref-link-box">https://t.me/SeninBotun?start=8392479231</div>
+        <button class="btn-pay" style="background:var(--v); color:#fff; margin-top:10px;" onclick="copyRefLink(this)">
+            LİNKİ KOPYALA
+        </button>
     </div>
 
-    <div id="p-friends" class="page">
-        <h2>Arkadaşlar</h2>
-        <div class="card">
-            <p>Arkadaşlarını davet et, ödülleri topla!</p>
-            </div>
+    <h3 style="margin: 20px 0 10px 5px; font-size:16px;">Davet Ettiğin Kişiler</h3>
+    <div id="friends-list" class="f-list-container">
+        <div style="text-align:center; opacity:0.3; padding:20px;">Henüz kimse yok...</div>
     </div>
-
-    <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('main')">
-            <span class="n-icon">🏠</span>Home
-        </button>
-        <button class="n-btn" onclick="showTab('friends')">
-            <span class="n-icon">👥</span>Friends
-        </button>
-        <button class="n-btn" onclick="showTab('wallet')">
-            <span class="n-icon">💰</span>Wallet
-        </button>
-    </nav>
 </div>
 
-</body>
-</html>
+<style>
+    /* Friends Ekstra Stilleri */
+    .f-header { text-align: center; margin-bottom: 20px; }
+    
+    .ref-link-box { 
+        background: #000; 
+        padding: 12px; 
+        border-radius: 10px; 
+        font-size: 11px; 
+        word-break: break-all; 
+        color: #aaa; 
+        border: 1px solid #222;
+    }
+
+    .f-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 20px;
+    }
+
+    .f-row {
+        display: flex;
+        align-items: center;
+        background: rgba(255,255,255,0.05);
+        padding: 12px;
+        border-radius: 15px;
+        animation: slideIn 0.3s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .f-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--v);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-weight: bold;
+        border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .f-info { flex: 1; }
+    .f-info b { font-size: 14px; display: block; }
+    .f-info span { font-size: 11px; opacity: 0.5; }
+
+    .f-reward {
+        color: var(--ok);
+        font-weight: bold;
+        font-size: 13px;
+    }
+</style>
+
+<script>
+    // JS Kısmına eklenecek fonksiyonlar:
+
+    window.copyRefLink = (btn) => {
+        const link = document.getElementById('ref-link-display').innerText;
+        navigator.clipboard.writeText(link).then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = "KOPYALANDI! ✓";
+            btn.style.background = "#2ed573";
+            
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "#6c5ce7";
+            }, 2000);
+        });
+    };
+
+    // Firebase'den Arkadaş Listesini Çekme Güncellemesi
+    async function loadFriendsData() {
+        const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+        const snap = await getDocs(q);
+        const listContainer = document.getElementById('friends-list');
+        const fCountEl = document.getElementById('f-count');
+        const fEarnedEl = document.getElementById('f-earned');
+        
+        listContainer.innerHTML = "";
+        const count = snap.size;
+        fCountEl.innerText = count;
+        fEarnedEl.innerText = "$" + (count * 0.05).toFixed(2);
+
+        if (snap.empty) {
+            listContainer.innerHTML = '<div style="text-align:center; opacity:0.3; padding:20px;">Henüz kimse yok...</div>';
+            return;
+        }
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            const firstLetter = data.username ? data.username.charAt(0).toUpperCase() : 'U';
+            
+            listContainer.innerHTML += `
+                <div class="f-row">
+                    <div class="f-avatar">${firstLetter}</div>
+                    <div class="f-info">
+                        <b>@${data.username || 'Hidden'}</b>
+                        <span>Davet Edildi</span>
+                    </div>
+                    <div class="f-reward">+$0.05</div>
+                </div>
+            `;
+        });
+    }
+
+    // init fonksiyonuna loadFriendsData() eklemeyi unutma
+</script>
