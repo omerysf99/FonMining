@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas Pro Hub</title>
-    
+    <title>Fonix Mining 2026</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // Firebase Yapılandırması (Senin Projen)
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
             authDomain: "fonixapp.firebaseapp.com",
@@ -25,235 +24,205 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Kullanıcı Bilgileri
         const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231";
-        const myName = user?.username || user?.first_name || "Koala";
+        const myID = user?.id ? user.id.toString() : "8392479231"; // Senin Admin ID'n
+        const myName = user?.username || user?.first_name || "FonixUser";
+        const botUsername = "FonixMining2026Bot";
         
         let stats = { usdt: 0, kls: 0, hasUsedCode: false };
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-
+            
             if (snap.exists()) {
                 stats = snap.data();
             } else {
                 stats = { 
-                    usdt: 0, kls: 0, hasUsedCode: false,
-                    username: myName, photo: user?.photo_url || "",
+                    usdt: 0, kls: 0, hasUsedCode: false, 
+                    username: myName, 
+                    photo: user?.photo_url || `https://ui-avatars.com/api/?name=${myName}`,
                     invitedBy: tg.initDataUnsafe?.start_param || "" 
                 };
                 await setDoc(userRef, stats);
+                // Eğer linkle gelmişse davet edene ödül ver (Otomatik)
+                if(stats.invitedBy) {
+                    await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.05) });
+                }
             }
             updateUI();
-            loadFriendsData();
+            loadFriends();
         }
 
         function updateUI() {
             document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
             document.querySelectorAll('.ui-kls').forEach(e => e.innerText = stats.kls.toFixed(2));
-            document.getElementById('ref-link-display').innerText = `https://t.me/SeninBotun?start=${myID}`;
+            document.getElementById('ref-link').innerText = `https://t.me/${botUsername}?start=${myID}`;
             
-            // Kod kullanılmışsa giriş kutusunu gizle
-            const codeBox = document.getElementById('code-input-box');
             if (stats.hasUsedCode) {
-                codeBox.innerHTML = `<div style="color:var(--ok); font-weight:bold; text-align:center; padding:10px;">✅ Davet kodu başarıyla kullanıldı!</div>`;
+                document.getElementById('code-section').innerHTML = `<div class="status-ok">Davet ödülü aktif! ✅</div>`;
             }
         }
 
-        // --- REFERANS KODU GİRME (TEK SEFERLİK) ---
+        // --- REFERANS KODU GİRME ---
         window.applyInviteCode = async () => {
-            const inputField = document.getElementById('invite-code-input');
-            const code = inputField.value.trim();
-            const btn = document.getElementById('apply-code-btn');
+            const input = document.getElementById('code-input');
+            const code = input.value.trim();
+            const card = document.getElementById('ref-card');
 
-            if (stats.hasUsedCode) return; 
-            if (code === myID) {
-                showNotify('error', '❌ Kendi kodunu giremezsin!', 'code-input-box');
-                return;
-            }
-            if (code === "") return;
-
-            try {
-                const targetRef = doc(db, "users", code);
-                const targetSnap = await getDoc(targetRef);
-
-                if (targetSnap.exists()) {
-                    // 1. Kodu girene 0.05$ ver ve kilitle
-                    await updateDoc(doc(db, "users", myID), { 
-                        usdt: increment(0.05), 
-                        hasUsedCode: true, 
-                        invitedBy: code 
-                    });
-                    
-                    // 2. Kodun sahibine 0.05$ ver
-                    await updateDoc(targetRef, { usdt: increment(0.05) });
-
-                    stats.usdt += 0.05;
-                    stats.hasUsedCode = true;
-                    
-                    showNotify('success', '✅ 0.05$ Hesabınıza Eklendi!', 'code-input-box');
-                    setTimeout(updateUI, 1500);
-                } else {
-                    showNotify('error', '❌ Geçersiz Davet Kodu!', 'code-input-box');
-                }
-            } catch (e) {
-                showNotify('error', '❌ İşlem Başarısız!', 'code-input-box');
-            }
-        };
-
-        // --- BİLDİRİM VE ANİMASYON ---
-        window.showNotify = (type, msg, elementId) => {
-            const el = document.getElementById(elementId);
-            tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success');
+            if (stats.hasUsedCode) return;
+            if (code === myID) return showFeed('error', 'Kendi kodunu kullanamazsın!', card);
             
-            if(type === 'error') {
-                el.classList.add('shake');
-                setTimeout(() => el.classList.remove('shake'), 500);
+            const targetRef = doc(db, "users", code);
+            const targetSnap = await getDoc(targetRef);
+
+            if (targetSnap.exists()) {
+                await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), hasUsedCode: true, invitedBy: code });
+                await updateDoc(targetRef, { usdt: increment(0.05) });
+                stats.usdt += 0.05; stats.hasUsedCode = true;
+                updateUI();
+                showFeed('success', 'Tebrikler! 0.05$ kazandın.', card);
             } else {
-                el.classList.add('bounce');
-                setTimeout(() => el.classList.remove('bounce'), 500);
+                showFeed('error', 'Geçersiz davet kodu!', card);
             }
-            tg.showAlert(msg);
         };
 
-        window.copyRefLink = (btn) => {
-            const link = document.getElementById('ref-link-display').innerText;
-            navigator.clipboard.writeText(link).then(() => {
-                const original = btn.innerText;
-                btn.innerText = "KOPYALANDI! ✓";
-                btn.style.background = "#2ed573";
-                tg.HapticFeedback.impactOccurred('medium');
-                setTimeout(() => { btn.innerText = original; btn.style.background = "#6c5ce7"; }, 2000);
+        // --- PARA ÇEKME ---
+        window.requestWithdraw = async () => {
+            const amt = parseFloat(document.getElementById('w-amt').value);
+            const adr = document.getElementById('w-adr').value.trim();
+            const card = document.getElementById('w-card');
+
+            if (isNaN(amt) || amt < 10) return showFeed('error', 'Minimum çekim $10.00!', card);
+            if (adr.length < 10) return showFeed('error', 'Geçerli bir adres girin!', card);
+            if (amt > stats.usdt) return showFeed('error', 'Yetersiz bakiye!', card);
+
+            await addDoc(collection(db, "withdrawals"), { 
+                userId: myID, username: myName, amount: amt, address: adr, status: "pending", date: new Date().toISOString() 
             });
+            await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
+            stats.usdt -= amt; 
+            updateUI();
+            showFeed('success', 'Çekim talebi gönderildi!', card);
         };
 
-        async function loadFriendsData() {
+        function showFeed(type, msg, el) {
+            tg.HapticFeedback.notificationOccurred(type);
+            el.classList.add(type === 'error' ? 'shake' : 'bounce');
+            tg.showAlert(msg);
+            setTimeout(() => el.classList.remove('shake', 'bounce'), 600);
+        }
+
+        async function loadFriends() {
             const q = query(collection(db, "users"), where("invitedBy", "==", myID));
             const snap = await getDocs(q);
-            const listContainer = document.getElementById('friends-list');
-            listContainer.innerHTML = "";
+            const list = document.getElementById('friends-list');
+            list.innerHTML = "";
             document.getElementById('f-count').innerText = snap.size;
-            document.getElementById('f-earned').innerText = "$" + (snap.size * 0.05).toFixed(2);
-
-            if (snap.empty) {
-                listContainer.innerHTML = '<div style="text-align:center; opacity:0.3; padding:20px;">Henüz arkadaşın yok.</div>';
-                return;
-            }
-            snap.forEach(doc => {
-                const data = doc.data();
-                listContainer.innerHTML += `
-                    <div class="f-row">
-                        <div class="f-avatar">${(data.username || 'U')[0].toUpperCase()}</div>
-                        <div class="f-info"><b>@${data.username || 'User'}</b><span>Davet Edildi</span></div>
-                        <div class="f-reward">+$0.05</div>
-                    </div>`;
+            snap.forEach(d => {
+                const data = d.data();
+                list.innerHTML += `<div class="f-item"><span>@${data.username}</span><b>+$0.05</b></div>`;
             });
         }
 
-        window.showTab = (name) => {
+        window.showTab = (tab, btn) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('p-' + name).classList.add('active');
+            document.getElementById('p-' + tab).classList.add('active');
             document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('n-on'));
-            event.currentTarget.classList.add('n-on');
+            btn.classList.add('n-on');
         };
 
         window.onload = init;
     </script>
-
     <style>
-        :root { --p: #70a1ff; --v: #6c5ce7; --y: #f7d348; --err: #ff4757; --ok: #2ed573; --d: #0a0b1e; }
-        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; user-select: none; }
-        
+        :root { --p: #70a1ff; --v: #6c5ce7; --y: #f7d348; --d: #080911; --c: rgba(255,255,255,0.06); }
+        body { margin: 0; background: var(--d); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; user-select: none; }
         #app { height: 100vh; display: flex; flex-direction: column; }
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
         .active { display: flex; }
-
-        .card { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
         
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--v); }
+        /* Kartlar */
+        .card { background: var(--c); border-radius: 20px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
+        .main-card { background: linear-gradient(135deg, var(--v), #3c338f); text-align: center; border: none; }
         
-        .btn-pay { width: 100%; background: var(--v); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; background: var(--v); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .btn-y { background: var(--y); color: #000; }
 
         /* Animasyonlar */
-        .shake { animation: shakeAnim 0.5s; border-color: var(--err) !important; }
-        @keyframes shakeAnim { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .bounce { animation: bounceAnim 0.5s; border-color: var(--ok) !important; }
-        @keyframes bounceAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .shake { animation: shake 0.5s; border-color: #ff4757 !important; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        .bounce { animation: bounce 0.5s; border-color: #2ed573 !important; }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
-        /* Arkadaş Listesi Stilleri */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; text-align: center; }
-        .ref-link-box { background: #000; padding: 10px; border-radius: 10px; font-size: 10px; color: #aaa; word-break: break-all; margin-bottom: 8px; }
-        .f-row { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 8px; }
-        .f-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--v); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; }
-        .f-info { flex: 1; } .f-reward { color: var(--ok); font-weight: bold; font-size: 13px; }
-
+        /* Navbar */
         .nav { height: 75px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 10px; }
         .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); }
-        .n-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+        .n-icon { font-size: 22px; display: block; margin-bottom: 5px; }
+
+        .f-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 8px; }
+        .status-ok { background: rgba(46, 213, 115, 0.15); color: #2ed573; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 13px; }
     </style>
 </head>
 <body>
-
 <div id="app">
-    <div id="p-main" class="page active">
-        <div style="text-align: center; margin-top: 20px;">
-            <img src="koalasmining.jpg" style="width: 100px; border-radius: 50%; border: 3px solid var(--y);">
-            <h1 style="margin: 10px 0;">KOALAS HUB</h1>
+    <div id="p-home" class="page active">
+        <div style="text-align: center; margin: 30px 0;">
+            <img src="koalasmining.jpg" style="width: 110px; border-radius: 50%; border: 4px solid var(--y); box-shadow: 0 0 20px rgba(247,211,72,0.2);">
+            <h1 style="margin: 15px 0 5px 0; letter-spacing: 1px;">FONIX MINING</h1>
+            <p style="opacity: 0.4; font-size: 12px;">EST. 2026 • OFFICIAL HUB</p>
         </div>
-        <div class="card" style="background: linear-gradient(135deg, var(--v), #341f97); text-align: center;">
-            <small>TOPLAM BAKİYE</small>
-            <h1 style="font-size: 36px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
-            <div style="font-size: 13px; opacity: 0.8;">🪙 <span class="ui-kls">0.00</span> KLS</div>
+        <div class="card main-card">
+            <small style="opacity: 0.8; font-weight: bold;">TOTAL BALANCE</small>
+            <h1 style="font-size: 44px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
+            <div style="font-size: 14px; background: rgba(0,0,0,0.2); display: inline-block; padding: 5px 15px; border-radius: 20px;">
+                🪙 <span class="ui-kls">0.00</span> KLS Token
+            </div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2 style="margin-top:0;">Referans Merkezi</h2>
-        
-        <div class="card" id="code-input-box">
-            <small style="color:var(--y); font-weight:bold;">BİR DAVET KODUN VAR MI?</small>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <input type="text" id="invite-code-input" placeholder="Kodu buraya yaz..." style="margin:0;">
-                <button id="apply-code-btn" class="btn-pay btn-y" style="width:auto; padding:12px 20px;" onclick="applyInviteCode()">GİR</button>
+        <h2 style="margin-top:0;">Network</h2>
+        <div class="card" id="ref-card">
+            <div id="code-section">
+                <small style="color:var(--y); font-weight:bold;">DAVET KODUN VAR MI?</small>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <input type="text" id="code-input" placeholder="Kod..." style="margin:0;">
+                    <button class="btn btn-y" style="width:auto; padding:0 20px;" onclick="applyInviteCode()">GİR</button>
+                </div>
             </div>
-            <p style="font-size:10px; opacity:0.5; margin:8px 0 0 0;">Bir kod girerek anında 0.05$ kazanabilirsin.</p>
         </div>
-
-        <div class="stat-grid">
-            <div class="stat-item"><small>Arkadaşlar</small><div id="f-count" style="font-size:20px; font-weight:bold;">0</div></div>
-            <div class="stat-item"><small>Toplam Kazanç</small><div id="f-earned" style="font-size:20px; font-weight:bold; color:var(--ok);">$0.00</div></div>
-        </div>
-
         <div class="card">
-            <small style="font-weight:bold; color:var(--v);">SENİN DAVET LİNKİN</small>
-            <div id="ref-link-display" class="ref-link-box">Yükleniyor...</div>
-            <button class="btn-pay" onclick="copyRefLink(this)">LİNKİ KOPYALA</button>
+            <small>SENİN REFERANS LİNKİN</small>
+            <div id="ref-link" style="font-size:10px; background:#000; padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; color:#888;">...</div>
+            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">LİNKİ KOPYALA</button>
         </div>
-
+        <h3 style="margin: 10px 0 10px 5px;">Arkadaşlar (<span id="f-count">0</span>)</h3>
         <div id="friends-list"></div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2>Cüzdan</h2>
-        <div class="card" id="withdraw-box">
-            <h3 style="margin:0 0 10px 0;">Para Çek</h3>
-            <input type="number" id="withdraw-amount" placeholder="Miktar ($10.00)">
-            <input type="text" id="wallet-address" placeholder="Cüzdan Adresi (TON/USDT)">
-            <button class="btn-pay btn-y" onclick="tg.showAlert('Talebiniz kaydedildi.')">TALEP OLUŞTUR</button>
+        <h2 style="margin-top:0;">Wallet</h2>
+        <div class="card" id="w-card">
+            <h3 style="margin-top:0;">Para Çekme</h3>
+            <label style="font-size:12px; opacity:0.6;">Miktar (Min $10.00)</label>
+            <input type="number" id="w-amt" placeholder="10.00">
+            <label style="font-size:12px; opacity:0.6;">Cüzdan Adresi (TON/USDT)</label>
+            <input type="text" id="w-adr" placeholder="UQ... veya USDT Adresi">
+            <button class="btn btn-y" onclick="requestWithdraw()">ÇEKİM TALEBİ OLUŞTUR</button>
+        </div>
+        <div class="card" style="opacity:0.5; font-size:12px; text-align:center;">
+            Ödemeler manuel kontrolden sonra 24 saat içinde cüzdanınıza iletilir.
         </div>
     </div>
 
     <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('main')"><span class="n-icon">🏠</span>Home</button>
-        <button class="n-btn" onclick="showTab('friends')"><span class="n-icon">👥</span>Friends</button>
-        <button class="n-btn" onclick="showTab('wallet')"><span class="n-icon">💰</span>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('home', this)"><span class="n-icon">🏠</span>Home</button>
+        <button class="n-btn" onclick="showTab('friends', this)"><span class="n-icon">👥</span>Friends</button>
+        <button class="n-btn" onclick="showTab('wallet', this)"><span class="n-icon">💰</span>Wallet</button>
     </nav>
 </div>
-
 </body>
 </html>
