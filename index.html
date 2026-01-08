@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Ultimate</title>
+    <title>Bums Clicker Ultimate Pro</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
@@ -58,9 +58,9 @@
         .score-display img { width: 40px; border-radius: 50%; }
         .score-display span { font-size: 3.5rem; font-weight: 900; }
         
-        #hero { width: 190px; cursor: pointer; transition: transform 0.05s; }
+        #hero { width: 180px; cursor: pointer; transition: transform 0.05s; }
 
-        /* LİSTE TASARIMI (Upgrade, Tasks, Friends) */
+        /* LİSTE TASARIMI */
         .list-container { padding: 20px; }
         .list-item { 
             background: #1e293b; border-radius: 15px; padding: 15px; 
@@ -73,6 +73,7 @@
         .item-text div:last-child { font-size: 11px; color: #94a3b8; }
         
         .action-btn { background: var(--accent-blue); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; min-width: 75px; }
+        .action-btn:disabled { background: #10b981; color: white; cursor: default; }
 
         /* ALT PANEL */
         .bottom-ui {
@@ -90,7 +91,6 @@
         .tab.active { color: white; font-weight: bold; }
         .tab.active img { border: 2px solid var(--gold); background: rgba(251, 191, 36, 0.1); }
 
-        /* POPUP SAYI */
         .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem; pointer-events: none; animation: rise 0.7s forwards; z-index: 300; }
         @keyframes rise { to { transform: translateY(-120px); opacity: 0; } }
     </style>
@@ -114,9 +114,9 @@
     <div id="screen-play" class="screen active-screen">
         <div class="side-menu">
             <div class="side-col">
-                <div class="s-item" onclick="earnGift()"><img src="Jgang.jpg">GANG</div>
+                <div class="s-item" id="btn-gang" onclick="earnGift()"><img src="Jgang.jpg">GANG</div>
                 <div class="s-item" onclick="startPassive()"><img src="TapEarn.jpg">8h 0m</div>
-                <div class="s-item" onclick="alert('Cüzdan Bağla: 8392479231')"><img src="Airdrop.jpg">AIRDROP</div>
+                <div class="s-item" onclick="alert('Cüzdan: 8392479231')"><img src="Airdrop.jpg">AIRDROP</div>
             </div>
             <div class="side-col">
                 <div class="s-item" onclick="buyAutoTap()"><img src="AutoTap.jpg">AUTO</div>
@@ -159,16 +159,16 @@
             <div class="list-item">
                 <div class="item-info">
                     <div class="item-icon">📱</div>
-                    <div class="item-text"><div>Telegrama Katıl</div><div>+5,000 Puan</div></div>
+                    <div class="item-text"><div>Telegram Kanalı</div><div>+5,000 Puan</div></div>
                 </div>
-                <button class="action-btn" onclick="doTask(this, 5000)">Yap</button>
+                <button class="action-btn" id="task-tg" onclick="completeTask('tg', 5000, 'https://t.me/+pYqOC1FDAnkwMTNk')">Katıl</button>
             </div>
             <div class="list-item">
                 <div class="item-info">
                     <div class="item-icon">📺</div>
-                    <div class="item-text"><div>Video İzle</div><div>+2,000 Puan</div></div>
+                    <div class="item-text"><div>Watch Ads</div><div>+2,500 Puan</div></div>
                 </div>
-                <button class="action-btn" onclick="doTask(this, 2000)">İzle</button>
+                <button class="action-btn" id="task-ads" onclick="completeTask('ads', 2500)">İzle</button>
             </div>
         </div>
     </div>
@@ -177,8 +177,8 @@
         <div class="list-container">
             <h2>Arkadaşlar</h2>
             <div class="list-item" style="flex-direction: column; text-align: center; gap: 15px;">
-                <p>Her başarılı referans için 10.000 Puan kazanın!</p>
-                <button class="action-btn" style="width: 100%;" onclick="alert('Davet linki kopyalandı!')">ARKADAŞ DAVET ET</button>
+                <p>Referans başına 10.000 Puan!</p>
+                <button class="action-btn" style="width: 100%;" onclick="alert('Davet linki kopyalandı!')">DAVET ET</button>
             </div>
         </div>
     </div>
@@ -203,8 +203,10 @@
     let energy = 2000;
     let maxEnergy = 2000;
     let power = 5;
+    
+    // Tek seferlik kontroller için bir obje
+    const completedTasks = { tg: false, ads: false, gang: false };
 
-    // SEKME GEÇİŞİ
     function switchTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById('screen-' + id).classList.add('active-screen');
@@ -212,7 +214,6 @@
         el.classList.add('active');
     }
 
-    // TIKLAMA
     document.getElementById('click-zone').addEventListener('pointerdown', (e) => {
         if (energy >= power) {
             coins += power;
@@ -226,25 +227,48 @@
         }
     });
 
-    // ANA EKRAN BUTON İŞLEVLERİ
-    function earnGift() { coins += 1000; alert("GANG HEDİYESİ: +1000!"); updateUI(); }
-    function startPassive() { alert("Pasif gelir aktif edildi!"); setInterval(() => { coins += 1; updateUI(); }, 2000); }
+    // Görev Tamamlama (1 Defa)
+    function completeTask(type, reward, link = null) {
+        if (completedTasks[type]) return;
+        
+        if(link) window.open(link, '_blank');
+        
+        coins += reward;
+        completedTasks[type] = true;
+        
+        const btn = document.getElementById('task-' + type);
+        btn.innerText = "Tamamlandı";
+        btn.disabled = true;
+        updateUI();
+    }
+
+    // Gang Hediyesi (1 Defa)
+    function earnGift() { 
+        if(completedTasks.gang) { alert("Hediyeni zaten aldın!"); return; }
+        coins += 1000; 
+        completedTasks.gang = true;
+        alert("GANG HEDİYESİ: +1000!"); 
+        updateUI(); 
+    }
+
+    function startPassive() { alert("8 Saatlik pasif gelir başladı!"); setInterval(() => { coins += 1; updateUI(); }, 2000); }
+
     function buyAutoTap() { 
         if(coins >= 5000) { 
             coins -= 5000; alert("Auto Tap Aktif!"); 
             setInterval(() => { if(energy >= power) { coins += power; energy -= power; updateUI(); } }, 1000);
         } else alert("5000 Coin gerekli!"); 
     }
+
     function openBox() {
         if(coins >= 500) {
             coins -= 500;
-            let win = Math.random() > 0.5 ? 1000 : 50;
-            alert(win > 500 ? "KUTUDAN 1000 COİN ÇIKTI!" : "Maalesef 50 coin çıktı.");
+            let win = Math.random() > 0.6 ? 1500 : 50;
+            alert(win > 500 ? "BÜYÜK ÖDÜL: 1500 COİN!" : "Kutudan 50 coin çıktı.");
             coins += win; updateUI();
         } else alert("500 Coin gerekli!");
     }
 
-    // MARKET VE GÖREVLER
     function buyUpgrade(type, cost) {
         if(coins >= cost) {
             coins -= cost;
@@ -252,11 +276,6 @@
             else { maxEnergy += 500; energy = maxEnergy; }
             updateUI();
         } else alert("Yetersiz Bakiye!");
-    }
-    function doTask(btn, reward) {
-        coins += reward;
-        btn.innerText = "Tamam"; btn.disabled = true;
-        updateUI();
     }
 
     function updateUI() {
