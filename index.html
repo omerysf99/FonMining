@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas App</title>
+    <title>Koalas Pro Hub</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -27,84 +27,178 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
+        const myUsername = user?.username || user?.first_name || "KoalaUser";
+        const myPhoto = user?.photo_url || `https://ui-avatars.com/api/?name=${myUsername}&background=random`;
+
+        let userData = { kls: 0, usdt: 0 };
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-            if (!snap.exists()) {
-                await setDoc(userRef, { 
+
+            if (snap.exists()) {
+                userData = snap.data();
+            } else {
+                userData = { 
                     kls: 0, 
                     usdt: 0, 
-                    username: user?.username || "Guest" 
-                });
+                    username: myUsername, 
+                    photo: myPhoto,
+                    invitedBy: tg.initDataUnsafe?.start_param || "" 
+                };
+                await setDoc(userRef, userData);
             }
-            document.getElementById('user-name').innerText = user?.first_name || "Koala";
+            
+            updateUI();
+            loadFriends();
         }
 
-        window.showTab = (n) => {
+        // UI Güncelleme
+        function updateUI() {
+            document.getElementById('user-display-name').innerText = myUsername;
+            document.getElementById('main-kls').innerText = userData.kls.toFixed(2);
+            document.getElementById('main-usdt').innerText = userData.usdt.toFixed(4);
+            document.getElementById('ref-link-text').innerText = `https://t.me/SeninBotUserAdin?start=${myID}`;
+        }
+
+        // Firebase'den Arkadaş Listesini Çekme
+        async function loadFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            const list = document.getElementById('friends-list');
+            list.innerHTML = "";
+            
+            document.getElementById('friend-count').innerText = snap.size;
+
+            if (snap.empty) {
+                list.innerHTML = "<p style='opacity:0.5'>Henüz kimseyi davet etmediniz.</p>";
+                return;
+            }
+
+            snap.forEach(d => {
+                const data = d.data();
+                const item = document.createElement('div');
+                item.className = 'friend-item';
+                item.innerHTML = `
+                    <img src="${data.photo || 'https://via.placeholder.com/40'}" class="friend-img">
+                    <div class="friend-info">
+                        <div class="name">@${data.username}</div>
+                        <div class="reward">Bonus: +$0.05</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Sekme Değiştirme
+        window.showTab = (tabId) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('p-'+n).classList.add('active');
-            document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('n-on'));
-            event.currentTarget.classList.add('n-on');
+            document.getElementById('p-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+            event.currentTarget.classList.add('active-nav');
+        };
+
+        window.copyRef = () => {
+            const link = document.getElementById('ref-link-text').innerText;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Davet linki kopyalandı!");
         };
 
         window.onload = init;
     </script>
 
     <style>
-        :root { --p: #5c3eb3; --y: #f7d348; --d: #0a0520; }
-        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; }
+        :root { --purple: #6c5ce7; --yellow: #fdcb6e; --bg: #0f0c29; --card: rgba(255, 255, 255, 0.08); }
+        
+        body { margin: 0; background: var(--bg); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
         
         #app { height: 100vh; display: flex; flex-direction: column; }
-        .page { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        /* Sayfa Yapısı */
+        .page { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
 
-        /* Ana Sayfa Görseli */
-        .hero-img { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--y); box-shadow: 0 0 30px rgba(247, 211, 72, 0.3); margin-bottom: 20px; }
-        h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
-        p { opacity: 0.6; margin-top: 10px; }
+        /* Kart Tasarımları */
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Cüzdan */
+        .wallet-header { text-align: center; padding: 20px 0; }
+        .balance-title { font-size: 14px; opacity: 0.7; margin-bottom: 5px; }
+        .balance-value { font-size: 36px; font-weight: bold; color: var(--yellow); }
+        .withdraw-btn { background: var(--purple); color: #fff; border: none; width: 100%; padding: 15px; border-radius: 15px; font-size: 16px; font-weight: bold; margin-top: 10px; }
 
-        /* Navigasyon */
-        .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .n-on { opacity: 1; color: var(--y); transform: scale(1.1); }
-        .n-icon { font-size: 24px; display: block; margin-bottom: 5px; }
+        /* Arkadaşlar */
+        .ref-box { background: #000; padding: 15px; border-radius: 12px; font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 10px; cursor: pointer; }
+        .friend-item { display: flex; align-items: center; gap: 15px; background: var(--card); padding: 12px; border-radius: 15px; margin-bottom: 10px; }
+        .friend-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--purple); }
+        .friend-info .name { font-weight: bold; font-size: 15px; }
+        .friend-info .reward { font-size: 12px; color: var(--yellow); }
 
-        .card { width: 100%; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; text-align: center; }
+        /* Alt Navigasyon */
+        .nav-bar { height: 75px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.3s; }
+        .nav-btn span { font-size: 20px; }
+        .active-nav { opacity: 1; color: var(--yellow); transform: translateY(-3px); }
+
+        h2 { margin: 0 0 15px 0; font-size: 22px; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div id="p-home" class="page active">
-        <img src="koalasmining.jpg" class="hero-img">
-        <h1>Welcome, <span id="user-name">...</span>!</h1>
-        <p>Koalas Community Hub</p>
-    </div>
-
-    <div id="p-wallet" class="page">
+        <div class="card" style="text-align:center;">
+            <img src="koalasmining.jpg" style="width:120px; border-radius:50%; border:4px solid var(--purple);">
+            <h2 style="margin-top:15px;">Merhaba, <span id="user-display-name">...</span></h2>
+            <p>Koalas ekosistemine hoş geldin. Arkadaşlarını davet ederek kazanmaya başla.</p>
+        </div>
         <div class="card">
-            <p>Total Balance</p>
-            <h1 style="color:var(--y);">$0.0000</h1>
+            <div style="display:flex; justify-content:space-between;">
+                <span>Token Durumu:</span>
+                <b style="color:var(--yellow);"><span id="main-kls">0.00</span> KLS</b>
+            </div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
+        <h2>Davet Paneli</h2>
         <div class="card">
-            <h2>Friends List</h2>
-            <p>No friends yet.</p>
+            <div class="balance-title">Davet Linkin (Kopyalamak için dokun)</div>
+            <div class="ref-box" id="ref-link-text" onclick="copyRef()">Yükleniyor...</div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3>Arkadaşlar (<span id="friend-count">0</span>)</h3>
+        </div>
+        
+        <div id="friends-list">
+            </div>
+    </div>
+
+    <div id="p-wallet" class="page">
+        <h2>Cüzdanım</h2>
+        <div class="card wallet-header">
+            <div class="balance-title">Toplam Bakiyen</div>
+            <div class="balance-value">$<span id="main-usdt">0.0000</span></div>
+        </div>
+        
+        <div class="card">
+            <h3>İşlemler</h3>
+            <button class="withdraw-btn" onclick="tg.showAlert('Minimum çekim tutarı $10.00')">PARA ÇEK</button>
+            <p style="font-size:12px; text-align:center; opacity:0.5; margin-top:15px;">Ödemeler 24 saat içinde cüzdanınıza yansır.</p>
         </div>
     </div>
 
-    <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('home')">
-            <span class="n-icon">🏠</span>Home
+    <nav class="nav-bar">
+        <button class="nav-btn active-nav" onclick="showTab('home')">
+            <span>🏠</span>Ana Sayfa
         </button>
-        <button class="n-btn" onclick="showTab('friends')">
-            <span class="n-icon">👥</span>Friends
+        <button class="nav-btn" onclick="showTab('friends')">
+            <span>👥</span>Arkadaşlar
         </button>
-        <button class="n-btn" onclick="showTab('wallet')">
-            <span class="n-icon">💰</span>Wallet
+        <button class="nav-btn" onclick="showTab('wallet')">
+            <span>💰</span>Cüzdan
         </button>
     </nav>
 </div>
