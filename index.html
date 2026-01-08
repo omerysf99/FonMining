@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -27,7 +27,7 @@
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         const myName = user?.username || user?.first_name || "FonixUser";
         
-        let stats = { usdt: 0, kls: 0, completedTasks: [] };
+        let stats = { usdt: 0, kls: 0, completedTasks: [], invitedBy: "" };
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -43,88 +43,86 @@
                 await setDoc(userRef, stats);
                 if(stats.invitedBy && stats.invitedBy !== myID) {
                     await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.05) });
+                    await updateDoc(userRef, { usdt: increment(0.02) }); // Yeni gelene de hoşgeldin bonusu
                 }
             }
             updateUI();
-            loadFriends();
+            loadNetworkData();
+            loadWithdrawHistory();
         }
 
         function updateUI() {
             document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(5));
             document.getElementById('display-my-id').innerText = myID;
             document.getElementById('ref-link').innerText = `https://t.me/FonixMining2026Bot?start=${myID}`;
-            
-            // Tek seferlik görevleri kontrol et (Telegram Kanalı gibi)
-            if(stats.completedTasks.includes('task_tg')) {
-                const btn = document.getElementById('btn-task_tg');
-                if(btn) { btn.innerText = "KATILDI ✅"; btn.disabled = true; btn.style.opacity = "0.5"; }
-            }
         }
 
-        // --- TEK SEFERLİK GÖREV (TELEGRAM) ---
-        window.doTask = async (taskId, reward, url) => {
-            if(stats.completedTasks.includes(taskId)) return;
-            window.open(url, '_blank');
-            setTimeout(async () => {
-                const userRef = doc(db, "users", myID);
-                await updateDoc(userRef, { 
-                    usdt: increment(reward),
-                    completedTasks: [...stats.completedTasks, taskId]
-                });
-                stats.usdt += reward;
-                stats.completedTasks.push(taskId);
-                updateUI();
-                tg.showAlert(`Tebrikler! ${reward}$ kazandın.`);
-            }, 3000);
-        };
-
-        // --- SINIRSIZ REKLAM İZLEME GÖREVİ ---
-        window.watchAd = async () => {
-            const reward = 0.0001;
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            // Buraya gerçek reklam sağlayıcı linkini (Adless, Monetag vb.) koyabilirsin.
-            // Şimdilik sembolik bir video/sayfa açıyoruz.
-            window.open('https://t.me/FonixMining', '_blank'); 
-
-            setTimeout(async () => {
-                const userRef = doc(db, "users", myID);
-                await updateDoc(userRef, { usdt: increment(reward) });
-                stats.usdt += reward;
-                updateUI();
-                tg.showScanQrPopup({text: "Ödülünüz tanımlandı! +$0.0001"}); // Bildirim amaçlı
-                setTimeout(() => tg.closeScanQrPopup(), 1500);
-            }, 2000);
-        };
-
-        // --- REFERANS KODU GİRİŞİ ---
-        window.applyCode = async () => {
-            const code = document.getElementById('invite-input').value.trim();
-            if(!code || stats.invitedBy) return;
-            const targetRef = doc(db, "users", code);
-            const targetSnap = await getDoc(targetRef);
-            if(targetSnap.exists() && code !== myID) {
-                await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), invitedBy: code });
-                await updateDoc(targetRef, { usdt: increment(0.05) });
-                stats.usdt += 0.05; stats.invitedBy = code;
-                updateUI();
-                tg.showAlert("Ödül tanımlandı!");
-            } else {
-                tg.showAlert("Geçersiz ID!");
-            }
-        };
-
+        // --- WALLET: ÇEKİM TALEBİ ---
         window.requestWithdraw = async () => {
             const amt = parseFloat(document.getElementById('w-amt').value);
-            if(amt > stats.usdt || amt < 10) return tg.showAlert("Min 10$ bakiye gerekli.");
-            tg.showAlert("Talep alındı! 24 saat içinde incelenecektir.");
+            const adr = document.getElementById('w-adr').value.trim();
+            
+            if(amt < 10) return tg.showAlert("Minimum çekim miktarı $10.00'dır.");
+            if(amt > stats.usdt) return tg.showAlert("Yetersiz bakiye!");
+            if(adr.length < 8) return tg.showAlert("Lütfen geçerli bir cüzdan adresi girin.");
+
+            tg.showConfirm(`$${amt} çekim talebi oluşturulsun mu?`, async (ok) => {
+                if(ok) {
+                    const withdrawRef = collection(db, "withdrawals");
+                    await addDoc(withdrawRef, {
+                        userId: myID, amount: amt, address: adr, status: "pending", date: new Date().getTime()
+                    });
+                    await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
+                    stats.usdt -= amt;
+                    updateUI();
+                    loadWithdrawHistory();
+                    tg.showAlert("Talebiniz alındı. Kontrol edildikten sonra cüzdanınıza iletilecektir.");
+                }
+            });
         };
 
-        async function loadFriends() {
+        // --- NETWORK: VERİLERİ YÜKLE ---
+        async function loadNetworkData() {
             const q = query(collection(db, "users"), where("invitedBy", "==", myID));
             const snap = await getDocs(q);
-            document.getElementById('f-count').innerText = snap.size;
+            const count = snap.size;
+            document.getElementById('f-count-big').innerText = count;
+            document.getElementById('f-earn-big').innerText = (count * 0.05).toFixed(2);
+            
+            const list = document.getElementById('network-list');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                list.innerHTML += `<div class="list-item"><span>@${data.username}</span><span style="color:var(--y)">+$0.05</span></div>`;
+            });
         }
+
+        // --- WALLET: GEÇMİŞİ YÜKLE ---
+        async function loadWithdrawHistory() {
+            const q = query(collection(db, "withdrawals"), where("userId", "==", myID), orderBy("date", "desc"), limit(5));
+            const snap = await getDocs(q);
+            const hist = document.getElementById('withdraw-history');
+            hist.innerHTML = "";
+            if(snap.empty) hist.innerHTML = "<small style='opacity:0.3'>Henüz işlem yok.</small>";
+            snap.forEach(d => {
+                const data = d.data();
+                const statusColor = data.status === 'pending' ? 'orange' : '#2ed573';
+                hist.innerHTML += `<div class="list-item">
+                    <span>$${data.amount.toFixed(2)}</span>
+                    <span style="color:${statusColor}">${data.status.toUpperCase()}</span>
+                </div>`;
+            });
+        }
+
+        window.watchAd = async () => {
+            window.open('https://t.me/FonixMining', '_blank'); 
+            setTimeout(async () => {
+                await updateDoc(doc(db, "users", myID), { usdt: increment(0.0001) });
+                stats.usdt += 0.0001;
+                updateUI();
+                tg.HapticFeedback.notificationOccurred('success');
+            }, 2000);
+        };
 
         window.showTab = (t, b) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -136,90 +134,106 @@
         window.onload = init;
     </script>
     <style>
-        :root { --p: #6c5ce7; --y: #f7d348; --d: #09090b; --c: rgba(255,255,255,0.06); }
-        body { margin: 0; background: var(--d); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; user-select: none; }
+        :root { --p: #6c5ce7; --y: #f7d348; --d: #08080e; --card: rgba(255,255,255,0.05); }
+        body { margin: 0; background: var(--d); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; user-select: none; }
         #app { height: 100vh; display: flex; flex-direction: column; }
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
         .active { display: flex; flex-direction: column; }
-        .card { background: var(--c); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); }
-        .main-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; text-align: center; }
-        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        .card { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: var(--card); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        
+        .list-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
+        
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--y); }
+        
+        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 16px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-y { background: var(--y); color: #000; }
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 10px; margin: 8px 0; box-sizing: border-box; }
-        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; }
-        .n-on { opacity: 1; color: var(--y); }
-        .t-row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; margin-bottom: 10px; }
+        .btn:active { transform: scale(0.98); }
+
+        .nav { height: 80px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 11px; transition: 0.3s; }
+        .n-on { opacity: 1; color: var(--y); transform: translateY(-5px); }
+        .n-icon { font-size: 24px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="p-home" class="page active">
-        <div style="text-align: center; margin: 30px 0;">
-            <img src="koalasmining.jpg" style="width: 90px; border-radius: 50%; border: 3px solid var(--y); box-shadow: 0 0 15px rgba(247,211,72,0.3);">
-            <h2 style="letter-spacing:1px; margin-top:10px;">FONIX MINING</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <img src="koalasmining.jpg" style="width: 85px; border-radius: 50%; border: 3px solid var(--y);">
+            <h2 style="margin: 10px 0 0 0;">FONIX MINING</h2>
+            <small style="opacity:0.4;">Official Miner Dashboard</small>
         </div>
-        <div class="card main-card">
-            <small style="opacity:0.8;">HESAP BAKİYESİ</small>
-            <h1 style="font-size: 42px; margin: 10px 0;">$<span class="ui-usdt">0.00000</span></h1>
-            <div style="font-size:12px; opacity:0.6;">KLS Token mining is active</div>
+        <div class="card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; text-align: center; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);">
+            <small style="font-weight: bold; opacity:0.8;">CURRENT BALANCE</small>
+            <h1 style="font-size: 40px; margin: 10px 0;">$<span class="ui-usdt">0.00000</span></h1>
+            <button class="btn btn-y" style="padding: 10px; font-size: 12px;" onclick="showTab('tasks', document.querySelectorAll('.n-btn')[1])">EARN MORE</button>
         </div>
-        <div class="card" style="text-align:center;">
-            <small style="opacity:0.5;">YOUR ID</small>
-            <div id="display-my-id" style="font-size:18px; font-weight:bold; color:var(--y);">...</div>
+        <div class="stat-box">
+            <small style="opacity:0.5;">YOUR UNIQUE ID</small>
+            <div id="display-my-id" style="font-size: 20px; font-weight: bold; color: var(--y);">...</div>
         </div>
     </div>
 
     <div id="p-tasks" class="page">
-        <h2 style="margin-top:0;">Görev Merkezi</h2>
-        
-        <div class="card" style="border-color: var(--y);">
-            <div class="t-row">
-                <div><b>🎬 Reklam İzle</b><br><small>Her izleme: +$0.0001</small></div>
-                <button class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="watchAd()">İZLE</button>
+        <h2 style="margin-top:0;">Task Center</h2>
+        <div class="card" style="border: 2px solid var(--y);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>📺 Watch Ad</b><br><small>Earn +$0.0001 per view</small></div>
+                <button class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="watchAd()">WATCH</button>
             </div>
-            <p style="font-size:10px; opacity:0.5; margin:0; text-align:center;">Bu görev her zaman yapılabilir.</p>
         </div>
-
         <div class="card">
-            <div class="t-row">
-                <div><b>📢 Resmi Kanal</b><br><small>Ödül: $0.05</small></div>
-                <button id="btn-task_tg" class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="doTask('task_tg', 0.05, 'https://t.me/FonixMining')">KATIL</button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><b>📢 Official Channel</b><br><small>Join & Get +$0.05</small></div>
+                <button class="btn" style="width:auto; padding:10px 20px;" onclick="window.open('https://t.me/FonixMining')">JOIN</button>
             </div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2 style="margin-top:0;">Referans</h2>
-        <div class="card">
-            <small style="font-weight:bold; color:var(--p);">DAVET LİNKİN</small>
-            <div id="ref-link" style="font-size: 10px; background:#000; padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; color:#666;"></div>
-            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">LİNKİ KOPYALA</button>
+        <h2 style="margin-top:0;">Network</h2>
+        <div class="stat-grid">
+            <div class="stat-box">
+                <small>Friends</small>
+                <div id="f-count-big" style="font-size:24px; font-weight:bold;">0</div>
+            </div>
+            <div class="stat-box">
+                <small>Total Earned</small>
+                <div style="font-size:24px; font-weight:bold; color:var(--y);">$<span id="f-earn-big">0.00</span></div>
+            </div>
         </div>
         <div class="card">
-            <small style="color:var(--y);">DAVET KODU GİR ($0.05)</small>
-            <input type="text" id="invite-input" placeholder="Arkadaşının ID'sini buraya yaz">
-            <button class="btn btn-y" onclick="applyCode()">KODU ONAYLA</button>
+            <small style="font-weight:bold; color:var(--p);">INVITATION LINK</small>
+            <div id="ref-link" style="font-size: 10px; background:#000; padding:12px; border-radius:12px; margin:10px 0; word-break:break-all; color:#666;"></div>
+            <button class="btn btn-y" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">COPY LINK</button>
         </div>
-        <div style="text-align: center; margin-top:10px;">Network: <span id="f-count" style="font-weight:bold; color:var(--y);">0</span> Arkadaş</div>
+        <h3 style="margin: 15px 0 10px 0;">Recent Referrals</h3>
+        <div id="network-list"></div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2 style="margin-top:0;">Cüzdan</h2>
+        <h2 style="margin-top:0;">Financial</h2>
         <div class="card">
-            <label style="font-size:12px; opacity:0.6;">Çekilecek Miktar (Min $10.00)</label>
-            <input type="number" id="w-amt" placeholder="10.00">
-            <label style="font-size:12px; opacity:0.6;">TON / USDT Adresi</label>
-            <input type="text" placeholder="UQ... veya Cüzdan Adresi">
-            <button class="btn btn-y" onclick="requestWithdraw()">ÇEKİM TALEBİ OLUŞTUR</button>
+            <h4 style="margin-top:0;">Withdraw Funds</h4>
+            <label style="font-size:11px; opacity:0.5;">Amount (Min $10.00)</label>
+            <input type="number" id="w-amt" placeholder="0.00">
+            <label style="font-size:11px; opacity:0.5;">Wallet Address (TON / USDT)</label>
+            <input type="text" id="w-adr" placeholder="Enter your address">
+            <button class="btn btn-y" onclick="requestWithdraw()">CONFIRM WITHDRAWAL</button>
         </div>
+        <h3 style="margin: 20px 0 10px 0;">Transaction History</h3>
+        <div id="withdraw-history"></div>
     </div>
 
     <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('home', this)">🏠<br>Home</button>
-        <button class="n-btn" onclick="showTab('tasks', this)">📺<br>Ads</button>
-        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Ref</button>
-        <button class="n-btn" onclick="showTab('wallet', this)">💰<br>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('home', this)"><span class="n-icon">🏠</span>Home</button>
+        <button class="n-btn" onclick="showTab('tasks', this)"><span class="n-icon">📺</span>Ads</button>
+        <button class="n-btn" onclick="showTab('friends', this)"><span class="n-icon">👥</span>Network</button>
+        <button class="n-btn" onclick="showTab('wallet', this)"><span class="n-icon">💰</span>Wallet</button>
     </nav>
 </div>
 </body>
