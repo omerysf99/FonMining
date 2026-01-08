@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX MATRIX v511</title>
+    <title>FONIX ULTIMATE v512</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -23,40 +24,38 @@
         const tg = window.Telegram.WebApp;
         const myID = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "8392479231"; 
 
-        // Kart Verileri ve SVG İkonları
-        const ICONS = {
-            miner: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>`,
-            drill: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10,2L4,8L10,14L11.5,12.5L7.5,8.5H14A4,4 0 0,1 18,12.5A4,4 0 0,1 14,16.5H12V18.5H14A6,6 0 0,0 20,12.5A6,6 0 0,0 14,6.5H7.5L11.5,2.5L10,2Z"/></svg>`,
-            og: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/></svg>`
-        };
-
+        // Kart ve Emoji Tanımları
         const TIERS = [
-            { id: 'com', name: 'COMMON', clr: '#32FF7E', cards: ['Hedgehog Miner', 'USB Pickaxe', 'Nano Bot'], icon: ICONS.miner },
-            { id: 'epic', name: 'EPIC', clr: '#A335EE', cards: ['Quantum Drill', 'Laser Core', 'Cyber Chip'], icon: ICONS.drill },
-            { id: 'leg', name: 'LEGENDARY', clr: '#FF9F43', cards: ['Solar Titan', 'Nebula Rig', 'Void Engine'], icon: ICONS.drill },
-            { id: 'og', name: 'OG SERIES', clr: '#48DBFB', cards: ['Founder OG', 'Alpha Tester', 'King Admin'], icon: ICONS.og }
+            { id: 'com', name: 'COMMON', clr: '#32FF7E', emoji: '🦔', cards: ['Fast Hedgehog', 'Iron Pickaxe', 'Nano Core'] },
+            { id: 'epic', name: 'EPIC', clr: '#A335EE', emoji: '🧬', cards: ['Quantum Drill', 'Laser Sword', 'Cyber Eye'] },
+            { id: 'leg', name: 'LEGENDARY', clr: '#FF9F43', emoji: '🏆', cards: ['Solar Titan', 'Nebula Rig', 'Void Star'] },
+            { id: 'og', name: 'OG SERIES', clr: '#48DBFB', emoji: '👑', cards: ['Founder King', 'Alpha Wolf', 'System Admin'] }
         ];
 
-        let stats = { usdt: 0, ton: 0, inventory: [] };
+        let stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [] };
 
         async function init() {
             const snap = await getDoc(doc(db, "users", myID));
             if (snap.exists()) stats = snap.data();
+            else {
+                stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [], lastAdDate: new Date().toDateString() };
+                await setDoc(doc(db, "users", myID), stats);
+            }
             updateUI();
         }
 
         function updateUI() {
-            document.getElementById('u-v').innerText = stats.usdt.toFixed(5);
-            document.getElementById('t-v').innerText = stats.ton.toFixed(6);
+            document.querySelectorAll('.u-val').forEach(e => e.innerText = stats.usdt.toFixed(5));
+            document.querySelectorAll('.t-val').forEach(e => e.innerText = stats.ton.toFixed(6));
+            document.getElementById('limit-count').innerText = stats.adsToday;
             
             const matrix = document.getElementById('album-matrix');
             matrix.innerHTML = "";
 
             TIERS.forEach(t => {
-                let section = document.createElement('div');
-                section.className = 'tier-section';
-                section.innerHTML = `<div class="tier-head">${t.name}</div>`;
-                
+                let row = document.createElement('div');
+                row.className = 'tier-row';
+                row.innerHTML = `<div class="tier-label">${t.name}</div>`;
                 let grid = document.createElement('div');
                 grid.className = 'grid';
 
@@ -66,112 +65,165 @@
                     grid.innerHTML += `
                         <div class="card ${owned ? 'owned' : 'locked'}" style="--c: ${t.clr}">
                             <div class="card-num">#${i+1}</div>
-                            <div class="card-art">${t.icon} ${!owned ? '<i>🔒</i>' : ''}</div>
-                            <div class="card-label">${owned ? name : t.name + ' #' + (i+1)}</div>
+                            <div class="card-art">${owned ? t.emoji : '🔒'}</div>
+                            <div class="card-name">${owned ? name : 'LOCKED'}</div>
                         </div>
                     `;
                 });
-                section.appendChild(grid);
-                matrix.appendChild(section);
+                row.appendChild(grid);
+                matrix.appendChild(row);
             });
         }
+
+        window.openChest = () => {
+            if(stats.adsToday >= 50) return tg.showAlert("Daily limit reached!");
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            window.showAdexora().then(async () => {
+                let uRew = Math.random() * 0.0005;
+                let tRew = Math.random() * 0.000005;
+                
+                let wonCard = null;
+                if(Math.random() < 0.05) { // Test için şansı %5 yaptım
+                    const tIndex = Math.floor(Math.random() * TIERS.length);
+                    const cIndex = Math.floor(Math.random() * 3) + 1;
+                    wonCard = { id: `${TIERS[tIndex].id}_${cIndex}`, name: TIERS[tIndex].cards[cIndex-1] };
+                }
+
+                let newInv = stats.inventory || [];
+                if(wonCard && !newInv.includes(wonCard.id)) newInv.push(wonCard.id);
+
+                await updateDoc(doc(db, "users", myID), {
+                    usdt: increment(uRew), ton: increment(tRew), adsToday: increment(1), inventory: newInv
+                });
+
+                stats.usdt += uRew; stats.ton += tRew; stats.adsToday += 1; stats.inventory = newInv;
+                updateUI();
+                tg.showAlert(`CONGRATS!\n+$${uRew.toFixed(5)} USDT\n+${tRew.toFixed(6)} TON ${wonCard ? '\n\nNEW CARD: ' + wonCard.name : ''}`);
+            });
+        };
 
         window.switchTab = (id, btn) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('on'));
             btn.classList.add('on');
+            tg.HapticFeedback.selectionChanged();
         };
 
         window.onload = init;
     </script>
 
     <style>
-        :root { --bg: #0B0E11; --sur: #15191E; --acc: #00FFCC; --bor: #23282F; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        :root { --bg: #0A0C0F; --sur: #14171C; --acc: #00FFCC; --bor: #23282F; --ton: #0088cc; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; user-select: none; }
         
         .app { height: 100vh; display: flex; flex-direction: column; }
 
-        /* Header UI - Görseldeki Gibi */
+        /* Header UI */
         .head { padding: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .logo { font-family: 'Syncopate'; font-size: 15px; font-weight: 800; }
-        .stats { display: flex; gap: 10px; }
-        .s-box { background: var(--sur); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--bor); min-width: 95px; border-bottom: 2px solid var(--acc); }
+        .logo { font-family: 'Syncopate'; font-size: 16px; letter-spacing: -1px; }
+        .stats { display: flex; gap: 8px; }
+        .s-box { background: var(--sur); padding: 8px 12px; border-radius: 12px; border: 1px solid var(--bor); min-width: 90px; border-bottom: 3px solid var(--acc); }
         .s-box label { font-size: 7px; color: #666; font-weight: 800; display: block; margin-bottom: 2px; }
         .s-box span { font-family: 'Syncopate'; font-size: 10px; color: var(--acc); }
 
         .content { flex: 1; overflow-y: auto; padding: 15px; }
-        .page { display: none; }
-        .active { display: block; }
+        .page { display: none; height: 100%; }
+        .active { display: block; animation: slideUp 0.3s ease-out; }
 
-        /* Album Mimarisi */
-        .title-line { font-family: 'Syncopate'; font-size: 13px; text-align: center; margin: 0 auto 25px; 
-            border-bottom: 2px solid var(--acc); width: 80px; padding-bottom: 8px; }
-        
-        .tier-section { margin-bottom: 25px; }
-        .tier-head { font-size: 9px; opacity: 0.4; font-family: 'Syncopate'; margin-bottom: 12px; letter-spacing: 1px; }
-        
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        /* Main Page */
+        .main-hero { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .chest-card { width: 100%; max-width: 300px; background: linear-gradient(135deg, #1A1F26, #0A0C0F); 
+            border: 2px solid var(--acc); border-radius: 30px; padding: 40px 20px; text-align: center; 
+            box-shadow: 0 10px 40px rgba(0,255,204,0.1); cursor: pointer; transition: 0.2s; }
+        .chest-card:active { transform: scale(0.95); }
+        .chest-emoji { font-size: 80px; margin-bottom: 15px; display: block; filter: drop-shadow(0 0 10px var(--acc)); }
 
-        .card { aspect-ratio: 1/1.3; background: #1A1F26; border-radius: 10px; border: 1px solid #2D343D; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
-            padding: 10px 5px; position: relative; transition: 0.3s; }
-        
-        .card-num { position: absolute; top: 8px; right: 8px; font-size: 8px; font-weight: 800; color: var(--c); opacity: 0.8; }
-        .card-art { width: 50%; color: var(--c); position: relative; margin-top: 15px; }
-        .card-art i { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-style: normal; font-size: 18px; filter: grayscale(1); }
-        .card-label { font-size: 7.5px; font-weight: 700; text-align: center; height: 20px; color: #fff; }
+        /* Album Matrix */
+        .title-bar { font-family: 'Syncopate'; font-size: 12px; text-align: center; margin-bottom: 20px; color: var(--acc); }
+        .tier-row { margin-bottom: 20px; }
+        .tier-label { font-size: 9px; opacity: 0.4; font-family: 'Syncopate'; margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .card { aspect-ratio: 1/1.3; background: #181C23; border-radius: 12px; border: 1px solid #2D343D; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12px 5px; position: relative; }
+        .card-num { position: absolute; top: 8px; right: 8px; font-size: 7px; color: var(--c); font-weight: 800; }
+        .card-art { font-size: 32px; margin-top: 10px; }
+        .card-name { font-size: 7px; font-weight: 800; text-align: center; color: #fff; text-transform: uppercase; }
+        .owned { border-color: var(--c); box-shadow: 0 0 15px rgba(0, 255, 204, 0.05); }
+        .owned .card-name { color: var(--c); }
+        .locked { opacity: 0.2; filter: grayscale(1); }
 
-        /* Durumlar */
-        .owned { border-color: var(--c); box-shadow: 0 0 15px rgba(0, 255, 204, 0.05), inset 0 0 10px rgba(255,255,255,0.02); }
-        .owned .card-label { color: var(--c); }
-        .locked { opacity: 0.25; filter: grayscale(1); }
+        /* Wallet Page */
+        .wallet-card { background: var(--sur); border: 1px solid var(--bor); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .input-group { margin-top: 15px; }
+        .input-group label { font-size: 9px; color: #666; font-family: 'Syncopate'; display: block; margin-bottom: 8px; }
+        .input-group input { width: 100%; background: #000; border: 1px solid var(--bor); padding: 15px; border-radius: 12px; color: #fff; outline: none; box-sizing: border-box; }
+        .btn-pro { width: 100%; margin-top: 20px; background: var(--acc); color: #000; border: none; padding: 18px; border-radius: 12px; font-family: 'Syncopate'; font-size: 11px; font-weight: 800; }
 
         /* Nav */
-        .nav { height: 75px; background: #111418; border-top: 1px solid var(--bor); display: flex; justify-content: space-around; align-items: center; }
-        .n-btn { background: none; border: none; color: #555; font-family: 'Syncopate'; font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .nav { height: 75px; background: #0D0F13; border-top: 1px solid var(--bor); display: flex; justify-content: space-around; align-items: center; }
+        .n-btn { background: none; border: none; color: #444; font-family: 'Syncopate'; font-size: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .on { color: var(--acc); }
         .n-icon { font-size: 22px; }
 
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="app">
     <div class="head">
-        <div class="logo">FONIX<br><span style="font-size: 7px; opacity: 0.4;">MATRIX v511</span></div>
+        <div class="logo">FONIX<br><span style="font-size: 8px; color: var(--acc);">COLLECTOR</span></div>
         <div class="stats">
-            <div class="s-box"><label>USDT ASSETS</label>$<span id="u-v">0.00000</span></div>
-            <div class="s-box" style="border-bottom-color: #0088cc;"><label>TON NETWORK</label><span id="t-v" style="color:#0088cc">0.000000</span></div>
+            <div class="s-box"><label>USDT ASSETS</label>$<span class="u-val">0.00000</span></div>
+            <div class="s-box" style="border-bottom-color: var(--ton);"><label>TON NETWORK</label><span class="t-val" style="color:var(--ton)">0.000000</span></div>
         </div>
     </div>
 
     <div class="content">
-        <div id="home" class="page">
-            <div style="text-align:center; padding-top:100px;">
-                <div style="font-size:60px; margin-bottom:20px;">🎁</div>
-                <button onclick="tg.showAlert('Yakında!')" style="background:var(--acc); border:none; padding:15px 40px; border-radius:30px; font-family:'Syncopate'; font-weight:800;">OPEN CHEST</button>
+        <div id="home" class="page active">
+            <div class="main-hero">
+                <div class="chest-card" onclick="openChest()">
+                    <span class="chest-emoji">📦</span>
+                    <div style="font-family: 'Syncopate'; font-size: 18px; letter-spacing: 1px;">GIFT CHEST</div>
+                    <div style="font-size: 9px; opacity: 0.5; margin-top: 10px;">LIMIT: <span id="limit-count">0</span> / 50</div>
+                    <div style="width: 100%; height: 4px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden;">
+                        <div style="width: 40%; height: 100%; background: var(--acc);"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="album" class="page active">
-            <div class="title-line">ALBUM</div>
+        <div id="album" class="page">
+            <div class="title-bar">COLLECTION ALBUM</div>
             <div id="album-matrix"></div>
         </div>
 
-        <div id="cash" class="page">
-            <div class="title-line">CASH</div>
-            <div style="background:var(--sur); padding:20px; border-radius:15px; border:1px solid var(--bor);">
-                <input type="text" placeholder="Wallet Address" style="width:100%; background:#000; border:1px solid #333; padding:15px; border-radius:10px; color:#fff; outline:none;">
-                <button style="width:100%; margin-top:15px; background:var(--acc); padding:15px; border:none; border-radius:10px; font-family:'Syncopate';">WITHDRAW</button>
+        <div id="wallet" class="page">
+            <div class="wallet-card">
+                <label style="font-size: 8px; opacity: 0.5; font-family: 'Syncopate';">TOTAL BALANCE</label>
+                <div style="font-family: 'Syncopate'; font-size: 22px; margin-top: 5px; color: var(--acc);">$<span class="u-val">0.00000</span></div>
+            </div>
+            
+            <div class="wallet-card">
+                <div class="input-group">
+                    <label>TON WALLET ADDRESS</label>
+                    <input type="text" placeholder="UQdx..." spellcheck="false">
+                </div>
+                <div class="input-group">
+                    <label>AMOUNT TO WITHDRAW</label>
+                    <input type="number" placeholder="Min 10.00">
+                </div>
+                <button class="btn-pro" onclick="tg.showAlert('Minimum withdrawal is $10')">SEND TRANSACTION</button>
             </div>
         </div>
     </div>
 
     <div class="nav">
-        <button class="n-btn" onclick="switchTab('home', this)"><span class="n-icon">🏠</span>HOME</button>
-        <button class="n-btn on" onclick="switchTab('album', this)"><span class="n-icon">🚀</span>ALBUM</button>
-        <button class="n-btn" onclick="switchTab('cash', this)"><span class="n-icon">💰</span>CASH</button>
+        <button class="n-btn" onclick="switchTab('home', this)"><span class="n-icon">⚡</span><span>MINE</span></button>
+        <button class="n-btn" onclick="switchTab('album', this)"><span class="n-icon">🃏</span><span>CARDS</span></button>
+        <button class="n-btn" onclick="switchTab('wallet', this)"><span class="n-icon">💰</span><span>WALLET</span></button>
     </div>
 </div>
 
