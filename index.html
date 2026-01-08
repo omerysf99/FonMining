@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX GEP v507</title>
+    <title>FONIX MATRIX v508</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
@@ -27,13 +27,12 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
-        
-        const CARD_TYPES = [
-            { id: 'common', name: 'COM', color: '#888', chance: 70 },
+
+        const TIERS = [
+            { id: 'com', name: 'COMMON', color: '#888', chance: 70 },
             { id: 'epic', name: 'EPIC', color: '#a335ee', chance: 20 },
-            { id: 'legend', name: 'LEGD', color: '#ff8000', chance: 7 },
-            { id: 'secret', name: 'SCRT', color: '#ff00ff', chance: 2.5 },
-            { id: 'og', name: 'OG', color: '#00ffcc', chance: 0.5 }
+            { id: 'leg', name: 'LEGENDARY', color: '#ff8000', chance: 9.5 },
+            { id: 'og', name: 'OG SERIES', color: '#00ffcc', chance: 0.5 }
         ];
 
         let stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [] };
@@ -52,39 +51,59 @@
         function updateUI() {
             document.getElementById('usdt-val').innerText = stats.usdt.toFixed(5);
             document.getElementById('ton-val').innerText = stats.ton.toFixed(6);
-            document.getElementById('ad-count').innerText = stats.adsToday;
             
-            const grid = document.getElementById('card-grid');
-            grid.innerHTML = "";
-            CARD_TYPES.forEach(type => {
-                const hasCard = stats.inventory?.includes(type.id);
-                grid.innerHTML += `
-                    <div class="card-mini ${hasCard ? 'owned' : 'locked'}" style="--clr: ${type.color}">
-                        <div class="tier-tag">${type.name}</div>
-                        <div class="status-ico">${hasCard ? '💎' : '🔒'}</div>
-                    </div>
-                `;
+            const container = document.getElementById('matrix-container');
+            container.innerHTML = "";
+
+            TIERS.forEach(tier => {
+                let row = document.createElement('div');
+                row.className = 'tier-row';
+                row.innerHTML = `<div class="tier-label" style="color:${tier.color}">${tier.name}</div>`;
+                
+                let cardsDiv = document.createElement('div');
+                cardsDiv.className = 'cards-line';
+
+                for(let i=1; i<=3; i++) {
+                    const cardID = `${tier.id}_${i}`;
+                    const isOwned = stats.inventory?.includes(cardID);
+                    cardsDiv.innerHTML += `
+                        <div class="card-box ${isOwned ? 'active' : 'locked'}" style="--clr:${tier.color}">
+                            <div class="card-num">#${i}</div>
+                            <span>${isOwned ? '💎' : '🔒'}</span>
+                        </div>
+                    `;
+                }
+                row.appendChild(cardsDiv);
+                container.appendChild(row);
             });
         }
 
         window.openChest = () => {
             if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
             window.showAdexora().then(async () => {
-                let uRew = Math.random() < 0.8 ? (Math.random()*(0.0001-0.000007)+0.000007) : (Math.random()*(0.001-0.0001)+0.0001);
-                let tRew = Math.random()*(0.000007-0.000001)+0.000001;
-                let wonCard = null;
-                if(Math.random() < 0.001) {
+                let uRew = Math.random() < 0.8 ? (Math.random()*0.0001) : (Math.random()*0.001);
+                let tRew = Math.random()*0.000007;
+                
+                let wonID = null;
+                if(Math.random() < 0.005) { // Kart çıkma şansını %0.5'e çıkardım (Daha eğlenceli)
                     const roll = Math.random() * 100;
                     let cur = 0;
-                    for(let t of CARD_TYPES) { cur += t.chance; if(roll <= cur) { wonCard = t; break; } }
+                    let selectedTier = TIERS[0];
+                    for(let t of TIERS) { cur += t.chance; if(roll <= cur) { selectedTier = t; break; } }
+                    wonID = `${selectedTier.id}_${Math.floor(Math.random()*3)+1}`;
                 }
+
                 let newInv = stats.inventory || [];
-                if(wonCard && !newInv.includes(wonCard.id)) newInv.push(wonCard.id);
+                if(wonID && !newInv.includes(wonID)) newInv.push(wonID);
+
+                await updateDoc(doc(db, "users", myID), {
+                    usdt: increment(uRew), ton: increment(tRew),
+                    adsToday: increment(1), inventory: newInv
+                });
                 
-                await updateDoc(doc(db, "users", myID), { usdt: increment(uRew), ton: increment(tRew), adsToday: increment(1), inventory: newInv });
                 stats.usdt += uRew; stats.ton += tRew; stats.adsToday += 1; stats.inventory = newInv;
                 updateUI();
-                tg.showAlert(`Kazanılan: $${uRew.toFixed(5)} USDT & ${tRew.toFixed(6)} TON ${wonCard ? '\nNADİR KART BULDUN!' : ''}`);
+                tg.showAlert(`KAZANÇ:\n$${uRew.toFixed(5)} USDT\n${tRew.toFixed(6)} TON${wonID ? '\n\nYENİ KART BULDUN!' : ''}`);
             });
         };
 
@@ -99,83 +118,76 @@
     </script>
 
     <style>
-        :root { --main: #00ffcc; --bg: #0a0a0c; --glass: rgba(255,255,255,0.05); }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; user-select: none; }
-        .app-shell { height: 100vh; display: flex; flex-direction: column; padding: 15px; }
+        :root { --main: #00ffcc; --bg: #050508; --glass: rgba(255,255,255,0.03); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .app { height: 100vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
         
-        /* Bakiye Paneli */
-        .top-stats { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-box { flex: 1; background: var(--glass); padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); }
-        .stat-box label { font-size: 8px; opacity: 0.5; font-weight: 800; display: block; margin-bottom: 4px; }
-        .stat-box div { font-family: 'Syncopate'; font-size: 13px; color: var(--main); }
+        .top-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stat { flex: 1; background: var(--glass); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat small { font-size: 7px; opacity: 0.5; font-family: 'Syncopate'; }
+        .stat div { font-family: 'Syncopate'; font-size: 11px; color: var(--main); margin-top: 4px; }
 
-        .tab-page { display: none; flex: 1; }
-        .on { display: block; animation: scaleUp 0.2s ease; }
-        @keyframes scaleUp { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .on { display: block; }
 
-        /* Kartlar (Küçültülmüş) */
-        #card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .card-mini { 
-            aspect-ratio: 1/1.3; border-radius: 12px; border: 1px solid #222; 
+        /* Matriks Kart Tasarımı */
+        .tier-row { margin-bottom: 20px; background: rgba(255,255,255,0.01); padding: 10px; border-radius: 15px; }
+        .tier-label { font-family: 'Syncopate'; font-size: 9px; margin-bottom: 10px; letter-spacing: 1px; }
+        .cards-line { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        
+        .card-box { 
+            aspect-ratio: 1/1; border-radius: 12px; border: 1px solid #1a1a1a;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.3s; position: relative;
+            position: relative; overflow: hidden; transition: 0.3s;
         }
-        .locked { background: #111; opacity: 0.3; }
-        .owned { background: #1a1a1a; border-color: var(--clr); box-shadow: 0 0 10px var(--clr); }
-        .tier-tag { font-family: 'Syncopate'; font-size: 7px; color: var(--clr); }
-        .status-ico { font-size: 16px; margin-top: 5px; }
+        .locked { background: #0c0c0c; opacity: 0.2; }
+        .active { 
+            background: #111; border-color: var(--clr); 
+            box-shadow: inset 0 0 10px var(--clr), 0 0 10px var(--clr);
+        }
+        .card-num { position: absolute; top: 5px; left: 5px; font-size: 7px; font-weight: 800; opacity: 0.3; }
 
-        /* Sandık Butonu */
-        .chest-container { 
+        .big-chest { 
             background: linear-gradient(135deg, #111, #000); border: 2px solid var(--main);
-            border-radius: 24px; padding: 40px 20px; text-align: center; margin-top: 20px;
-            box-shadow: 0 10px 30px rgba(0,255,204,0.1);
+            border-radius: 20px; padding: 35px; text-align: center; margin: 10px 0;
         }
-        .chest-container:active { transform: translateY(4px); background: var(--main); color: #000; }
 
-        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(0,0,0,0.9); height: 70px; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #222; }
+        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #000; height: 65px; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #1a1a1a; }
         .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 8px; font-family: 'Syncopate'; }
         .on-nav { opacity: 1; color: var(--main); }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
-    <div class="top-stats">
-        <div class="stat-box">
-            <label>USDT ASSETS</label>
-            <div id="usdt-val">0.00000</div>
-        </div>
-        <div class="stat-box">
-            <label>TON NETWORK</label>
-            <div id="ton-val" style="color:#0088cc">0.000000</div>
-        </div>
+<div class="app">
+    <div class="top-bar">
+        <div class="stat"><small>USDT</small><div id="usdt-val">0.00000</div></div>
+        <div class="stat"><small>TON</small><div id="ton-val" style="color:#0088cc">0.000000</div></div>
     </div>
 
     <div id="home" class="tab-page on">
-        <div class="chest-container" onclick="openChest()">
-            <div style="font-size: 44px;">📦</div>
-            <div style="font-family: 'Syncopate'; font-size: 12px; margin-top: 10px;">GİFT CHEST OPEN</div>
-            <div style="font-size: 9px; opacity: 0.5; margin-top: 5px;">HAK: <span id="ad-count">0</span>/50</div>
+        <div class="big-chest" onclick="openChest()">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
+            <div style="font-family: 'Syncopate'; font-size: 13px;">GIFT CHEST</div>
+            <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">TAP TO EARN REWARDS</div>
         </div>
     </div>
 
     <div id="cards" class="tab-page">
-        <h4 style="font-family: 'Syncopate'; font-size: 10px; margin-bottom: 15px; opacity: 0.6;">COLLECTION</h4>
-        <div id="card-grid"></div>
+        <div id="matrix-container"></div>
     </div>
 
     <div id="wallet" class="tab-page">
-        <div class="stat-box" style="padding:20px; margin-top:10px;">
-            <label>WITHDRAW</label>
-            <input type="text" placeholder="TON Wallet Address" style="width:100%; background:none; border:none; color:#fff; font-size:14px; margin-top:10px; outline:none;">
-            <button onclick="tg.showAlert('Min 10 USDT')" style="width:100%; padding:15px; background:var(--main); border:none; border-radius:12px; margin-top:20px; font-family:'Syncopate'; font-size:10px;">PROCESS</button>
+        <div class="stat" style="padding:20px;">
+            <label style="font-size:9px; opacity:0.5; font-family:'Syncopate';">WITHDRAWAL</label>
+            <input type="text" placeholder="TON Address" style="width:100%; background:none; border:none; border-bottom:1px solid #333; color:#fff; padding:15px 0; outline:none;">
+            <button onclick="tg.showAlert('Min $10')" style="width:100%; padding:15px; background:var(--main); border:none; border-radius:10px; margin-top:20px; font-family:'Syncopate'; font-size:9px;">SUBMIT</button>
         </div>
     </div>
 
     <div class="nav">
-        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>OPEN</button>
-        <button class="nav-btn" onclick="switchTab('cards', this)">🃏<br>CARDS</button>
+        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>HOME</button>
+        <button class="nav-btn" onclick="switchTab('cards', this)">🃏<br>ALBUM</button>
         <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>CASH</button>
     </div>
 </div>
