@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hobbo Clicker Game</title>
+    <title>Hobbo Clicker</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #1a2a3a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
             color: white;
             display: flex;
             justify-content: center;
@@ -22,138 +22,116 @@
         #game-container {
             width: 100%;
             max-width: 400px;
-            height: 90vh;
-            background: linear-gradient(to bottom, #2c3e50, #000000);
-            border: 4px solid #34495e;
-            border-radius: 20px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #020617 100%);
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            border: 2px solid #334155;
         }
 
-        /* Üst Panel */
-        .stats-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        /* Skor ve Kazanç Paneli */
+        .top-stats {
+            margin-top: 30px;
+            text-align: center;
         }
 
-        .stat-item { text-align: center; }
-        .stat-value { font-weight: bold; color: #f1c40f; font-size: 1.2em; }
-        .stat-label { font-size: 0.8em; color: #bdc3c7; }
+        #coin-count {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
 
-        /* Karakter Alanı */
-        #character-area {
+        /* Karakter Alanı (TapLv1.jpg burada görünecek) */
+        #character-target {
             flex-grow: 1;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            width: 100%;
             cursor: pointer;
-            transition: transform 0.1s;
+            touch-action: manipulation;
         }
 
-        #character-area:active { transform: scale(0.95); }
-
-        .character-img {
-            width: 200px;
+        #character-img {
+            width: 280px; /* Karakterin boyutu */
             height: auto;
-            filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.3));
+            transition: transform 0.05s active;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+        }
+
+        #character-img:active {
+            transform: scale(0.92); /* Tıklayınca küçülme efekti */
         }
 
         /* Enerji Barı */
-        .energy-container {
-            width: 80%;
-            height: 25px;
-            background: #2c3e50;
-            border-radius: 15px;
-            margin: 20px 0;
-            position: relative;
-            border: 2px solid #7f8c8d;
+        .energy-wrapper {
+            width: 85%;
+            margin-bottom: 40px;
+        }
+
+        .energy-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: 14px;
+            background: #334155;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         #energy-fill {
+            width: 100%;
             height: 100%;
-            width: 100%;
-            background: linear-gradient(to right, #3498db, #2980b9);
-            border-radius: 12px;
-            transition: width 0.3s;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transition: width 0.1s linear;
         }
 
-        /* Alt Menü */
-        .bottom-nav {
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            background: #34495e;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-
-        /* Tıklama Efekti */
-        .plus-one {
+        /* Tıklama Efekti (+5 yazısı) */
+        .click-popup {
             position: absolute;
-            color: #f1c40f;
-            font-weight: bold;
-            animation: moveUp 0.8s ease-out forwards;
+            color: #fbbf24;
+            font-weight: 800;
+            font-size: 1.5rem;
             pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 100;
         }
 
-        @keyframes moveUp {
+        @keyframes floatUp {
             0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
+            100% { transform: translateY(-120px); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-label">Coin</div>
-            <div class="stat-value" id="coin-count">0</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Saatlik Kazanç</div>
-            <div class="stat-value" id="per-hour">+0</div>
-        </div>
+    <div class="top-stats">
+        <div id="coin-count">0</div>
+        <div style="color: #94a3b8;">+5 her tık</div>
     </div>
 
-    <div id="character-area">
-        <h2 id="total-display" style="font-size: 2.5em; margin-bottom: 10px;">0</h2>
-        <svg class="character-img" viewBox="0 0 100 120">
-            <circle cx="50" cy="40" r="20" fill="#e0ac69"/>
-            <rect x="35" y="60" width="30" height="50" fill="#5d4037"/>
-            <rect x="30" y="55" width="40" height="10" rx="5" fill="#333"/>
-        </svg>
+    <div id="character-target">
+        <img src="TapLv1.jpg" alt="Character" id="character-img" onerror="this.src='https://via.placeholder.com/280x400?text=TapLv1.jpg+Eksik'">
     </div>
 
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span>⚡</span>
-        <div class="energy-container">
+    <div class="energy-wrapper">
+        <div class="energy-info">
+            <span>⚡ Enerji</span>
+            <span id="energy-text">2000 / 2000</span>
+        </div>
+        <div class="energy-bar">
             <div id="energy-fill"></div>
         </div>
-        <span id="energy-text">2000 / 2000</span>
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-btn" onclick="buyUpgrade()">🚀 Geliştir<br>(100 Coin)</button>
-        <button class="nav-btn">👥 Arkadaşlar</button>
-        <button class="nav-btn">📋 Görevler</button>
     </div>
 </div>
 
@@ -161,73 +139,54 @@
     let coins = 0;
     let energy = 2000;
     const maxEnergy = 2000;
-    let clickValue = 5;
-    let autoIncome = 0;
+    const clickValue = 5;
 
     const coinDisplay = document.getElementById('coin-count');
-    const totalDisplay = document.getElementById('total-display');
     const energyFill = document.getElementById('energy-fill');
     const energyText = document.getElementById('energy-text');
-    const perHourDisplay = document.getElementById('per-hour');
-    const charArea = document.getElementById('character-area');
+    const charImg = document.getElementById('character-img');
+    const charTarget = document.getElementById('character-target');
 
-    // Tıklama Fonksiyonu
-    charArea.addEventListener('click', (e) => {
+    // Tıklama Olayı
+    charTarget.addEventListener('pointerdown', (e) => {
         if (energy >= clickValue) {
-            updateCoins(clickValue);
-            updateEnergy(-clickValue);
-            showClickEffect(e.clientX, e.clientY);
+            // Coin ekle
+            coins += clickValue;
+            coinDisplay.innerText = coins.toLocaleString();
+
+            // Enerji düşür
+            energy -= clickValue;
+            updateEnergyUI();
+
+            // Görsel efekt oluştur
+            createClickEffect(e.clientX, e.clientY);
         }
     });
 
-    function updateCoins(amount) {
-        coins += amount;
-        coinDisplay.innerText = Math.floor(coins).toLocaleString();
-        totalDisplay.innerText = Math.floor(coins).toLocaleString();
-    }
-
-    function updateEnergy(amount) {
-        energy = Math.min(maxEnergy, Math.max(0, energy + amount));
-        const percentage = (energy / maxEnergy) * 100;
-        energyFill.style.width = percentage + "%";
+    function updateEnergyUI() {
+        const percent = (energy / maxEnergy) * 100;
+        energyFill.style.width = percent + "%";
         energyText.innerText = `${Math.floor(energy)} / ${maxEnergy}`;
     }
 
-    // Tıklama Efekti (+5 yazısı)
-    function showClickEffect(x, y) {
-        const effect = document.createElement('div');
-        effect.className = 'plus-one';
-        effect.innerText = '+' + clickValue;
-        effect.style.left = x + 'px';
-        effect.style.top = y + 'px';
-        document.body.appendChild(effect);
-        setTimeout(() => effect.remove(), 800);
-    }
-
-    // Basit Geliştirme Sistemi
-    function buyUpgrade() {
-        if (coins >= 100) {
-            coins -= 100;
-            autoIncome += 10;
-            perHourDisplay.innerText = "+" + autoIncome;
-            updateCoins(0);
-            alert("Geliştirme Yapıldı! Saatlik kazanç arttı.");
-        } else {
-            alert("Yetersiz Coin!");
-        }
-    }
-
-    // Enerji Yenilenmesi ve Otomatik Kazanç (Her saniye)
-    setInterval(() => {
-        // Enerji her saniye 2 artar
-        updateEnergy(2);
+    function createClickEffect(x, y) {
+        const popup = document.createElement('div');
+        popup.className = 'click-popup';
+        popup.innerText = `+${clickValue}`;
+        popup.style.left = `${x - 20}px`;
+        popup.style.top = `${y - 40}px`;
+        document.body.appendChild(popup);
         
-        // Otomatik kazanç (saatlik kazancın saniyeye bölünmüş hali)
-        if (autoIncome > 0) {
-            updateCoins(autoIncome / 3600);
+        setTimeout(() => popup.remove(), 600);
+    }
+
+    // Enerji Yenilenmesi (Her saniye +3 enerji)
+    setInterval(() => {
+        if (energy < maxEnergy) {
+            energy = Math.min(maxEnergy, energy + 3);
+            updateEnergyUI();
         }
     }, 1000);
-
 </script>
 
 </body>
