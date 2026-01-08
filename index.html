@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Full UI</title>
+    <title>Bums Clicker - Original UI</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --bg-rgba: rgba(15, 23, 42, 0.9);
+            --panel-bg: rgba(15, 23, 42, 0.9);
         }
 
         body {
@@ -31,142 +31,140 @@
             display: flex; flex-direction: column;
         }
 
-        /* ÜST PANEL DÜZENLEMESİ */
-        .top-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
+        /* ÜST PANEL */
+        .top-nav {
+            display: flex; justify-content: space-between; align-items: center;
             padding: 10px 15px; z-index: 100;
         }
 
-        .user-info { display: flex; flex-direction: column; gap: 5px; }
-        .lvl-badge { 
-            background: rgba(0,0,0,0.6); border: 1px solid var(--accent-blue);
-            padding: 2px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold;
-        }
-        .lvl-progress { width: 60px; height: 6px; background: #334155; border-radius: 3px; margin-top: 3px; overflow: hidden; }
-        .lvl-fill { width: 35%; height: 100%; background: var(--accent-blue); }
+        .profile-box { display: flex; flex-direction: column; align-items: flex-start; }
+        .p-icon-wrap { position: relative; width: 50px; height: 50px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
+        .p-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .lvl-tag { position: absolute; bottom: 0; width: 100%; background: var(--accent-blue); font-size: 10px; text-align: center; }
+        .u-id { font-size: 10px; color: #94a3b8; margin-top: 5px; }
 
-        .header-stats { display: flex; gap: 8px; margin-top: 5px; }
-        .h-card { background: var(--bg-rgba); padding: 5px 15px; border-radius: 12px; text-align: center; min-width: 80px; border: 1px solid #1e293b; }
-        
-        .hamburger-menu { font-size: 1.5rem; cursor: pointer; padding-top: 5px; }
+        .stat-cards { display: flex; gap: 10px; }
+        .stat-card { background: var(--panel-bg); padding: 5px 12px; border-radius: 12px; text-align: center; min-width: 85px; border: 1px solid #1e293b; }
+        .stat-card div:first-child { font-size: 10px; color: #94a3b8; margin-bottom: 2px; }
+        .stat-card div:last-child { font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .coin-mini { width: 14px; height: 14px; border-radius: 50%; }
 
-        /* YAN MENÜLER (SOL VE SAĞ) */
-        .side-icons {
-            position: absolute; width: 100%; top: 100px;
+        .menu-btn { font-size: 24px; cursor: pointer; color: white; }
+
+        /* YAN MENÜLER */
+        .side-menu {
+            position: absolute; width: 100%; top: 90px;
             display: flex; justify-content: space-between;
             padding: 0 15px; pointer-events: none; z-index: 90;
         }
-        .side-col { display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
-        .icon-btn { width: 55px; text-align: center; font-size: 0.6rem; font-weight: bold; }
-        .icon-btn img { width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 2px; }
+        .side-col { display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
+        .s-item { width: 65px; text-align: center; font-size: 9px; font-weight: bold; }
+        .s-item img { width: 100%; border-radius: 12px; margin-bottom: 3px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
         /* ANA OYUN ALANI */
-        .play-stage {
+        .main-view {
             flex-grow: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             position: relative;
         }
 
-        .score-box { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .score-box img { width: 35px; }
-        .score-box span { font-size: 3rem; font-weight: 900; }
+        .main-score { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .main-score img { width: 35px; }
+        .main-score span { font-size: 3.2rem; font-weight: 900; letter-spacing: -1px; }
 
-        /* TAPLV1 GÖRSELİ (KÜÇÜK VE SABİT) */
-        #hero-character {
-            width: 190px;
-            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        /* TAPLV1 KÜÇÜLTÜLDÜ VE SABİT */
+        #hero {
+            width: 170px; /* Görsel küçültüldü */
             cursor: pointer;
-            transition: brightness 0.1s;
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.4));
+            transition: filter 0.1s;
         }
-        #hero-character:active { brightness: 1.2; }
+        #hero:active { filter: brightness(1.2); }
 
-        /* SOL ALT NOTCOIN */
-        .notcoin-glow {
-            position: absolute; left: 20px; bottom: 35px;
-            width: 85px; filter: drop-shadow(0 0 15px var(--gold));
-        }
+        .coin-glow { position: absolute; left: 20px; bottom: 25px; width: 90px; filter: drop-shadow(0 0 20px var(--gold)); }
 
         /* ALT PANEL */
         .bottom-ui {
-            background: rgba(15, 23, 42, 0.95);
-            padding: 15px 15px 25px 15px; border-top: 1px solid #1e293b;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 12px 15px 30px 15px; border-top: 1px solid #1e293b;
             z-index: 100;
         }
 
-        .energy-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .energy-text { font-weight: bold; font-size: 1rem; }
-        .per-tap-text { color: #94a3b8; font-size: 0.8rem; }
+        .e-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .e-text { font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 5px; }
+        .p-tap { color: #94a3b8; font-size: 12px; }
 
-        .energy-bar-bg { background: #1e293b; height: 14px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        #energy-bar-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.1s; }
+        .e-bar-bg { background: #1e293b; height: 16px; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; }
+        #e-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.1s; }
 
-        .nav-footer { display: flex; justify-content: space-around; }
-        .nav-btn { text-align: center; color: #94a3b8; font-size: 0.75rem; flex: 1; cursor: pointer; }
-        .nav-btn img { width: 45px; height: 45px; display: block; margin: 0 auto 5px; border-radius: 10px; }
-        .nav-btn.active { color: white; font-weight: bold; }
+        .nav-tabs { display: flex; justify-content: space-around; }
+        .tab { text-align: center; color: #94a3b8; font-size: 10px; flex: 1; cursor: pointer; }
+        .tab img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 10px; }
+        .tab.active { color: white; font-weight: bold; }
+        .tab.active img { border: 2px solid var(--gold); }
 
-        .pop-val { position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem; pointer-events: none; animation: riseUp 0.6s forwards; }
-        @keyframes riseUp { to { transform: translateY(-100px); opacity: 0; } }
+        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem; pointer-events: none; animation: rise 0.6s forwards; z-index: 200; }
+        @keyframes rise { to { transform: translateY(-110px); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="top-header">
-        <div class="user-info">
-            <div class="lvl-badge">Lv.1</div>
-            <div class="lvl-progress"><div class="lvl-fill"></div></div>
-            <div style="font-size: 0.7rem; font-weight: bold; margin-top: 2px;">V.Albayra...</div>
-        </div>
-        <div class="header-stats">
-            <div class="h-card">
-                <div style="font-size:0.5rem; color:#94a3b8;">Coin</div>
-                <div id="top-coin" style="color:var(--gold); font-weight:bold;">0</div>
+    <div class="top-nav">
+        <div class="profile-box">
+            <div class="p-icon-wrap">
+                <img src="TapLv1.jpg">
+                <div class="lvl-tag">Lv.1</div>
             </div>
-            <div class="h-card">
-                <div style="font-size:0.5rem; color:#94a3b8;">Per hour</div>
-                <div style="color:#10b981; font-weight:bold;">+0</div>
+            <div class="u-id">ID: 8392479231</div>
+        </div>
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div>Coin</div>
+                <div><img src="Notcoin.jpg" class="coin-mini"><span id="c-val">0</span></div>
+            </div>
+            <div class="stat-card">
+                <div>Per hour</div>
+                <div style="color:#10b981;">+0</div>
             </div>
         </div>
-        <div class="hamburger-menu">☰</div>
+        <div class="menu-btn">☰</div>
     </div>
 
-    <div class="side-icons">
+    <div class="side-menu">
         <div class="side-col">
-            <div class="icon-btn"><img src="Jgang.jpg">JOIN GANG</div>
-            <div class="icon-btn"><img src="TapEarn.jpg">8h 0m</div>
-            <div class="icon-btn"><img src="Airdrop.jpg">Airdrop</div>
+            <div class="s-item"><img src="Jgang.jpg">JOIN GANG</div>
+            <div class="s-item"><img src="TapEarn.jpg">8h 0m</div>
+            <div class="s-item"><img src="Airdrop.jpg">Airdrop</div>
         </div>
         <div class="side-col">
-            <div class="icon-btn"><img src="AutoTap.jpg">Auto tap</div>
-            <div class="icon-btn" style="width: 75px;"><img src="Nft.jpg"></div>
-            <div class="icon-btn" style="width: 70px; margin-top: 10px;"><img src="Task.jpg"></div>
+            <div class="s-item"><img src="AutoTap.jpg">Auto tap</div>
+            <div class="s-item" style="width: 75px;"><img src="Nft.jpg"></div>
+            <div class="s-item" style="width: 75px; margin-top: 10px;"><img src="Task.jpg"></div>
         </div>
     </div>
 
-    <div class="play-stage" id="tap-target">
-        <div class="score-box">
+    <div class="main-view" id="click-zone">
+        <div class="main-score">
             <img src="Notcoin.jpg" style="border-radius: 50%;">
-            <span id="main-score">0</span>
+            <span id="score">0</span>
         </div>
-        
-        <img src="TapLv1.jpg" id="hero-character" alt="Hero">
-        
-        <img src="Notcoin.jpg" class="notcoin-glow">
+        <img src="TapLv1.jpg" id="hero" alt="Hero">
+        <img src="Notcoin.jpg" class="coin-glow">
     </div>
 
     <div class="bottom-ui">
-        <div class="energy-status">
-            <div class="energy-text">⚡ <span id="e-val">2000</span> / 2000</div>
-            <div class="per-tap-text">🟡 +5 Per tap</div>
+        <div class="e-info">
+            <div class="e-text">⚡ <span id="e-num">2000</span> / 2000</div>
+            <div class="p-tap">🟡 +5 Per tap</div>
         </div>
-        <div class="energy-bar-bg"><div id="energy-bar-fill"></div></div>
+        <div class="e-bar-bg"><div id="e-fill"></div></div>
 
-        <div class="nav-footer">
-            <div class="nav-btn active"><img src="Notcoin.jpg">Play</div>
-            <div class="nav-btn"><img src="Upgrade.jpg">Upgrade</div>
-            <div class="nav-btn"><img src="friends.jpg">Friends</div>
-            <div class="nav-btn"><img src="Task.jpg">Tasks</div>
+        <div class="nav-tabs">
+            <div class="tab active"><img src="Notcoin.jpg">Play</div>
+            <div class="tab"><img src="Upgrade.jpg">Upgrade</div>
+            <div class="tab"><img src="friends.jpg">Friends</div>
+            <div class="tab"><img src="Task.jpg">Tasks</div>
         </div>
     </div>
 </div>
@@ -176,34 +174,30 @@
     let energy = 2000;
     let power = 5;
 
-    const mainScore = document.getElementById('main-score');
-    const topCoin = document.getElementById('top-coin');
-    const eBar = document.getElementById('energy-bar-fill');
-    const eText = document.getElementById('e-val');
+    const scoreEl = document.getElementById('score');
+    const cValEl = document.getElementById('c-val');
+    const eFill = document.getElementById('e-fill');
+    const eNum = document.getElementById('e-num');
 
-    document.getElementById('tap-target').addEventListener('pointerdown', (e) => {
+    document.getElementById('click-zone').addEventListener('pointerdown', (e) => {
         if (energy >= power) {
             coins += power;
             energy -= power;
             updateUI();
-            createPop(e.clientX, e.clientY);
+            
+            const p = document.createElement('div');
+            p.className = 'pop'; p.innerText = `+${power}`;
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
         }
     });
 
     function updateUI() {
-        mainScore.innerText = Math.floor(coins).toLocaleString();
-        topCoin.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
-        eBar.style.width = (energy / 2000 * 100) + "%";
-        eText.innerText = Math.floor(energy);
-    }
-
-    function createPop(x, y) {
-        const p = document.createElement('div');
-        p.className = 'pop-val';
-        p.innerText = `+${power}`;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 600);
+        scoreEl.innerText = Math.floor(coins).toLocaleString();
+        cValEl.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
+        eFill.style.width = (energy / 2000 * 100) + "%";
+        eNum.innerText = Math.floor(energy);
     }
 
     setInterval(() => {
