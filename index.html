@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fonix Mining 2026</title>
+    <title>Fonix Mining 2026 Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
@@ -24,11 +24,10 @@
         tg.expand();
 
         const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231"; // Default olarak senin ID'n
-        const myName = user?.username || user?.first_name || "User";
-        const botUser = "FonixMining2026Bot";
-
-        let stats = { usdt: 0, kls: 0, hasUsedCode: false };
+        const myID = user?.id ? user.id.toString() : "8392479231"; 
+        const myName = user?.username || user?.first_name || "FonixUser";
+        
+        let stats = { usdt: 0, kls: 0, completedTasks: [] };
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -37,23 +36,13 @@
             if (snap.exists()) {
                 stats = snap.data();
             } else {
-                const startParam = tg.initDataUnsafe?.start_param || "";
                 stats = { 
-                    usdt: 0, kls: 0, hasUsedCode: startParam !== "", 
-                    username: myName, invitedBy: startParam 
+                    usdt: 0, kls: 0, completedTasks: [],
+                    username: myName, invitedBy: tg.initDataUnsafe?.start_param || "" 
                 };
                 await setDoc(userRef, stats);
-                
-                // Eğer linkle (start_param) geldiyse davet edene ödül ver
-                if(startParam && startParam !== myID) {
-                    const inviterRef = doc(db, "users", startParam);
-                    const inviterSnap = await getDoc(inviterRef);
-                    if(inviterSnap.exists()) {
-                        await updateDoc(inviterRef, { usdt: increment(0.05) });
-                        // Kendisine de hoşgeldin ödülü
-                        await updateDoc(userRef, { usdt: increment(0.05) });
-                        stats.usdt += 0.05;
-                    }
+                if(stats.invitedBy && stats.invitedBy !== myID) {
+                    await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.05) });
                 }
             }
             updateUI();
@@ -62,83 +51,70 @@
 
         function updateUI() {
             document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
-            document.querySelectorAll('.ui-kls').forEach(e => e.innerText = stats.kls.toFixed(2));
-            document.getElementById('display-my-id').innerText = myID;
-            document.getElementById('ref-link').innerText = `https://t.me/${botUser}?start=${myID}`;
+            document.getElementById('ref-link').innerText = `https://t.me/FonixMining2026Bot?start=${myID}`;
             
-            if (stats.hasUsedCode) {
-                document.getElementById('code-input-area').innerHTML = `<div class="status-ok">Davet Sistemi Aktif ✅</div>`;
-            }
+            // Görev Durumlarını Güncelle
+            stats.completedTasks.forEach(taskId => {
+                const btn = document.getElementById('btn-' + taskId);
+                if(btn) {
+                    btn.innerText = "DONE ✅";
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                }
+            });
         }
 
-        // --- REFERANS KODU (ID) GİRME ---
+        // --- GÖREV SİSTEMİ ---
+        window.doTask = async (taskId, reward, url) => {
+            if(stats.completedTasks.includes(taskId)) return;
+            
+            window.open(url, '_blank');
+            
+            setTimeout(async () => {
+                const userRef = doc(db, "users", myID);
+                await updateDoc(userRef, { 
+                    usdt: increment(reward),
+                    completedTasks: [...stats.completedTasks, taskId]
+                });
+                stats.usdt += reward;
+                stats.completedTasks.push(taskId);
+                updateUI();
+                tg.showAlert(`Tebrikler! ${reward}$ kazandın.`);
+            }, 2000);
+        };
+
+        // --- REFERANS KODU GİRİŞİ ---
         window.applyCode = async () => {
-            const input = document.getElementById('invite-input');
-            const code = input.value.trim();
-            const card = document.getElementById('ref-card');
+            const code = document.getElementById('invite-input').value.trim();
+            if(!code || stats.invitedBy) return;
+            
+            const targetRef = doc(db, "users", code);
+            const targetSnap = await getDoc(targetRef);
 
-            if (!code || stats.hasUsedCode) return;
-            if (code === myID) return showMsg('error', 'Kendi ID\'ni giremezsin!', card);
-
-            try {
-                const targetRef = doc(db, "users", code);
-                const targetSnap = await getDoc(targetRef);
-
-                if (targetSnap.exists()) {
-                    await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), hasUsedCode: true, invitedBy: code });
-                    await updateDoc(targetRef, { usdt: increment(0.05) });
-                    stats.usdt += 0.05; stats.hasUsedCode = true;
-                    updateUI();
-                    showMsg('success', 'Tebrikler! Ödül tanımlandı.', card);
-                } else {
-                    showMsg('error', 'Bu ID\'ye sahip kullanıcı bulunamadı!', card);
-                }
-            } catch(e) {
-                showMsg('error', 'Bir hata oluştu!', card);
+            if(targetSnap.exists()) {
+                await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), invitedBy: code });
+                await updateDoc(targetRef, { usdt: increment(0.05) });
+                stats.usdt += 0.05; stats.invitedBy = code;
+                updateUI();
+                tg.showAlert("Ödül tanımlandı!");
+            } else {
+                tg.showAlert("Geçersiz ID!");
             }
         };
 
+        // --- ÇEKİM ---
         window.requestWithdraw = async () => {
             const amt = parseFloat(document.getElementById('w-amt').value);
-            const adr = document.getElementById('w-adr').value.trim();
-            const card = document.getElementById('w-card');
-
-            if (amt < 10 || isNaN(amt)) return showMsg('error', 'Minimum çekim $10.00!', card);
-            if (adr.length < 10) return showMsg('error', 'Geçersiz cüzdan adresi!', card);
-            if (amt > stats.usdt) return showMsg('error', 'Yetersiz bakiye!', card);
-
-            try {
-                await addDoc(collection(db, "withdrawals"), { userId: myID, amount: amt, address: adr, status: "pending", date: new Date().toISOString() });
-                await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
-                stats.usdt -= amt; 
-                updateUI();
-                showMsg('success', 'Talebiniz başarıyla iletildi!', card);
-            } catch(e) {
-                showMsg('error', 'İşlem başarısız!', card);
-            }
+            if(amt > stats.usdt || amt < 10) return tg.showAlert("Yetersiz bakiye veya min 10$");
+            await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
+            stats.usdt -= amt; updateUI();
+            tg.showAlert("Talep gönderildi!");
         };
-
-        function showMsg(type, msg, el) {
-            tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success');
-            el.classList.add(type === 'error' ? 'shake' : 'bounce');
-            tg.showAlert(msg);
-            setTimeout(() => el.classList.remove('shake', 'bounce'), 600);
-        }
 
         async function loadFriends() {
             const q = query(collection(db, "users"), where("invitedBy", "==", myID));
             const snap = await getDocs(q);
-            const list = document.getElementById('f-list');
-            list.innerHTML = "";
             document.getElementById('f-count').innerText = snap.size;
-            if(snap.empty) {
-                list.innerHTML = `<div style="text-align:center; opacity:0.3; padding:10px;">Henüz kimse yok.</div>`;
-                return;
-            }
-            snap.forEach(d => {
-                const data = d.data();
-                list.innerHTML += `<div class="f-item"><span>@${data.username || 'Gizli'}</span><b>+$0.05</b></div>`;
-            });
         }
 
         window.showTab = (t, b) => {
@@ -151,78 +127,80 @@
         window.onload = init;
     </script>
     <style>
-        :root { --p: #6c5ce7; --y: #f7d348; --d: #080810; --c: rgba(255,255,255,0.05); }
+        :root { --p: #6c5ce7; --y: #f7d348; --d: #0a0a12; --c: rgba(255,255,255,0.06); }
         body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; user-select: none; }
         #app { height: 100vh; display: flex; flex-direction: column; }
-        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
-        .active { display: flex; }
-        .card { background: var(--c); border-radius: 20px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
-        .main-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; text-align: center; box-shadow: 0 8px 25px rgba(108, 92, 231, 0.2); }
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; }
-        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
+        .active { display: flex; flex-direction: column; }
+        .card { background: var(--c); border-radius: 18px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); }
+        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .btn-y { background: var(--y); color: #000; }
-        .shake { animation: shake 0.5s; border-color: #ff4757 !important; }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
-        .bounce { animation: bounce 0.5s; border-color: #2ed573 !important; }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; cursor: pointer; }
-        .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); }
-        .n-icon { font-size: 22px; display: block; margin-bottom: 5px; }
-        .f-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
-        .status-ok { color: #2ed573; font-weight: bold; text-align: center; padding: 10px; background: rgba(46,213,115,0.1); border-radius: 10px; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin: 8px 0; box-sizing: border-box; }
+        .nav { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; }
+        .n-on { opacity: 1; color: var(--y); }
+        .t-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="p-home" class="page active">
-        <div style="text-align: center; margin: 30px 0;">
-            <img src="koalasmining.jpg" style="width: 100px; border-radius: 50%; border: 3px solid var(--y);">
-            <h1 style="margin: 10px 0 0 0; letter-spacing: 1px;">FONIX HUB</h1>
-            <p style="opacity: 0.4; font-size: 12px;">Admin ID: <span id="display-my-id">...</span></p>
+        <div style="text-align: center; margin: 20px 0;">
+            <img src="koalasmining.jpg" style="width: 80px; border-radius: 50%; border: 3px solid var(--y);">
+            <h2>FONIX MINING</h2>
         </div>
-        <div class="card main-card">
-            <small style="opacity: 0.8; font-weight: bold;">AVAILABLE BALANCE</small>
-            <h1 style="font-size: 44px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
-            <div style="opacity: 0.9; font-size: 14px;">🪙 <span class="ui-kls">0.00</span> KLS Token</div>
+        <div class="card" style="background: linear-gradient(135deg, var(--p), #3b2fad); text-align: center;">
+            <small>BAKİYE</small>
+            <h1 style="font-size: 38px; margin: 5px 0;">$<span class="ui-usdt">0.0000</span></h1>
+        </div>
+    </div>
+
+    <div id="p-tasks" class="page">
+        <h2>Görevler</h2>
+        <div class="card">
+            <div class="t-row">
+                <div><b>X Takip Et</b><br><small>+$0.10</small></div>
+                <button id="btn-task_x" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_x', 0.10, 'https://x.com/koalas')">YAP</button>
+            </div>
+            <div class="t-row">
+                <div><b>Telegram Kanalı</b><br><small>+$0.05</small></div>
+                <button id="btn-task_tg" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_tg', 0.05, 'https://t.me/kanaliniz')">KATIL</button>
+            </div>
+            <div class="t-row">
+                <div><b>Günlük Bonus</b><br><small>+$0.01</small></div>
+                <button id="btn-task_daily" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_daily', 0.01, '#')">AL</button>
+            </div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2 style="margin-top:0;">Referral</h2>
-        <div class="card" id="ref-card">
-            <div id="code-input-area">
-                <small style="color:var(--y); font-weight:bold;">ENTER FRIEND'S ID ($0.05)</small>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="text" id="invite-input" placeholder="Referral ID..." style="margin:0;">
-                    <button class="btn btn-y" style="width:auto; padding:0 20px;" onclick="applyCode()">GO</button>
-                </div>
-            </div>
+        <h2>Referans</h2>
+        <div class="card">
+            <small>SENİN ID: <span id="display-my-id"></span></small>
+            <div id="ref-link" style="font-size: 10px; opacity: 0.5; margin: 5px 0;"></div>
+            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); alert('Kopyalandı!')">LİNKİ KOPYALA</button>
         </div>
         <div class="card">
-            <small style="font-weight:bold; color:var(--p);">YOUR INVITE LINK</small>
-            <div id="ref-link" style="font-size:10px; background:#000; padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; color:#888;">...</div>
-            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Copied!')">COPY LINK</button>
+            <input type="text" id="invite-input" placeholder="Arkadaşının ID'sini Gir">
+            <button class="btn btn-y" onclick="applyCode()">KODU KULLAN</button>
         </div>
-        <h3 style="margin-left:5px;">Network (<span id="f-count">0</span>)</h3>
-        <div id="f-list"></div>
+        <div style="text-align: center; opacity: 0.6;">Davet Edilen: <span id="f-count">0</span></div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2 style="margin-top:0;">Wallet</h2>
-        <div class="card" id="w-card">
-            <h3 style="margin-top:0;">Withdrawal</h3>
-            <input type="number" id="w-amt" placeholder="Amount (Min $10.00)">
-            <input type="text" id="w-adr" placeholder="TON or USDT Address">
-            <button class="btn btn-y" onclick="requestWithdraw()">SEND REQUEST</button>
+        <h2>Cüzdan</h2>
+        <div class="card">
+            <input type="number" id="w-amt" placeholder="Miktar (Min 10$)">
+            <input type="text" placeholder="Cüzdan Adresi">
+            <button class="btn btn-y" onclick="requestWithdraw()">ÇEKİM TALEBİ</button>
         </div>
-        <p style="font-size:11px; opacity:0.4; text-align:center;">Withdrawals are processed within 24 hours.</p>
     </div>
 
     <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('home', this)"><span class="n-icon">🏠</span>Home</button>
-        <button class="n-btn" onclick="showTab('friends', this)"><span class="n-icon">👥</span>Friends</button>
-        <button class="n-btn" onclick="showTab('wallet', this)"><span class="n-icon">💰</span>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('home', this)">🏠<br>Home</button>
+        <button class="n-btn" onclick="showTab('tasks', this)">✅<br>Tasks</button>
+        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Friends</button>
+        <button class="n-btn" onclick="showTab('wallet', this)">💰<br>Wallet</button>
     </nav>
 </div>
 </body>
