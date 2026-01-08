@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Pro Edition</title>
+    <title>FonixApp v1300 - Referral Boosted</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     
@@ -11,7 +11,6 @@
     <script type="text/javascript">
         let adexiumWidget;
         document.addEventListener('DOMContentLoaded', () => {
-            // Yeni WID: d0ca8f05-2b16-4290-b24a-81d2e62a5db2
             adexiumWidget = new AdexiumWidget({
                 wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
                 adFormat: 'interstitial'
@@ -44,10 +43,9 @@
         const myPhoto = user?.photo_url || `https://ui-avatars.com/api/?name=${myUsername}&background=7b66ff&color=fff`;
 
         let stats = { balance: 0.0, completedTasks: [], invitedBy: "" };
-        
-        // AYARLAR
         const SEC_REWARD = 0.000002; 
         const AD_INTERVAL = 20;
+        const REF_BONUS = 0.10; // Yeni referans ödülü
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -59,20 +57,56 @@
                 stats = { balance: 0.0, invitedBy: "", completedTasks: [], username: myUsername, photo: myPhoto };
                 await setDoc(userRef, stats);
                 
+                // Link ile geldiyse otomatik işle
                 const startParam = tg.initDataUnsafe?.start_param;
                 if (startParam && startParam !== myID) {
-                    await updateDoc(doc(db, "users", myID), { invitedBy: startParam, balance: increment(0.05) });
-                    await updateDoc(doc(db, "users", startParam), { balance: increment(0.05) });
+                    await applyReferral(startParam);
                 }
             }
+            
+            checkReferralStatus();
             updateUI();
             renderTasks();
             loadFriends();
         }
 
-        // --- MINING ENGINE ---
-        let miningInterval, sessionEarned = 0, secondsActive = 0;
+        // --- REFERANS SİSTEMİ ---
+        function checkReferralStatus() {
+            if (!stats.invitedBy || stats.invitedBy === "") {
+                document.getElementById('ref-modal').style.display = 'flex';
+            }
+        }
 
+        window.submitReferral = async () => {
+            const code = document.getElementById('referral-code-input').value.trim();
+            if (!code || code === myID) {
+                alert("Geçersiz kod!");
+                return;
+            }
+            const success = await applyReferral(code);
+            if (success) {
+                document.getElementById('ref-modal').style.display = 'none';
+                tg.showPopup({ message: `Referans onaylandı! $${REF_BONUS} kazandınız.` });
+                location.reload();
+            } else {
+                alert("Kullanıcı bulunamadı!");
+            }
+        };
+
+        async function applyReferral(code) {
+            const inviterRef = doc(db, "users", code);
+            const inviterSnap = await getDoc(inviterRef);
+            
+            if (inviterSnap.exists()) {
+                await updateDoc(doc(db, "users", myID), { invitedBy: code, balance: increment(REF_BONUS) });
+                await updateDoc(inviterRef, { balance: increment(REF_BONUS) });
+                return true;
+            }
+            return false;
+        }
+
+        // --- MINING ---
+        let miningInterval, sessionEarned = 0, secondsActive = 0;
         window.toggleMining = () => {
             const btn = document.getElementById('main-action-btn');
             if (btn.innerText === "START MINING") {
@@ -83,7 +117,6 @@
         };
 
         function startMining() {
-            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('nav-bar').style.opacity = "0.3";
             document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
             document.getElementById('main-action-btn').style.background = "#ff4757";
@@ -95,48 +128,24 @@
             miningInterval = setInterval(() => {
                 sessionEarned += SEC_REWARD;
                 secondsActive++;
-                
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
-                
-                // 20 Saniyede Bir Reklam Spamla
-                if (secondsActive % AD_INTERVAL === 0) {
-                    console.log("Auto Ad Triggered");
-                    if(adexiumWidget) adexiumWidget.show();
-                }
-                
-                let nextAd = AD_INTERVAL - (secondsActive % AD_INTERVAL);
-                document.getElementById('ad-timer').innerText = nextAd + "s";
+                if (secondsActive % AD_INTERVAL === 0 && adexiumWidget) adexiumWidget.show();
+                document.getElementById('ad-timer').innerText = (AD_INTERVAL - (secondsActive % AD_INTERVAL)) + "s";
             }, 1000);
         }
 
         async function stopMining() {
             clearInterval(miningInterval);
-            const anim = document.getElementById('reward-anim');
             document.getElementById('earned-final').innerText = "+" + sessionEarned.toFixed(6);
-            anim.style.display = 'flex';
-
+            document.getElementById('reward-anim').style.display = 'flex';
             stats.balance += sessionEarned;
             await updateDoc(doc(db, "users", myID), { balance: stats.balance });
-
-            setTimeout(() => {
-                anim.style.display = 'none';
-                resetMiningUI();
-                updateUI();
-            }, 2500);
-        }
-
-        function resetMiningUI() {
-            document.getElementById('nav-bar').style.opacity = "1";
-            document.getElementById('main-action-btn').innerText = "START MINING";
-            document.getElementById('main-action-btn').style.background = "var(--g)";
-            document.getElementById('mining-fan-outer').classList.remove('active-spin');
-            document.getElementById('session-val').innerText = "0.000000";
-            document.getElementById('ad-timer').innerText = "20s";
+            setTimeout(() => { location.reload(); }, 2000);
         }
 
         // --- UI & TABS ---
         function updateUI() {
-            document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(5));
+            document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(4));
             document.getElementById('user-pic').src = myPhoto;
             document.getElementById('user-name').innerText = "@" + myUsername;
             document.getElementById('my-id-display').innerText = myID;
@@ -151,24 +160,15 @@
 
         function renderTasks() {
             const container = document.getElementById('task-list');
-            container.innerHTML = `
-                <div class="card">
-                    <div style="flex:1"><b>Follow Official Channel</b><br><small>$0.05</small></div>
-                    <button class="s-btn" onclick="doTask('tg_ch', 0.05, 'https://t.me/FonixCommunity')">GO</button>
-                </div>
-                <div class="card">
-                    <div style="flex:1"><b>Daily Video Reward</b><br><small>$0.01</small></div>
-                    <button class="s-btn" onclick="doTask('daily_ad', 0.01, 'ad')">WATCH</button>
-                </div>
-            `;
+            container.innerHTML = `<div class="card"><div style="flex:1"><b>Official Channel</b><br><small>$0.05</small></div><button class="s-btn" onclick="doTask('tg', 0.05, 'https://t.me/FonixCommunity')">GO</button></div>`;
         }
 
         window.doTask = async (id, rew, url) => {
-            if (url === 'ad') { adexiumWidget.show(); } else { tg.openLink(url); }
+            tg.openLink(url);
             setTimeout(async () => {
                 await updateDoc(doc(db, "users", myID), { balance: increment(rew), completedTasks: arrayUnion(id) });
                 location.reload();
-            }, 6000);
+            }, 5000);
         };
 
         async function loadFriends() {
@@ -186,7 +186,7 @@
         window.copyRef = () => {
             const link = `https://t.me/FonixMining2026Bot?start=${myID}`;
             navigator.clipboard.writeText(link);
-            tg.showPopup({ message: "Referral link copied!" });
+            tg.showPopup({ message: "Davet linki kopyalandı!" });
         };
 
         window.onload = init;
@@ -212,6 +212,11 @@
         .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; padding-bottom: 5px; }
         .ni { opacity: 0.4; text-align: center; cursor: pointer; font-size: 11px; font-weight: bold; }
         .active-nav { opacity: 1; color: var(--p); }
+        
+        /* Modal Style */
+        #ref-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; display:none; flex-direction:column; justify-content:center; align-items:center; padding:30px; text-align:center; }
+        #ref-modal input { background:#111; border:1px solid #333; color:#fff; padding:15px; width:100%; border-radius:15px; margin:20px 0; text-align:center; font-size:18px; }
+        
         #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -219,20 +224,26 @@
 <body>
 
 <div id="app">
+    <div id="ref-modal">
+        <h2 style="color:var(--g)">HOŞ GELDİN!</h2>
+        <p>Seni kim davet etti? Davet kodu girerek anında <b>$0.10</b> kazanabilirsin.</p>
+        <input type="number" id="referral-code-input" placeholder="Davet Kodunu Yaz">
+        <button class="btn" onclick="submitReferral()">ÖDÜLÜ AL</button>
+        <p onclick="document.getElementById('ref-modal').style.display='none'" style="margin-top:20px; opacity:0.5; font-size:12px;">Kodum yok, geç.</p>
+    </div>
+
     <div class="header">
         <div style="display: flex; align-items: center; gap: 8px;">
             <img id="user-pic" src="" style="width: 30px; border-radius: 50%;">
             <span id="user-name" style="font-weight: bold; font-size: 13px;">-</span>
         </div>
-        <div class="balance-badge">🪙 $<span class="bal-val">0.00000</span></div>
+        <div class="balance-badge">🪙 $<span class="bal-val">0.0000</span></div>
     </div>
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
             <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <div style="background:rgba(123,102,255,0.1); display:inline-block; padding:5px 15px; border-radius:10px;">
-                <small>AUTO AD IN: <b id="ad-timer">20s</b></small>
-            </div>
+            <small>AD IN: <b id="ad-timer">20s</b></small>
         </div>
         <div class="mining-circle">
             <div id="mining-fan-outer" class="fan-outer"></div>
@@ -242,38 +253,38 @@
     </div>
 
     <div id="tab-tasks" class="p">
-        <h2>Quests</h2>
+        <h2>Görevler</h2>
         <div id="task-list"></div>
     </div>
 
     <div id="tab-friends" class="p">
         <h2>Network (<span id="friend-count">0</span>)</h2>
         <div class="card" style="justify-content: space-between; background: linear-gradient(90deg, #1a1a2e, #0b0b14);">
-            <div style="font-size:12px;">MY ID: <b id="my-id-display">-</b></div>
-            <button class="s-btn" onclick="copyRef()">INVITE</button>
+            <div>KODUN: <b id="my-id-display">-</b></div>
+            <button class="s-btn" onclick="copyRef()">KOPYALA</button>
         </div>
         <div id="friends-list"></div>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h2>Wallet</h2>
+        <h2>Cüzdan</h2>
         <div class="card" style="height: 120px; flex-direction: column; justify-content: center; background: var(--p);">
-            <small>AVAILABLE BALANCE</small>
-            <h1 style="margin:5px 0;">$<span class="bal-val">0.00000</span></h1>
+            <small>BAKİYE</small>
+            <h1 style="margin:5px 0;">$<span class="bal-val">0.0000</span></h1>
         </div>
-        <button class="btn" style="opacity: 0.3; margin-top: 20px;" disabled>WITHDRAW (Min $10)</button>
+        <button class="btn" style="opacity: 0.3; margin-top: 20px;" disabled>ÇEKİM YAP ($10 MIN)</button>
     </div>
 
     <div id="reward-anim">
         <h2 id="earned-final" style="font-size: 50px; color: var(--g);">+0.00</h2>
-        <p>RESOURCES COLLECTED!</p>
+        <p>TOPLANDI!</p>
     </div>
 
     <nav class="nav" id="nav-bar">
         <div id="nav-home" class="ni active-nav" onclick="tab('home')">⛏️<br>Mining</div>
-        <div id="nav-tasks" class="ni" onclick="tab('tasks')">📝<br>Tasks</div>
-        <div id="nav-friends" class="ni" onclick="tab('friends')">👥<br>Friends</div>
-        <div id="nav-wallet" class="ni" onclick="tab('wallet')">💰<br>Wallet</div>
+        <div id="nav-tasks" class="ni" onclick="tab('tasks')">📝<br>Görev</div>
+        <div id="nav-friends" class="ni" onclick="tab('friends')">👥<br>Arkadaş</div>
+        <div id="nav-wallet" class="ni" onclick="tab('wallet')">💰<br>Cüzdan</div>
     </nav>
 </div>
 
