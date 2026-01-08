@@ -47,10 +47,13 @@
                 // Eğer linkle (start_param) geldiyse davet edene ödül ver
                 if(startParam && startParam !== myID) {
                     const inviterRef = doc(db, "users", startParam);
-                    await updateDoc(inviterRef, { usdt: increment(0.05) });
-                    // Kendisine de hoşgeldin ödülü
-                    await updateDoc(userRef, { usdt: increment(0.05) });
-                    stats.usdt += 0.05;
+                    const inviterSnap = await getDoc(inviterRef);
+                    if(inviterSnap.exists()) {
+                        await updateDoc(inviterRef, { usdt: increment(0.05) });
+                        // Kendisine de hoşgeldin ödülü
+                        await updateDoc(userRef, { usdt: increment(0.05) });
+                        stats.usdt += 0.05;
+                    }
                 }
             }
             updateUI();
@@ -77,17 +80,21 @@
             if (!code || stats.hasUsedCode) return;
             if (code === myID) return showMsg('error', 'Kendi ID\'ni giremezsin!', card);
 
-            const targetRef = doc(db, "users", code);
-            const targetSnap = await getDoc(targetRef);
+            try {
+                const targetRef = doc(db, "users", code);
+                const targetSnap = await getDoc(targetRef);
 
-            if (targetSnap.exists()) {
-                await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), hasUsedCode: true, invitedBy: code });
-                await updateDoc(targetRef, { usdt: increment(0.05) });
-                stats.usdt += 0.05; stats.hasUsedCode = true;
-                updateUI();
-                showMsg('success', 'Tebrikler! Ödül tanımlandı.', card);
-            } else {
-                showMsg('error', 'Bu ID\'ye sahip kullanıcı bulunamadı!', card);
+                if (targetSnap.exists()) {
+                    await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), hasUsedCode: true, invitedBy: code });
+                    await updateDoc(targetRef, { usdt: increment(0.05) });
+                    stats.usdt += 0.05; stats.hasUsedCode = true;
+                    updateUI();
+                    showMsg('success', 'Tebrikler! Ödül tanımlandı.', card);
+                } else {
+                    showMsg('error', 'Bu ID\'ye sahip kullanıcı bulunamadı!', card);
+                }
+            } catch(e) {
+                showMsg('error', 'Bir hata oluştu!', card);
             }
         };
 
@@ -100,14 +107,19 @@
             if (adr.length < 10) return showMsg('error', 'Geçersiz cüzdan adresi!', card);
             if (amt > stats.usdt) return showMsg('error', 'Yetersiz bakiye!', card);
 
-            await addDoc(collection(db, "withdrawals"), { userId: myID, amount: amt, address: adr, status: "pending", date: new Date().toISOString() });
-            await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
-            stats.usdt -= amt; updateUI();
-            showMsg('success', 'Talebiniz başarıyla iletildi!', card);
+            try {
+                await addDoc(collection(db, "withdrawals"), { userId: myID, amount: amt, address: adr, status: "pending", date: new Date().toISOString() });
+                await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
+                stats.usdt -= amt; 
+                updateUI();
+                showMsg('success', 'Talebiniz başarıyla iletildi!', card);
+            } catch(e) {
+                showMsg('error', 'İşlem başarısız!', card);
+            }
         };
 
         function showMsg(type, msg, el) {
-            tg.HapticFeedback.notificationOccurred(type);
+            tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success');
             el.classList.add(type === 'error' ? 'shake' : 'bounce');
             tg.showAlert(msg);
             setTimeout(() => el.classList.remove('shake', 'bounce'), 600);
@@ -119,6 +131,10 @@
             const list = document.getElementById('f-list');
             list.innerHTML = "";
             document.getElementById('f-count').innerText = snap.size;
+            if(snap.empty) {
+                list.innerHTML = `<div style="text-align:center; opacity:0.3; padding:10px;">Henüz kimse yok.</div>`;
+                return;
+            }
             snap.forEach(d => {
                 const data = d.data();
                 list.innerHTML += `<div class="f-item"><span>@${data.username || 'Gizli'}</span><b>+$0.05</b></div>`;
@@ -141,7 +157,7 @@
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
         .active { display: flex; }
         .card { background: var(--c); border-radius: 20px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
-        .main-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; text-align: center; }
+        .main-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; text-align: center; box-shadow: 0 8px 25px rgba(108, 92, 231, 0.2); }
         input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; }
         .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .btn-y { background: var(--y); color: #000; }
@@ -150,7 +166,7 @@
         .bounce { animation: bounce 0.5s; border-color: #2ed573 !important; }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; cursor: pointer; }
         .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); }
         .n-icon { font-size: 22px; display: block; margin-bottom: 5px; }
         .f-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
@@ -163,16 +179,12 @@
         <div style="text-align: center; margin: 30px 0;">
             <img src="koalasmining.jpg" style="width: 100px; border-radius: 50%; border: 3px solid var(--y);">
             <h1 style="margin: 10px 0 0 0; letter-spacing: 1px;">FONIX HUB</h1>
-            <p style="opacity: 0.4; font-size: 12px;">Welcome back, 2026</p>
+            <p style="opacity: 0.4; font-size: 12px;">Admin ID: <span id="display-my-id">...</span></p>
         </div>
         <div class="card main-card">
-            <small style="opacity: 0.8;">HESAP BAKİYESİ</small>
+            <small style="opacity: 0.8; font-weight: bold;">AVAILABLE BALANCE</small>
             <h1 style="font-size: 44px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
             <div style="opacity: 0.9; font-size: 14px;">🪙 <span class="ui-kls">0.00</span> KLS Token</div>
-        </div>
-        <div class="card" style="text-align:center;">
-            <small style="opacity:0.5;">YOUR ACCOUNT ID</small>
-            <div id="display-my-id" style="font-size:20px; font-weight:bold; color:var(--y);">...</div>
         </div>
     </div>
 
@@ -180,17 +192,17 @@
         <h2 style="margin-top:0;">Referral</h2>
         <div class="card" id="ref-card">
             <div id="code-input-area">
-                <small style="color:var(--y); font-weight:bold;">ARKADAŞININ ID'SİNİ GİR ($0.05)</small>
+                <small style="color:var(--y); font-weight:bold;">ENTER FRIEND'S ID ($0.05)</small>
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <input type="text" id="invite-input" placeholder="Referans ID..." style="margin:0;">
-                    <button class="btn btn-y" style="width:auto; padding:0 20px;" onclick="applyCode()">GİR</button>
+                    <input type="text" id="invite-input" placeholder="Referral ID..." style="margin:0;">
+                    <button class="btn btn-y" style="width:auto; padding:0 20px;" onclick="applyCode()">GO</button>
                 </div>
             </div>
         </div>
         <div class="card">
-            <small style="font-weight:bold; color:var(--p);">DAVET LİNKİN</small>
+            <small style="font-weight:bold; color:var(--p);">YOUR INVITE LINK</small>
             <div id="ref-link" style="font-size:10px; background:#000; padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; color:#888;">...</div>
-            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">LİNKİ KOPYALA</button>
+            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Copied!')">COPY LINK</button>
         </div>
         <h3 style="margin-left:5px;">Network (<span id="f-count">0</span>)</h3>
         <div id="f-list"></div>
@@ -199,12 +211,12 @@
     <div id="p-wallet" class="page">
         <h2 style="margin-top:0;">Wallet</h2>
         <div class="card" id="w-card">
-            <h3 style="margin-top:0;">Para Çekme</h3>
-            <input type="number" id="w-amt" placeholder="Miktar (Min $10.00)">
-            <input type="text" id="w-adr" placeholder="TON veya USDT Adresi">
-            <button class="btn btn-y" onclick="requestWithdraw()">TALEBİ GÖNDER</button>
+            <h3 style="margin-top:0;">Withdrawal</h3>
+            <input type="number" id="w-amt" placeholder="Amount (Min $10.00)">
+            <input type="text" id="w-adr" placeholder="TON or USDT Address">
+            <button class="btn btn-y" onclick="requestWithdraw()">SEND REQUEST</button>
         </div>
-        <p style="font-size:11px; opacity:0.4; text-align:center;">Çekimler onay sonrası 24 saat içinde tamamlanır.</p>
+        <p style="font-size:11px; opacity:0.4; text-align:center;">Withdrawals are processed within 24 hours.</p>
     </div>
 
     <nav class="nav">
