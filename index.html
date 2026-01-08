@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas Mining - Universal Version</title>
+    <title>Koalas Mining - Animation Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -27,48 +27,24 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Kullanıcı ID'sini direkt Telegram'dan alıyoruz (Admin kısıtlaması kalktı)
         const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "Anonymous";
-        const myUsername = user?.username || "Miner";
+        const myID = user?.id ? user.id.toString() : "Web_User";
         const startParam = tg.initDataUnsafe?.start_param;
 
         let stats = { kls_bal: 0, usdt_bal: 0, energy: 100 };
 
         async function init() {
-            // Adexium Push
             new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
-
-            if (myID === "Anonymous") {
-                tg.showAlert("Lütfen uygulamayı Telegram üzerinden açın.");
-                return;
-            }
-
             const userRef = doc(db, "users", myID);
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                // YENİ KAYIT SİSTEMİ
-                stats = { 
-                    kls_bal: 0, 
-                    usdt_bal: 0, 
-                    energy: 100, 
-                    username: myUsername, 
-                    invitedBy: startParam || "" 
-                };
-
+                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, username: user?.username || "Miner", invitedBy: startParam || "" };
                 if (startParam && startParam !== myID) {
-                    // Davet Edene Ödül
-                    const invRef = doc(db, "users", startParam);
-                    const invSnap = await getDoc(invRef);
-                    if(invSnap.exists()) {
-                        await updateDoc(invRef, { usdt_bal: increment(0.20), kls_bal: increment(500) });
-                    }
-                    // Yeni Gelene Ödül
-                    stats.usdt_bal = 0.10;
-                    stats.kls_bal = 250;
+                    await updateDoc(doc(db, "users", startParam), { usdt_bal: increment(0.20), kls_bal: increment(500) });
+                    stats.usdt_bal = 0.10; stats.kls_bal = 250;
                 }
                 await setDoc(userRef, stats);
             }
@@ -85,14 +61,13 @@
                 if (stats.energy < 1) return tg.showAlert("Enerji bitti!");
                 startM();
             } else {
-                // REWARDED AD
+                // Reklam ve Sonrası Animasyon
                 show_10432457().then(() => { stopM(); }).catch(() => stopM());
             }
         };
 
         function startM() {
-            tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('m-btn').innerText = "CLAIM REWARDS (AD)";
+            document.getElementById('m-btn').innerText = "CLAIM REWARDS";
             document.getElementById('m-btn').style.background = "#ff4757";
             document.getElementById('fan').classList.add('spinning');
             
@@ -110,36 +85,59 @@
         }
 
         async function stopM() {
-            clearInterval(minInt);
+            clearInterval(minInt); // Akışı durdur
+            document.getElementById('fan').classList.remove('spinning');
+            
+            // Para Yağmuru Animasyonu Başlat
+            createMoneyRain();
+
+            // Veritabanı Güncelleme
             await updateDoc(doc(db, "users", myID), { 
                 kls_bal: increment(sKLS), 
                 usdt_bal: increment(sUSDT),
                 energy: stats.energy 
             });
-            location.reload();
+
+            // 3 Saniye sonra sayfayı yenile
+            setTimeout(() => { location.reload(); }, 4000);
+        }
+
+        // --- ANIMASYON FONKSIYONU ---
+        function createMoneyRain() {
+            const container = document.getElementById('animation-layer');
+            container.style.display = 'block';
+            const symbols = ['🪙', '💵', '💎', '💰'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'money';
+                    el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                    el.style.left = Math.random() * 100 + 'vw';
+                    el.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                    container.appendChild(el);
+                    
+                    // Temizlik
+                    setTimeout(() => el.remove(), 3000);
+                }, i * 50);
+            }
         }
 
         function updateUI() {
             document.getElementById('t-kls').innerText = stats.kls_bal.toFixed(2);
             document.getElementById('t-usdt').innerText = stats.usdt_bal.toFixed(4);
             document.getElementById('w-usdt').innerText = stats.usdt_bal.toFixed(2);
-            if(stats.usdt_bal >= 10) {
-                const w = document.getElementById('wd-btn');
-                w.disabled = false; w.style.opacity = "1";
-            }
         }
 
         async function loadRef() {
             const q = query(collection(db, "users"), where("invitedBy", "==", myID));
             const snap = await getDocs(q);
             document.getElementById('ref-count').innerText = snap.size;
-            // Bot Linkini buraya kendi bot adını yazarak güncellemelisin
-            document.getElementById('ref-link').innerText = `https://t.me/KoalasMiningBot?start=${myID}`;
+            document.getElementById('ref-link').innerText = `https://t.me/KendiBotAdiniz?start=${myID}`;
         }
 
         window.copyRef = () => {
-            const link = document.getElementById('ref-link').innerText;
-            navigator.clipboard.writeText(link);
+            navigator.clipboard.writeText(document.getElementById('ref-link').innerText);
             tg.showAlert("Link kopyalandı!");
         };
 
@@ -154,24 +152,37 @@
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
         body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; }
-        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; font-weight: bold; font-size: 14px; }
-        .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; position: relative; }
+        
+        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; font-weight: bold; }
+        .p { flex: 1; display: none; flex-direction: column; padding: 20px; z-index: 5; }
         .active { display: flex; }
-        .fan-box { width: 220px; height: 220px; margin: 30px auto; position: relative; }
-        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #333; object-fit: cover; transition: 0.3s; }
+        
+        /* Mining Fan */
+        .fan-box { width: 200px; height: 200px; margin: 30px auto; position: relative; }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #333; object-fit: cover; }
         .spinning { animation: rot 2s linear infinite; border-color: var(--p); box-shadow: 0 0 30px var(--p); }
-        .btn { background: var(--g); border: none; padding: 20px; border-radius: 18px; font-weight: 900; width: 100%; cursor: pointer; color: #000; font-size: 16px; }
-        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #222; }
+
+        .btn { background: var(--g); border: none; padding: 20px; border-radius: 18px; font-weight: 900; width: 100%; cursor: pointer; color: #000; font-size: 16px; box-shadow: 0 4px 15px rgba(251, 197, 49, 0.3); }
         .bar { width: 100%; height: 10px; background: #1a1a1a; border-radius: 10px; margin: 15px 0; overflow: hidden; }
         #energy-fill { height: 100%; background: var(--p); width: 100%; transition: 0.3s; }
+        
+        /* Animasyon Katmanı */
+        #animation-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; background: rgba(0,0,0,0.4); }
+        .money { position: absolute; top: -50px; font-size: 30px; animation: fall linear forwards; }
+        
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #222; }
         .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+
         @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div id="app">
+    <div id="animation-layer"></div>
+
     <div class="header">
         <div style="color:var(--p)">🪙 <span id="t-kls">0</span> KLS</div>
         <div style="color:var(--g)">💵 $<span id="t-usdt">0.00</span></div>
@@ -179,35 +190,27 @@
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
-            <div style="font-size: 40px; font-weight: 900;">+<span id="s-kls">0.00</span></div>
-            <div style="color:var(--g); font-weight:bold;">+$<span id="s-usdt">0.00000</span></div>
+            <div style="font-size: 45px; font-weight: 900; color: #fff;">+<span id="s-kls">0.00</span></div>
+            <div style="color:var(--g); font-size: 18px;">+$<span id="s-usdt">0.00000</span></div>
         </div>
         <div class="fan-box"><img id="fan" src="koalasmining.jpg" class="fan-img"></div>
         <div class="bar"><div id="energy-fill"></div></div>
-        <div style="text-align:center; font-size:11px; opacity:0.6;">ENERGY RESOURCES</div>
         <div style="flex:1"></div>
         <button id="m-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h2>Assets & Referral</h2>
-        <div class="card" style="text-align:center; background: var(--p); color:white;">
+        <h2>Assets</h2>
+        <div class="card" style="text-align:center; background: var(--p);">
             <small>USDT BALANCE</small>
             <h1 style="margin:5px 0;">$<span id="w-usdt">0.00</span></h1>
         </div>
-        
         <div class="card">
-            <small style="color:var(--g)">Your Invite Link:</small>
-            <div id="ref-link" style="font-size: 10px; margin: 10px 0; background: #000; padding: 10px; border-radius: 8px; word-break: break-all;">Loading...</div>
+            <small>Invite Link:</small>
+            <div id="ref-link" style="font-size: 10px; margin: 10px 0; background: #000; padding: 10px; border-radius: 8px;">Loading...</div>
             <button class="btn" onclick="copyRef()" style="padding:10px; font-size:12px;">COPY LINK</button>
         </div>
-
-        <div class="card" style="display:flex; justify-content: space-between;">
-            <span>Friends Invited:</span>
-            <b id="ref-count">0</b>
-        </div>
-
-        <button id="wd-btn" class="btn" style="opacity:0.3;" disabled onclick="tg.showAlert('Need $10 to withdraw.')">WITHDRAW USDT</button>
+        <div class="card">Friends: <b id="ref-count">0</b></div>
     </div>
 
     <nav class="nav">
