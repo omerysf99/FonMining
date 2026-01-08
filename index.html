@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas Coin Mining - Pro v2.0</title>
+    <title>Koalas Mining & USDT Rewards</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -11,7 +11,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, orderBy, limit, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -29,14 +29,12 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const myUsername = user?.username || "KoalaMiner";
         const startParam = tg.initDataUnsafe?.start_param;
 
-        let stats = { balance: 0.0, energy: 100, tasks: [] };
+        let stats = { kls_bal: 0, usdt_bal: 0, energy: 100, tasks: [] };
         let adex;
 
         async function init() {
-            // Adexium Push Başlat
             adex = new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' });
             adex.autoMode();
 
@@ -46,128 +44,102 @@
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { balance: 0.0, energy: 100, username: myUsername, invitedBy: startParam || "", tasks: [] };
+                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, username: user?.username || "Koala", invitedBy: startParam || "", tasks: [] };
                 if (startParam && startParam !== myID) {
-                    await updateDoc(doc(db, "users", startParam), { balance: increment(50) }); // Davet edene 50 KLS
-                    stats.balance = 25; // Yeni gelene 25 KLS
+                    await updateDoc(doc(db, "users", startParam), { kls_bal: increment(100), usdt_bal: increment(0.10) });
                 }
                 await setDoc(userRef, stats);
             }
             updateUI();
-            loadLeaderboard();
             renderTasks();
-            loadFriends();
         }
 
-        // --- MINING VE REKLAM MANTIĞI ---
+        // --- MINING ---
         let miningInterval, sessionKLS = 0, adTimer = 0;
 
         window.toggleMining = () => {
             const btn = document.getElementById('mining-btn');
             if (btn.innerText.includes("START")) {
-                if (stats.energy < 10) return tg.showAlert("Düşük Enerji! Biraz dinlen.");
+                if (stats.energy < 5) return tg.showAlert("Enerji yetersiz!");
                 startMining();
             } else {
-                // LibTL Rewarded Reklam Tetikleme
-                if (typeof show_10432457 === 'function') {
-                    show_10432457('pop').then(() => {
-                        stopMining(); // Reklam izlendi, ödülü ver
-                    }).catch(e => {
-                        console.log("Ad Error:", e);
-                        stopMining(); // Hata olsa da mağdur etme
-                    });
-                } else {
-                    stopMining();
-                }
+                show_10432457('pop').then(() => stopMining()).catch(() => stopMining());
             }
         };
 
         function startMining() {
-            tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('mining-btn').innerText = "CLAIM KOALAS";
+            document.getElementById('mining-btn').innerText = "CLAIM KLS & ADS";
             document.getElementById('mining-btn').style.background = "#ff4757";
-            document.getElementById('fan-img').classList.add('spinning');
+            document.getElementById('fan').classList.add('spinning');
             
             miningInterval = setInterval(() => {
-                sessionKLS += 0.0055; // Saniyede kazanılan KLS
+                sessionKLS += 0.015;
                 stats.energy -= 0.1;
                 adTimer++;
-
-                if (stats.energy <= 0) { stats.energy = 0; stopMining(); }
+                if (stats.energy <= 0) stopMining();
                 
                 document.getElementById('session-val').innerText = sessionKLS.toFixed(4);
                 document.getElementById('energy-fill').style.width = stats.energy + "%";
-                document.getElementById('energy-text').innerText = Math.floor(stats.energy);
-
-                // 15 Saniyede bir Adexium Push Reklam
                 if (adTimer >= 15) { adex.autoMode(); adTimer = 0; }
             }, 1000);
         }
 
         async function stopMining() {
             clearInterval(miningInterval);
-            stats.balance += sessionKLS;
-            await updateDoc(doc(db, "users", myID), { balance: stats.balance, energy: stats.energy });
-            tg.showPopup({ message: `${sessionKLS.toFixed(2)} KLS Bakiyenize Eklendi!` }, () => location.reload());
+            await updateDoc(doc(db, "users", myID), { kls_bal: increment(sessionKLS), energy: stats.energy });
+            location.reload();
         }
 
-        // --- SEKMELERİN İŞLEVLERİ ---
-        async function loadLeaderboard() {
-            const q = query(collection(db, "users"), orderBy("balance", "desc"), limit(10));
-            const snap = await getDocs(q);
-            const container = document.getElementById('leader-list');
-            container.innerHTML = "";
-            snap.forEach((doc, index) => {
-                const data = doc.data();
-                container.innerHTML += `<div class="card"><span>#${index+1} @${data.username}</span><b>${data.balance.toFixed(2)} KLS</b></div>`;
-            });
-        }
-
-        async function loadFriends() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            document.getElementById('friend-count').innerText = snap.size;
-            document.getElementById('ref-reward').innerText = (snap.size * 50).toFixed(0);
-        }
-
-        const taskList = [
-            { id: 't1', title: 'Join Koalas TG', reward: 100, link: 'https://t.me/example' },
-            { id: 't2', title: 'Watch Video Ad', reward: 50, link: 'ad' }
+        // --- GÖREVLER ---
+        const taskItems = [
+            { id: 'v1', type: 'ad', title: 'Watch Video & Earn USDT', reward: 0.05, currency: 'USDT' },
+            { id: 't1', type: 'link', title: 'Follow Koalas Twitter', reward: 250, currency: 'KLS', link: 'https://x.com' },
+            { id: 't2', type: 'link', title: 'Join TG Channel', reward: 500, currency: 'KLS', link: 'https://t.me' }
         ];
 
         function renderTasks() {
             const container = document.getElementById('task-list');
-            container.innerHTML = "";
-            taskList.forEach(task => {
-                const done = stats.tasks?.includes(task.id);
-                container.innerHTML += `
+            container.innerHTML = taskItems.map(t => {
+                const isDone = stats.tasks?.includes(t.id);
+                return `
                     <div class="card">
-                        <div><b>${task.title}</b><br><small>+${task.reward} KLS</small></div>
-                        <button onclick="doTask('${task.id}', '${task.link}', ${task.reward})" ${done ? 'disabled' : ''}>
-                            ${done ? '✅' : 'DO'}
+                        <div><b>${t.title}</b><br><small>+${t.reward} ${t.currency}</small></div>
+                        <button onclick="doTask('${t.id}', '${t.type}', '${t.link || ''}', ${t.reward}, '${t.currency}')" ${isDone ? 'disabled' : ''}>
+                            ${isDone ? '✅' : 'DO'}
                         </button>
                     </div>`;
-            });
+            }).join('');
         }
 
-        window.doTask = async (id, link, reward) => {
-            if(link === 'ad') {
+        window.doTask = async (id, type, link, reward, curr) => {
+            if (type === 'ad') {
                 show_10432457('pop').then(async () => {
-                    await updateDoc(doc(db, "users", myID), { balance: increment(reward), tasks: arrayUnion(id) });
+                    const ref = doc(db, "users", myID);
+                    await updateDoc(ref, { usdt_bal: increment(reward), tasks: arrayUnion(id) });
+                    tg.showAlert(`Tebrikler! ${reward} USDT kazandın.`);
                     location.reload();
                 });
             } else {
                 window.open(link);
                 setTimeout(async () => {
-                    await updateDoc(doc(db, "users", myID), { balance: increment(reward), tasks: arrayUnion(id) });
+                    const ref = doc(db, "users", myID);
+                    const updateField = curr === 'USDT' ? { usdt_bal: increment(reward) } : { kls_bal: increment(reward) };
+                    await updateDoc(ref, { ...updateField, tasks: arrayUnion(id) });
                     location.reload();
-                }, 4000);
+                }, 5000);
             }
         };
 
         function updateUI() {
-            document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(2));
-            document.getElementById('energy-fill').style.width = stats.energy + "%";
+            document.getElementById('kls-display').innerText = stats.kls_bal.toFixed(2);
+            document.getElementById('usdt-display').innerText = stats.usdt_bal.toFixed(2);
+            document.getElementById('wallet-usdt').innerText = stats.usdt_bal.toFixed(2);
+            
+            const withdrawBtn = document.getElementById('withdraw-btn');
+            if (stats.usdt_bal >= 10.0) {
+                withdrawBtn.disabled = false;
+                withdrawBtn.style.opacity = "1";
+            }
         }
 
         window.tab = (t) => {
@@ -175,43 +147,24 @@
             document.getElementById('tab-'+t).classList.add('active');
         };
 
-        window.copyRef = () => {
-            const link = `https://t.me/KoalasCoinBot?start=${myID}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Ref linkin kopyalandı!");
-        };
-
         window.onload = init;
     </script>
 
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; }
-        
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .bal-badge { background: rgba(251, 197, 49, 0.1); padding: 8px 15px; border-radius: 20px; color: var(--g); border: 1px solid var(--g); font-weight: bold; }
-        
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #app { width: 100%; height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
-
-        /* Mining Fan */
-        .fan-box { width: 230px; height: 230px; margin: 30px auto; position: relative; }
-        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 6px solid #222; object-fit: cover; }
-        .spinning { animation: rot 2s linear infinite; border-color: var(--p); box-shadow: 0 0 30px var(--p); }
-
-        /* Energy Bar */
-        .energy-box { margin: 20px 0; }
-        .bar { width: 100%; height: 12px; background: #1a1a1a; border-radius: 10px; overflow: hidden; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff4757, var(--g)); transition: 0.3s; }
-
-        .btn { background: var(--g); border: none; padding: 20px; border-radius: 20px; font-weight: 900; width: 100%; color: #000; font-size: 18px; cursor: pointer; }
+        .fan-box { width: 220px; height: 220px; margin: 20px auto; position: relative; }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #222; object-fit: cover; }
+        .spinning { animation: rot 2s linear infinite; border-color: var(--p); box-shadow: 0 0 20px var(--p); }
+        .btn { background: var(--g); border: none; padding: 18px; border-radius: 15px; font-weight: bold; width: 100%; cursor: pointer; color: #000; }
         .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .card button { background: var(--p); border: none; color: #fff; padding: 8px 15px; border-radius: 10px; font-weight: bold; }
-
-        .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .ni { text-align: center; font-size: 10px; opacity: 0.6; cursor: pointer; }
+        .energy-bar { width: 100%; height: 10px; background: #222; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        #energy-fill { height: 100%; width: 100%; background: var(--p); transition: 0.3s; }
+        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; font-size: 12px; }
         @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -219,68 +172,44 @@
 
 <div id="app">
     <div class="header">
-        <div style="font-weight: 900; letter-spacing: 1px;">KOALAS <span style="color:var(--p)">COIN</span></div>
-        <div class="bal-badge">🪙 <span class="bal-val">0.00</span> KLS</div>
+        <div>🪙 <span id="kls-display">0</span> KLS</div>
+        <div style="color: var(--g);">💵 $<span id="usdt-display">0.00</span></div>
     </div>
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
-            <h1 style="font-size: 45px; margin: 5px 0;">+<span id="session-val">0.0000</span></h1>
-            <small style="color:var(--p)">MINING IN PROGRESS</small>
+            <h1 style="font-size: 40px; margin: 0;">+<span id="session-val">0.0000</span></h1>
+            <small>MINING KOALAS COIN</small>
         </div>
-
-        <div class="fan-box">
-            <img id="fan-img" src="koalasmining.jpg" class="fan-img" alt="Koala Fan">
-        </div>
-
-        <div class="energy-box">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
-                <span>ENERGY LIMIT</span>
-                <span><b id="energy-text">100</b>/100</span>
-            </div>
-            <div class="bar"><div id="energy-fill"></div></div>
-        </div>
-
+        <div class="fan-box"><img id="fan" src="koalasmining.jpg" class="fan-img"></div>
+        <div class="energy-bar"><div id="energy-fill"></div></div>
         <div style="flex:1"></div>
         <button id="mining-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
     <div id="tab-tasks" class="p">
-        <h2>Earning Tasks</h2>
+        <h2>Tasks & Rewards</h2>
         <div id="task-list"></div>
     </div>
 
-    <div id="tab-friends" class="p">
-        <h2>Referral System</h2>
-        <div class="card" style="flex-direction: column; text-align: center; gap: 15px;">
-            <p>Davet ettiğin her aktif arkadaşın için <b>50 KLS</b> kazan!</p>
-            <button onclick="copyRef()" style="width: 100%; padding: 15px;">INVITE FRIENDS</button>
-        </div>
-        <div class="card"><span>Davet Edilenler:</span><b id="friend-count">0</b></div>
-        <div class="card"><span>Toplam Kazanç:</span><b id="ref-reward">0</b> KLS</div>
-    </div>
-
-    <div id="tab-leader" class="p">
-        <h2>Top Miners</h2>
-        <div id="leader-list"></div>
-    </div>
-
     <div id="tab-wallet" class="p">
-        <h2>Your Wallet</h2>
-        <div class="card" style="background: var(--p); height: 120px; flex-direction: column; justify-content: center;">
-            <small>AVAILABLE BALANCE</small>
-            <h1 style="margin: 5px 0;"><span class="bal-val">0.00</span> KLS</h1>
+        <h2>Wallet</h2>
+        <div class="card" style="background: var(--p); flex-direction: column; align-items: flex-start;">
+            <small>WITHDRAWABLE USDT</small>
+            <h1 style="margin: 5px 0;">$<span id="wallet-usdt">0.00</span></h1>
         </div>
-        <button class="btn" style="opacity: 0.3; margin-top: 20px;" disabled>WITHDRAW (Min. 5000 KLS)</button>
-        <p style="font-size: 11px; text-align: center; margin-top: 10px; opacity: 0.5;">Withdrawals will be active after TGE.</p>
+        <div class="card">
+            <span>KOALAS COIN:</span>
+            <b>KLS <span class="kls-val">0</span></b>
+        </div>
+        <p style="font-size: 11px; opacity: 0.5;">* Koalas Coin çekimleri TGE sonrası aktif olacaktır.</p>
+        <button id="withdraw-btn" class="btn" style="opacity: 0.3;" disabled onclick="tg.showAlert('Adres girme ekranı yakında!')">WITHDRAW USDT ($10.00)</button>
     </div>
 
     <nav class="nav">
-        <div class="ni" onclick="tab('home')">⛏️<br>Mining</div>
-        <div class="ni" onclick="tab('tasks')">📋<br>Tasks</div>
-        <div class="ni" onclick="tab('friends')">👥<br>Friends</div>
-        <div class="ni" onclick="tab('leader')">🏆<br>Leader</div>
-        <div class="ni" onclick="tab('wallet')">💰<br>Wallet</div>
+        <div onclick="tab('home')">⛏️<br>Mining</div>
+        <div onclick="tab('tasks')">📋<br>Tasks</div>
+        <div onclick="tab('wallet')">💰<br>Wallet</div>
     </nav>
 </div>
 
