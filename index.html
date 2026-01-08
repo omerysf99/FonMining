@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Monetag Edition</title>
+    <title>FonixApp v1300 - Monetag Full</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     
@@ -45,11 +45,15 @@
             } else {
                 stats = { balance: 0.0, invitedBy: "", completedTasks: [], username: myUsername, photo: myPhoto };
                 await setDoc(userRef, stats);
+                
                 const startParam = tg.initDataUnsafe?.start_param;
                 if (startParam && startParam !== myID) await applyReferral(startParam);
             }
             
-            if (!stats.invitedBy || stats.invitedBy === "") document.getElementById('ref-modal').style.display = 'flex';
+            if (!stats.invitedBy || stats.invitedBy === "") {
+                document.getElementById('ref-modal').style.display = 'flex';
+            }
+
             updateUI();
             loadFriends();
         }
@@ -57,7 +61,7 @@
         async function applyReferral(code) {
             const inviterRef = doc(db, "users", code);
             const inviterSnap = await getDoc(inviterRef);
-            if (inviterSnap.exists()) {
+            if (inviterSnap.exists() && code !== myID) {
                 await updateDoc(doc(db, "users", myID), { invitedBy: code, balance: increment(REF_BONUS) });
                 await updateDoc(inviterRef, { balance: increment(REF_BONUS) });
                 return true;
@@ -67,10 +71,15 @@
 
         window.submitReferral = async () => {
             const code = document.getElementById('referral-code-input').value.trim();
-            if (code && code !== myID && await applyReferral(code)) location.reload();
+            if (code && await applyReferral(code)) {
+                tg.showPopup({ message: "Başarılı! $0.10 eklendi." });
+                location.reload();
+            } else {
+                alert("Geçersiz kod veya hata!");
+            }
         };
 
-        // --- MINING & MONETAG AUTO AD ---
+        // --- MINING ENGINE ---
         let miningInterval, sessionEarned = 0;
 
         window.toggleMining = () => {
@@ -83,18 +92,19 @@
         };
 
         function startMining() {
+            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('nav-bar').style.opacity = "0.3";
             document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
             document.getElementById('main-action-btn').style.background = "#ff4757";
             document.getElementById('mining-fan-outer').classList.add('active-spin');
 
-            // Monetag Auto Ad Trigger (30 saniye aralıklı)
+            // Monetag In-App Interstitial (30 saniye aralıklı otomatik reklam)
             if (typeof show_10432457 === 'function') {
                 show_10432457({
                     type: 'inApp',
                     inAppSettings: {
-                        frequency: 10, // Çoklu reklam için artırıldı
-                        capping: 1, 
+                        frequency: 5,
+                        capping: 0.1,
                         interval: 30, // 30 saniyede bir
                         timeout: 5,
                         everyPage: false
@@ -112,19 +122,25 @@
             clearInterval(miningInterval);
             stats.balance += sessionEarned;
             await updateDoc(doc(db, "users", myID), { balance: stats.balance });
-            location.reload();
+            
+            document.getElementById('earned-final').innerText = "+" + sessionEarned.toFixed(6);
+            document.getElementById('reward-anim').style.display = 'flex';
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2500);
         }
 
-        // --- REWARDED TASK ---
+        // --- REWARDED TASK (Task Kısmındaki Reklam) ---
         window.watchAdTask = () => {
             if (typeof show_10432457 === 'function') {
                 show_10432457().then(async () => {
                     await updateDoc(doc(db, "users", myID), { balance: increment(0.01) });
-                    tg.showPopup({ message: "Ödül Alındı: $0.01" });
-                    setTimeout(() => location.reload(), 1000);
+                    tg.showPopup({ message: "Reklam Ödülü: $0.01 bakiyenize eklendi!" });
+                    setTimeout(() => location.reload(), 1500);
+                }).catch(err => {
+                    alert("Reklam henüz hazır değil, lütfen bekleyin.");
                 });
-            } else {
-                alert("Reklam yüklenemedi, lütfen tekrar deneyin.");
             }
         };
 
@@ -146,26 +162,36 @@
             document.getElementById('friend-count').innerText = snap.size;
         }
 
+        window.copyRef = () => {
+            const link = `https://t.me/FonixMining2026Bot?start=${myID}`;
+            navigator.clipboard.writeText(link);
+            tg.showPopup({ message: "Davet linki kopyalandı!" });
+        };
+
         window.onload = init;
     </script>
 
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
-        * { box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; color: #fff; overflow: hidden; }
         #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; position: relative; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .balance-badge { background: #1a1a2e; padding: 8px 15px; border-radius: 20px; color: var(--g); font-weight: 800; border: 1px solid #333; }
-        .mining-circle { width: 200px; height: 200px; margin: 30px auto; position: relative; display: flex; align-items: center; justify-content: center; }
+        .mining-circle { width: 220px; height: 220px; margin: 30px auto; position: relative; display: flex; align-items: center; justify-content: center; }
         .fan-outer { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed #333; position: absolute; }
-        .active-spin { animation: spin 2s linear infinite; border-color: var(--p); }
-        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: #111; border: 5px solid #222; z-index: 2; }
-        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
-        .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        #ref-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; display:none; flex-direction:column; justify-content:center; align-items:center; padding:30px; }
-        input { background:#111; border:1px solid #333; color:#fff; padding:15px; width:100%; border-radius:15px; margin:15px 0; text-align:center; }
+        .active-spin { animation: spin 2s linear infinite; border-color: var(--p); box-shadow: 0 0 20px rgba(123,102,255,0.3); }
+        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: #111; border: 5px solid #222; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; font-size: 16px; }
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; border: 1px solid #222; }
+        .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; padding-bottom: 5px; }
+        .ni { text-align: center; font-size: 11px; opacity: 0.5; cursor: pointer; }
+        .active-nav { opacity: 1; color: var(--p); }
+        #ref-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:100; display:none; flex-direction:column; justify-content:center; align-items:center; padding:30px; text-align:center; }
+        input { background:#111; border:1px solid #333; color:#fff; padding:15px; width:100%; border-radius:15px; margin:20px 0; text-align:center; font-size:18px; }
+        #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -173,16 +199,17 @@
 
 <div id="app">
     <div id="ref-modal">
-        <h2 style="color:var(--g)">KİM DAVET ETTİ?</h2>
-        <input type="number" id="referral-code-input" placeholder="Kod Gir ve $0.10 Kazan">
-        <button class="btn" onclick="submitReferral()">ONAYLA</button>
-        <p onclick="document.getElementById('ref-modal').style.display='none'" style="margin-top:15px; opacity:0.5;">Atla</p>
+        <h2 style="color:var(--g)">HOŞ GELDİN!</h2>
+        <p>Seni kim davet etti? Kod girerek anında <b>$0.10</b> kazanabilirsin.</p>
+        <input type="number" id="referral-code-input" placeholder="Davet Kodunu Yaz">
+        <button class="btn" onclick="submitReferral()">ÖDÜLÜ AL</button>
+        <p onclick="document.getElementById('ref-modal').style.display='none'" style="margin-top:20px; opacity:0.5; font-size:12px;">Kodum yok, geç.</p>
     </div>
 
     <div class="header">
         <div style="display: flex; align-items: center; gap: 8px;">
             <img id="user-pic" src="" style="width: 30px; border-radius: 50%;">
-            <span id="user-name" style="font-weight: bold;">-</span>
+            <span id="user-name" style="font-weight: bold; font-size: 13px;">-</span>
         </div>
         <div class="balance-badge">🪙 $<span class="bal-val">0.0000</span></div>
     </div>
@@ -190,34 +217,50 @@
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
             <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <small style="color:var(--p)">MONETAG ADS ACTIVE (30s)</small>
+            <small style="color:var(--p); letter-spacing: 1px;">AUTO AD ENGINE ACTIVE (30s)</small>
         </div>
         <div class="mining-circle">
             <div id="mining-fan-outer" class="fan-outer"></div>
-            <div class="fan-inner"></div>
+            <div class="fan-inner">🔥</div>
         </div>
         <button id="main-action-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
     <div id="tab-tasks" class="p">
         <h2>Görevler</h2>
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
-            <div><b>Video Reklam İzle</b><br><small>$0.01 Ödül</small></div>
-            <button onclick="watchAdTask()" style="background:var(--p); color:#fff; border:none; padding:10px 20px; border-radius:10px;">İZLE</button>
+        <div class="card">
+            <div style="flex:1"><b>Video Reklam İzle</b><br><small>$0.01 Bonus</small></div>
+            <button onclick="watchAdTask()" style="background:var(--p); color:#fff; border:none; padding:10px 15px; border-radius:10px; font-weight:bold;">İZLE</button>
         </div>
     </div>
 
     <div id="tab-friends" class="p">
-        <h2>Arkadaşlar (<span id="friend-count">0</span>)</h2>
-        <div style="padding:15px; background:#111; border-radius:15px;">
-            KODUN: <b id="my-id-display">-</b>
+        <h2>Referanslar (<span id="friend-count">0</span>)</h2>
+        <div class="card" style="justify-content: space-between; background: #1a1a2e;">
+            <div>ID: <b id="my-id-display">-</b></div>
+            <button onclick="copyRef()" style="background:var(--p); color:#fff; border:none; padding:8px 15px; border-radius:10px; font-size:12px;">LİNKİ KOPYALA</button>
         </div>
     </div>
 
-    <nav class="nav">
-        <div onclick="tab('home')">⛏️ Miner</div>
-        <div onclick="tab('tasks')">📋 Görevler</div>
-        <div onclick="tab('friends')">👥 Arkadaş</div>
+    <div id="tab-wallet" class="p">
+        <h2>Cüzdan</h2>
+        <div class="card" style="height: 120px; flex-direction: column; justify-content: center; background: linear-gradient(45deg, #7b66ff, #5a44ff);">
+            <small>TOPLAM BAKİYE</small>
+            <h1 style="margin:5px 0;">$<span class="bal-val">0.0000</span></h1>
+        </div>
+        <button class="btn" style="opacity: 0.3; margin-top: 10px;" disabled>PARA ÇEK ($10 MIN)</button>
+    </div>
+
+    <div id="reward-anim">
+        <h2 id="earned-final" style="font-size: 50px; color: var(--g);">+0.00</h2>
+        <p>BAKİYEYE EKLENDİ!</p>
+    </div>
+
+    <nav class="nav" id="nav-bar">
+        <div class="ni" onclick="tab('home')">⛏️<br>Mining</div>
+        <div class="ni" onclick="tab('tasks')">📋<br>Görev</div>
+        <div class="ni" onclick="tab('friends')">👥<br>Arkadaş</div>
+        <div class="ni" onclick="tab('wallet')">💰<br>Cüzdan</div>
     </nav>
 </div>
 
