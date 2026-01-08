@@ -29,7 +29,7 @@
         const myID = user?.id ? user.id.toString() : "8392479231";
         const myName = user?.username || user?.first_name || "Koala";
         
-        let stats = { usdt: 0, kls: 0 };
+        let stats = { usdt: 0, kls: 0, hasUsedCode: false };
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -39,8 +39,8 @@
                 stats = snap.data();
             } else {
                 stats = { 
-                    usdt: 0, kls: 0, 
-                    username: myName, 
+                    usdt: 0, kls: 0, hasUsedCode: false,
+                    username: myName, photo: user?.photo_url || "",
                     invitedBy: tg.initDataUnsafe?.start_param || "" 
                 };
                 await setDoc(userRef, stats);
@@ -53,49 +53,77 @@
             document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
             document.querySelectorAll('.ui-kls').forEach(e => e.innerText = stats.kls.toFixed(2));
             document.getElementById('ref-link-display').innerText = `https://t.me/SeninBotun?start=${myID}`;
+            
+            // Kod kullanılmışsa giriş kutusunu gizle
+            const codeBox = document.getElementById('code-input-box');
+            if (stats.hasUsedCode) {
+                codeBox.innerHTML = `<div style="color:var(--ok); font-weight:bold; text-align:center; padding:10px;">✅ Davet kodu başarıyla kullanıldı!</div>`;
+            }
         }
 
-        // --- CÜZDAN & ANİMASYONLU BİLDİRİM ---
-        window.showNotify = (type, msg) => {
-            const card = document.getElementById('withdraw-card');
-            const status = document.getElementById('status-msg');
-            status.innerText = msg;
-            status.className = "status-text " + (type === 'error' ? 'err-txt' : 'ok-txt');
-            
-            if(type === 'error') {
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 500);
-            } else {
-                card.classList.add('bounce');
-                setTimeout(() => card.classList.remove('bounce'), 500);
+        // --- REFERANS KODU GİRME (TEK SEFERLİK) ---
+        window.applyInviteCode = async () => {
+            const inputField = document.getElementById('invite-code-input');
+            const code = inputField.value.trim();
+            const btn = document.getElementById('apply-code-btn');
+
+            if (stats.hasUsedCode) return; 
+            if (code === myID) {
+                showNotify('error', '❌ Kendi kodunu giremezsin!', 'code-input-box');
+                return;
+            }
+            if (code === "") return;
+
+            try {
+                const targetRef = doc(db, "users", code);
+                const targetSnap = await getDoc(targetRef);
+
+                if (targetSnap.exists()) {
+                    // 1. Kodu girene 0.05$ ver ve kilitle
+                    await updateDoc(doc(db, "users", myID), { 
+                        usdt: increment(0.05), 
+                        hasUsedCode: true, 
+                        invitedBy: code 
+                    });
+                    
+                    // 2. Kodun sahibine 0.05$ ver
+                    await updateDoc(targetRef, { usdt: increment(0.05) });
+
+                    stats.usdt += 0.05;
+                    stats.hasUsedCode = true;
+                    
+                    showNotify('success', '✅ 0.05$ Hesabınıza Eklendi!', 'code-input-box');
+                    setTimeout(updateUI, 1500);
+                } else {
+                    showNotify('error', '❌ Geçersiz Davet Kodu!', 'code-input-box');
+                }
+            } catch (e) {
+                showNotify('error', '❌ İşlem Başarısız!', 'code-input-box');
             }
         };
 
-        window.requestWithdraw = async () => {
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const address = document.getElementById('wallet-address').value.trim();
-
-            if (isNaN(amount) || amount < 10) return showNotify('error', '❌ Minimum çekim $10.00!');
-            if (address.length < 10) return showNotify('error', '❌ Geçersiz cüzdan adresi!');
-            if (amount > stats.usdt) return showNotify('error', '❌ Yetersiz bakiye!');
-
-            try {
-                await addDoc(collection(db, "withdrawals"), { userId: myID, amount, address, status: "pending", date: new Date().toISOString() });
-                await updateDoc(doc(db, "users", myID), { usdt: increment(-amount) });
-                stats.usdt -= amount;
-                updateUI();
-                showNotify('success', '✅ Talebiniz alındı!');
-            } catch (e) { showNotify('error', '❌ Sistem Hatası!'); }
+        // --- BİLDİRİM VE ANİMASYON ---
+        window.showNotify = (type, msg, elementId) => {
+            const el = document.getElementById(elementId);
+            tg.HapticFeedback.notificationOccurred(type === 'error' ? 'error' : 'success');
+            
+            if(type === 'error') {
+                el.classList.add('shake');
+                setTimeout(() => el.classList.remove('shake'), 500);
+            } else {
+                el.classList.add('bounce');
+                setTimeout(() => el.classList.remove('bounce'), 500);
+            }
+            tg.showAlert(msg);
         };
 
-        // --- REFERANS SİSTEMİ ---
         window.copyRefLink = (btn) => {
             const link = document.getElementById('ref-link-display').innerText;
             navigator.clipboard.writeText(link).then(() => {
                 const original = btn.innerText;
                 btn.innerText = "KOPYALANDI! ✓";
                 btn.style.background = "#2ed573";
-                tg.HapticFeedback.notificationOccurred('success');
+                tg.HapticFeedback.impactOccurred('medium');
                 setTimeout(() => { btn.innerText = original; btn.style.background = "#6c5ce7"; }, 2000);
             });
         };
@@ -109,7 +137,7 @@
             document.getElementById('f-earned').innerText = "$" + (snap.size * 0.05).toFixed(2);
 
             if (snap.empty) {
-                listContainer.innerHTML = '<div style="text-align:center; opacity:0.3; padding:20px;">Henüz kimse yok...</div>';
+                listContainer.innerHTML = '<div style="text-align:center; opacity:0.3; padding:20px;">Henüz arkadaşın yok.</div>';
                 return;
             }
             snap.forEach(doc => {
@@ -117,7 +145,7 @@
                 listContainer.innerHTML += `
                     <div class="f-row">
                         <div class="f-avatar">${(data.username || 'U')[0].toUpperCase()}</div>
-                        <div class="f-info"><b>@${data.username || 'Hidden'}</b><span>Davet Edildi</span></div>
+                        <div class="f-info"><b>@${data.username || 'User'}</b><span>Davet Edildi</span></div>
                         <div class="f-reward">+$0.05</div>
                     </div>`;
             });
@@ -141,33 +169,30 @@
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
         .active { display: flex; }
 
-        /* Kartlar */
-        .card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .main-card { background: linear-gradient(135deg, var(--v), #341f97); text-align: center; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2); }
-
-        /* Form Elemanları */
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none; }
-        .btn-pay { width: 100%; background: var(--y); color: #000; border: none; padding: 16px; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .card { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--v); }
+        
+        .btn-pay { width: 100%; background: var(--v); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .btn-y { background: var(--y); color: #000; }
 
         /* Animasyonlar */
-        .shake { animation: shakeAnim 0.5s ease; border-color: var(--err) !important; }
+        .shake { animation: shakeAnim 0.5s; border-color: var(--err) !important; }
         @keyframes shakeAnim { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .bounce { animation: bounceAnim 0.5s ease; border-color: var(--ok) !important; }
+        .bounce { animation: bounceAnim 0.5s; border-color: var(--ok) !important; }
         @keyframes bounceAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .status-text { font-size: 13px; font-weight: bold; text-align: center; margin-top: 10px; min-height: 18px; }
-        .err-txt { color: var(--err); } .ok-txt { color: var(--ok); }
 
-        /* Referans Listesi */
+        /* Arkadaş Listesi Stilleri */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .stat-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; text-align: center; }
-        .ref-link-box { background: #000; padding: 12px; border-radius: 10px; font-size: 10px; color: #aaa; word-break: break-all; margin: 5px 0; }
-        .f-row { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; }
+        .ref-link-box { background: #000; padding: 10px; border-radius: 10px; font-size: 10px; color: #aaa; word-break: break-all; margin-bottom: 8px; }
+        .f-row { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 8px; }
         .f-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--v); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; }
-        .f-info { flex: 1; } .f-reward { color: var(--ok); font-weight: bold; }
+        .f-info { flex: 1; } .f-reward { color: var(--ok); font-weight: bold; font-size: 13px; }
 
-        /* Navbar */
         .nav { height: 75px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 10px; transition: 0.3s; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 10px; }
         .n-on { opacity: 1; color: var(--y); transform: translateY(-3px); }
         .n-icon { font-size: 22px; display: block; margin-bottom: 4px; }
     </style>
@@ -176,43 +201,50 @@
 
 <div id="app">
     <div id="p-main" class="page active">
-        <div style="text-align: center; margin: 20px 0;">
-            <img src="koalasmining.jpg" style="width: 110px; border-radius: 50%; border: 4px solid var(--y);">
-            <h1 style="margin: 10px 0 0 0;">KOALAS HUB</h1>
-            <p style="opacity: 0.5; font-size: 14px;">Premium Community Access</p>
+        <div style="text-align: center; margin-top: 20px;">
+            <img src="koalasmining.jpg" style="width: 100px; border-radius: 50%; border: 3px solid var(--y);">
+            <h1 style="margin: 10px 0;">KOALAS HUB</h1>
         </div>
-        <div class="card main-card">
-            <small style="opacity: 0.8;">CÜZDAN BAKİYESİ</small>
-            <h1 style="font-size: 40px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
-            <div style="font-size: 14px; opacity: 0.9;">🪙 <span class="ui-kls">0.00</span> KLS Token</div>
+        <div class="card" style="background: linear-gradient(135deg, var(--v), #341f97); text-align: center;">
+            <small>TOPLAM BAKİYE</small>
+            <h1 style="font-size: 36px; margin: 10px 0;">$<span class="ui-usdt">0.0000</span></h1>
+            <div style="font-size: 13px; opacity: 0.8;">🪙 <span class="ui-kls">0.00</span> KLS</div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2 style="margin-top:0;">Referanslarım</h2>
+        <h2 style="margin-top:0;">Referans Merkezi</h2>
+        
+        <div class="card" id="code-input-box">
+            <small style="color:var(--y); font-weight:bold;">BİR DAVET KODUN VAR MI?</small>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="invite-code-input" placeholder="Kodu buraya yaz..." style="margin:0;">
+                <button id="apply-code-btn" class="btn-pay btn-y" style="width:auto; padding:12px 20px;" onclick="applyInviteCode()">GİR</button>
+            </div>
+            <p style="font-size:10px; opacity:0.5; margin:8px 0 0 0;">Bir kod girerek anında 0.05$ kazanabilirsin.</p>
+        </div>
+
         <div class="stat-grid">
             <div class="stat-item"><small>Arkadaşlar</small><div id="f-count" style="font-size:20px; font-weight:bold;">0</div></div>
-            <div class="stat-item"><small>Kazanç</small><div id="f-earned" style="font-size:20px; font-weight:bold; color:var(--ok);">$0.00</div></div>
+            <div class="stat-item"><small>Toplam Kazanç</small><div id="f-earned" style="font-size:20px; font-weight:bold; color:var(--ok);">$0.00</div></div>
         </div>
-        <div class="card" style="border: 1px dashed var(--v);">
-            <small style="color:var(--v); font-weight:bold;">DAVET LİNKİN</small>
+
+        <div class="card">
+            <small style="font-weight:bold; color:var(--v);">SENİN DAVET LİNKİN</small>
             <div id="ref-link-display" class="ref-link-box">Yükleniyor...</div>
-            <button class="btn-pay" style="background:var(--v); color:#fff; padding:12px; margin-top:5px;" onclick="copyRefLink(this)">KOPYALA</button>
+            <button class="btn-pay" onclick="copyRefLink(this)">LİNKİ KOPYALA</button>
         </div>
-        <div id="friends-list" style="margin-top:10px;"></div>
+
+        <div id="friends-list"></div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2 style="margin-top:0;">Cüzdan</h2>
-        <div class="card" id="withdraw-card">
-            <h3 style="margin:0 0 15px 0;">Para Çekme</h3>
+        <h2>Cüzdan</h2>
+        <div class="card" id="withdraw-box">
+            <h3 style="margin:0 0 10px 0;">Para Çek</h3>
             <input type="number" id="withdraw-amount" placeholder="Miktar ($10.00)">
-            <input type="text" id="wallet-address" placeholder="Cüzdan Adresiniz (TON/USDT)">
-            <button class="btn-pay" onclick="requestWithdraw()">ÖDEME TALEBİ OLUŞTUR</button>
-            <div id="status-msg" class="status-text"></div>
-        </div>
-        <div class="card" style="opacity:0.6; font-size:12px;">
-            <p>• Minimum çekim $10.00.<br>• İşlemler 24 saat içinde tamamlanır.</p>
+            <input type="text" id="wallet-address" placeholder="Cüzdan Adresi (TON/USDT)">
+            <button class="btn-pay btn-y" onclick="tg.showAlert('Talebiniz kaydedildi.')">TALEP OLUŞTUR</button>
         </div>
     </div>
 
