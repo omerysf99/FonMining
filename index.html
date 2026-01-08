@@ -2,230 +2,233 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX ULTIMATE v512</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
-            authDomain: "fonixapp.firebaseapp.com",
-            projectId: "fonixapp",
-            appId: "1:980255542194:web:883a3f7a8fc05fee6332ab"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const tg = window.Telegram.WebApp;
-        const myID = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "8392479231"; 
-
-        // Kart ve Emoji Tanımları
-        const TIERS = [
-            { id: 'com', name: 'COMMON', clr: '#32FF7E', emoji: '🦔', cards: ['Fast Hedgehog', 'Iron Pickaxe', 'Nano Core'] },
-            { id: 'epic', name: 'EPIC', clr: '#A335EE', emoji: '🧬', cards: ['Quantum Drill', 'Laser Sword', 'Cyber Eye'] },
-            { id: 'leg', name: 'LEGENDARY', clr: '#FF9F43', emoji: '🏆', cards: ['Solar Titan', 'Nebula Rig', 'Void Star'] },
-            { id: 'og', name: 'OG SERIES', clr: '#48DBFB', emoji: '👑', cards: ['Founder King', 'Alpha Wolf', 'System Admin'] }
-        ];
-
-        let stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [] };
-
-        async function init() {
-            const snap = await getDoc(doc(db, "users", myID));
-            if (snap.exists()) stats = snap.data();
-            else {
-                stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [], lastAdDate: new Date().toDateString() };
-                await setDoc(doc(db, "users", myID), stats);
-            }
-            updateUI();
-        }
-
-        function updateUI() {
-            document.querySelectorAll('.u-val').forEach(e => e.innerText = stats.usdt.toFixed(5));
-            document.querySelectorAll('.t-val').forEach(e => e.innerText = stats.ton.toFixed(6));
-            document.getElementById('limit-count').innerText = stats.adsToday;
-            
-            const matrix = document.getElementById('album-matrix');
-            matrix.innerHTML = "";
-
-            TIERS.forEach(t => {
-                let row = document.createElement('div');
-                row.className = 'tier-row';
-                row.innerHTML = `<div class="tier-label">${t.name}</div>`;
-                let grid = document.createElement('div');
-                grid.className = 'grid';
-
-                t.cards.forEach((name, i) => {
-                    const cID = `${t.id}_${i+1}`;
-                    const owned = stats.inventory?.includes(cID);
-                    grid.innerHTML += `
-                        <div class="card ${owned ? 'owned' : 'locked'}" style="--c: ${t.clr}">
-                            <div class="card-num">#${i+1}</div>
-                            <div class="card-art">${owned ? t.emoji : '🔒'}</div>
-                            <div class="card-name">${owned ? name : 'LOCKED'}</div>
-                        </div>
-                    `;
-                });
-                row.appendChild(grid);
-                matrix.appendChild(row);
-            });
-        }
-
-        window.openChest = () => {
-            if(stats.adsToday >= 50) return tg.showAlert("Daily limit reached!");
-            tg.HapticFeedback.impactOccurred('medium');
-            
-            window.showAdexora().then(async () => {
-                let uRew = Math.random() * 0.0005;
-                let tRew = Math.random() * 0.000005;
-                
-                let wonCard = null;
-                if(Math.random() < 0.05) { // Test için şansı %5 yaptım
-                    const tIndex = Math.floor(Math.random() * TIERS.length);
-                    const cIndex = Math.floor(Math.random() * 3) + 1;
-                    wonCard = { id: `${TIERS[tIndex].id}_${cIndex}`, name: TIERS[tIndex].cards[cIndex-1] };
-                }
-
-                let newInv = stats.inventory || [];
-                if(wonCard && !newInv.includes(wonCard.id)) newInv.push(wonCard.id);
-
-                await updateDoc(doc(db, "users", myID), {
-                    usdt: increment(uRew), ton: increment(tRew), adsToday: increment(1), inventory: newInv
-                });
-
-                stats.usdt += uRew; stats.ton += tRew; stats.adsToday += 1; stats.inventory = newInv;
-                updateUI();
-                tg.showAlert(`CONGRATS!\n+$${uRew.toFixed(5)} USDT\n+${tRew.toFixed(6)} TON ${wonCard ? '\n\nNEW CARD: ' + wonCard.name : ''}`);
-            });
-        };
-
-        window.switchTab = (id, btn) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.n-btn').forEach(b => b.classList.remove('on'));
-            btn.classList.add('on');
-            tg.HapticFeedback.selectionChanged();
-        };
-
-        window.onload = init;
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hobbo Clicker Game</title>
     <style>
-        :root { --bg: #0A0C0F; --sur: #14171C; --acc: #00FFCC; --bor: #23282F; --ton: #0088cc; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; user-select: none; }
-        
-        .app { height: 100vh; display: flex; flex-direction: column; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #1a2a3a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
 
-        /* Header UI */
-        .head { padding: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .logo { font-family: 'Syncopate'; font-size: 16px; letter-spacing: -1px; }
-        .stats { display: flex; gap: 8px; }
-        .s-box { background: var(--sur); padding: 8px 12px; border-radius: 12px; border: 1px solid var(--bor); min-width: 90px; border-bottom: 3px solid var(--acc); }
-        .s-box label { font-size: 7px; color: #666; font-weight: 800; display: block; margin-bottom: 2px; }
-        .s-box span { font-family: 'Syncopate'; font-size: 10px; color: var(--acc); }
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background: linear-gradient(to bottom, #2c3e50, #000000);
+            border: 4px solid #34495e;
+            border-radius: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
 
-        .content { flex: 1; overflow-y: auto; padding: 15px; }
-        .page { display: none; height: 100%; }
-        .active { display: block; animation: slideUp 0.3s ease-out; }
+        /* Üst Panel */
+        .stats-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
 
-        /* Main Page */
-        .main-hero { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .chest-card { width: 100%; max-width: 300px; background: linear-gradient(135deg, #1A1F26, #0A0C0F); 
-            border: 2px solid var(--acc); border-radius: 30px; padding: 40px 20px; text-align: center; 
-            box-shadow: 0 10px 40px rgba(0,255,204,0.1); cursor: pointer; transition: 0.2s; }
-        .chest-card:active { transform: scale(0.95); }
-        .chest-emoji { font-size: 80px; margin-bottom: 15px; display: block; filter: drop-shadow(0 0 10px var(--acc)); }
+        .stat-item { text-align: center; }
+        .stat-value { font-weight: bold; color: #f1c40f; font-size: 1.2em; }
+        .stat-label { font-size: 0.8em; color: #bdc3c7; }
 
-        /* Album Matrix */
-        .title-bar { font-family: 'Syncopate'; font-size: 12px; text-align: center; margin-bottom: 20px; color: var(--acc); }
-        .tier-row { margin-bottom: 20px; }
-        .tier-label { font-size: 9px; opacity: 0.4; font-family: 'Syncopate'; margin-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .card { aspect-ratio: 1/1.3; background: #181C23; border-radius: 12px; border: 1px solid #2D343D; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12px 5px; position: relative; }
-        .card-num { position: absolute; top: 8px; right: 8px; font-size: 7px; color: var(--c); font-weight: 800; }
-        .card-art { font-size: 32px; margin-top: 10px; }
-        .card-name { font-size: 7px; font-weight: 800; text-align: center; color: #fff; text-transform: uppercase; }
-        .owned { border-color: var(--c); box-shadow: 0 0 15px rgba(0, 255, 204, 0.05); }
-        .owned .card-name { color: var(--c); }
-        .locked { opacity: 0.2; filter: grayscale(1); }
+        /* Karakter Alanı */
+        #character-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
 
-        /* Wallet Page */
-        .wallet-card { background: var(--sur); border: 1px solid var(--bor); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        .input-group { margin-top: 15px; }
-        .input-group label { font-size: 9px; color: #666; font-family: 'Syncopate'; display: block; margin-bottom: 8px; }
-        .input-group input { width: 100%; background: #000; border: 1px solid var(--bor); padding: 15px; border-radius: 12px; color: #fff; outline: none; box-sizing: border-box; }
-        .btn-pro { width: 100%; margin-top: 20px; background: var(--acc); color: #000; border: none; padding: 18px; border-radius: 12px; font-family: 'Syncopate'; font-size: 11px; font-weight: 800; }
+        #character-area:active { transform: scale(0.95); }
 
-        /* Nav */
-        .nav { height: 75px; background: #0D0F13; border-top: 1px solid var(--bor); display: flex; justify-content: space-around; align-items: center; }
-        .n-btn { background: none; border: none; color: #444; font-family: 'Syncopate'; font-size: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .on { color: var(--acc); }
-        .n-icon { font-size: 22px; }
+        .character-img {
+            width: 200px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.3));
+        }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Enerji Barı */
+        .energy-container {
+            width: 80%;
+            height: 25px;
+            background: #2c3e50;
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            border: 2px solid #7f8c8d;
+        }
+
+        #energy-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            border-radius: 12px;
+            transition: width 0.3s;
+        }
+
+        /* Alt Menü */
+        .bottom-nav {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            background: #34495e;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        /* Tıklama Efekti */
+        .plus-one {
+            position: absolute;
+            color: #f1c40f;
+            font-weight: bold;
+            animation: moveUp 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes moveUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="head">
-        <div class="logo">FONIX<br><span style="font-size: 8px; color: var(--acc);">COLLECTOR</span></div>
-        <div class="stats">
-            <div class="s-box"><label>USDT ASSETS</label>$<span class="u-val">0.00000</span></div>
-            <div class="s-box" style="border-bottom-color: var(--ton);"><label>TON NETWORK</label><span class="t-val" style="color:var(--ton)">0.000000</span></div>
+<div id="game-container">
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-label">Coin</div>
+            <div class="stat-value" id="coin-count">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Saatlik Kazanç</div>
+            <div class="stat-value" id="per-hour">+0</div>
         </div>
     </div>
 
-    <div class="content">
-        <div id="home" class="page active">
-            <div class="main-hero">
-                <div class="chest-card" onclick="openChest()">
-                    <span class="chest-emoji">📦</span>
-                    <div style="font-family: 'Syncopate'; font-size: 18px; letter-spacing: 1px;">GIFT CHEST</div>
-                    <div style="font-size: 9px; opacity: 0.5; margin-top: 10px;">LIMIT: <span id="limit-count">0</span> / 50</div>
-                    <div style="width: 100%; height: 4px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden;">
-                        <div style="width: 40%; height: 100%; background: var(--acc);"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="album" class="page">
-            <div class="title-bar">COLLECTION ALBUM</div>
-            <div id="album-matrix"></div>
-        </div>
-
-        <div id="wallet" class="page">
-            <div class="wallet-card">
-                <label style="font-size: 8px; opacity: 0.5; font-family: 'Syncopate';">TOTAL BALANCE</label>
-                <div style="font-family: 'Syncopate'; font-size: 22px; margin-top: 5px; color: var(--acc);">$<span class="u-val">0.00000</span></div>
-            </div>
-            
-            <div class="wallet-card">
-                <div class="input-group">
-                    <label>TON WALLET ADDRESS</label>
-                    <input type="text" placeholder="UQdx..." spellcheck="false">
-                </div>
-                <div class="input-group">
-                    <label>AMOUNT TO WITHDRAW</label>
-                    <input type="number" placeholder="Min 10.00">
-                </div>
-                <button class="btn-pro" onclick="tg.showAlert('Minimum withdrawal is $10')">SEND TRANSACTION</button>
-            </div>
-        </div>
+    <div id="character-area">
+        <h2 id="total-display" style="font-size: 2.5em; margin-bottom: 10px;">0</h2>
+        <svg class="character-img" viewBox="0 0 100 120">
+            <circle cx="50" cy="40" r="20" fill="#e0ac69"/>
+            <rect x="35" y="60" width="30" height="50" fill="#5d4037"/>
+            <rect x="30" y="55" width="40" height="10" rx="5" fill="#333"/>
+        </svg>
     </div>
 
-    <div class="nav">
-        <button class="n-btn" onclick="switchTab('home', this)"><span class="n-icon">⚡</span><span>MINE</span></button>
-        <button class="n-btn" onclick="switchTab('album', this)"><span class="n-icon">🃏</span><span>CARDS</span></button>
-        <button class="n-btn" onclick="switchTab('wallet', this)"><span class="n-icon">💰</span><span>WALLET</span></button>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span>⚡</span>
+        <div class="energy-container">
+            <div id="energy-fill"></div>
+        </div>
+        <span id="energy-text">2000 / 2000</span>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="buyUpgrade()">🚀 Geliştir<br>(100 Coin)</button>
+        <button class="nav-btn">👥 Arkadaşlar</button>
+        <button class="nav-btn">📋 Görevler</button>
     </div>
 </div>
+
+<script>
+    let coins = 0;
+    let energy = 2000;
+    const maxEnergy = 2000;
+    let clickValue = 5;
+    let autoIncome = 0;
+
+    const coinDisplay = document.getElementById('coin-count');
+    const totalDisplay = document.getElementById('total-display');
+    const energyFill = document.getElementById('energy-fill');
+    const energyText = document.getElementById('energy-text');
+    const perHourDisplay = document.getElementById('per-hour');
+    const charArea = document.getElementById('character-area');
+
+    // Tıklama Fonksiyonu
+    charArea.addEventListener('click', (e) => {
+        if (energy >= clickValue) {
+            updateCoins(clickValue);
+            updateEnergy(-clickValue);
+            showClickEffect(e.clientX, e.clientY);
+        }
+    });
+
+    function updateCoins(amount) {
+        coins += amount;
+        coinDisplay.innerText = Math.floor(coins).toLocaleString();
+        totalDisplay.innerText = Math.floor(coins).toLocaleString();
+    }
+
+    function updateEnergy(amount) {
+        energy = Math.min(maxEnergy, Math.max(0, energy + amount));
+        const percentage = (energy / maxEnergy) * 100;
+        energyFill.style.width = percentage + "%";
+        energyText.innerText = `${Math.floor(energy)} / ${maxEnergy}`;
+    }
+
+    // Tıklama Efekti (+5 yazısı)
+    function showClickEffect(x, y) {
+        const effect = document.createElement('div');
+        effect.className = 'plus-one';
+        effect.innerText = '+' + clickValue;
+        effect.style.left = x + 'px';
+        effect.style.top = y + 'px';
+        document.body.appendChild(effect);
+        setTimeout(() => effect.remove(), 800);
+    }
+
+    // Basit Geliştirme Sistemi
+    function buyUpgrade() {
+        if (coins >= 100) {
+            coins -= 100;
+            autoIncome += 10;
+            perHourDisplay.innerText = "+" + autoIncome;
+            updateCoins(0);
+            alert("Geliştirme Yapıldı! Saatlik kazanç arttı.");
+        } else {
+            alert("Yetersiz Coin!");
+        }
+    }
+
+    // Enerji Yenilenmesi ve Otomatik Kazanç (Her saniye)
+    setInterval(() => {
+        // Enerji her saniye 2 artar
+        updateEnergy(2);
+        
+        // Otomatik kazanç (saatlik kazancın saniyeye bölünmüş hali)
+        if (autoIncome > 0) {
+            updateCoins(autoIncome / 3600);
+        }
+    }, 1000);
+
+</script>
 
 </body>
 </html>
