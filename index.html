@@ -8,7 +8,8 @@
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --nav-size: 75px;
+            --panel-bg: rgba(30, 41, 59, 0.95);
+            --nav-size: 65px;
         }
 
         body {
@@ -31,88 +32,99 @@
             display: flex; flex-direction: column;
         }
 
-        /* Üst Panel */
+        /* Üst Panel - Her zaman görünür */
         .top-ui {
             display: flex; justify-content: space-between;
-            padding: 15px; background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 50;
+            padding: 15px; background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
         }
 
         .profile-area { display: flex; align-items: center; gap: 10px; }
-        .p-icon { width: 45px; height: 45px; border-radius: 10px; border: 2px solid var(--accent-blue); }
+        .p-icon { width: 40px; height: 40px; border-radius: 8px; border: 2px solid var(--accent-blue); }
 
-        .stats-area { display: flex; gap: 10px; }
-        .stat-box { background: rgba(30, 41, 59, 0.9); padding: 5px 12px; border-radius: 12px; text-align: center; min-width: 70px; }
+        .stats-area { display: flex; gap: 8px; }
+        .stat-box { background: rgba(15, 23, 42, 0.8); padding: 5px 12px; border-radius: 10px; text-align: center; border: 1px solid #334155; }
 
-        /* Yan Menüler */
-        .side-menu {
-            position: absolute; width: 100%; top: 120px;
-            display: flex; justify-content: space-between;
-            padding: 0 15px; pointer-events: none; z-index: 40;
-        }
-        .side-stack { display: flex; flex-direction: column; gap: 18px; pointer-events: auto; }
-        .s-btn { width: 60px; text-align: center; font-size: 0.65rem; font-weight: bold; }
-        .s-btn img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 4px; }
-
-        /* ANA OYUN ALANI */
-        .main-stage {
+        /* ANA OYUN EKRANI */
+        #main-play-screen {
             flex-grow: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            position: relative; z-index: 10;
+            position: relative;
         }
 
-        #score-display { 
-            font-size: 3.5rem; font-weight: 900; margin-bottom: 15px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.8); 
-        }
+        #score-display { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; text-shadow: 0 4px 10px #000; }
 
-        /* KÜÇÜLTÜLMÜŞ VE SABİT ANA GÖRSEL */
         #hero {
-            width: 200px; /* Görsel boyutu küçültüldü */
+            width: 180px; /* İstediğin gibi küçültüldü */
             cursor: pointer;
-            filter: drop-shadow(0 0 25px rgba(0,0,0,0.5));
-            /* Push/Scale animasyonu kaldırıldı */
-            transition: filter 0.1s;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+            transition: filter 0.1s; /* Push animasyonu kaldırıldı */
         }
-        
-        #hero:active {
-            filter: brightness(1.2); /* Tıklandığında sadece hafif bir parlama verir */
+        #hero:active { filter: brightness(1.3); }
+
+        .notcoin-fixed { position: absolute; left: 20px; bottom: 30px; width: 80px; filter: drop-shadow(0 0 15px var(--gold)); }
+
+        /* UPGRADE (GELİŞTİRME) EKRANI */
+        #upgrade-screen {
+            display: none; /* Varsayılan kapalı */
+            flex-grow: 1;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 80;
         }
 
-        /* Notcoin Sol Alt */
-        .notcoin-fixed {
-            position: absolute; left: 20px; bottom: 30px;
-            width: 85px; filter: drop-shadow(0 0 15px var(--gold));
+        .upgrade-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; }
+
+        .upgrade-item {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
         }
+
+        .up-info { display: flex; align-items: center; gap: 15px; }
+        .up-icon { width: 50px; height: 50px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        .up-details div:first-child { font-weight: bold; font-size: 1rem; }
+        .up-details div:last-child { font-size: 0.8rem; color: #94a3b8; }
+
+        .buy-btn {
+            background: var(--accent-blue);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .buy-btn:disabled { background: #475569; cursor: not-allowed; }
 
         /* ALT PANEL */
         .bottom-panel {
             background: rgba(15, 23, 42, 0.95);
-            padding: 15px 10px 25px 10px; border-top: 3px solid #1e293b;
-            z-index: 50;
+            padding: 10px 10px 25px 10px; border-top: 2px solid #1e293b;
+            z-index: 100;
         }
 
-        .energy-wrap { margin-bottom: 15px; }
-        .e-label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px; font-size: 0.9rem; }
-        .e-bar { background: #334155; height: 16px; border-radius: 20px; overflow: hidden; }
-        #e-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.1s; }
+        .energy-wrap { margin-bottom: 15px; padding: 0 10px; }
+        .e-bar { background: #334155; height: 12px; border-radius: 10px; overflow: hidden; }
+        #e-fill { width: 100%; height: 100%; background: var(--accent-blue); }
 
-        .tabs { display: flex; justify-content: space-around; align-items: flex-end; }
+        .tabs { display: flex; justify-content: space-around; }
         .tab-item { text-align: center; color: #94a3b8; font-size: 0.8rem; flex: 1; cursor: pointer; }
-        .tab-item img { 
-            width: var(--nav-size); height: var(--nav-size); 
-            display: block; margin: 0 auto 5px; border-radius: 15px;
-        }
-        .tab-item.active { color: white; font-weight: bold; }
-        .tab-item.active img { border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
+        .tab-item img { width: 50px; height: 50px; display: block; margin: 0 auto 5px; border-radius: 12px; transition: 0.2s; }
+        .tab-item.active { color: white; }
+        .tab-item.active img { border: 2px solid var(--gold); background: rgba(251, 191, 36, 0.1); }
 
-        /* Tıklama Sayısı Efekti */
-        .pop {
-            position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem;
-            pointer-events: none; animation: rise 0.6s forwards; z-index: 100;
-        }
-        @keyframes rise { to { transform: translateY(-120px); opacity: 0; } }
+        /* Tıklama Pop */
+        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem; pointer-events: none; animation: rise 0.6s forwards; z-index: 200; }
+        @keyframes rise { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -122,52 +134,73 @@
         <div class="profile-area">
             <img src="TapLv1.jpg" class="p-icon">
             <div>
-                <div style="font-size:0.85rem; font-weight:bold;">V.Albayra...</div>
-                <div style="font-size:0.65rem; color: #94a3b8;">ID: 8392479231</div>
+                <div style="font-size:0.8rem; font-weight:bold;">V.Albayra...</div>
+                <div style="font-size:0.6rem; color: #94a3b8;">ID: 8392479231</div>
             </div>
         </div>
         <div class="stats-area">
             <div class="stat-box">
-                <div style="font-size:0.55rem; color:#94a3b8;">Coin</div>
+                <div style="font-size:0.5rem; color:#94a3b8;">Coin</div>
                 <div id="coin-val" style="color:var(--gold); font-weight:bold;">0</div>
             </div>
             <div class="stat-box">
-                <div style="font-size:0.55rem; color:#94a3b8;">Per hour</div>
+                <div style="font-size:0.5rem; color:#94a3b8;">Per hour</div>
                 <div id="hour-val" style="color:#10b981; font-weight:bold;">+0</div>
             </div>
         </div>
     </div>
 
-    <div class="side-menu">
-        <div class="side-stack">
-            <div class="s-btn"><img src="Jgang.jpg">GANG</div>
-            <div class="s-btn"><img src="TapEarn.jpg">EARN</div>
-            <div class="s-btn"><img src="Airdrop.jpg">AIRDROP</div>
-        </div>
-        <div class="side-stack">
-            <div class="s-btn"><img src="AutoTap.jpg">AUTO</div>
-            <div class="s-btn"><img src="Nft.jpg">NFT</div>
-        </div>
-    </div>
-
-    <div class="main-stage" id="tap-area">
+    <div id="main-play-screen">
         <div id="score-display">0</div>
         <img src="TapLv1.jpg" id="hero" alt="Hero">
         <img src="Notcoin.jpg" class="notcoin-fixed" alt="Notcoin">
     </div>
 
+    <div id="upgrade-screen">
+        <div class="upgrade-title">Geliştirmeler</div>
+        
+        <div class="upgrade-item">
+            <div class="up-info">
+                <div class="up-icon">⚡</div>
+                <div class="up-details">
+                    <div>Tık Gücü</div>
+                    <div id="up-tap-desc">+1 tık gücü</div>
+                </div>
+            </div>
+            <button class="buy-btn" onclick="buyUpgrade('tap')">100 🟡</button>
+        </div>
+
+        <div class="upgrade-item">
+            <div class="up-info">
+                <div class="up-icon">🕒</div>
+                <div class="up-details">
+                    <div>Saatlik Kazanç</div>
+                    <div id="up-hour-desc">+50 per hour</div>
+                </div>
+            </div>
+            <button class="buy-btn" onclick="buyUpgrade('hour')">500 🟡</button>
+        </div>
+
+        <div class="upgrade-item">
+            <div class="up-info">
+                <div class="up-icon">🔋</div>
+                <div class="up-details">
+                    <div>Enerji Deposu</div>
+                    <div id="up-energy-desc">+500 Max Enerji</div>
+                </div>
+            </div>
+            <button class="buy-btn" onclick="buyUpgrade('energy')">1000 🟡</button>
+        </div>
+    </div>
+
     <div class="bottom-panel">
         <div class="energy-wrap">
-            <div class="e-label">
-                <span>⚡ <span id="e-current">2000</span> / 2000</span>
-                <span style="color:var(--gold);" id="p-text">+5</span>
-            </div>
             <div class="e-bar"><div id="e-fill"></div></div>
         </div>
 
         <div class="tabs">
-            <div class="tab-item active"><img src="Notcoin.jpg">Bums</div>
-            <div class="tab-item" onclick="upgrade()"><img src="Upgrade.jpg">Geliştir</div>
+            <div class="tab-item active" id="tab-play" onclick="showScreen('play')"><img src="Notcoin.jpg">Oyna</div>
+            <div class="tab-item" id="tab-up" onclick="showScreen('upgrade')"><img src="Upgrade.jpg">Geliştir</div>
             <div class="tab-item"><img src="Task.jpg">Görevler</div>
             <div class="tab-item"><img src="friends.jpg">Arkadaşlar</div>
         </div>
@@ -177,54 +210,62 @@
 <script>
     let coins = 0;
     let energy = 2000;
+    let maxEnergy = 2000;
     let tapPower = 5;
     let income = 0;
 
-    const coinEl = document.getElementById('coin-val');
-    const scoreEl = document.getElementById('score-display');
-    const eFill = document.getElementById('e-fill');
-    const eText = document.getElementById('e-current');
-    const hVal = document.getElementById('hour-val');
+    function showScreen(type) {
+        const playScr = document.getElementById('main-play-screen');
+        const upScr = document.getElementById('upgrade-screen');
+        const tabPlay = document.getElementById('tab-play');
+        const tabUp = document.getElementById('tab-up');
 
-    document.getElementById('tap-area').addEventListener('pointerdown', (e) => {
+        if(type === 'upgrade') {
+            playScr.style.display = 'none';
+            upScr.style.display = 'block';
+            tabUp.classList.add('active');
+            tabPlay.classList.remove('active');
+        } else {
+            playScr.style.display = 'flex';
+            upScr.style.display = 'none';
+            tabPlay.classList.add('active');
+            tabUp.classList.remove('active');
+        }
+    }
+
+    document.getElementById('main-play-screen').addEventListener('pointerdown', (e) => {
         if (energy >= tapPower) {
             coins += tapPower;
             energy -= tapPower;
             updateUI();
-            createPop(e.clientX, e.clientY);
+            const p = document.createElement('div');
+            p.className = 'pop'; p.innerText = `+${tapPower}`;
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
         }
     });
 
-    function updateUI() {
-        scoreEl.innerText = Math.floor(coins).toLocaleString();
-        coinEl.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
-        eFill.style.width = (energy / 2000 * 100) + "%";
-        eText.innerText = Math.floor(energy);
-        hVal.innerText = "+" + income;
-        document.getElementById('p-text').innerText = `+${tapPower}`;
-    }
-
-    function upgrade() {
-        let cost = tapPower * 100;
-        if (coins >= cost) {
-            coins -= cost;
-            tapPower += 5;
-            income += 50;
-            updateUI();
+    function buyUpgrade(type) {
+        if(type === 'tap' && coins >= 100) {
+            coins -= 100; tapPower += 1;
+        } else if(type === 'hour' && coins >= 500) {
+            coins -= 500; income += 50;
+        } else if(type === 'energy' && coins >= 1000) {
+            coins -= 1000; maxEnergy += 500; energy = maxEnergy;
         }
+        updateUI();
     }
 
-    function createPop(x, y) {
-        const p = document.createElement('div');
-        p.className = 'pop';
-        p.innerText = `+${tapPower}`;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 600);
+    function updateUI() {
+        document.getElementById('score-display').innerText = Math.floor(coins).toLocaleString();
+        document.getElementById('coin-val').innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
+        document.getElementById('e-fill').style.width = (energy / maxEnergy * 100) + "%";
+        document.getElementById('hour-val').innerText = "+" + income;
     }
 
     setInterval(() => {
-        if (energy < 2000) energy = Math.min(2000, energy + 5);
+        if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 5);
         if (income > 0) coins += (income / 3600);
         updateUI();
     }, 1000);
