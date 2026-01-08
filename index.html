@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX PRO v503</title>
+    <title>FONIX PRO v504</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -30,7 +30,6 @@
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         
         let stats = { usdt: 0, adsToday: 0, lastAdDate: "" };
-        let friendCount = 0;
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -45,20 +44,10 @@
                     await updateDoc(userRef, { adsToday: 0, lastAdDate: today });
                 }
             } else {
-                stats = { usdt: 0, adsToday: 0, lastAdDate: today, username: user?.username || "Miner", invitedBy: tg.initDataUnsafe?.start_param || "" };
+                stats = { usdt: 0, adsToday: 0, lastAdDate: today, username: user?.username || "Oyuncu" };
                 await setDoc(userRef, stats);
-                if(stats.invitedBy) await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.10) });
             }
-            
-            await fetchFriends();
             updateUI();
-        }
-
-        async function fetchFriends() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            friendCount = snap.size;
-            document.getElementById('ref-count-val').innerText = friendCount;
         }
 
         function updateUI() {
@@ -66,38 +55,32 @@
             document.getElementById('ad-count').innerText = stats.adsToday;
             const progress = (stats.adsToday / 50) * 100;
             document.getElementById('limit-bar').style.width = progress + "%";
-            document.getElementById('ref-link').innerText = `https://t.me/FonixMiningBot?start=${myID}`;
         }
 
         window.watchAd = () => {
-            if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
+            if(stats.adsToday >= 50) return tg.showAlert("Günlük limitinize ulaştınız!");
+            
+            tg.HapticFeedback.impactOccurred('medium');
             window.showAdexora().then(async () => {
-                const reward = 0.05;
+                const reward = 0.05; // Reklam başı kazanç
                 stats.usdt += reward;
                 stats.adsToday += 1;
                 await updateDoc(doc(db, "users", myID), { usdt: increment(reward), adsToday: increment(1) });
                 updateUI();
-            }).catch(() => tg.showAlert("Reklam yüklenemedi."));
+                tg.showAlert("Sandık açıldı! $0.05 kazandınız.");
+            }).catch(() => tg.showAlert("Hediye sandığı şu an hazır değil."));
         };
 
         window.processWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amt').value);
             const address = document.getElementById('wallet-adr').value;
 
-            if (!amount || amount < 10) return tg.showAlert("Minimum çekim 10 USDT.");
+            if (!amount || amount < 10) return tg.showAlert("Minimum çekim tutarı 10 USDT'dir.");
             if (amount > stats.usdt) return tg.showAlert("Yetersiz bakiye.");
-            if (address.length < 10) return tg.showAlert("Geçerli bir adres girin.");
+            if (address.length < 10) return tg.showAlert("Lütfen geçerli bir USDT (TON) adresi girin.");
 
-            // KRAL İSTEDİĞİN MANTIK BURADA: 5$ için 2 Ref (1$ = 0.4 Ref)
-            const requiredRefs = Math.ceil((amount / 5) * 2);
-            
-            if (friendCount < requiredRefs) {
-                tg.showAlert(`Yetersiz Referans!\n\n${amount}$ çekmek için en az ${requiredRefs} aktif referansınız olmalı.\nŞu anki: ${friendCount}`);
-                return;
-            }
-
-            tg.showConfirm(`${amount} USDT çekim talebi onaylansın mı?`, (ok) => {
-                if(ok) tg.showAlert("Talebiniz alındı! 24 saat içinde kontrol edilecektir.");
+            tg.showConfirm(`${amount} USDT çekim talebinizi onaylıyor musunuz?`, (ok) => {
+                if(ok) tg.showAlert("Talebiniz başarıyla alındı! İnceleme sonrası ödemeniz yapılacaktır.");
             });
         };
 
@@ -116,119 +99,77 @@
         :root { --main: #00ffcc; --bg: #050508; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08); }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
         .app-shell { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
+        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
         .on { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Arkaplan Efekti */
-        .glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top right, rgba(0,255,204,0.05) 0%, transparent 40%); z-index: -1; }
+        .glass-card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 25px; margin-bottom: 20px; text-align: center; }
+        .bal-val { font-family: 'Syncopate'; font-size: 36px; font-weight: 700; color: var(--main); margin: 10px 0; }
 
-        /* Kartlar */
-        .glass-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 20px; position: relative; overflow: hidden; }
-        .glass-card::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%); }
+        .chest-zone { background: linear-gradient(135deg, #1a1a2e 0%, #000 100%); border: 2px solid var(--main); border-radius: 35px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .chest-zone:active { transform: scale(0.95); background: var(--main); color: #000; }
+        .chest-icon { font-size: 60px; display: block; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--main)); }
+
+        .primary-btn { width: 100%; padding: 20px; border-radius: 20px; border: none; font-family: 'Syncopate'; font-weight: 700; font-size: 13px; cursor: pointer; background: #fff; color: #000; }
         
-        .bal-val { font-family: 'Syncopate'; font-size: 32px; font-weight: 700; color: var(--main); text-shadow: 0 0 20px rgba(0,255,204,0.2); margin: 10px 0; }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 10px; opacity: 0.5; margin-bottom: 10px; font-family: 'Syncopate'; }
+        .input-group input { width: 100%; background: #000; border: 1px solid var(--border); border-radius: 15px; padding: 18px; color: #fff; outline: none; box-sizing: border-box; }
 
-        /* Butonlar */
-        .primary-btn { width: 100%; padding: 20px; border-radius: 18px; border: none; font-family: 'Syncopate'; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; background: #fff; color: #000; }
-        .primary-btn:active { transform: scale(0.97); background: var(--main); }
-        .ad-zone { height: 150px; background: linear-gradient(135deg, #00ffcc 0%, #0099ff 100%); color: #000; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px 0; }
-
-        /* Inputlar */
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 10px; opacity: 0.4; margin-bottom: 8px; font-family: 'Syncopate'; }
-        .input-group input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 15px; padding: 15px; color: #fff; outline: none; box-sizing: border-box; }
-
-        /* Navigasyon */
-        .nav-dock { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(10,10,15,0.9); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 24px; height: 75px; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 9px; font-family: 'Syncopate'; transition: 0.3s; }
+        .nav-dock { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(10,10,15,0.95); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 28px; height: 80px; display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; font-family: 'Syncopate'; }
         .on-nav { opacity: 1; color: var(--main); }
     </style>
 </head>
 <body>
 
-<div class="glow"></div>
-
 <div class="app-shell">
     <div id="home" class="tab-page on">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <span style="font-family: 'Syncopate'; font-size: 10px; color: var(--main);">NETWORK_ACTIVE</span>
-            <div style="background: rgba(0,255,204,0.1); padding: 5px 12px; border-radius: 50px; font-size: 9px; border: 1px solid var(--main);">DAILY: <span id="ad-count">0</span>/50</div>
+            <span style="font-family: 'Syncopate'; font-size: 10px; color: var(--main);">FONIX_SİSTEM_AKTİF</span>
+            <div style="font-size: 10px; opacity: 0.6;">GÜNLÜK: <span id="ad-count">0</span>/50</div>
         </header>
 
         <div class="glass-card">
-            <small style="opacity: 0.5; font-size: 9px; letter-spacing: 2px;">AVAILABLE ASSETS</small>
+            <small style="opacity: 0.5; font-size: 9px; letter-spacing: 2px;">TOPLAM BAKİYE</small>
             <div class="bal-val">$<span class="ui-balance">0.0000</span></div>
             <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 15px; overflow: hidden;">
-                <div id="limit-bar" style="height: 100%; background: var(--main); width: 0%; transition: 0.5s;"></div>
+                <div id="limit-bar" style="height: 100%; background: var(--main); width: 0%;"></div>
             </div>
         </div>
 
-        <div class="ad-zone" onclick="watchAd()">
-            <span style="font-size: 32px; margin-bottom: 10px;">⚡</span>
-            <span style="font-family: 'Syncopate'; font-weight: 700;">WATCH AD & EARN</span>
-            <small style="margin-top: 5px; opacity: 0.7;">$0.05 PER SESSION</small>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="glass-card" style="margin:0; padding:15px; text-align:center;">
-                <small style="opacity:0.4; font-size: 8px;">NODES</small>
-                <div id="ref-count-val" style="font-size: 18px; font-weight: 800; color: var(--main);">0</div>
-            </div>
-            <div class="glass-card" style="margin:0; padding:15px; text-align:center;">
-                <small style="opacity:0.4; font-size: 8px;">LEVEL</small>
-                <div style="font-size: 18px; font-weight: 800;">ELITE</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="ref" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">NETWORK</h2>
-        <div class="glass-card">
-            <small style="opacity:0.5; font-size: 9px;">UNIQUE INVITE LINK</small>
-            <div id="ref-link" style="font-size: 10px; background: #000; padding: 18px; border-radius: 15px; margin: 15px 0; word-break: break-all; border: 1px solid #222;">...</div>
-            <button class="primary-btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">SHARE LINK</button>
-        </div>
-        <div class="glass-card" style="background: rgba(0,255,204,0.05);">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <b style="display:block; font-size: 14px;">BONUS REWARD</b>
-                    <small style="opacity:0.6;">$0.10 Per active node</small>
-                </div>
-                <div style="font-size: 20px; font-weight: 800; color: var(--main);">$0.10</div>
-            </div>
+        <div class="chest-zone" onclick="watchAd()">
+            <span class="chest-icon">🎁</span>
+            <span style="font-family: 'Syncopate'; font-size: 14px; letter-spacing: 1px;">HEDİYE SANDIĞI AÇ</span>
+            <p style="font-size: 11px; opacity: 0.6; margin-top: 10px;">İzle ve Anında $0.05 Kazan</p>
         </div>
     </div>
 
     <div id="wallet" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">WITHDRAWAL</h2>
-        <div class="glass-card">
+        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">PARA ÇEKME</h2>
+        
+        <div class="glass-card" style="text-align: left;">
             <div class="input-group">
-                <label>USDT AMOUNT (MIN 10$)</label>
+                <label>ÇEKİLECEK TUTAR (MİN $10)</label>
                 <input type="number" id="withdraw-amt" placeholder="10.00">
             </div>
+            
             <div class="input-group">
-                <label>USDT ADDRESS (TON NETWORK)</label>
+                <label>USDT CÜZDAN ADRESİ (TON AĞI)</label>
                 <input type="text" id="wallet-adr" placeholder="UQ...">
             </div>
-            
-            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px dashed var(--border);">
-                <small style="font-size: 9px; opacity: 0.5; display: block; margin-bottom: 5px;">VERIFICATION REQUIREMENT:</small>
-                <span style="font-size: 11px; color: var(--main);">● Every $5 withdrawal requires 2 active referrals.</span>
+
+            <div style="background: rgba(0,255,204,0.05); padding: 15px; border-radius: 15px; margin-bottom: 25px; border: 1px solid rgba(0,255,204,0.1);">
+                <small style="font-size: 11px; color: var(--main);">ℹ️ Ödemeler manuel inceleme sonrası 24 saat içinde cüzdanınıza iletilir.</small>
             </div>
 
-            <button class="primary-btn" onclick="processWithdraw()">CONFIRM TRANSACTION</button>
-        </div>
-
-        <div class="glass-card" style="border-style: dashed; opacity: 0.5;">
-            <center><small>No recent transactions</small></center>
+            <button class="primary-btn" onclick="processWithdraw()">TALEBİ ONAYLA</button>
         </div>
     </div>
 
     <div class="nav-dock">
-        <button class="nav-btn on-nav" onclick="switchTab('home', this)">⚡<br>EARN</button>
-        <button class="nav-btn" onclick="switchTab('ref', this)">🛰️<br>NET</button>
-        <button class="nav-btn" onclick="switchTab('wallet', this)">💎<br>CASH</button>
+        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>KAZAN</button>
+        <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>CÜZDAN</button>
     </div>
 </div>
 
