@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX MATRIX v508</title>
+    <title>FONIX MATRIX v509</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
@@ -28,11 +28,29 @@
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
 
-        const TIERS = [
-            { id: 'com', name: 'COMMON', color: '#888', chance: 70 },
-            { id: 'epic', name: 'EPIC', color: '#a335ee', chance: 20 },
-            { id: 'leg', name: 'LEGENDARY', color: '#ff8000', chance: 9.5 },
-            { id: 'og', name: 'OG SERIES', color: '#00ffcc', chance: 0.5 }
+        const CARDS = [
+            { id: 'com_1', name: 'Hedgehog Miner', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'com', color: '#00ffcc' }, // Yeşil tonlu
+            { id: 'com_2', name: 'USB Pickaxe #2', img: 'https://i.imgur.com/f2oGv5L.png', tier: 'com', color: '#00ffcc' },
+            { id: 'com_3', name: 'Common Card #3', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'com', color: '#00ffcc' }, // Burayı kendi görselinle değiştir
+            
+            { id: 'epic_1', name: 'Quantum Drill', img: 'https://i.imgur.com/N5Q7x3g.png', tier: 'epic', color: '#a335ee' },
+            { id: 'epic_2', name: 'Epic Card #2', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'epic', color: '#a335ee' }, // Burayı kendi görselinle değiştir
+            { id: 'epic_3', name: 'Epic Card #3', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'epic', color: '#a335ee' }, // Burayı kendi görselinle değiştir
+
+            { id: 'leg_1', name: 'Legendary #1', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'leg', color: '#ff8000' }, // Burayı kendi görselinle değiştir
+            { id: 'leg_2', name: 'Legendary #2', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'leg', color: '#ff8000' }, // Burayı kendi görselinle değiştir
+            { id: 'leg_3', name: 'Legendary #3', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'leg', color: '#ff8000' }, // Burayı kendi görselinle değiştir
+
+            { id: 'og_1', name: 'OG SERIES #1', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'og', color: '#ff0000' }, // Burayı kendi görselinle değiştir
+            { id: 'og_2', name: 'OG SERIES #2', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'og', color: '#ff0000' }, // Burayı kendi görselinle değiştir
+            { id: 'og_3', name: 'OG SERIES #3', img: 'https://i.imgur.com/k2oTj7N.png', tier: 'og', color: '#ff0000' }  // Burayı kendi görselinle değiştir
+        ];
+
+        const TIERS_CONFIG = [
+            { id: 'com', name: 'COMMON', chance: 70, cards: CARDS.filter(c => c.tier === 'com') },
+            { id: 'epic', name: 'EPIC', chance: 20, cards: CARDS.filter(c => c.tier === 'epic') },
+            { id: 'leg', name: 'LEGENDARY', chance: 9.5, cards: CARDS.filter(c => c.tier === 'leg') },
+            { id: 'og', name: 'OG SERIES', chance: 0.5, cards: CARDS.filter(c => c.tier === 'og') }
         ];
 
         let stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [] };
@@ -55,24 +73,23 @@
             const container = document.getElementById('matrix-container');
             container.innerHTML = "";
 
-            TIERS.forEach(tier => {
+            TIERS_CONFIG.forEach(tier => {
                 let row = document.createElement('div');
                 row.className = 'tier-row';
-                row.innerHTML = `<div class="tier-label" style="color:${tier.color}">${tier.name}</div>`;
+                row.innerHTML = `<div class="tier-label">${tier.name}</div>`;
                 
                 let cardsDiv = document.createElement('div');
                 cardsDiv.className = 'cards-line';
 
-                for(let i=1; i<=3; i++) {
-                    const cardID = `${tier.id}_${i}`;
-                    const isOwned = stats.inventory?.includes(cardID);
+                tier.cards.forEach(card => {
+                    const isOwned = stats.inventory?.includes(card.id);
                     cardsDiv.innerHTML += `
-                        <div class="card-box ${isOwned ? 'active' : 'locked'}" style="--clr:${tier.color}">
-                            <div class="card-num">#${i}</div>
-                            <span>${isOwned ? '💎' : '🔒'}</span>
+                        <div class="card-box ${isOwned ? 'active' : 'locked'}" style="--clr:${card.color}">
+                            <img src="${isOwned ? card.img : 'https://i.imgur.com/00l4i64.png'}" alt="${card.name}" class="card-img">
+                            <div class="card-name">${isOwned ? card.name : ''}</div>
                         </div>
                     `;
-                }
+                });
                 row.appendChild(cardsDiv);
                 container.appendChild(row);
             });
@@ -81,20 +98,26 @@
         window.openChest = () => {
             if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
             window.showAdexora().then(async () => {
-                let uRew = Math.random() < 0.8 ? (Math.random()*0.0001) : (Math.random()*0.001);
-                let tRew = Math.random()*0.000007;
+                let uRew = Math.random() * (0.001 - 0.000007) + 0.000007; // Ortalamayı yüksek tuttum
+                let tRew = Math.random() * (0.000007 - 0.000001) + 0.000001;
                 
-                let wonID = null;
-                if(Math.random() < 0.005) { // Kart çıkma şansını %0.5'e çıkardım (Daha eğlenceli)
+                let wonCard = null;
+                if(Math.random() < 0.005) { // Kart çıkma şansı %0.5
                     const roll = Math.random() * 100;
-                    let cur = 0;
-                    let selectedTier = TIERS[0];
-                    for(let t of TIERS) { cur += t.chance; if(roll <= cur) { selectedTier = t; break; } }
-                    wonID = `${selectedTier.id}_${Math.floor(Math.random()*3)+1}`;
+                    let currentLimit = 0;
+                    let selectedTierConfig = null;
+                    for(let t of TIERS_CONFIG) {
+                        currentLimit += t.chance;
+                        if(roll <= currentLimit) { selectedTierConfig = t; break; }
+                    }
+                    if(selectedTierConfig) {
+                        const randomIndex = Math.floor(Math.random() * selectedTierConfig.cards.length);
+                        wonCard = selectedTierConfig.cards[randomIndex];
+                    }
                 }
 
                 let newInv = stats.inventory || [];
-                if(wonID && !newInv.includes(wonID)) newInv.push(wonID);
+                if(wonCard && !newInv.includes(wonCard.id)) newInv.push(wonCard.id);
 
                 await updateDoc(doc(db, "users", myID), {
                     usdt: increment(uRew), ton: increment(tRew),
@@ -103,7 +126,7 @@
                 
                 stats.usdt += uRew; stats.ton += tRew; stats.adsToday += 1; stats.inventory = newInv;
                 updateUI();
-                tg.showAlert(`KAZANÇ:\n$${uRew.toFixed(5)} USDT\n${tRew.toFixed(6)} TON${wonID ? '\n\nYENİ KART BULDUN!' : ''}`);
+                tg.showAlert(`KAZANÇ:\n$${uRew.toFixed(5)} USDT\n${tRew.toFixed(6)} TON${wonCard ? `\n\nYENİ KART: ${wonCard.name}!` : ''}`);
             });
         };
 
@@ -118,42 +141,56 @@
     </script>
 
     <style>
-        :root { --main: #00ffcc; --bg: #050508; --glass: rgba(255,255,255,0.03); }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        :root { --main: #00ffcc; --bg: #0d0d0f; --glass: rgba(255,255,255,0.05); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; user-select: none; }
         .app { height: 100vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
         
-        .top-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat { flex: 1; background: var(--glass); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat small { font-size: 7px; opacity: 0.5; font-family: 'Syncopate'; }
-        .stat div { font-family: 'Syncopate'; font-size: 11px; color: var(--main); margin-top: 4px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-family: 'Syncopate'; font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; }
+        .logo img { height: 20px; margin-right: 8px; }
+        .stats-group { display: flex; gap: 8px; }
+        .stat-badge { background: var(--glass); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: right; }
+        .stat-badge label { font-size: 7px; opacity: 0.6; display: block; margin-bottom: 2px; }
+        .stat-badge div { font-family: 'Syncopate'; font-size: 10px; color: var(--main); }
 
-        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
-        .on { display: block; }
+        .tab-content { flex: 1; background: #1a1a1e; border-radius: 18px; padding: 15px; overflow-y: auto; }
+        .tab-page { display: none; }
+        .on { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Matriks Kart Tasarımı */
-        .tier-row { margin-bottom: 20px; background: rgba(255,255,255,0.01); padding: 10px; border-radius: 15px; }
-        .tier-label { font-family: 'Syncopate'; font-size: 9px; margin-bottom: 10px; letter-spacing: 1px; }
+        /* Kart Albümü */
+        #album-header { font-family: 'Syncopate'; font-size: 14px; margin-bottom: 20px; text-align: center; }
+        .tier-row { margin-bottom: 15px; }
+        .tier-label { font-family: 'Syncopate'; font-size: 9px; opacity: 0.7; margin-bottom: 8px; letter-spacing: 1px; }
         .cards-line { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         
         .card-box { 
-            aspect-ratio: 1/1; border-radius: 12px; border: 1px solid #1a1a1a;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; overflow: hidden; transition: 0.3s;
+            aspect-ratio: 1/1.4; border-radius: 8px; border: 1px solid #2a2a2e;
+            background: #222; overflow: hidden; position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding-bottom: 8px; transition: 0.2s;
         }
-        .locked { background: #0c0c0c; opacity: 0.2; }
-        .active { 
-            background: #111; border-color: var(--clr); 
-            box-shadow: inset 0 0 10px var(--clr), 0 0 10px var(--clr);
-        }
-        .card-num { position: absolute; top: 5px; left: 5px; font-size: 7px; font-weight: 800; opacity: 0.3; }
+        .locked { filter: grayscale(1); opacity: 0.3; }
+        .active { border-color: var(--clr); box-shadow: 0 0 10px var(--clr); }
+        .card-img { width: 80%; height: auto; object-fit: contain; margin-top: 10px; }
+        .card-name { font-size: 8px; text-align: center; font-weight: 600; color: #fff; margin-top: auto; }
 
-        .big-chest { 
-            background: linear-gradient(135deg, #111, #000); border: 2px solid var(--main);
-            border-radius: 20px; padding: 35px; text-align: center; margin: 10px 0;
+        /* Sandık */
+        .chest-area { 
+            background: linear-gradient(135deg, #1f1f22, #000); border: 2px solid var(--main);
+            border-radius: 15px; padding: 30px 15px; text-align: center; margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(0,255,204,0.15); cursor: pointer;
         }
+        .chest-area:active { transform: translateY(2px); opacity: 0.9; }
+        .chest-icon { font-size: 40px; }
+        .chest-text { font-family: 'Syncopate'; font-size: 11px; margin-top: 8px; }
+        .chest-subtext { font-size: 8px; opacity: 0.5; margin-top: 3px; }
 
-        .nav { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #000; height: 65px; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; border: 1px solid #1a1a1a; }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 8px; font-family: 'Syncopate'; }
+        /* Nav */
+        .nav { position: sticky; bottom: 0; background: #1a1a1e; height: 60px; border-top: 1px solid #2a2a2e; 
+            border-bottom-left-radius: 18px; border-bottom-right-radius: 18px;
+            display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 8px; font-family: 'Syncopate'; padding: 5px 0; }
         .on-nav { opacity: 1; color: var(--main); }
     </style>
 </head>
@@ -161,27 +198,36 @@
 
 <div class="app">
     <div class="top-bar">
-        <div class="stat"><small>USDT</small><div id="usdt-val">0.00000</div></div>
-        <div class="stat"><small>TON</small><div id="ton-val" style="color:#0088cc">0.000000</div></div>
-    </div>
-
-    <div id="home" class="tab-page on">
-        <div class="big-chest" onclick="openChest()">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
-            <div style="font-family: 'Syncopate'; font-size: 13px;">GIFT CHEST</div>
-            <div style="font-size: 8px; opacity: 0.4; margin-top: 5px;">TAP TO EARN REWARDS</div>
+        <div class="logo"><img src="https://i.imgur.com/8Q0bV9S.png">FONIX</div>
+        <div class="stats-group">
+            <div class="stat-badge"><label>USDT ASSETS</label><div id="usdt-val">$0.00000</div></div>
+            <div class="stat-badge"><label>TON NETWORK</label><div id="ton-val">0.000000</div></div>
         </div>
     </div>
 
-    <div id="cards" class="tab-page">
-        <div id="matrix-container"></div>
-    </div>
+    <div class="tab-content">
+        <div id="home" class="tab-page on">
+            <div class="chest-area" onclick="openChest()">
+                <div class="chest-icon">📦</div>
+                <div class="chest-text">GIFT CHEST</div>
+                <div class="chest-subtext">TAP TO OPEN & GET REWARDS</div>
+            </div>
+        </div>
 
-    <div id="wallet" class="tab-page">
-        <div class="stat" style="padding:20px;">
-            <label style="font-size:9px; opacity:0.5; font-family:'Syncopate';">WITHDRAWAL</label>
-            <input type="text" placeholder="TON Address" style="width:100%; background:none; border:none; border-bottom:1px solid #333; color:#fff; padding:15px 0; outline:none;">
-            <button onclick="tg.showAlert('Min $10')" style="width:100%; padding:15px; background:var(--main); border:none; border-radius:10px; margin-top:20px; font-family:'Syncopate'; font-size:9px;">SUBMIT</button>
+        <div id="cards" class="tab-page">
+            <h3 id="album-header">ALBUM</h3>
+            <div id="matrix-container"></div>
+        </div>
+
+        <div id="wallet" class="tab-page">
+            <h3 style="font-family: 'Syncopate'; font-size: 14px; margin-bottom: 20px; text-align: center;">WITHDRAW FUNDS</h3>
+            <div class="stat-badge" style="width:100%; text-align:left; margin-bottom:15px;">
+                <label>YOUR BALANCE</label>
+                <div id="usdt-balance-withdraw" style="font-size:12px;">$<span id="usdt-val-withdraw">0.00000</span> USDT</div>
+            </div>
+            <input type="text" placeholder="TON Wallet Address" style="width:100%; background:#2a2a2e; border:1px solid #3a3a3e; border-radius:8px; color:#fff; padding:12px; outline:none; font-size:11px; margin-bottom:10px;">
+            <input type="number" placeholder="Amount (Min $10)" style="width:100%; background:#2a2a2e; border:1px solid #3a3a3e; border-radius:8px; color:#fff; padding:12px; outline:none; font-size:11px; margin-bottom:20px;">
+            <button onclick="tg.showAlert('Min $10 Çekim')" style="width:100%; padding:12px; background:var(--main); border:none; border-radius:8px; font-family:'Syncopate'; font-size:10px; color:#000;">CONFIRM</button>
         </div>
     </div>
 
