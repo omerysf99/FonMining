@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas: Infinite Mining & Tabs</title>
+    <title>Koalas: Pro Referral System</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -29,82 +29,107 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const startParam = tg.initDataUnsafe?.start_param;
+        const myPhoto = user?.photo_url || "https://ui-avatars.com/api/?name=" + (user?.first_name || "M");
+        const myUsername = user?.username || user?.first_name || "Anonymous";
 
-        let stats = { kls_bal: 0, usdt_bal: 0 };
-        let miningInterval;
-        let sKLS = 0, sUSDT = 0;
-        let isMining = false;
+        let stats = { kls_bal: 0, usdt_bal: 0, hasUsedCode: false };
+        let sKLS = 0, sUSDT = 0, isMining = false, miningInterval;
 
         async function init() {
             new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
-            const userSnap = await getDoc(doc(db, "users", myID));
+            
+            const userRef = doc(db, "users", myID);
+            const userSnap = await getDoc(userRef);
+
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { kls_bal: 0, usdt_bal: 0, invitedBy: startParam || "" };
-                await setDoc(doc(db, "users", myID), stats);
+                stats = { 
+                    kls_bal: 0, usdt_bal: 0, hasUsedCode: false, 
+                    username: myUsername, photo: myPhoto, invitedBy: "" 
+                };
+                await setDoc(userRef, stats);
             }
             updateUI();
-            loadRefInfo();
+            loadReferralList();
         }
 
-        // --- SEKMELER ARASI GEÇİŞ ---
-        window.showTab = (tabName) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
+        // --- MANUEL DAVET KODU GİRİŞİ ---
+        window.applyInviteCode = async () => {
+            const code = document.getElementById('invite-input').value.trim();
+            if (stats.hasUsedCode) return tg.showAlert("Zaten bir kod kullandınız!");
+            if (code === myID) return tg.showAlert("Kendi kodunuzu kullanamazsınız!");
+
+            const targetRef = doc(db, "users", code);
+            const targetSnap = await getDoc(targetRef);
+
+            if (targetSnap.exists()) {
+                // Kod Sahibi ve Giren Kişiye 0.05$
+                await updateDoc(targetRef, { usdt_bal: increment(0.05) });
+                await updateDoc(doc(db, "users", myID), { 
+                    usdt_bal: increment(0.05), 
+                    hasUsedCode: true, 
+                    invitedBy: code 
+                });
+                tg.showAlert("Tebrikler! 0.05$ hesabınıza eklendi.");
+                location.reload();
+            } else {
+                tg.showAlert("Geçersiz davet kodu!");
+            }
+        };
+
+        // --- DAVET EDİLENLERİ LİSTELEME ---
+        async function loadReferralList() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            const listContainer = document.getElementById('ref-list');
+            listContainer.innerHTML = "";
             
+            document.getElementById('ref-count').innerText = snap.size;
+            document.getElementById('my-code-display').innerText = myID;
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.className = 'ref-item';
+                item.innerHTML = `
+                    <img src="${data.photo || 'https://via.placeholder.com/40'}" class="ref-photo">
+                    <div class="ref-info">
+                        <b>@${data.username}</b>
+                        <small>Kazandırdı: $0.05</small>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        // --- MINING VE TABS (ÖNCEKİ KODLARIN DEVAMI) ---
+        window.showTab = (name) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             event.currentTarget.classList.add('nav-active');
         };
 
-        // --- SONSUZ MINING KONTROLÜ ---
         window.toggleMining = () => {
-            const btn = document.getElementById('mine-action-btn');
             if (!isMining) {
-                // BAŞLAT
                 isMining = true;
-                btn.innerText = "CLAIM REWARDS (AD)";
-                btn.classList.add('btn-claiming');
-                document.getElementById('pet-img-main').classList.add('pet-active');
-                
+                document.getElementById('mine-btn').innerText = "CLAIM REWARDS";
+                document.getElementById('pet-img').classList.add('pet-active');
                 miningInterval = setInterval(() => {
-                    sKLS += 0.01;
-                    sUSDT += 0.00001;
+                    sKLS += 0.01; sUSDT += 0.00001;
                     document.getElementById('live-kls').innerText = sKLS.toFixed(3);
                     document.getElementById('live-usdt').innerText = "$" + sUSDT.toFixed(6);
                 }, 1000);
             } else {
-                // REKLAM VE CLAIM
-                show_10432457().then(() => finalizeClaim()).catch(() => finalizeClaim());
+                show_10432457().then(() => finalize());
             }
         };
 
-        async function finalizeClaim() {
+        async function finalize() {
             clearInterval(miningInterval);
-            isMining = false;
-            createRain();
-
-            await updateDoc(doc(db, "users", myID), { 
-                kls_bal: increment(sKLS), 
-                usdt_bal: increment(sUSDT) 
-            });
-
-            setTimeout(() => location.reload(), 4000);
-        }
-
-        function createRain() {
-            const layer = document.getElementById('rain-layer');
-            layer.style.display = 'block';
-            for(let i=0; i<40; i++){
-                setTimeout(() => {
-                    const d = document.createElement('div');
-                    d.className = 'drop'; d.innerText = Math.random() > 0.5 ? '🪙' : '💵';
-                    d.style.left = Math.random() * 95 + 'vw';
-                    layer.appendChild(d);
-                    setTimeout(() => d.remove(), 2500);
-                }, i * 60);
-            }
+            await updateDoc(doc(db, "users", myID), { kls_bal: increment(sKLS), usdt_bal: increment(sUSDT) });
+            location.reload();
         }
 
         function updateUI() {
@@ -112,134 +137,84 @@
             document.querySelectorAll('.total-usdt-ui').forEach(el => el.innerText = stats.usdt_bal.toFixed(4));
         }
 
-        async function loadRefInfo() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            document.getElementById('ref-count').innerText = snap.size;
-            document.getElementById('ref-link').innerText = `https://t.me/BotAdiniz?start=${myID}`;
-        }
-
         window.onload = init;
     </script>
 
     <style>
         :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --dark: #1a0b4a; }
-        body { margin: 0; background: var(--p); color: #fff; font-family: 'Arial Rounded MT Bold', sans-serif; overflow: hidden; }
-        
-        /* Layout */
+        body { margin: 0; background: var(--p); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
-        .header { height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; background: rgba(0,0,0,0.2); }
-        .content-area { flex: 1; position: relative; overflow: hidden; }
-        .tab-content { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.3); }
+        .tab-content { display: none; flex-direction: column; padding: 20px; flex: 1; overflow-y: auto; align-items: center; }
         .active { display: flex; }
 
-        /* Chips */
-        .chip { background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); }
+        /* Referral Styles */
+        .card { width: 100%; background: var(--dark); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-sizing: border-box; }
+        .invite-box { display: flex; gap: 10px; margin-top: 10px; }
+        .invite-input { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #000; color: #fff; }
+        .btn-apply { background: var(--y); color: #000; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; }
 
-        /* Pet Box */
-        .pet-box { width: 200px; height: 200px; background: var(--b); border: 6px solid #fff; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 0 rgba(0,0,0,0.2); margin: 20px 0; }
-        .pet-img { width: 80%; transition: 0.3s; }
+        .ref-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
+        .ref-photo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--b); }
+        .ref-info b { display: block; font-size: 14px; }
+        .ref-info small { color: var(--y); font-size: 11px; }
+
+        .pet-box { width: 180px; height: 180px; background: var(--b); border-radius: 20px; border: 5px solid #fff; display: flex; justify-content: center; align-items: center; margin: 20px 0; }
+        .pet-img { width: 80%; }
         .pet-active { animation: bounce 0.8s infinite; }
-
-        /* Mining Stats */
-        .mining-stats { text-align: center; margin-bottom: 20px; }
-        #live-kls { font-size: 40px; color: var(--y); display: block; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #live-usdt { font-size: 18px; color: #00ffaa; }
-
-        /* Buttons */
-        .btn-main { background: var(--y); color: var(--p); border: none; padding: 18px 40px; border-radius: 20px; font-size: 22px; font-weight: 900; cursor: pointer; border-bottom: 6px solid #d4b12d; width: 80%; }
-        .btn-claiming { background: #ff4757; color: #fff; border-bottom-color: #b33939; }
-
-        /* Cards for Tabs */
-        .card { width: 100%; background: var(--dark); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
-
-        /* Nav Bar */
-        .nav-bar { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 2px solid rgba(255,255,255,0.1); }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.5; font-size: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .nav-active { opacity: 1; transform: scale(1.1); color: var(--y); }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 4px; }
-
-        /* Animations */
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        #rain-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; display: none; }
-        .drop { position: absolute; top: -50px; font-size: 30px; animation: fall 2s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        .nav-bar { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.5; font-size: 11px; }
+        .nav-active { opacity: 1; color: var(--y); }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="rain-layer"></div>
-
     <div class="header">
         <div class="chip">🪙 <span class="total-kls-ui">0.00</span></div>
         <div class="chip">💵 $<span class="total-usdt-ui">0.0000</span></div>
     </div>
 
-    <div class="content-area">
-        <div id="tab-mining" class="tab-content active">
-            <div class="mining-stats">
-                <small>CURRENT MINING</small>
-                <span id="live-kls">0.000</span>
-                <span id="live-usdt">$0.000000</span>
-            </div>
-            <div class="pet-box">
-                <img id="pet-img-main" src="koalasmining.jpg" class="pet-img">
-            </div>
-            <button id="mine-action-btn" class="btn-main" onclick="toggleMining()">START PLAY</button>
-            <p style="margin-top:15px; font-size:12px; opacity:0.6;">Mining is infinite until you claim!</p>
-        </div>
+    <div id="tab-mining" class="tab-content active">
+        <h1 id="live-kls" style="color:var(--y); margin-bottom:0;">0.000</h1>
+        <small id="live-usdt" style="color:#00ffaa;">$0.000000</small>
+        <div class="pet-box"><img id="pet-img" src="koalasmining.jpg" class="pet-img"></div>
+        <button id="mine-btn" onclick="toggleMining()" style="width:80%; padding:20px; border-radius:20px; background:var(--y); border:none; font-weight:900; font-size:20px;">START PLAY</button>
+    </div>
 
-        <div id="tab-friends" class="tab-content">
-            <h2>Invite Friends</h2>
-            <div class="card">
-                <p>Referral Link:</p>
-                <div id="ref-link" style="font-size:10px; background:#000; padding:10px; border-radius:10px; word-break:break-all;">Loading...</div>
-            </div>
-            <div class="card" style="display:flex; justify-content:space-between;">
-                <span>Total Invited:</span>
-                <b id="ref-count">0</b>
-            </div>
-            <p style="font-size:11px; text-align:center;">Earn $0.20 per friend!</p>
-        </div>
-
-        <div id="tab-tasks" class="tab-content">
-            <h2>Daily Tasks</h2>
-            <div class="card">
-                <b>Follow X (Twitter)</b><br>
-                <small>Reward: 500 KLS</small>
-                <button class="chip" style="float:right; margin-top:-20px; background:var(--y); color:#000;">GO</button>
-            </div>
-            <div class="card">
-                <b>Join Telegram</b><br>
-                <small>Reward: 250 KLS</small>
-                <button class="chip" style="float:right; margin-top:-20px; background:var(--y); color:#000;">GO</button>
+    <div id="tab-friends" class="tab-content">
+        <div class="card">
+            <small>SİZİ KİM DAVET ETTİ?</small>
+            <div class="invite-box">
+                <input type="text" id="invite-input" class="invite-input" placeholder="Kod girin...">
+                <button class="btn-apply" onclick="applyInviteCode()">KULLAN</button>
             </div>
         </div>
 
-        <div id="tab-wallet" class="tab-content">
-            <h2>Wallet</h2>
-            <div class="card" style="text-align:center; background:var(--b);">
-                <small>TOTAL BALANCE</small>
-                <h1 style="margin:10px 0;">$<span class="total-usdt-ui">0.00</span></h1>
+        <div class="card">
+            <small>KODUNUZ (Kopyalamak için dokun):</small>
+            <div id="my-code-display" style="font-size:20px; font-weight:bold; color:var(--y); margin-top:5px;" onclick="navigator.clipboard.writeText(this.innerText); alert('Kod kopyalandı!')">Loading...</div>
+        </div>
+
+        <h3 style="align-self: flex-start;">Davet Ettikleriniz (<span id="ref-count">0</span>)</h3>
+        <div id="ref-list" style="width: 100%;">
             </div>
-            <button class="btn-main" style="width:100%; opacity:0.5;" onclick="tg.showAlert('Minimum withdrawal $10')">WITHDRAW</button>
+    </div>
+
+    <div id="tab-wallet" class="tab-content">
+        <h2>Cüzdan</h2>
+        <div class="card" style="text-align:center; background:var(--b);">
+            <small>TOPLAM KAZANÇ</small>
+            <h1>$<span class="total-usdt-ui">0.00</span></h1>
         </div>
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-btn nav-active" onclick="showTab('mining')">
-            <span class="nav-icon">⛏️</span>Mining
-        </button>
-        <button class="nav-btn" onclick="showTab('friends')">
-            <span class="nav-icon">👥</span>Friends
-        </button>
-        <button class="nav-btn" onclick="showTab('tasks')">
-            <span class="nav-icon">🎁</span>Tasks
-        </button>
-        <button class="nav-btn" onclick="showTab('wallet')">
-            <span class="nav-icon">💰</span>Wallet
-        </button>
+        <button class="nav-btn nav-active" onclick="showTab('mining')">⛏️<br>Mining</button>
+        <button class="nav-btn" onclick="showTab('friends')">👥<br>Friends</button>
+        <button class="nav-btn" onclick="showTab('wallet')">💰<br>Wallet</button>
     </nav>
 </div>
 
