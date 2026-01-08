@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX PRO v504</title>
+    <title>FONIX GACHA v505</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         
-        let stats = { usdt: 0, adsToday: 0, lastAdDate: "" };
+        let stats = { usdt: 0, ton: 0, adsToday: 0, cards: 0 };
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -40,48 +40,67 @@
                 stats = snap.data();
                 if (stats.lastAdDate !== today) {
                     stats.adsToday = 0;
-                    stats.lastAdDate = today;
                     await updateDoc(userRef, { adsToday: 0, lastAdDate: today });
                 }
             } else {
-                stats = { usdt: 0, adsToday: 0, lastAdDate: today, username: user?.username || "Oyuncu" };
+                stats = { usdt: 0, ton: 0, adsToday: 0, lastAdDate: today, cards: 0 };
                 await setDoc(userRef, stats);
             }
             updateUI();
         }
 
         function updateUI() {
-            document.querySelectorAll('.ui-balance').forEach(e => e.innerText = stats.usdt.toFixed(4));
+            document.getElementById('usdt-val').innerText = stats.usdt.toFixed(6);
+            document.getElementById('ton-val').innerText = stats.ton.toFixed(7);
+            document.getElementById('card-count').innerText = stats.cards || 0;
             document.getElementById('ad-count').innerText = stats.adsToday;
-            const progress = (stats.adsToday / 50) * 100;
-            document.getElementById('limit-bar').style.width = progress + "%";
+            
+            const cardGrid = document.getElementById('card-grid');
+            cardGrid.innerHTML = "";
+            for(let i=0; i < (stats.cards || 0); i++) {
+                cardGrid.innerHTML += `<div class="card-item">💎 ELITE CARD #${i+1}</div>`;
+            }
         }
 
-        window.watchAd = () => {
-            if(stats.adsToday >= 50) return tg.showAlert("Günlük limitinize ulaştınız!");
-            
+        function getRandom(min, max) { return Math.random() * (max - min) + min; }
+
+        window.openChest = () => {
+            if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
+
             tg.HapticFeedback.impactOccurred('medium');
             window.showAdexora().then(async () => {
-                const reward = 0.05; // Reklam başı kazanç
-                stats.usdt += reward;
+                // 1. Ödül: USDT (Şanslı Aralıklar)
+                let usdtReward = 0;
+                if(Math.random() < 0.80) usdtReward = getRandom(0.000007, 0.0001);
+                else usdtReward = getRandom(0.0001, 0.001);
+
+                // 2. Ödül: TON (Sabit Aralık)
+                const tonReward = getRandom(0.000001, 0.000007);
+
+                // 3. Ödül: KART (%0.10 ihtimal)
+                let cardWon = false;
+                if(Math.random() < 0.001) cardWon = true;
+
+                // Güncelleme
+                stats.usdt += usdtReward;
+                stats.ton += tonReward;
                 stats.adsToday += 1;
-                await updateDoc(doc(db, "users", myID), { usdt: increment(reward), adsToday: increment(1) });
+                if(cardWon) stats.cards = (stats.cards || 0) + 1;
+
+                await updateDoc(doc(db, "users", myID), { 
+                    usdt: increment(usdtReward),
+                    ton: increment(tonReward),
+                    adsToday: increment(1),
+                    cards: increment(cardWon ? 1 : 0)
+                });
+
                 updateUI();
-                tg.showAlert("Sandık açıldı! $0.05 kazandınız.");
-            }).catch(() => tg.showAlert("Hediye sandığı şu an hazır değil."));
-        };
-
-        window.processWithdraw = () => {
-            const amount = parseFloat(document.getElementById('withdraw-amt').value);
-            const address = document.getElementById('wallet-adr').value;
-
-            if (!amount || amount < 10) return tg.showAlert("Minimum çekim tutarı 10 USDT'dir.");
-            if (amount > stats.usdt) return tg.showAlert("Yetersiz bakiye.");
-            if (address.length < 10) return tg.showAlert("Lütfen geçerli bir USDT (TON) adresi girin.");
-
-            tg.showConfirm(`${amount} USDT çekim talebinizi onaylıyor musunuz?`, (ok) => {
-                if(ok) tg.showAlert("Talebiniz başarıyla alındı! İnceleme sonrası ödemeniz yapılacaktır.");
-            });
+                
+                let msg = `🎁 SANDIK AÇILDI!\n\n💰 USDT: +$${usdtReward.toFixed(6)}\n💎 TON: +${tonReward.toFixed(7)}`;
+                if(cardWon) msg += `\n\n🃏 İNANILMAZ! NADİR KART KAZANDIN!`;
+                
+                tg.showAlert(msg);
+            }).catch(() => tg.showAlert("Sandık kilitli! (Reklam yüklenemedi)"));
         };
 
         window.switchTab = (id, btn) => {
@@ -89,87 +108,75 @@
             document.getElementById(id).classList.add('on');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on-nav'));
             btn.classList.add('on-nav');
-            tg.HapticFeedback.selectionChanged();
         };
 
         window.onload = init;
     </script>
 
     <style>
-        :root { --main: #00ffcc; --bg: #050508; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08); }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
-        .app-shell { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
-        .on { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --main: #00ffcc; --ton: #0088cc; --bg: #050508; --card: rgba(255,255,255,0.03); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .app-container { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 90px; }
+        .on { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .glass-card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 25px; margin-bottom: 20px; text-align: center; }
-        .bal-val { font-family: 'Syncopate'; font-size: 36px; font-weight: 700; color: var(--main); margin: 10px 0; }
-
-        .chest-zone { background: linear-gradient(135deg, #1a1a2e 0%, #000 100%); border: 2px solid var(--main); border-radius: 35px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .chest-zone:active { transform: scale(0.95); background: var(--main); color: #000; }
-        .chest-icon { font-size: 60px; display: block; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--main)); }
-
-        .primary-btn { width: 100%; padding: 20px; border-radius: 20px; border: none; font-family: 'Syncopate'; font-weight: 700; font-size: 13px; cursor: pointer; background: #fff; color: #000; }
+        .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; padding: 20px; margin-bottom: 15px; }
+        .val { font-family: 'Syncopate'; font-weight: 700; font-size: 22px; }
         
-        .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 10px; opacity: 0.5; margin-bottom: 10px; font-family: 'Syncopate'; }
-        .input-group input { width: 100%; background: #000; border: 1px solid var(--border); border-radius: 15px; padding: 18px; color: #fff; outline: none; box-sizing: border-box; }
+        .chest-btn { background: linear-gradient(45deg, #1a1a2e, #000); border: 2px solid var(--main); border-radius: 30px; padding: 40px 20px; text-align: center; cursor: pointer; margin-top: 10px; }
+        .chest-btn:active { transform: scale(0.95); background: var(--main); color: #000; }
 
-        .nav-dock { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(10,10,15,0.95); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 28px; height: 80px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; font-family: 'Syncopate'; }
+        .card-item { background: linear-gradient(135deg, #7000ff, #00ffcc); color: #000; padding: 20px; border-radius: 15px; font-weight: 800; font-size: 12px; margin-bottom: 10px; text-align: center; border: 3px solid #fff; }
+
+        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; height: 70px; display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 9px; font-family: 'Syncopate'; }
         .on-nav { opacity: 1; color: var(--main); }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
+<div class="app-container">
     <div id="home" class="tab-page on">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <span style="font-family: 'Syncopate'; font-size: 10px; color: var(--main);">FONIX_SİSTEM_AKTİF</span>
-            <div style="font-size: 10px; opacity: 0.6;">GÜNLÜK: <span id="ad-count">0</span>/50</div>
-        </header>
+        <h2 style="font-family: 'Syncopate'; font-size: 14px; color: var(--main);">ŞANSLI SANDIK</h2>
+        
+        <div class="stat-card">
+            <small style="opacity:0.5; font-size: 10px;">USDT BAKİYE</small>
+            <div class="val" style="color: var(--main);">$<span id="usdt-val">0.000000</span></div>
+        </div>
 
-        <div class="glass-card">
-            <small style="opacity: 0.5; font-size: 9px; letter-spacing: 2px;">TOPLAM BAKİYE</small>
-            <div class="bal-val">$<span class="ui-balance">0.0000</span></div>
-            <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 15px; overflow: hidden;">
-                <div id="limit-bar" style="height: 100%; background: var(--main); width: 0%;"></div>
+        <div class="stat-card">
+            <small style="opacity:0.5; font-size: 10px;">TON BAKİYE</small>
+            <div class="val" style="color: var(--ton);"><span id="ton-val">0.0000000</span> TON</div>
+        </div>
+
+        <div class="chest-btn" onclick="openChest()">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
+            <div style="font-family: 'Syncopate';">SANDIĞI AÇ</div>
+            <small style="opacity:0.5;">Günlük Hak: <span id="ad-count">0</span>/50</small>
+        </div>
+    </div>
+
+    <div id="cards" class="tab-page">
+        <h2 style="font-family: 'Syncopate'; font-size: 14px;">KOLEKSİYONUM (<span id="card-count">0</span>)</h2>
+        <div id="card-grid">
             </div>
-        </div>
-
-        <div class="chest-zone" onclick="watchAd()">
-            <span class="chest-icon">🎁</span>
-            <span style="font-family: 'Syncopate'; font-size: 14px; letter-spacing: 1px;">HEDİYE SANDIĞI AÇ</span>
-            <p style="font-size: 11px; opacity: 0.6; margin-top: 10px;">İzle ve Anında $0.05 Kazan</p>
-        </div>
     </div>
 
     <div id="wallet" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 18px; margin-bottom: 25px;">PARA ÇEKME</h2>
-        
-        <div class="glass-card" style="text-align: left;">
-            <div class="input-group">
-                <label>ÇEKİLECEK TUTAR (MİN $10)</label>
-                <input type="number" id="withdraw-amt" placeholder="10.00">
-            </div>
-            
-            <div class="input-group">
-                <label>USDT CÜZDAN ADRESİ (TON AĞI)</label>
-                <input type="text" id="wallet-adr" placeholder="UQ...">
-            </div>
-
-            <div style="background: rgba(0,255,204,0.05); padding: 15px; border-radius: 15px; margin-bottom: 25px; border: 1px solid rgba(0,255,204,0.1);">
-                <small style="font-size: 11px; color: var(--main);">ℹ️ Ödemeler manuel inceleme sonrası 24 saat içinde cüzdanınıza iletilir.</small>
-            </div>
-
-            <button class="primary-btn" onclick="processWithdraw()">TALEBİ ONAYLA</button>
+        <h2 style="font-family: 'Syncopate'; font-size: 14px;">ÇEKİM TALEBİ</h2>
+        <div class="stat-card">
+            <input type="number" id="withdraw-amt" placeholder="Tutar (Min $10)" style="width:100%; background:none; border:none; color:#fff; font-size: 18px; outline:none;">
+            <hr style="opacity:0.1; margin: 15px 0;">
+            <input type="text" id="wallet-adr" placeholder="TON Adresi" style="width:100%; background:none; border:none; color:#fff; font-size: 14px; outline:none;">
+            <button onclick="tg.showAlert('Talebiniz alındı!')" style="width:100%; padding:15px; margin-top:20px; border-radius:15px; border:none; font-family:'Syncopate'; font-weight:800;">ONAYLA</button>
         </div>
     </div>
 
-    <div class="nav-dock">
-        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>KAZAN</button>
-        <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>CÜZDAN</button>
+    <div class="nav-bar">
+        <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>AÇ</button>
+        <button class="nav-btn" onclick="switchTab('cards', this)">🃏<br>KART</button>
+        <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>PARA</button>
     </div>
 </div>
 
