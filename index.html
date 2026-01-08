@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas & USDT - Pro v3</title>
+    <title>Koalas Mining - Universal Version</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -11,7 +11,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -27,17 +27,22 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Kullanıcı ID'sini direkt Telegram'dan alıyoruz (Admin kısıtlaması kalktı)
         const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231";
+        const myID = user?.id ? user.id.toString() : "Anonymous";
+        const myUsername = user?.username || "Miner";
         const startParam = tg.initDataUnsafe?.start_param;
 
-        let stats = { kls_bal: 0, usdt_bal: 0, energy: 100, tasks: [] };
-        let adex;
+        let stats = { kls_bal: 0, usdt_bal: 0, energy: 100 };
 
         async function init() {
-            // Adexium Push (Her 15sn bir altta çıkar)
-            adex = new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' });
-            adex.autoMode();
+            // Adexium Push
+            new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
+
+            if (myID === "Anonymous") {
+                tg.showAlert("Lütfen uygulamayı Telegram üzerinden açın.");
+                return;
+            }
 
             const userRef = doc(db, "users", myID);
             const userSnap = await getDoc(userRef);
@@ -45,103 +50,98 @@
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, username: user?.username || "Miner", invitedBy: startParam || "", tasks: [] };
+                // YENİ KAYIT SİSTEMİ
+                stats = { 
+                    kls_bal: 0, 
+                    usdt_bal: 0, 
+                    energy: 100, 
+                    username: myUsername, 
+                    invitedBy: startParam || "" 
+                };
+
                 if (startParam && startParam !== myID) {
-                    await updateDoc(doc(db, "users", startParam), { kls_bal: increment(100), usdt_bal: increment(0.10) });
+                    // Davet Edene Ödül
+                    const invRef = doc(db, "users", startParam);
+                    const invSnap = await getDoc(invRef);
+                    if(invSnap.exists()) {
+                        await updateDoc(invRef, { usdt_bal: increment(0.20), kls_bal: increment(500) });
+                    }
+                    // Yeni Gelene Ödül
+                    stats.usdt_bal = 0.10;
+                    stats.kls_bal = 250;
                 }
                 await setDoc(userRef, stats);
             }
             updateUI();
-            renderTasks();
+            loadRef();
         }
 
-        // --- MINING VE REWARDED AD ENTEGRASYONU ---
-        let miningInterval, sessionKLS = 0, adTimer = 0;
+        // --- MINING ENGINE ---
+        let minInt, sKLS = 0, sUSDT = 0;
 
         window.toggleMining = () => {
-            const btn = document.getElementById('mining-btn');
+            const btn = document.getElementById('m-btn');
             if (btn.innerText.includes("START")) {
-                if (stats.energy < 10) return tg.showAlert("Enerji bitti! Bekle...");
-                startMining();
+                if (stats.energy < 1) return tg.showAlert("Enerji bitti!");
+                startM();
             } else {
-                // YENİ REKLAM KODU: Claim anında Rewarded Interstitial
-                show_10432457().then(() => {
-                    stopMining(); // Reklam izlendi, KLS'yi cüzdana at
-                }).catch(() => stopMining());
+                // REWARDED AD
+                show_10432457().then(() => { stopM(); }).catch(() => stopM());
             }
         };
 
-        function startMining() {
+        function startM() {
             tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('mining-btn').innerText = "CLAIM & WATCH AD";
-            document.getElementById('mining-btn').style.background = "#ff4757";
-            document.getElementById('fan-img').classList.add('spinning');
+            document.getElementById('m-btn').innerText = "CLAIM REWARDS (AD)";
+            document.getElementById('m-btn').style.background = "#ff4757";
+            document.getElementById('fan').classList.add('spinning');
             
-            miningInterval = setInterval(() => {
-                sessionKLS += 0.025;
-                stats.energy -= 0.15;
-                adTimer++;
+            minInt = setInterval(() => {
+                sKLS += 0.01;      
+                sUSDT += 0.00001;  
+                stats.energy -= 0.1;
 
-                document.getElementById('session-val').innerText = sessionKLS.toFixed(4);
+                document.getElementById('s-kls').innerText = sKLS.toFixed(2);
+                document.getElementById('s-usdt').innerText = sUSDT.toFixed(5);
                 document.getElementById('energy-fill').style.width = stats.energy + "%";
 
-                if (stats.energy <= 0) { stats.energy = 0; stopMining(); }
-                if (adTimer >= 15) { adex.autoMode(); adTimer = 0; }
+                if (stats.energy <= 0) stopM();
             }, 1000);
         }
 
-        async function stopMining() {
-            clearInterval(miningInterval);
-            const userRef = doc(db, "users", myID);
-            await updateDoc(userRef, { kls_bal: increment(sessionKLS), energy: stats.energy });
-            tg.showPopup({ message: `${sessionKLS.toFixed(2)} KLS kazandın!` }, () => location.reload());
+        async function stopM() {
+            clearInterval(minInt);
+            await updateDoc(doc(db, "users", myID), { 
+                kls_bal: increment(sKLS), 
+                usdt_bal: increment(sUSDT),
+                energy: stats.energy 
+            });
+            location.reload();
         }
-
-        // --- GÖREVLER (USDT KAZANDIRAN) ---
-        const taskItems = [
-            { id: 'v1', type: 'ad', title: 'Video Ad Reward', reward: 0.05, curr: 'USDT' },
-            { id: 't1', type: 'link', title: 'Follow Telegram', reward: 500, curr: 'KLS', link: 'https://t.me' },
-            { id: 't2', type: 'link', title: 'Follow Twitter', reward: 500, curr: 'KLS', link: 'https://twitter.com' }
-        ];
-
-        function renderTasks() {
-            const container = document.getElementById('task-list');
-            container.innerHTML = taskItems.map(t => {
-                const isDone = stats.tasks?.includes(t.id);
-                return `
-                    <div class="card">
-                        <div><b>${t.title}</b><br><small>+${t.reward} ${t.curr}</small></div>
-                        <button onclick="doTask('${t.id}', '${t.type}', '${t.link || ''}', ${t.reward}, '${t.curr}')" ${isDone ? 'disabled' : ''}>
-                            ${isDone ? '✅' : 'DO'}
-                        </button>
-                    </div>`;
-            }).join('');
-        }
-
-        window.doTask = async (id, type, link, reward, curr) => {
-            if (type === 'ad') {
-                show_10432457().then(async () => {
-                    await updateDoc(doc(db, "users", myID), { usdt_bal: increment(reward), tasks: arrayUnion(id) });
-                    tg.showAlert(`Tebrikler: ${reward} USDT kazandın!`);
-                    location.reload();
-                });
-            } else {
-                window.open(link);
-                setTimeout(async () => {
-                    const updateField = curr === 'USDT' ? { usdt_bal: increment(reward) } : { kls_bal: increment(reward) };
-                    await updateDoc(doc(db, "users", myID), { ...updateField, tasks: arrayUnion(id) });
-                    location.reload();
-                }, 5000);
-            }
-        };
 
         function updateUI() {
-            document.querySelectorAll('.kls-val').forEach(e => e.innerText = stats.kls_bal.toFixed(2));
-            document.querySelectorAll('.usdt-val').forEach(e => e.innerText = stats.usdt_bal.toFixed(2));
-            
-            const withdrawBtn = document.getElementById('withdraw-btn');
-            if (stats.usdt_bal >= 10.0) { withdrawBtn.disabled = false; withdrawBtn.style.opacity = "1"; }
+            document.getElementById('t-kls').innerText = stats.kls_bal.toFixed(2);
+            document.getElementById('t-usdt').innerText = stats.usdt_bal.toFixed(4);
+            document.getElementById('w-usdt').innerText = stats.usdt_bal.toFixed(2);
+            if(stats.usdt_bal >= 10) {
+                const w = document.getElementById('wd-btn');
+                w.disabled = false; w.style.opacity = "1";
+            }
         }
+
+        async function loadRef() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            document.getElementById('ref-count').innerText = snap.size;
+            // Bot Linkini buraya kendi bot adını yazarak güncellemelisin
+            document.getElementById('ref-link').innerText = `https://t.me/KoalasMiningBot?start=${myID}`;
+        }
+
+        window.copyRef = () => {
+            const link = document.getElementById('ref-link').innerText;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Link kopyalandı!");
+        };
 
         window.tab = (t) => {
             document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
@@ -154,18 +154,17 @@
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
         body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #app { width: 100%; height: 100vh; display: flex; flex-direction: column; background: var(--bg); max-width: 450px; margin: auto; }
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; }
+        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; font-weight: bold; font-size: 14px; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
         .fan-box { width: 220px; height: 220px; margin: 30px auto; position: relative; }
-        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 6px solid #222; object-fit: cover; }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #333; object-fit: cover; transition: 0.3s; }
         .spinning { animation: rot 2s linear infinite; border-color: var(--p); box-shadow: 0 0 30px var(--p); }
-        .btn { background: var(--g); border: none; padding: 20px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; font-size: 16px; }
-        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .card button { background: var(--p); border: none; padding: 8px 15px; border-radius: 10px; color: white; }
-        .energy-bar { width: 100%; height: 12px; background: #1a1a1a; border-radius: 10px; margin-top: 20px; overflow: hidden; }
-        #energy-fill { height: 100%; background: linear-gradient(90deg, #ff4757, var(--g)); width: 100%; transition: 0.3s; }
+        .btn { background: var(--g); border: none; padding: 20px; border-radius: 18px; font-weight: 900; width: 100%; cursor: pointer; color: #000; font-size: 16px; }
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #222; }
+        .bar { width: 100%; height: 10px; background: #1a1a1a; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        #energy-fill { height: 100%; background: var(--p); width: 100%; transition: 0.3s; }
         .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -174,45 +173,46 @@
 
 <div id="app">
     <div class="header">
-        <div>🪙 <span class="kls-val">0</span> KLS</div>
-        <div style="color: var(--g);">💵 $<span class="usdt-val">0.00</span></div>
+        <div style="color:var(--p)">🪙 <span id="t-kls">0</span> KLS</div>
+        <div style="color:var(--g)">💵 $<span id="t-usdt">0.00</span></div>
     </div>
 
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
-            <h1 style="font-size: 45px; margin: 0;">+<span id="session-val">0.0000</span></h1>
-            <small style="color:var(--p)">KOALAS MINING PRO</small>
+            <div style="font-size: 40px; font-weight: 900;">+<span id="s-kls">0.00</span></div>
+            <div style="color:var(--g); font-weight:bold;">+$<span id="s-usdt">0.00000</span></div>
         </div>
-        <div class="fan-box"><img id="fan-img" src="koalasmining.jpg" class="fan-img"></div>
-        <div class="energy-bar"><div id="energy-fill"></div></div>
+        <div class="fan-box"><img id="fan" src="koalasmining.jpg" class="fan-img"></div>
+        <div class="bar"><div id="energy-fill"></div></div>
+        <div style="text-align:center; font-size:11px; opacity:0.6;">ENERGY RESOURCES</div>
         <div style="flex:1"></div>
-        <button id="mining-btn" class="btn" onclick="toggleMining()">START MINING</button>
-    </div>
-
-    <div id="tab-tasks" class="p">
-        <h2>Tasks & Earnings</h2>
-        <div id="task-list"></div>
+        <button id="m-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h2>Your Assets</h2>
-        <div class="card" style="background: var(--p); height: 130px; flex-direction: column; justify-content: center;">
+        <h2>Assets & Referral</h2>
+        <div class="card" style="text-align:center; background: var(--p); color:white;">
             <small>USDT BALANCE</small>
-            <h1 style="margin: 5px 0;">$<span class="usdt-val">0.00</span></h1>
-            <small>Min. withdraw: $10.00</small>
+            <h1 style="margin:5px 0;">$<span id="w-usdt">0.00</span></h1>
         </div>
+        
         <div class="card">
-            <span>Koalas Coin (KLS):</span>
-            <b class="kls-val">0</b>
+            <small style="color:var(--g)">Your Invite Link:</small>
+            <div id="ref-link" style="font-size: 10px; margin: 10px 0; background: #000; padding: 10px; border-radius: 8px; word-break: break-all;">Loading...</div>
+            <button class="btn" onclick="copyRef()" style="padding:10px; font-size:12px;">COPY LINK</button>
         </div>
-        <p style="font-size: 11px; opacity: 0.5; text-align: center;">KLS withdrawals will open after listing.</p>
-        <button id="withdraw-btn" class="btn" style="opacity: 0.3;" disabled onclick="tg.showAlert('Address input coming soon!')">WITHDRAW USDT</button>
+
+        <div class="card" style="display:flex; justify-content: space-between;">
+            <span>Friends Invited:</span>
+            <b id="ref-count">0</b>
+        </div>
+
+        <button id="wd-btn" class="btn" style="opacity:0.3;" disabled onclick="tg.showAlert('Need $10 to withdraw.')">WITHDRAW USDT</button>
     </div>
 
     <nav class="nav">
-        <div onclick="tab('home')">⛏️<br><small>Mining</small></div>
-        <div onclick="tab('tasks')">📋<br><small>Tasks</small></div>
-        <div onclick="tab('wallet')">💰<br><small>Wallet</small></div>
+        <div onclick="tab('home')" style="text-align:center">⛏️<br><small>Mining</small></div>
+        <div onclick="tab('wallet')" style="text-align:center">💰<br><small>Wallet</small></div>
     </nav>
 </div>
 
