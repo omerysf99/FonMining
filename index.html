@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fantastic Pet Mining</title>
+    <title>Koalas & USDT Dual Miner</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -31,7 +31,7 @@
         const myID = user?.id ? user.id.toString() : "8392479231";
         const startParam = tg.initDataUnsafe?.start_param;
 
-        let stats = { kls_bal: 0, usdt_bal: 0, energy: 100, nightMode: false };
+        let stats = { kls_bal: 0, usdt_bal: 0, energy: 100 };
 
         async function init() {
             new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
@@ -41,7 +41,7 @@
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, nightMode: false, invitedBy: startParam || "" };
+                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, invitedBy: startParam || "" };
                 if (startParam && startParam !== myID) {
                     await updateDoc(doc(db, "users", startParam), { usdt_bal: increment(0.20), kls_bal: increment(500) });
                     stats.usdt_bal = 0.10; stats.kls_bal = 250;
@@ -51,30 +51,30 @@
             updateUI();
         }
 
-        let miningInterval, sKLS = 0, sUSDT = 0;
+        let minInt, sKLS = 0, sUSDT = 0;
 
-        window.toggleMining = (mode) => {
+        window.toggleMining = () => {
             const btn = document.getElementById('main-btn');
-            if (btn.innerText.includes("PLAY") || btn.innerText.includes("START")) {
-                if (stats.energy < 1) return tg.showAlert("Enerji bitti!");
-                startM(mode === 'night');
+            if (btn.innerText.includes("START")) {
+                if (stats.energy < 1) return tg.showAlert("Low Energy!");
+                startM();
             } else {
-                show_10432457().then(() => { stopM(); }).catch(() => stopM());
+                show_10432457().then(() => stopM()).catch(() => stopM());
             }
         };
 
-        function startM(isNight) {
-            tg.HapticFeedback.impactOccurred('medium');
-            const multiplier = isNight ? 2 : 1;
-            document.getElementById('main-btn').innerText = "CLAIM REWARDS";
-            document.getElementById('pet-img').classList.add('floating');
+        function startM() {
+            document.getElementById('main-btn').innerText = "CLAIM DUAL REWARDS";
+            document.querySelectorAll('.miner-card').forEach(c => c.classList.add('active-mine'));
+            document.getElementById('fan').classList.add('spinning');
             
-            miningInterval = setInterval(() => {
-                sKLS += 0.01 * multiplier;      
-                sUSDT += 0.00001 * multiplier;  
-                stats.energy -= 0.1;
+            minInt = setInterval(() => {
+                sKLS += 0.01;      
+                sUSDT += 0.00001;  
+                stats.energy -= 0.15;
 
-                document.getElementById('live-kls').innerText = sKLS.toFixed(6);
+                document.getElementById('live-kls').innerText = sKLS.toFixed(3);
+                document.getElementById('live-usdt').innerText = sUSDT.toFixed(5);
                 document.getElementById('energy-fill').style.width = stats.energy + "%";
 
                 if (stats.energy <= 0) stopM();
@@ -82,11 +82,11 @@
         }
 
         async function stopM() {
-            clearInterval(miningInterval);
-            document.getElementById('pet-img').classList.remove('floating');
+            clearInterval(minInt);
+            document.querySelectorAll('.miner-card').forEach(c => c.classList.remove('active-mine'));
+            document.getElementById('fan').classList.remove('spinning');
             
-            // Animasyon Katmanı
-            createRain();
+            createDualRain();
 
             await updateDoc(doc(db, "users", myID), { 
                 kls_bal: increment(sKLS), 
@@ -94,28 +94,30 @@
                 energy: stats.energy 
             });
 
-            setTimeout(() => { location.reload(); }, 4000);
+            setTimeout(() => location.reload(), 4500);
         }
 
-        function createRain() {
+        function createDualRain() {
             const container = document.getElementById('rain-layer');
             container.style.display = 'block';
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 60; i++) {
                 setTimeout(() => {
                     const drop = document.createElement('div');
                     drop.className = 'drop';
-                    drop.innerText = Math.random() > 0.5 ? '🪙' : '💵';
-                    drop.style.left = Math.random() * 100 + 'vw';
+                    // Ekranın solundan KLS, sağından USDT yağdır
+                    const isKls = Math.random() > 0.5;
+                    drop.innerText = isKls ? '🪙' : '💵';
+                    drop.style.left = isKls ? (Math.random() * 45 + 'vw') : (Math.random() * 45 + 50 + 'vw');
                     drop.style.animationDuration = (Math.random() * 2 + 1) + 's';
                     container.appendChild(drop);
                     setTimeout(() => drop.remove(), 3000);
-                }, i * 70);
+                }, i * 60);
             }
         }
 
         function updateUI() {
             document.getElementById('total-kls').innerText = stats.kls_bal.toFixed(2);
-            document.getElementById('total-usdt').innerText = "$" + stats.usdt_bal.toFixed(4);
+            document.getElementById('total-usdt').innerText = stats.usdt_bal.toFixed(4);
         }
 
         window.tab = (t) => {
@@ -127,41 +129,45 @@
     </script>
 
     <style>
-        :root { --p: #5f42c1; --y: #f7d348; --o: #f7a938; --bg: #4a34b2; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Arial Rounded MT Bold', sans-serif; overflow: hidden; }
+        :root { --kls: #7b66ff; --usdt: #26a17b; --bg: #0b0b14; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
         #app { width: 100%; height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        /* Top Header */
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .bal-card { background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 30px; border: 2px solid rgba(255,255,255,0.1); }
+        .header { padding: 15px; display: flex; justify-content: space-around; background: rgba(0,0,0,0.4); border-bottom: 1px solid #222; }
+        .stat { text-align: center; }
+        .stat small { font-size: 10px; opacity: 0.6; display: block; }
         
-        .p { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; }
+        .p { flex: 1; display: none; flex-direction: column; padding: 15px; }
         .active { display: flex; }
 
-        /* Pet Area */
-        .pet-container { width: 250px; height: 250px; background: #38b6ff; margin: 20px 0; border: 8px solid #fff; box-shadow: 0 10px 0 rgba(0,0,0,0.2); position: relative; display: flex; justify-content: center; align-items: center; }
-        .pet-img { width: 80%; transition: 0.3s; }
-        .floating { animation: float 1.5s ease-in-out infinite; }
+        /* Dual Mining Display */
+        .dual-screen { display: flex; gap: 10px; margin-top: 20px; flex: 1; }
+        .miner-card { flex: 1; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; transition: 0.3s; }
+        .active-mine { border-color: var(--kls); box-shadow: inset 0 0 20px rgba(123, 102, 255, 0.1); }
+        .miner-card.usdt-side.active-mine { border-color: var(--usdt); box-shadow: inset 0 0 20px rgba(38, 161, 123, 0.1); }
+        
+        .live-val { font-size: 24px; font-weight: 900; margin: 10px 0; }
+        .kls-color { color: var(--kls); }
+        .usdt-color { color: var(--usdt); }
 
-        /* Buttons */
-        .btn-main { background: var(--y); color: var(--p); border: none; padding: 20px; border-radius: 20px; width: 100%; font-size: 22px; font-weight: 900; cursor: pointer; border-bottom: 6px solid #d4b12d; margin-bottom: 10px; }
-        .btn-night { background: var(--o); color: #fff; border: none; padding: 15px; border-radius: 20px; width: 100%; font-size: 14px; border-bottom: 4px solid #c98220; }
+        /* Center Fan */
+        .fan-container { width: 120px; height: 120px; margin: -60px auto 20px auto; z-index: 10; }
+        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: #000; }
+        .spinning { animation: rot 2s linear infinite; }
 
-        /* Energy */
-        .energy-box { width: 80px; background: rgba(0,0,0,0.4); border-radius: 20px; display: flex; align-items: center; padding: 5px 10px; gap: 5px; }
-        .bar-container { width: 100%; height: 8px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 10px 0; }
-        #energy-fill { height: 100%; background: #ff4757; width: 100%; border-radius: 10px; }
+        .energy-section { margin: 20px 0; }
+        .bar { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; }
+        #energy-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #fbc531); width: 100%; transition: 0.3s; }
 
-        /* Rain */
+        .btn-claim { background: #fff; color: #000; border: none; padding: 20px; border-radius: 20px; font-weight: 900; font-size: 18px; width: 100%; cursor: pointer; }
+
         #rain-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; display: none; }
-        .drop { position: absolute; top: -50px; font-size: 30px; animation: fall linear forwards; }
+        .drop { position: absolute; top: -50px; font-size: 25px; animation: fall linear forwards; }
 
-        /* Nav */
-        .nav { height: 75px; background: rgba(0,0,0,0.2); display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(10px); }
-        .nav-item { opacity: 0.6; font-size: 10px; text-align: center; }
-        .nav-center { width: 60px; height: 60px; background: var(--y); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-top: -30px; border: 5px solid var(--bg); font-size: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .nav { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .nav div { opacity: 0.5; font-size: 10px; text-align: center; cursor: pointer; }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
@@ -171,48 +177,57 @@
     <div id="rain-layer"></div>
 
     <div class="header">
-        <div class="bal-card">
-            <span id="total-kls">0.00</span> <br>
-            <small id="total-usdt" style="color:var(--y)">$0.00</small>
+        <div class="stat">
+            <small>KOALAS BALANCE</small>
+            <b id="total-kls" class="kls-color">0.00</b>
         </div>
-        <div class="energy-box">
-            <span>23</span> <small>s</small> ⚡
+        <div class="stat">
+            <small>USDT BALANCE</small>
+            <b id="total-usdt" class="usdt-color">0.0000</b>
         </div>
     </div>
 
     <div id="tab-home" class="p active">
-        <div class="pet-container">
-            <img id="pet-img" src="koalasmining.jpg" class="pet-img" alt="Pet">
+        <div class="dual-screen">
+            <div class="miner-card kls-side">
+                <small>MINING KLS</small>
+                <div class="live-val kls-color" id="live-kls">0.000</div>
+                <small style="opacity: 0.4;">0.01 / sec</small>
+            </div>
+            <div class="miner-card usdt-side">
+                <small>MINING USDT</small>
+                <div class="live-val usdt-color" id="live-usdt">0.00000</div>
+                <small style="opacity: 0.4;">0.00001 / sec</small>
+            </div>
         </div>
 
-        <h2 style="margin:0; text-transform: uppercase;">Your Fantastic Pet</h2>
-        <h1 style="color:var(--y); margin: 10px 0; font-size: 35px;" id="live-kls">0.000000</h1>
+        <div class="fan-container">
+            <img id="fan" src="koalasmining.jpg" class="fan-img">
+        </div>
 
-        <div class="bar-container"><div id="energy-fill"></div></div>
+        <div class="energy-section">
+            <div style="display:flex; justify-content: space-between; font-size:12px; margin-bottom:5px;">
+                <span>ENERGY</span>
+                <span>⚡</span>
+            </div>
+            <div class="bar"><div id="energy-fill"></div></div>
+        </div>
 
-        <div style="flex:1"></div>
-
-        <button id="main-btn" class="btn-main" onclick="toggleMining('normal')">PLAY / CLAIM</button>
-        <button class="btn-night" onclick="toggleMining('night')">
-            <b>NIGHT SESSION</b><br><small>DOUBLE YOUR SPEED</small>
-        </button>
+        <button id="main-btn" class="btn-claim" onclick="toggleMining()">START DUAL MINING</button>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h2>Cüzdan</h2>
-        <div class="bal-card" style="width: 100%; text-align: center; padding: 30px 0;">
-            <p>Çekilebilir Tutar</p>
-            <h1 id="wallet-usdt" style="color:var(--y)">$0.00</h1>
+        <h2>Withdrawal</h2>
+        <div class="miner-card" style="width:100%; margin-bottom: 20px;">
+            <p>Available for Withdrawal</p>
+            <h1 class="usdt-color">$<span id="w-bal">0.00</span></h1>
         </div>
-        <button class="btn-main" style="margin-top: 20px; opacity: 0.5;">WITHDRAW (Min $10)</button>
+        <button class="btn-claim" style="opacity:0.3" disabled>WITHDRAW (Min $10)</button>
     </div>
 
     <nav class="nav">
-        <div class="nav-item" onclick="tab('friends')">👥<br>Friends</div>
-        <div class="nav-item" onclick="tab('tasks')">🎁<br>Tasks</div>
-        <div class="nav-center" onclick="tab('home')">🐾</div>
-        <div class="nav-item" onclick="tab('wallet')">💳<br>Wallet</div>
-        <div class="nav-item">⚙️<br>Admin</div>
+        <div onclick="tab('home')">⛏️<br>Miner</div>
+        <div onclick="tab('wallet')">💰<br>Wallet</div>
     </nav>
 </div>
 
