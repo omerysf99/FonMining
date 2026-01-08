@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas: Pro Referral System</title>
+    <title>Koalas: Pro Infinite Mining</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -29,194 +29,172 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const myPhoto = user?.photo_url || "https://ui-avatars.com/api/?name=" + (user?.first_name || "M");
-        const myUsername = user?.username || user?.first_name || "Anonymous";
-
+        
         let stats = { kls_bal: 0, usdt_bal: 0, hasUsedCode: false };
-        let sKLS = 0, sUSDT = 0, isMining = false, miningInterval;
+        let isMining = false, miningInterval, adTimer = 0;
+        let sKLS = 0, sUSDT = 0;
 
         async function init() {
-            new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
-            
-            const userRef = doc(db, "users", myID);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                stats = userSnap.data();
-            } else {
-                stats = { 
-                    kls_bal: 0, usdt_bal: 0, hasUsedCode: false, 
-                    username: myUsername, photo: myPhoto, invitedBy: "" 
-                };
-                await setDoc(userRef, stats);
-            }
+            const userSnap = await getDoc(doc(db, "users", myID));
+            if (userSnap.exists()) stats = userSnap.data();
             updateUI();
-            loadReferralList();
         }
-
-        // --- MANUEL DAVET KODU GİRİŞİ ---
-        window.applyInviteCode = async () => {
-            const code = document.getElementById('invite-input').value.trim();
-            if (stats.hasUsedCode) return tg.showAlert("Zaten bir kod kullandınız!");
-            if (code === myID) return tg.showAlert("Kendi kodunuzu kullanamazsınız!");
-
-            const targetRef = doc(db, "users", code);
-            const targetSnap = await getDoc(targetRef);
-
-            if (targetSnap.exists()) {
-                // Kod Sahibi ve Giren Kişiye 0.05$
-                await updateDoc(targetRef, { usdt_bal: increment(0.05) });
-                await updateDoc(doc(db, "users", myID), { 
-                    usdt_bal: increment(0.05), 
-                    hasUsedCode: true, 
-                    invitedBy: code 
-                });
-                tg.showAlert("Tebrikler! 0.05$ hesabınıza eklendi.");
-                location.reload();
-            } else {
-                tg.showAlert("Geçersiz davet kodu!");
-            }
-        };
-
-        // --- DAVET EDİLENLERİ LİSTELEME ---
-        async function loadReferralList() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            const listContainer = document.getElementById('ref-list');
-            listContainer.innerHTML = "";
-            
-            document.getElementById('ref-count').innerText = snap.size;
-            document.getElementById('my-code-display').innerText = myID;
-
-            snap.forEach(doc => {
-                const data = doc.data();
-                const item = document.createElement('div');
-                item.className = 'ref-item';
-                item.innerHTML = `
-                    <img src="${data.photo || 'https://via.placeholder.com/40'}" class="ref-photo">
-                    <div class="ref-info">
-                        <b>@${data.username}</b>
-                        <small>Kazandırdı: $0.05</small>
-                    </div>
-                `;
-                listContainer.appendChild(item);
-            });
-        }
-
-        // --- MINING VE TABS (ÖNCEKİ KODLARIN DEVAMI) ---
-        window.showTab = (name) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + name).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            event.currentTarget.classList.add('nav-active');
-        };
 
         window.toggleMining = () => {
+            const btn = document.getElementById('mine-btn');
             if (!isMining) {
                 isMining = true;
-                document.getElementById('mine-btn').innerText = "CLAIM REWARDS";
-                document.getElementById('pet-img').classList.add('pet-active');
+                btn.innerText = "MINING ACTIVE...";
+                btn.style.background = "#ff4757";
+                document.getElementById('fan-img').classList.add('fan-spin');
+                
                 miningInterval = setInterval(() => {
-                    sKLS += 0.01; sUSDT += 0.00001;
+                    sKLS += 0.01;
+                    sUSDT += 0.00001;
+                    adTimer++;
+
                     document.getElementById('live-kls').innerText = sKLS.toFixed(3);
                     document.getElementById('live-usdt').innerText = "$" + sUSDT.toFixed(6);
+                    document.getElementById('ad-progress').style.width = (adTimer / 30 * 100) + "%";
+
+                    // 30 Saniyede Bir Reklam
+                    if (adTimer >= 30) {
+                        autoClaim();
+                    }
                 }, 1000);
-            } else {
-                show_10432457().then(() => finalize());
             }
         };
 
-        async function finalize() {
+        async function autoClaim() {
             clearInterval(miningInterval);
-            await updateDoc(doc(db, "users", myID), { kls_bal: increment(sKLS), usdt_bal: increment(sUSDT) });
-            location.reload();
+            document.getElementById('fan-img').classList.remove('fan-spin');
+            
+            // Reklamı Göster
+            show_10432457().then(() => finalizeAdCycle()).catch(() => finalizeAdCycle());
+        }
+
+        async function finalizeAdCycle() {
+            // Veritabanı Güncelle
+            await updateDoc(doc(db, "users", myID), { 
+                kls_bal: increment(sKLS), 
+                usdt_bal: increment(sUSDT) 
+            });
+
+            // Animasyon ve Reset
+            createRain();
+            sKLS = 0; sUSDT = 0; adTimer = 0;
+            
+            // 3 saniye sonra kazıma devam et
+            setTimeout(() => {
+                document.getElementById('rain-layer').style.display = 'none';
+                isMining = false;
+                toggleMining();
+            }, 3000);
+        }
+
+        function createRain() {
+            const layer = document.getElementById('rain-layer');
+            layer.style.display = 'block';
+            for(let i=0; i<30; i++) {
+                const d = document.createElement('div');
+                d.className = 'drop'; d.innerText = Math.random() > 0.5 ? '🪙' : '💵';
+                d.style.left = Math.random() * 95 + 'vw';
+                layer.appendChild(d);
+                setTimeout(() => d.remove(), 2000);
+            }
         }
 
         function updateUI() {
-            document.querySelectorAll('.total-kls-ui').forEach(el => el.innerText = stats.kls_bal.toFixed(2));
-            document.querySelectorAll('.total-usdt-ui').forEach(el => el.innerText = stats.usdt_bal.toFixed(4));
+            document.getElementById('total-kls').innerText = stats.kls_bal.toFixed(2);
+            document.getElementById('total-usdt').innerText = stats.usdt_bal.toFixed(4);
         }
+
+        window.showTab = (name) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+        };
 
         window.onload = init;
     </script>
 
     <style>
-        :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --dark: #1a0b4a; }
-        body { margin: 0; background: var(--p); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
-        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.3); }
-        .tab-content { display: none; flex-direction: column; padding: 20px; flex: 1; overflow-y: auto; align-items: center; }
+        :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --dark: #120a3d; }
+        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        
+        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.4); border-bottom: 2px solid var(--p); }
+        .tab-content { display: none; flex-direction: column; align-items: center; padding: 20px; height: calc(100vh - 130px); overflow-y: auto; }
         .active { display: flex; }
 
-        /* Referral Styles */
-        .card { width: 100%; background: var(--dark); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-sizing: border-box; }
-        .invite-box { display: flex; gap: 10px; margin-top: 10px; }
-        .invite-input { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #000; color: #fff; }
-        .btn-apply { background: var(--y); color: #000; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; }
+        /* Mining Ekranı Gelişmiş */
+        .fan-area { width: 260px; height: 260px; position: relative; display: flex; justify-content: center; align-items: center; margin: 20px 0; }
+        .fan-glow { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, var(--b) 0%, transparent 70%); opacity: 0.3; filter: blur(20px); }
+        
+        /* Arka planı kaldırılmış ve yuvarlak fan */
+        .fan-frame { width: 200px; height: 200px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; z-index: 2; box-shadow: 0 0 20px var(--b); }
+        .fan-img { width: 100%; height: 100%; object-fit: cover; }
+        .fan-spin { animation: spin 2s linear infinite; }
 
-        .ref-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
-        .ref-photo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--b); }
-        .ref-info b { display: block; font-size: 14px; }
-        .ref-info small { color: var(--y); font-size: 11px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .pet-box { width: 180px; height: 180px; background: var(--b); border-radius: 20px; border: 5px solid #fff; display: flex; justify-content: center; align-items: center; margin: 20px 0; }
-        .pet-img { width: 80%; }
-        .pet-active { animation: bounce 0.8s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .live-stats { text-align: center; z-index: 5; background: rgba(0,0,0,0.5); padding: 10px 30px; border-radius: 50px; border: 1px solid var(--p); }
+        #live-kls { font-size: 40px; color: var(--y); font-weight: 900; display: block; }
+        #live-usdt { color: #00ffaa; font-weight: bold; }
 
-        .nav-bar { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; color: #fff; opacity: 0.5; font-size: 11px; }
-        .nav-active { opacity: 1; color: var(--y); }
+        /* Reklam Barı */
+        .ad-bar-wrap { width: 80%; height: 6px; background: #222; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        #ad-progress { height: 100%; width: 0%; background: var(--y); transition: 1s linear; }
+
+        .btn-mine { width: 85%; padding: 20px; border-radius: 20px; border: none; background: var(--y); color: var(--dark); font-size: 20px; font-weight: 900; cursor: pointer; border-bottom: 5px solid #b89610; }
+
+        /* Navigasyon */
+        .nav { height: 70px; display: flex; justify-content: space-around; align-items: center; background: #000; position: fixed; bottom: 0; width: 100%; }
+        .nav-btn { background: none; border: none; color: #fff; font-size: 11px; opacity: 0.6; }
+
+        #rain-layer { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 100; }
+        .drop { position: absolute; top: -50px; font-size: 30px; animation: fall 2s linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="app">
     <div class="header">
-        <div class="chip">🪙 <span class="total-kls-ui">0.00</span></div>
-        <div class="chip">💵 $<span class="total-usdt-ui">0.0000</span></div>
+        <div>🪙 <span id="total-kls">0.00</span></div>
+        <div>💵 $<span id="total-usdt">0.0000</span></div>
     </div>
 
     <div id="tab-mining" class="tab-content active">
-        <h1 id="live-kls" style="color:var(--y); margin-bottom:0;">0.000</h1>
-        <small id="live-usdt" style="color:#00ffaa;">$0.000000</small>
-        <div class="pet-box"><img id="pet-img" src="koalasmining.jpg" class="pet-img"></div>
-        <button id="mine-btn" onclick="toggleMining()" style="width:80%; padding:20px; border-radius:20px; background:var(--y); border:none; font-weight:900; font-size:20px;">START PLAY</button>
+        <div class="live-stats">
+            <span id="live-kls">0.000</span>
+            <span id="live-usdt">$0.000000</span>
+        </div>
+
+        <div class="fan-area">
+            <div class="fan-glow"></div>
+            <div class="fan-frame">
+                <img id="fan-img" src="koalasmining.jpg" class="fan-img">
+            </div>
+        </div>
+
+        <div style="font-size: 12px; opacity: 0.8;">NEXT REWARD CYCLE</div>
+        <div class="ad-bar-wrap">
+            <div id="ad-progress"></div>
+        </div>
+
+        <button id="mine-btn" class="btn-mine" onclick="toggleMining()">START MINING</button>
+        <p style="font-size: 10px; margin-top: 10px; opacity: 0.5;">Auto-claim every 30 seconds</p>
     </div>
 
     <div id="tab-friends" class="tab-content">
-        <div class="card">
-            <small>SİZİ KİM DAVET ETTİ?</small>
-            <div class="invite-box">
-                <input type="text" id="invite-input" class="invite-input" placeholder="Kod girin...">
-                <button class="btn-apply" onclick="applyInviteCode()">KULLAN</button>
-            </div>
+        <h2>Friends Panel</h2>
         </div>
 
-        <div class="card">
-            <small>KODUNUZ (Kopyalamak için dokun):</small>
-            <div id="my-code-display" style="font-size:20px; font-weight:bold; color:var(--y); margin-top:5px;" onclick="navigator.clipboard.writeText(this.innerText); alert('Kod kopyalandı!')">Loading...</div>
-        </div>
+    <div id="rain-layer"></div>
 
-        <h3 style="align-self: flex-start;">Davet Ettikleriniz (<span id="ref-count">0</span>)</h3>
-        <div id="ref-list" style="width: 100%;">
-            </div>
-    </div>
-
-    <div id="tab-wallet" class="tab-content">
-        <h2>Cüzdan</h2>
-        <div class="card" style="text-align:center; background:var(--b);">
-            <small>TOPLAM KAZANÇ</small>
-            <h1>$<span class="total-usdt-ui">0.00</span></h1>
-        </div>
-    </div>
-
-    <nav class="nav-bar">
-        <button class="nav-btn nav-active" onclick="showTab('mining')">⛏️<br>Mining</button>
+    <nav class="nav">
+        <button class="nav-btn" onclick="showTab('mining')">⛏️<br>Mining</button>
         <button class="nav-btn" onclick="showTab('friends')">👥<br>Friends</button>
         <button class="nav-btn" onclick="showTab('wallet')">💰<br>Wallet</button>
     </nav>
-</div>
 
 </body>
 </html>
