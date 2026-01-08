@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Ultimate</title>
+    <title>Bums Clicker Pro</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
@@ -19,12 +19,12 @@
             display: flex; justify-content: center;
             height: 100vh; overflow: hidden;
             user-select: none;
+            touch-action: manipulation;
         }
 
         #game-container {
             width: 100%; max-width: 450px;
             height: 100vh;
-            /* YENİ ARKA PLAN BURADA */
             background: url('arkaplan.jpg') no-repeat center center;
             background-size: cover;
             position: relative;
@@ -34,16 +34,16 @@
         /* Üst Panel */
         .top-ui {
             display: flex; justify-content: space-between;
-            padding: 15px; background: rgba(15, 23, 42, 0.8);
+            padding: 15px; background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(8px);
             z-index: 50;
         }
 
         .profile-area { display: flex; align-items: center; gap: 10px; }
-        .p-icon { width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--accent-blue); }
+        .p-icon { width: 45px; height: 45px; border-radius: 10px; border: 2px solid var(--accent-blue); }
 
         .stats-area { display: flex; gap: 10px; }
-        .stat-box { background: rgba(30, 41, 59, 0.9); padding: 5px 15px; border-radius: 12px; text-align: center; }
+        .stat-box { background: rgba(30, 41, 59, 0.9); padding: 5px 12px; border-radius: 12px; text-align: center; min-width: 70px; }
 
         /* Yan Menüler */
         .side-menu {
@@ -52,8 +52,8 @@
             padding: 0 15px; pointer-events: none; z-index: 40;
         }
         .side-stack { display: flex; flex-direction: column; gap: 18px; pointer-events: auto; }
-        .s-btn { width: 62px; text-align: center; font-size: 0.65rem; font-weight: bold; }
-        .s-btn img { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 4px; }
+        .s-btn { width: 60px; text-align: center; font-size: 0.65rem; font-weight: bold; }
+        .s-btn img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 4px; }
 
         /* ANA OYUN ALANI */
         .main-stage {
@@ -63,51 +63,56 @@
         }
 
         #score-display { 
-            font-size: 4rem; font-weight: 900; margin-bottom: 20px;
+            font-size: 3.5rem; font-weight: 900; margin-bottom: 15px;
             text-shadow: 0 5px 15px rgba(0,0,0,0.8); 
         }
 
-        /* ANA TIKLANAN GÖRSEL */
+        /* KÜÇÜLTÜLMÜŞ VE SABİT ANA GÖRSEL */
         #hero {
-            width: 280px; transition: transform 0.05s;
-            cursor: pointer; filter: drop-shadow(0 0 30px rgba(0,0,0,0.6));
+            width: 200px; /* Görsel boyutu küçültüldü */
+            cursor: pointer;
+            filter: drop-shadow(0 0 25px rgba(0,0,0,0.5));
+            /* Push/Scale animasyonu kaldırıldı */
+            transition: filter 0.1s;
+        }
+        
+        #hero:active {
+            filter: brightness(1.2); /* Tıklandığında sadece hafif bir parlama verir */
         }
 
-        /* Sol Alt Notcoin */
+        /* Notcoin Sol Alt */
         .notcoin-fixed {
-            position: absolute; left: 25px; bottom: 35px;
-            width: 95px; filter: drop-shadow(0 0 20px var(--gold));
-            animation: float 3s infinite ease-in-out;
+            position: absolute; left: 20px; bottom: 30px;
+            width: 85px; filter: drop-shadow(0 0 15px var(--gold));
         }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* ALT PANEL VE DEV SEKMELER */
+        /* ALT PANEL */
         .bottom-panel {
             background: rgba(15, 23, 42, 0.95);
-            padding: 20px 10px 30px 10px; border-top: 3px solid #1e293b;
+            padding: 15px 10px 25px 10px; border-top: 3px solid #1e293b;
             z-index: 50;
         }
 
-        .energy-wrap { margin-bottom: 20px; }
-        .e-label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
-        .e-bar { background: #334155; height: 18px; border-radius: 20px; overflow: hidden; border: 1px solid #475569; }
+        .energy-wrap { margin-bottom: 15px; }
+        .e-label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px; font-size: 0.9rem; }
+        .e-bar { background: #334155; height: 16px; border-radius: 20px; overflow: hidden; }
         #e-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.1s; }
 
         .tabs { display: flex; justify-content: space-around; align-items: flex-end; }
-        .tab-item { text-align: center; color: #94a3b8; font-size: 0.85rem; flex: 1; cursor: pointer; }
+        .tab-item { text-align: center; color: #94a3b8; font-size: 0.8rem; flex: 1; cursor: pointer; }
         .tab-item img { 
             width: var(--nav-size); height: var(--nav-size); 
-            display: block; margin: 0 auto 8px; border-radius: 18px;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: block; margin: 0 auto 5px; border-radius: 15px;
         }
-        .tab-item.active { color: white; font-weight: 900; }
-        .tab-item.active img { transform: scale(1.15) translateY(-10px); border: 3px solid var(--gold); box-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
+        .tab-item.active { color: white; font-weight: bold; }
+        .tab-item.active img { border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
 
+        /* Tıklama Sayısı Efekti */
         .pop {
-            position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem;
-            pointer-events: none; animation: rise 0.8s forwards; z-index: 100;
+            position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem;
+            pointer-events: none; animation: rise 0.6s forwards; z-index: 100;
         }
-        @keyframes rise { to { transform: translateY(-150px) scale(1.2); opacity: 0; } }
+        @keyframes rise { to { transform: translateY(-120px); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -117,17 +122,17 @@
         <div class="profile-area">
             <img src="TapLv1.jpg" class="p-icon">
             <div>
-                <div style="font-size:0.9rem; font-weight:bold;">V.Albayra...</div>
-                <div style="font-size:0.7rem; color: #94a3b8;">ID: 8392479231</div>
+                <div style="font-size:0.85rem; font-weight:bold;">V.Albayra...</div>
+                <div style="font-size:0.65rem; color: #94a3b8;">ID: 8392479231</div>
             </div>
         </div>
         <div class="stats-area">
             <div class="stat-box">
-                <div style="font-size:0.6rem; color:#94a3b8;">Coin</div>
+                <div style="font-size:0.55rem; color:#94a3b8;">Coin</div>
                 <div id="coin-val" style="color:var(--gold); font-weight:bold;">0</div>
             </div>
             <div class="stat-box">
-                <div style="font-size:0.6rem; color:#94a3b8;">Per hour</div>
+                <div style="font-size:0.55rem; color:#94a3b8;">Per hour</div>
                 <div id="hour-val" style="color:#10b981; font-weight:bold;">+0</div>
             </div>
         </div>
@@ -135,19 +140,19 @@
 
     <div class="side-menu">
         <div class="side-stack">
-            <div class="s-btn"><img src="Jgang.jpg">JOIN GANG</div>
-            <div class="s-btn"><img src="TapEarn.jpg">8h 0m</div>
+            <div class="s-btn"><img src="Jgang.jpg">GANG</div>
+            <div class="s-btn"><img src="TapEarn.jpg">EARN</div>
             <div class="s-btn"><img src="Airdrop.jpg">AIRDROP</div>
         </div>
         <div class="side-stack">
-            <div class="s-btn"><img src="AutoTap.jpg">AUTO TAP</div>
+            <div class="s-btn"><img src="AutoTap.jpg">AUTO</div>
             <div class="s-btn"><img src="Nft.jpg">NFT</div>
         </div>
     </div>
 
     <div class="main-stage" id="tap-area">
         <div id="score-display">0</div>
-        <img src="TapLv1.jpg" id="hero" alt="Tap Hero">
+        <img src="TapLv1.jpg" id="hero" alt="Hero">
         <img src="Notcoin.jpg" class="notcoin-fixed" alt="Notcoin">
     </div>
 
@@ -155,7 +160,7 @@
         <div class="energy-wrap">
             <div class="e-label">
                 <span>⚡ <span id="e-current">2000</span> / 2000</span>
-                <span style="color:var(--gold);" id="p-text">+5 Per tap</span>
+                <span style="color:var(--gold);" id="p-text">+5</span>
             </div>
             <div class="e-bar"><div id="e-fill"></div></div>
         </div>
@@ -179,7 +184,6 @@
     const scoreEl = document.getElementById('score-display');
     const eFill = document.getElementById('e-fill');
     const eText = document.getElementById('e-current');
-    const hero = document.getElementById('hero');
     const hVal = document.getElementById('hour-val');
 
     document.getElementById('tap-area').addEventListener('pointerdown', (e) => {
@@ -188,8 +192,6 @@
             energy -= tapPower;
             updateUI();
             createPop(e.clientX, e.clientY);
-            hero.style.transform = "scale(0.9)";
-            setTimeout(() => hero.style.transform = "scale(1)", 50);
         }
     });
 
@@ -199,19 +201,16 @@
         eFill.style.width = (energy / 2000 * 100) + "%";
         eText.innerText = Math.floor(energy);
         hVal.innerText = "+" + income;
-        document.getElementById('p-text').innerText = `+${tapPower} Per tap`;
+        document.getElementById('p-text').innerText = `+${tapPower}`;
     }
 
     function upgrade() {
-        let cost = tapPower * 150;
+        let cost = tapPower * 100;
         if (coins >= cost) {
             coins -= cost;
             tapPower += 5;
-            income += 120;
+            income += 50;
             updateUI();
-            alert("TEBRİKLER!\nGeliştirme Yapıldı.");
-        } else {
-            alert("Yetersiz Coin! Gerekli: " + cost);
         }
     }
 
@@ -221,11 +220,11 @@
         p.innerText = `+${tapPower}`;
         p.style.left = x + 'px'; p.style.top = y + 'px';
         document.body.appendChild(p);
-        setTimeout(() => p.remove(), 700);
+        setTimeout(() => p.remove(), 600);
     }
 
     setInterval(() => {
-        if (energy < 2000) energy = Math.min(2000, energy + 6);
+        if (energy < 2000) energy = Math.min(2000, energy + 5);
         if (income > 0) coins += (income / 3600);
         updateUI();
     }, 1000);
