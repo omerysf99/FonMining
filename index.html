@@ -50,26 +50,21 @@
         }
 
         function updateUI() {
-            document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(4));
+            document.querySelectorAll('.ui-usdt').forEach(e => e.innerText = stats.usdt.toFixed(5));
+            document.getElementById('display-my-id').innerText = myID;
             document.getElementById('ref-link').innerText = `https://t.me/FonixMining2026Bot?start=${myID}`;
             
-            // Görev Durumlarını Güncelle
-            stats.completedTasks.forEach(taskId => {
-                const btn = document.getElementById('btn-' + taskId);
-                if(btn) {
-                    btn.innerText = "DONE ✅";
-                    btn.disabled = true;
-                    btn.style.opacity = "0.5";
-                }
-            });
+            // Tek seferlik görevleri kontrol et (Telegram Kanalı gibi)
+            if(stats.completedTasks.includes('task_tg')) {
+                const btn = document.getElementById('btn-task_tg');
+                if(btn) { btn.innerText = "KATILDI ✅"; btn.disabled = true; btn.style.opacity = "0.5"; }
+            }
         }
 
-        // --- GÖREV SİSTEMİ ---
+        // --- TEK SEFERLİK GÖREV (TELEGRAM) ---
         window.doTask = async (taskId, reward, url) => {
             if(stats.completedTasks.includes(taskId)) return;
-            
             window.open(url, '_blank');
-            
             setTimeout(async () => {
                 const userRef = doc(db, "users", myID);
                 await updateDoc(userRef, { 
@@ -80,6 +75,25 @@
                 stats.completedTasks.push(taskId);
                 updateUI();
                 tg.showAlert(`Tebrikler! ${reward}$ kazandın.`);
+            }, 3000);
+        };
+
+        // --- SINIRSIZ REKLAM İZLEME GÖREVİ ---
+        window.watchAd = async () => {
+            const reward = 0.0001;
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            // Buraya gerçek reklam sağlayıcı linkini (Adless, Monetag vb.) koyabilirsin.
+            // Şimdilik sembolik bir video/sayfa açıyoruz.
+            window.open('https://t.me/FonixMining', '_blank'); 
+
+            setTimeout(async () => {
+                const userRef = doc(db, "users", myID);
+                await updateDoc(userRef, { usdt: increment(reward) });
+                stats.usdt += reward;
+                updateUI();
+                tg.showScanQrPopup({text: "Ödülünüz tanımlandı! +$0.0001"}); // Bildirim amaçlı
+                setTimeout(() => tg.closeScanQrPopup(), 1500);
             }, 2000);
         };
 
@@ -87,11 +101,9 @@
         window.applyCode = async () => {
             const code = document.getElementById('invite-input').value.trim();
             if(!code || stats.invitedBy) return;
-            
             const targetRef = doc(db, "users", code);
             const targetSnap = await getDoc(targetRef);
-
-            if(targetSnap.exists()) {
+            if(targetSnap.exists() && code !== myID) {
                 await updateDoc(doc(db, "users", myID), { usdt: increment(0.05), invitedBy: code });
                 await updateDoc(targetRef, { usdt: increment(0.05) });
                 stats.usdt += 0.05; stats.invitedBy = code;
@@ -102,13 +114,10 @@
             }
         };
 
-        // --- ÇEKİM ---
         window.requestWithdraw = async () => {
             const amt = parseFloat(document.getElementById('w-amt').value);
-            if(amt > stats.usdt || amt < 10) return tg.showAlert("Yetersiz bakiye veya min 10$");
-            await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
-            stats.usdt -= amt; updateUI();
-            tg.showAlert("Talep gönderildi!");
+            if(amt > stats.usdt || amt < 10) return tg.showAlert("Min 10$ bakiye gerekli.");
+            tg.showAlert("Talep alındı! 24 saat içinde incelenecektir.");
         };
 
         async function loadFriends() {
@@ -127,79 +136,89 @@
         window.onload = init;
     </script>
     <style>
-        :root { --p: #6c5ce7; --y: #f7d348; --d: #0a0a12; --c: rgba(255,255,255,0.06); }
-        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; user-select: none; }
+        :root { --p: #6c5ce7; --y: #f7d348; --d: #09090b; --c: rgba(255,255,255,0.06); }
+        body { margin: 0; background: var(--d); color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; user-select: none; }
         #app { height: 100vh; display: flex; flex-direction: column; }
         .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
         .active { display: flex; flex-direction: column; }
-        .card { background: var(--c); border-radius: 18px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); }
-        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .card { background: var(--c); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); }
+        .main-card { background: linear-gradient(135deg, var(--p), #3b2fad); border: none; text-align: center; }
+        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .btn-y { background: var(--y); color: #000; }
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin: 8px 0; box-sizing: border-box; }
-        .nav { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 14px; border-radius: 10px; margin: 8px 0; box-sizing: border-box; }
+        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 10px; }
         .n-on { opacity: 1; color: var(--y); }
-        .t-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; }
+        .t-row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 15px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="p-home" class="page active">
-        <div style="text-align: center; margin: 20px 0;">
-            <img src="koalasmining.jpg" style="width: 80px; border-radius: 50%; border: 3px solid var(--y);">
-            <h2>FONIX MINING</h2>
+        <div style="text-align: center; margin: 30px 0;">
+            <img src="koalasmining.jpg" style="width: 90px; border-radius: 50%; border: 3px solid var(--y); box-shadow: 0 0 15px rgba(247,211,72,0.3);">
+            <h2 style="letter-spacing:1px; margin-top:10px;">FONIX MINING</h2>
         </div>
-        <div class="card" style="background: linear-gradient(135deg, var(--p), #3b2fad); text-align: center;">
-            <small>BAKİYE</small>
-            <h1 style="font-size: 38px; margin: 5px 0;">$<span class="ui-usdt">0.0000</span></h1>
+        <div class="card main-card">
+            <small style="opacity:0.8;">HESAP BAKİYESİ</small>
+            <h1 style="font-size: 42px; margin: 10px 0;">$<span class="ui-usdt">0.00000</span></h1>
+            <div style="font-size:12px; opacity:0.6;">KLS Token mining is active</div>
+        </div>
+        <div class="card" style="text-align:center;">
+            <small style="opacity:0.5;">YOUR ID</small>
+            <div id="display-my-id" style="font-size:18px; font-weight:bold; color:var(--y);">...</div>
         </div>
     </div>
 
     <div id="p-tasks" class="page">
-        <h2>Görevler</h2>
+        <h2 style="margin-top:0;">Görev Merkezi</h2>
+        
+        <div class="card" style="border-color: var(--y);">
+            <div class="t-row">
+                <div><b>🎬 Reklam İzle</b><br><small>Her izleme: +$0.0001</small></div>
+                <button class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="watchAd()">İZLE</button>
+            </div>
+            <p style="font-size:10px; opacity:0.5; margin:0; text-align:center;">Bu görev her zaman yapılabilir.</p>
+        </div>
+
         <div class="card">
             <div class="t-row">
-                <div><b>X Takip Et</b><br><small>+$0.10</small></div>
-                <button id="btn-task_x" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_x', 0.10, 'https://x.com/koalas')">YAP</button>
-            </div>
-            <div class="t-row">
-                <div><b>Telegram Kanalı</b><br><small>+$0.05</small></div>
-                <button id="btn-task_tg" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_tg', 0.05, 'https://t.me/kanaliniz')">KATIL</button>
-            </div>
-            <div class="t-row">
-                <div><b>Günlük Bonus</b><br><small>+$0.01</small></div>
-                <button id="btn-task_daily" class="btn btn-y" style="width:auto; padding:8px 15px;" onclick="doTask('task_daily', 0.01, '#')">AL</button>
+                <div><b>📢 Resmi Kanal</b><br><small>Ödül: $0.05</small></div>
+                <button id="btn-task_tg" class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="doTask('task_tg', 0.05, 'https://t.me/FonixMining')">KATIL</button>
             </div>
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2>Referans</h2>
+        <h2 style="margin-top:0;">Referans</h2>
         <div class="card">
-            <small>SENİN ID: <span id="display-my-id"></span></small>
-            <div id="ref-link" style="font-size: 10px; opacity: 0.5; margin: 5px 0;"></div>
-            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); alert('Kopyalandı!')">LİNKİ KOPYALA</button>
+            <small style="font-weight:bold; color:var(--p);">DAVET LİNKİN</small>
+            <div id="ref-link" style="font-size: 10px; background:#000; padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; color:#666;"></div>
+            <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">LİNKİ KOPYALA</button>
         </div>
         <div class="card">
-            <input type="text" id="invite-input" placeholder="Arkadaşının ID'sini Gir">
-            <button class="btn btn-y" onclick="applyCode()">KODU KULLAN</button>
+            <small style="color:var(--y);">DAVET KODU GİR ($0.05)</small>
+            <input type="text" id="invite-input" placeholder="Arkadaşının ID'sini buraya yaz">
+            <button class="btn btn-y" onclick="applyCode()">KODU ONAYLA</button>
         </div>
-        <div style="text-align: center; opacity: 0.6;">Davet Edilen: <span id="f-count">0</span></div>
+        <div style="text-align: center; margin-top:10px;">Network: <span id="f-count" style="font-weight:bold; color:var(--y);">0</span> Arkadaş</div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2>Cüzdan</h2>
+        <h2 style="margin-top:0;">Cüzdan</h2>
         <div class="card">
-            <input type="number" id="w-amt" placeholder="Miktar (Min 10$)">
-            <input type="text" placeholder="Cüzdan Adresi">
-            <button class="btn btn-y" onclick="requestWithdraw()">ÇEKİM TALEBİ</button>
+            <label style="font-size:12px; opacity:0.6;">Çekilecek Miktar (Min $10.00)</label>
+            <input type="number" id="w-amt" placeholder="10.00">
+            <label style="font-size:12px; opacity:0.6;">TON / USDT Adresi</label>
+            <input type="text" placeholder="UQ... veya Cüzdan Adresi">
+            <button class="btn btn-y" onclick="requestWithdraw()">ÇEKİM TALEBİ OLUŞTUR</button>
         </div>
     </div>
 
     <nav class="nav">
         <button class="n-btn n-on" onclick="showTab('home', this)">🏠<br>Home</button>
-        <button class="n-btn" onclick="showTab('tasks', this)">✅<br>Tasks</button>
-        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Friends</button>
+        <button class="n-btn" onclick="showTab('tasks', this)">📺<br>Ads</button>
+        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Ref</button>
         <button class="n-btn" onclick="showTab('wallet', this)">💰<br>Wallet</button>
     </nav>
 </div>
