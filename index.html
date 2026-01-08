@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas Ultra Miner</title>
+    <title>Koalas App</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-    <script src='//libtl.com/sdk.js' data-zone='10432457' data-sdk='show_10432457'></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -29,97 +27,18 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const myName = user?.username || user?.first_name || "Koala_User";
-        const myPhoto = user?.photo_url || "https://ui-avatars.com/api/?name=" + myName;
-
-        let stats = { main_kls: 0, main_usdt: 0, pending_kls: 0, pending_usdt: 0, hasUsedCode: false };
-        let isMining = false, adTimer = 0;
 
         async function init() {
-            new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-
-            if (snap.exists()) {
-                stats = snap.data();
-            } else {
-                stats = { main_kls: 0, main_usdt: 0, pending_kls: 0, pending_usdt: 0, username: myName, photo: myPhoto, invitedBy: "" };
-                await setDoc(userRef, stats);
+            if (!snap.exists()) {
+                await setDoc(userRef, { 
+                    kls: 0, 
+                    usdt: 0, 
+                    username: user?.username || "Guest" 
+                });
             }
-            updateUI();
-            loadFriends();
-        }
-
-        // --- OTOMATİK MİNİNG SİSTEMİ ---
-        window.startMining = () => {
-            if(isMining) return;
-            isMining = true;
-            document.getElementById('start-overlay').style.display = 'none';
-            document.getElementById('fan-img').classList.add('fan-spin');
-            
-            setInterval(async () => {
-                stats.pending_kls += 0.005;
-                stats.pending_usdt += 0.000005;
-                adTimer++;
-
-                updateUI();
-
-                // 30 Saniyede Bir Reklam
-                if (adTimer >= 30) {
-                    adTimer = 0;
-                    show_10432457().then(() => {
-                        updateDoc(doc(db, "users", myID), { 
-                            pending_kls: stats.pending_kls, 
-                            pending_usdt: stats.pending_usdt 
-                        });
-                    });
-                }
-            }, 1000);
-        };
-
-        // --- WALLET CLAIM ---
-        window.claimToMain = async () => {
-            if (stats.pending_usdt <= 0) return tg.showAlert("Birikmiş ödül yok!");
-            
-            const k = stats.pending_kls;
-            const u = stats.pending_usdt;
-
-            stats.main_kls += k;
-            stats.main_usdt += u;
-            stats.pending_kls = 0;
-            stats.pending_usdt = 0;
-
-            await updateDoc(doc(db, "users", myID), {
-                main_kls: increment(k),
-                main_usdt: increment(u),
-                pending_kls: 0,
-                pending_usdt: 0
-            });
-
-            createRain();
-            tg.showAlert("Ödüller ana bakiyeye aktarıldı!");
-            updateUI();
-        };
-
-        // --- FRIENDS ---
-        async function loadFriends() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            const list = document.getElementById('friends-list');
-            list.innerHTML = "";
-            document.getElementById('f-count').innerText = snap.size;
-            snap.forEach(d => {
-                const data = d.data();
-                list.innerHTML += `<div class="f-item"><img src="${data.photo}"><span>@${data.username}</span><b>+$0.05</b></div>`;
-            });
-        }
-
-        function updateUI() {
-            document.querySelectorAll('.ui-main-kls').forEach(e => e.innerText = stats.main_kls.toFixed(2));
-            document.querySelectorAll('.ui-main-usdt').forEach(e => e.innerText = stats.main_usdt.toFixed(4));
-            document.getElementById('ui-pending-kls').innerText = stats.pending_kls.toFixed(4);
-            document.getElementById('ui-pending-usdt').innerText = stats.pending_usdt.toFixed(6);
-            document.getElementById('ad-bar').style.width = (adTimer / 30 * 100) + "%";
+            document.getElementById('user-name').innerText = user?.first_name || "Koala";
         }
 
         window.showTab = (n) => {
@@ -129,124 +48,66 @@
             event.currentTarget.classList.add('n-on');
         };
 
-        function createRain() {
-            const r = document.getElementById('rain');
-            r.style.display = 'block';
-            for(let i=0; i<30; i++) {
-                const d = document.createElement('div');
-                d.className = 'drop'; d.innerText = '🪙';
-                d.style.left = Math.random()*95+'vw';
-                r.appendChild(d);
-                setTimeout(() => d.remove(), 2000);
-            }
-        }
-
         window.onload = init;
     </script>
 
     <style>
-        :root { --p: #5c3eb3; --y: #f7d348; --b: #38b6ff; --d: #0a0520; }
-        body { margin: 0; background: var(--d); color: #fff; font-family: 'Arial Rounded MT Bold', sans-serif; overflow: hidden; }
+        :root { --p: #5c3eb3; --y: #f7d348; --d: #0a0520; }
+        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; }
         
-        .header { height: 60px; display: flex; justify-content: space-around; align-items: center; background: rgba(0,0,0,0.5); border-bottom: 1px solid #333; }
-        .page { display: none; height: calc(100vh - 135px); flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        #app { height: 100vh; display: flex; flex-direction: column; }
+        .page { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .active { display: flex; }
 
-        /* Ana Sayfa Overlay */
-        #start-overlay { position: absolute; inset: 0; background: var(--d); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
-        /* Mining Ekranı */
-        .fan-box { width: 240px; height: 240px; border-radius: 50%; border: 8px solid #fff; overflow: hidden; box-shadow: 0 0 40px var(--b); margin: 30px 0; }
-        .fan-img { width: 100%; height: 100%; object-fit: cover; }
-        .fan-spin { animation: spin 2s linear infinite; }
-        @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+        /* Ana Sayfa Görseli */
+        .hero-img { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--y); box-shadow: 0 0 30px rgba(247, 211, 72, 0.3); margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+        p { opacity: 0.6; margin-top: 10px; }
 
-        .mining-vals { text-align: center; background: rgba(0,0,0,0.4); padding: 15px 40px; border-radius: 30px; border: 1px solid var(--p); }
-        .ad-wrap { width: 80%; height: 6px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden; }
-        #ad-bar { width: 0; height: 100%; background: var(--y); transition: 1s linear; }
-
-        /* Wallet & Friends */
-        .card { width: 100%; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; text-align: center; }
-        .btn-claim { width: 100%; padding: 18px; border-radius: 15px; border: none; background: var(--y); font-weight: 900; font-size: 16px; cursor: pointer; color: #000; }
-        .f-item { width: 100%; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.08); padding: 10px; border-radius: 12px; margin-bottom: 8px; }
-        .f-item img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--b); }
-
-        /* Nav */
-        .nav { height: 75px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 11px; }
+        /* Navigasyon */
+        .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 12px; cursor: pointer; transition: 0.2s; }
         .n-on { opacity: 1; color: var(--y); transform: scale(1.1); }
+        .n-icon { font-size: 24px; display: block; margin-bottom: 5px; }
 
-        #rain { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 100; }
-        .drop { position: absolute; top: -50px; font-size: 30px; animation: fall 2s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh); } }
+        .card { width: 100%; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div id="rain"></div>
-
-    <div id="start-overlay">
-        <img src="koalasmining.jpg" style="width:150px; border-radius:50%; margin-bottom:30px; border:5px solid var(--y);">
-        <h1 style="margin-bottom:10px;">KOALAS MINER</h1>
-        <p style="opacity:0.6; margin-bottom:40px;">Ready to earn KLS & USDT?</p>
-        <button class="btn-claim" style="width:200px; font-size:24px;" onclick="startMining()">PLAY</button>
-    </div>
-
-    <div class="header">
-        <div>🪙 <span class="ui-main-kls">0.00</span></div>
-        <div>💵 $<span class="ui-main-usdt">0.0000</span></div>
-    </div>
-
-    <div id="p-mining" class="page active">
-        <div class="mining-vals">
-            <small style="color:var(--y)">PENDING REWARDS</small>
-            <h2 id="ui-pending-kls" style="margin:5px 0; font-size:32px;">0.0000</h2>
-            <div id="ui-pending-usdt" style="color:#00ffaa;">$0.000000</div>
-        </div>
-        
-        <div class="fan-box">
-            <img id="fan-img" src="koalasmining.jpg" class="fan-img">
-        </div>
-
-        <small style="opacity:0.5;">Next Ad Cycle</small>
-        <div class="ad-wrap"><div id="ad-bar"></div></div>
-        <p style="font-size:12px; margin-top:15px; color:var(--b);">Mining is active in background...</p>
-    </div>
-
-    <div id="p-friends" class="page">
-        <h2>Friends (<span id="f-count">0</span>)</h2>
-        <div class="card">
-            <small>Your Referral Link</small>
-            <div id="ref-link" style="font-size:11px; background:#000; padding:10px; border-radius:10px; margin-top:5px;" onclick="navigator.clipboard.writeText(this.innerText); alert('Copied!')">https://t.me/BotUser?start=8392479231</div>
-        </div>
-        <div id="friends-list" style="width:100%"></div>
+<div id="app">
+    <div id="p-home" class="page active">
+        <img src="koalasmining.jpg" class="hero-img">
+        <h1>Welcome, <span id="user-name">...</span>!</h1>
+        <p>Koalas Community Hub</p>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2>Wallet</h2>
-        <div class="card" style="background:var(--p);">
-            <p>Main Balance</p>
-            <h1>$<span class="ui-main-usdt">0.00</span></h1>
-        </div>
-
         <div class="card">
-            <p>Unclaimed Mining Rewards</p>
-            <h3 style="color:var(--y);">$<span id="ui-pending-usdt-wallet">0.0000</span></h3>
-            <button class="btn-claim" style="margin-top:10px;" onclick="claimToMain()">CLAIM TO MAIN BALANCE</button>
+            <p>Total Balance</p>
+            <h1 style="color:var(--y);">$0.0000</h1>
+        </div>
+    </div>
+
+    <div id="p-friends" class="page">
+        <div class="card">
+            <h2>Friends List</h2>
+            <p>No friends yet.</p>
         </div>
     </div>
 
     <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('mining')">⛏️<br>Mining</button>
-        <button class="n-btn" onclick="showTab('friends')">👥<br>Friends</button>
-        <button class="n-btn" onclick="showTab('wallet')">💰<br>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('home')">
+            <span class="n-icon">🏠</span>Home
+        </button>
+        <button class="n-btn" onclick="showTab('friends')">
+            <span class="n-icon">👥</span>Friends
+        </button>
+        <button class="n-btn" onclick="showTab('wallet')">
+            <span class="n-icon">💰</span>Wallet
+        </button>
     </nav>
+</div>
 
-    <script>
-        // Sync pending values for wallet tab
-        setInterval(() => {
-            document.getElementById('ui-pending-usdt-wallet').innerText = stats.pending_usdt.toFixed(6);
-        }, 1000);
-    </script>
 </body>
 </html>
