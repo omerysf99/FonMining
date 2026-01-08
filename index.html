@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FONIX GACHA v505</title>
+    <title>FONIX COLLECTOR v506</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
@@ -24,26 +24,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const tg = window.Telegram.WebApp;
-        tg.expand();
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
         
-        let stats = { usdt: 0, ton: 0, adsToday: 0, cards: 0 };
+        // Kart Tanımları
+        const CARD_TYPES = [
+            { id: 'common', name: 'COMMON', color: '#888', chance: 70 },
+            { id: 'epic', name: 'EPIC', color: '#a335ee', chance: 20 },
+            { id: 'legendary', name: 'LEGENDARY', color: '#ff8000', chance: 7 },
+            { id: 'secret', name: 'SECRET', color: '#ff00ff', chance: 2.5 },
+            { id: 'og', name: 'OG', color: '#00ffcc', chance: 0.5 }
+        ];
+
+        let stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [] };
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-            const today = new Date().toDateString();
-
-            if (snap.exists()) {
-                stats = snap.data();
-                if (stats.lastAdDate !== today) {
-                    stats.adsToday = 0;
-                    await updateDoc(userRef, { adsToday: 0, lastAdDate: today });
-                }
-            } else {
-                stats = { usdt: 0, ton: 0, adsToday: 0, lastAdDate: today, cards: 0 };
+            if (snap.exists()) stats = snap.data();
+            else {
+                stats = { usdt: 0, ton: 0, adsToday: 0, inventory: [], lastAdDate: new Date().toDateString() };
                 await setDoc(userRef, stats);
             }
             updateUI();
@@ -52,55 +53,63 @@
         function updateUI() {
             document.getElementById('usdt-val').innerText = stats.usdt.toFixed(6);
             document.getElementById('ton-val').innerText = stats.ton.toFixed(7);
-            document.getElementById('card-count').innerText = stats.cards || 0;
-            document.getElementById('ad-count').innerText = stats.adsToday;
             
-            const cardGrid = document.getElementById('card-grid');
-            cardGrid.innerHTML = "";
-            for(let i=0; i < (stats.cards || 0); i++) {
-                cardGrid.innerHTML += `<div class="card-item">💎 ELITE CARD #${i+1}</div>`;
-            }
-        }
+            const grid = document.getElementById('card-grid');
+            grid.innerHTML = "";
 
-        function getRandom(min, max) { return Math.random() * (max - min) + min; }
+            CARD_TYPES.forEach(type => {
+                const hasCard = stats.inventory && stats.inventory.includes(type.id);
+                const cardEl = document.createElement('div');
+                cardEl.className = `card-box ${hasCard ? 'active' : 'locked'}`;
+                cardEl.style.setProperty('--card-clr', type.color);
+                cardEl.innerHTML = `
+                    <div class="card-tier">${type.name}</div>
+                    <div class="card-status">${hasCard ? 'SAHİPSİN' : 'KİLİTLİ'}</div>
+                `;
+                grid.appendChild(cardEl);
+            });
+        }
 
         window.openChest = () => {
             if(stats.adsToday >= 50) return tg.showAlert("Günlük limit doldu!");
 
-            tg.HapticFeedback.impactOccurred('medium');
             window.showAdexora().then(async () => {
-                // 1. Ödül: USDT (Şanslı Aralıklar)
-                let usdtReward = 0;
-                if(Math.random() < 0.80) usdtReward = getRandom(0.000007, 0.0001);
-                else usdtReward = getRandom(0.0001, 0.001);
+                let usdtReward = Math.random() < 0.8 ? (Math.random()*(0.0001-0.000007)+0.000007) : (Math.random()*(0.001-0.0001)+0.0001);
+                let tonReward = Math.random()*(0.000007-0.000001)+0.000001;
+                
+                let wonCard = null;
+                // %0.10 Kart Çıkma İhtimali
+                if(Math.random() < 0.001) {
+                    const roll = Math.random() * 100;
+                    let currentLimit = 0;
+                    for(let t of CARD_TYPES) {
+                        currentLimit += t.chance;
+                        if(roll <= currentLimit) {
+                            wonCard = t;
+                            break;
+                        }
+                    }
+                }
 
-                // 2. Ödül: TON (Sabit Aralık)
-                const tonReward = getRandom(0.000001, 0.000007);
+                let newInv = stats.inventory || [];
+                if(wonCard && !newInv.includes(wonCard.id)) {
+                    newInv.push(wonCard.id);
+                }
 
-                // 3. Ödül: KART (%0.10 ihtimal)
-                let cardWon = false;
-                if(Math.random() < 0.001) cardWon = true;
-
-                // Güncelleme
-                stats.usdt += usdtReward;
-                stats.ton += tonReward;
-                stats.adsToday += 1;
-                if(cardWon) stats.cards = (stats.cards || 0) + 1;
-
-                await updateDoc(doc(db, "users", myID), { 
+                await updateDoc(doc(db, "users", myID), {
                     usdt: increment(usdtReward),
                     ton: increment(tonReward),
                     adsToday: increment(1),
-                    cards: increment(cardWon ? 1 : 0)
+                    inventory: newInv
                 });
 
+                stats.usdt += usdtReward; stats.ton += tonReward; stats.adsToday += 1; stats.inventory = newInv;
                 updateUI();
                 
-                let msg = `🎁 SANDIK AÇILDI!\n\n💰 USDT: +$${usdtReward.toFixed(6)}\n💎 TON: +${tonReward.toFixed(7)}`;
-                if(cardWon) msg += `\n\n🃏 İNANILMAZ! NADİR KART KAZANDIN!`;
-                
+                let msg = `🎁 SANDIK AÇILDI!\n💰 $${usdtReward.toFixed(6)}\n💎 ${tonReward.toFixed(7)} TON`;
+                if(wonCard) msg += `\n\n🃏 TEBRİKLER! ${wonCard.name} KARTI ÇIKTI!`;
                 tg.showAlert(msg);
-            }).catch(() => tg.showAlert("Sandık kilitli! (Reklam yüklenemedi)"));
+            });
         };
 
         window.switchTab = (id, btn) => {
@@ -114,66 +123,76 @@
     </script>
 
     <style>
-        :root { --main: #00ffcc; --ton: #0088cc; --bg: #050508; --card: rgba(255,255,255,0.03); }
+        :root { --main: #00ffcc; --bg: #050508; }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .app-container { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .app { height: 100vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
         .tab-page { display: none; flex: 1; overflow-y: auto; padding-bottom: 90px; }
         .on { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 25px; padding: 20px; margin-bottom: 15px; }
-        .val { font-family: 'Syncopate'; font-weight: 700; font-size: 22px; }
-        
-        .chest-btn { background: linear-gradient(45deg, #1a1a2e, #000); border: 2px solid var(--main); border-radius: 30px; padding: 40px 20px; text-align: center; cursor: pointer; margin-top: 10px; }
-        .chest-btn:active { transform: scale(0.95); background: var(--main); color: #000; }
+        .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 15px; margin-bottom: 10px; }
+        .val { font-family: 'Syncopate'; font-size: 20px; color: var(--main); }
 
-        .card-item { background: linear-gradient(135deg, #7000ff, #00ffcc); color: #000; padding: 20px; border-radius: 15px; font-weight: 800; font-size: 12px; margin-bottom: 10px; text-align: center; border: 3px solid #fff; }
+        /* Kart Tasarımı */
+        #card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 10px; }
+        .card-box { 
+            aspect-ratio: 2/3; border-radius: 15px; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; position: relative;
+            transition: 0.3s; border: 2px solid transparent;
+        }
+        .active { 
+            background: linear-gradient(135deg, #111, #000); 
+            border-color: var(--card-clr);
+            box-shadow: 0 0 15px var(--card-clr);
+        }
+        .locked { 
+            background: #111; 
+            border-color: #222; 
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+        .card-tier { font-family: 'Syncopate'; font-size: 10px; margin-bottom: 5px; color: var(--card-clr); }
+        .card-status { font-size: 8px; opacity: 0.6; }
 
-        .nav-bar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; height: 70px; display: flex; justify-content: space-around; align-items: center; }
+        .chest-area { background: #111; border: 2px solid var(--main); border-radius: 25px; padding: 30px; text-align: center; margin-top: 20px; cursor: pointer; }
+
+        .nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #000; border: 1px solid #222; border-radius: 20px; height: 70px; display: flex; justify-content: space-around; align-items: center; }
         .nav-btn { background: none; border: none; color: #fff; opacity: 0.4; font-size: 9px; font-family: 'Syncopate'; }
         .on-nav { opacity: 1; color: var(--main); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="app">
     <div id="home" class="tab-page on">
-        <h2 style="font-family: 'Syncopate'; font-size: 14px; color: var(--main);">ŞANSLI SANDIK</h2>
-        
         <div class="stat-card">
-            <small style="opacity:0.5; font-size: 10px;">USDT BAKİYE</small>
-            <div class="val" style="color: var(--main);">$<span id="usdt-val">0.000000</span></div>
+            <small style="opacity:0.5; font-size: 9px;">USDT</small>
+            <div class="val">$<span id="usdt-val">0.000000</span></div>
         </div>
-
         <div class="stat-card">
-            <small style="opacity:0.5; font-size: 10px;">TON BAKİYE</small>
-            <div class="val" style="color: var(--ton);"><span id="ton-val">0.0000000</span> TON</div>
+            <small style="opacity:0.5; font-size: 9px;">TON</small>
+            <div class="val" style="color:#0088cc;"><span id="ton-val">0.0000000</span></div>
         </div>
-
-        <div class="chest-btn" onclick="openChest()">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎁</div>
-            <div style="font-family: 'Syncopate';">SANDIĞI AÇ</div>
-            <small style="opacity:0.5;">Günlük Hak: <span id="ad-count">0</span>/50</small>
+        <div class="chest-area" onclick="openChest()">
+            <div style="font-size: 40px;">🎁</div>
+            <div style="font-family: 'Syncopate'; margin-top:10px;">SANDIK AÇ</div>
         </div>
     </div>
 
     <div id="cards" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 14px;">KOLEKSİYONUM (<span id="card-count">0</span>)</h2>
-        <div id="card-grid">
-            </div>
+        <h3 style="font-family: 'Syncopate'; font-size: 12px; margin-bottom: 20px;">KART KOLEKSİYONU</h3>
+        <div id="card-grid"></div>
     </div>
 
     <div id="wallet" class="tab-page">
-        <h2 style="font-family: 'Syncopate'; font-size: 14px;">ÇEKİM TALEBİ</h2>
+        <h3 style="font-family: 'Syncopate'; font-size: 12px;">CÜZDAN</h3>
         <div class="stat-card">
-            <input type="number" id="withdraw-amt" placeholder="Tutar (Min $10)" style="width:100%; background:none; border:none; color:#fff; font-size: 18px; outline:none;">
-            <hr style="opacity:0.1; margin: 15px 0;">
-            <input type="text" id="wallet-adr" placeholder="TON Adresi" style="width:100%; background:none; border:none; color:#fff; font-size: 14px; outline:none;">
-            <button onclick="tg.showAlert('Talebiniz alındı!')" style="width:100%; padding:15px; margin-top:20px; border-radius:15px; border:none; font-family:'Syncopate'; font-weight:800;">ONAYLA</button>
+            <input type="text" placeholder="TON Adresi" style="width:100%; background:none; border:none; color:#fff; padding:10px 0; outline:none;">
+            <button onclick="tg.showAlert('Yakında!')" style="width:100%; background:var(--main); border:none; padding:15px; border-radius:10px; font-family:'Syncopate'; margin-top:10px;">ÇEKİM YAP</button>
         </div>
     </div>
 
-    <div class="nav-bar">
+    <div class="nav">
         <button class="nav-btn on-nav" onclick="switchTab('home', this)">🎁<br>AÇ</button>
         <button class="nav-btn" onclick="switchTab('cards', this)">🃏<br>KART</button>
         <button class="nav-btn" onclick="switchTab('wallet', this)">💰<br>PARA</button>
