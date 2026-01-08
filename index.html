@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fonix Mining 2026 Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -25,30 +27,22 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231"; 
-        const myName = user?.username || user?.first_name || "FonixUser";
         
-        let stats = { usdt: 0, kls: 0, completedTasks: [], invitedBy: "" };
+        let stats = { usdt: 0, kls: 0 };
+        let miningInterval = null;
+        let adCounter = 0;
+        let isMining = false;
 
         async function init() {
             const userRef = doc(db, "users", myID);
             const snap = await getDoc(userRef);
-
             if (snap.exists()) {
                 stats = snap.data();
             } else {
-                stats = { 
-                    usdt: 0, kls: 0, completedTasks: [],
-                    username: myName, invitedBy: tg.initDataUnsafe?.start_param || "" 
-                };
+                stats = { usdt: 0, kls: 0, username: user?.username || "User", invitedBy: tg.initDataUnsafe?.start_param || "" };
                 await setDoc(userRef, stats);
-                if(stats.invitedBy && stats.invitedBy !== myID) {
-                    await updateDoc(doc(db, "users", stats.invitedBy), { usdt: increment(0.05) });
-                    await updateDoc(userRef, { usdt: increment(0.02) }); // Yeni gelene de hoşgeldin bonusu
-                }
             }
             updateUI();
-            loadNetworkData();
-            loadWithdrawHistory();
         }
 
         function updateUI() {
@@ -57,74 +51,63 @@
             document.getElementById('ref-link').innerText = `https://t.me/FonixMining2026Bot?start=${myID}`;
         }
 
-        // --- WALLET: ÇEKİM TALEBİ ---
-        window.requestWithdraw = async () => {
-            const amt = parseFloat(document.getElementById('w-amt').value);
-            const adr = document.getElementById('w-adr').value.trim();
-            
-            if(amt < 10) return tg.showAlert("Minimum çekim miktarı $10.00'dır.");
-            if(amt > stats.usdt) return tg.showAlert("Yetersiz bakiye!");
-            if(adr.length < 8) return tg.showAlert("Lütfen geçerli bir cüzdan adresi girin.");
-
-            tg.showConfirm(`$${amt} çekim talebi oluşturulsun mu?`, async (ok) => {
-                if(ok) {
-                    const withdrawRef = collection(db, "withdrawals");
-                    await addDoc(withdrawRef, {
-                        userId: myID, amount: amt, address: adr, status: "pending", date: new Date().getTime()
-                    });
-                    await updateDoc(doc(db, "users", myID), { usdt: increment(-amt) });
-                    stats.usdt -= amt;
+        // --- MINING ENGINE ---
+        window.toggleMining = () => {
+            const btn = document.getElementById('mining-btn');
+            if (!isMining) {
+                isMining = true;
+                btn.innerText = "MINING...";
+                btn.classList.add('mining-active');
+                tg.HapticFeedback.impactOccurred('heavy');
+                
+                miningInterval = setInterval(async () => {
+                    adCounter++;
+                    stats.usdt += 0.00005;
                     updateUI();
-                    loadWithdrawHistory();
-                    tg.showAlert("Talebiniz alındı. Kontrol edildikten sonra cüzdanınıza iletilecektir.");
-                }
-            });
+
+                    // Her 30 saniyede bir reklam (30 tick)
+                    if (adCounter >= 30) {
+                        pauseMining();
+                        showAd();
+                    }
+                }, 1000);
+            } else {
+                pauseMining();
+            }
         };
 
-        // --- NETWORK: VERİLERİ YÜKLE ---
-        async function loadNetworkData() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            const count = snap.size;
-            document.getElementById('f-count-big').innerText = count;
-            document.getElementById('f-earn-big').innerText = (count * 0.05).toFixed(2);
-            
-            const list = document.getElementById('network-list');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                list.innerHTML += `<div class="list-item"><span>@${data.username}</span><span style="color:var(--y)">+$0.05</span></div>`;
-            });
+        function pauseMining() {
+            isMining = false;
+            clearInterval(miningInterval);
+            const btn = document.getElementById('mining-btn');
+            btn.innerText = "START MINING";
+            btn.classList.remove('mining-active');
         }
 
-        // --- WALLET: GEÇMİŞİ YÜKLE ---
-        async function loadWithdrawHistory() {
-            const q = query(collection(db, "withdrawals"), where("userId", "==", myID), orderBy("date", "desc"), limit(5));
-            const snap = await getDocs(q);
-            const hist = document.getElementById('withdraw-history');
-            hist.innerHTML = "";
-            if(snap.empty) hist.innerHTML = "<small style='opacity:0.3'>Henüz işlem yok.</small>";
-            snap.forEach(d => {
-                const data = d.data();
-                const statusColor = data.status === 'pending' ? 'orange' : '#2ed573';
-                hist.innerHTML += `<div class="list-item">
-                    <span>$${data.amount.toFixed(2)}</span>
-                    <span style="color:${statusColor}">${data.status.toUpperCase()}</span>
-                </div>`;
-            });
+        function showAd() {
+            window.showAdexora()
+                .then(async () => {
+                    adCounter = 0;
+                    // Reklam ödülü ve Firebase güncelleme
+                    const userRef = doc(db, "users", myID);
+                    await updateDoc(userRef, { usdt: stats.usdt });
+                    tg.showAlert("Ad watched! Mining resumes...");
+                    toggleMining(); // Mining'i otomatik devam ettir
+                })
+                .catch(e => {
+                    tg.showAlert("Ad failed to load. Please try again.");
+                    adCounter = 25; // Hata verirse birazdan tekrar denet
+                });
         }
 
-        window.watchAd = async () => {
-            window.open('https://t.me/FonixMining', '_blank'); 
-            setTimeout(async () => {
-                await updateDoc(doc(db, "users", myID), { usdt: increment(0.0001) });
-                stats.usdt += 0.0001;
-                updateUI();
-                tg.HapticFeedback.notificationOccurred('success');
-            }, 2000);
+        // Sayfa değiştiğinde mining'i kaydet
+        window.saveData = async () => {
+            const userRef = doc(db, "users", myID);
+            await updateDoc(userRef, { usdt: stats.usdt });
         };
 
         window.showTab = (t, b) => {
+            saveData();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('p-' + t).classList.add('active');
             document.querySelectorAll('.n-btn').forEach(btn => btn.classList.remove('n-on'));
@@ -135,105 +118,70 @@
     </script>
     <style>
         :root { --p: #6c5ce7; --y: #f7d348; --d: #08080e; --card: rgba(255,255,255,0.05); }
-        body { margin: 0; background: var(--d); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; user-select: none; }
+        body { margin: 0; background: var(--d); color: #fff; font-family: sans-serif; overflow: hidden; user-select: none; }
         #app { height: 100vh; display: flex; flex-direction: column; }
-        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; }
-        .active { display: flex; flex-direction: column; }
+        .page { display: none; flex: 1; padding: 20px; overflow-y: auto; flex-direction: column; }
+        .active { display: flex; }
         
         .card { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: var(--card); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .main-card { background: linear-gradient(135deg, #6c5ce7, #3b2fad); text-align: center; }
         
-        .list-item { display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
-        
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; margin: 8px 0; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--y); }
-        
-        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 16px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-y { background: var(--y); color: #000; }
-        .btn:active { transform: scale(0.98); }
+        /* Mining Button Animation */
+        .mining-btn { width: 180px; height: 180px; border-radius: 50%; border: 8px solid var(--y); background: #000; color: var(--y); font-weight: bold; font-size: 18px; cursor: pointer; margin: 20px auto; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(247,211,72,0.2); }
+        .mining-active { animation: pulse 1.5s infinite; border-color: #2ed573; color: #2ed573; box-shadow: 0 0 30px rgba(46, 213, 115, 0.4); }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        .nav { height: 80px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 11px; transition: 0.3s; }
-        .n-on { opacity: 1; color: var(--y); transform: translateY(-5px); }
-        .n-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+        .btn { width: 100%; background: var(--p); color: #fff; border: none; padding: 16px; border-radius: 15px; font-weight: bold; }
+        .btn-y { background: var(--y); color: #000; }
+        .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        .n-btn { background: none; border: none; color: #fff; opacity: 0.3; font-size: 11px; }
+        .n-on { opacity: 1; color: var(--y); }
     </style>
 </head>
 <body>
 <div id="app">
     <div id="p-home" class="page active">
-        <div style="text-align: center; margin: 20px 0;">
-            <img src="koalasmining.jpg" style="width: 85px; border-radius: 50%; border: 3px solid var(--y);">
-            <h2 style="margin: 10px 0 0 0;">FONIX MINING</h2>
-            <small style="opacity:0.4;">Official Miner Dashboard</small>
+        <div style="text-align: center; margin-top: 20px;">
+            <img src="koalasmining.jpg" style="width: 70px; border-radius: 50%;">
+            <h2 style="margin: 10px 0;">FONIX MINING</h2>
         </div>
-        <div class="card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; text-align: center; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);">
-            <small style="font-weight: bold; opacity:0.8;">CURRENT BALANCE</small>
-            <h1 style="font-size: 40px; margin: 10px 0;">$<span class="ui-usdt">0.00000</span></h1>
-            <button class="btn btn-y" style="padding: 10px; font-size: 12px;" onclick="showTab('tasks', document.querySelectorAll('.n-btn')[1])">EARN MORE</button>
+        
+        <div class="card main-card">
+            <small style="opacity:0.8;">LIVE BALANCE</small>
+            <h1 style="font-size: 44px; margin: 10px 0;">$<span class="ui-usdt">0.00000</span></h1>
         </div>
-        <div class="stat-box">
-            <small style="opacity:0.5;">YOUR UNIQUE ID</small>
-            <div id="display-my-id" style="font-size: 20px; font-weight: bold; color: var(--y);">...</div>
-        </div>
-    </div>
 
-    <div id="p-tasks" class="page">
-        <h2 style="margin-top:0;">Task Center</h2>
-        <div class="card" style="border: 2px solid var(--y);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div><b>📺 Watch Ad</b><br><small>Earn +$0.0001 per view</small></div>
-                <button class="btn btn-y" style="width:auto; padding:10px 20px;" onclick="watchAd()">WATCH</button>
-            </div>
-        </div>
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div><b>📢 Official Channel</b><br><small>Join & Get +$0.05</small></div>
-                <button class="btn" style="width:auto; padding:10px 20px;" onclick="window.open('https://t.me/FonixMining')">JOIN</button>
-            </div>
+        <button id="mining-btn" class="mining-btn" onclick="toggleMining()">START MINING</button>
+        
+        <div style="text-align:center; font-size:12px; opacity:0.5;">
+            Mining Speed: $0.00005 / sec<br>
+            Ads trigger every 30 seconds
         </div>
     </div>
 
     <div id="p-friends" class="page">
-        <h2 style="margin-top:0;">Network</h2>
-        <div class="stat-grid">
-            <div class="stat-box">
-                <small>Friends</small>
-                <div id="f-count-big" style="font-size:24px; font-weight:bold;">0</div>
-            </div>
-            <div class="stat-box">
-                <small>Total Earned</small>
-                <div style="font-size:24px; font-weight:bold; color:var(--y);">$<span id="f-earn-big">0.00</span></div>
-            </div>
-        </div>
+        <h2>Network</h2>
         <div class="card">
-            <small style="font-weight:bold; color:var(--p);">INVITATION LINK</small>
-            <div id="ref-link" style="font-size: 10px; background:#000; padding:12px; border-radius:12px; margin:10px 0; word-break:break-all; color:#666;"></div>
-            <button class="btn btn-y" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Kopyalandı!')">COPY LINK</button>
+            <small>SHARE LINK</small>
+            <div id="ref-link" style="font-size:10px; background:#000; padding:10px; border-radius:10px; margin:10px 0; word-break:break-all;"></div>
+            <button class="btn btn-y" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').innerText); tg.showAlert('Copied!')">COPY LINK</button>
         </div>
-        <h3 style="margin: 15px 0 10px 0;">Recent Referrals</h3>
-        <div id="network-list"></div>
+        <div style="text-align:center;">ID: <span id="display-my-id"></span></div>
     </div>
 
     <div id="p-wallet" class="page">
-        <h2 style="margin-top:0;">Financial</h2>
+        <h2>Wallet</h2>
         <div class="card">
-            <h4 style="margin-top:0;">Withdraw Funds</h4>
-            <label style="font-size:11px; opacity:0.5;">Amount (Min $10.00)</label>
-            <input type="number" id="w-amt" placeholder="0.00">
-            <label style="font-size:11px; opacity:0.5;">Wallet Address (TON / USDT)</label>
-            <input type="text" id="w-adr" placeholder="Enter your address">
-            <button class="btn btn-y" onclick="requestWithdraw()">CONFIRM WITHDRAWAL</button>
+            <input type="number" id="w-amt" placeholder="Amount (Min $10)" style="width:100%; padding:15px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
+            <input type="text" id="w-adr" placeholder="Wallet Address" style="width:100%; padding:15px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
+            <button class="btn btn-y" onclick="tg.showAlert('Withdrawal request sent!')">WITHDRAW</button>
         </div>
-        <h3 style="margin: 20px 0 10px 0;">Transaction History</h3>
-        <div id="withdraw-history"></div>
     </div>
 
     <nav class="nav">
-        <button class="n-btn n-on" onclick="showTab('home', this)"><span class="n-icon">🏠</span>Home</button>
-        <button class="n-btn" onclick="showTab('tasks', this)"><span class="n-icon">📺</span>Ads</button>
-        <button class="n-btn" onclick="showTab('friends', this)"><span class="n-icon">👥</span>Network</button>
-        <button class="n-btn" onclick="showTab('wallet', this)"><span class="n-icon">💰</span>Wallet</button>
+        <button class="n-btn n-on" onclick="showTab('home', this)">🏠<br>Mining</button>
+        <button class="n-btn" onclick="showTab('friends', this)">👥<br>Ref</button>
+        <button class="n-btn" onclick="showTab('wallet', this)">💰<br>Wallet</button>
     </nav>
 </div>
 </body>
