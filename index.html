@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koalas & USDT Dual Miner</title>
+    <title>Koalas: Fantastic Pet</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
@@ -29,34 +29,23 @@
 
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const startParam = tg.initDataUnsafe?.start_param;
-
+        
         let stats = { kls_bal: 0, usdt_bal: 0, energy: 100 };
 
         async function init() {
             new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' }).autoMode();
-            const userRef = doc(db, "users", myID);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                stats = userSnap.data();
-            } else {
-                stats = { kls_bal: 0, usdt_bal: 0, energy: 100, invitedBy: startParam || "" };
-                if (startParam && startParam !== myID) {
-                    await updateDoc(doc(db, "users", startParam), { usdt_bal: increment(0.20), kls_bal: increment(500) });
-                    stats.usdt_bal = 0.10; stats.kls_bal = 250;
-                }
-                await setDoc(userRef, stats);
-            }
+            const userSnap = await getDoc(doc(db, "users", myID));
+            if (userSnap.exists()) stats = userSnap.data();
+            else await setDoc(doc(db, "users", myID), stats);
             updateUI();
         }
 
-        let minInt, sKLS = 0, sUSDT = 0;
+        let mInt, sKLS = 0, sUSDT = 0;
 
         window.toggleMining = () => {
             const btn = document.getElementById('main-btn');
-            if (btn.innerText.includes("START")) {
-                if (stats.energy < 1) return tg.showAlert("Low Energy!");
+            if (btn.innerText.includes("PLAY")) {
+                if (stats.energy < 1) return tg.showAlert("Energy Empty!");
                 startM();
             } else {
                 show_10432457().then(() => stopM()).catch(() => stopM());
@@ -64,54 +53,41 @@
         };
 
         function startM() {
-            document.getElementById('main-btn').innerText = "CLAIM DUAL REWARDS";
-            document.querySelectorAll('.miner-card').forEach(c => c.classList.add('active-mine'));
-            document.getElementById('fan').classList.add('spinning');
+            document.getElementById('main-btn').innerText = "CLAIM REWARDS";
+            document.getElementById('pet-box').classList.add('mining-glow');
+            document.getElementById('pet-img').classList.add('pet-jump');
             
-            minInt = setInterval(() => {
-                sKLS += 0.01;      
-                sUSDT += 0.00001;  
+            mInt = setInterval(() => {
+                sKLS += 0.01; sUSDT += 0.00001;
                 stats.energy -= 0.15;
-
                 document.getElementById('live-kls').innerText = sKLS.toFixed(3);
                 document.getElementById('live-usdt').innerText = sUSDT.toFixed(5);
-                document.getElementById('energy-fill').style.width = stats.energy + "%";
-
+                document.getElementById('energy-bar').style.width = stats.energy + "%";
                 if (stats.energy <= 0) stopM();
             }, 1000);
         }
 
         async function stopM() {
-            clearInterval(minInt);
-            document.querySelectorAll('.miner-card').forEach(c => c.classList.remove('active-mine'));
-            document.getElementById('fan').classList.remove('spinning');
-            
-            createDualRain();
-
+            clearInterval(mInt);
+            createRain();
             await updateDoc(doc(db, "users", myID), { 
-                kls_bal: increment(sKLS), 
-                usdt_bal: increment(sUSDT),
-                energy: stats.energy 
+                kls_bal: increment(sKLS), usdt_bal: increment(sUSDT), energy: stats.energy 
             });
-
-            setTimeout(() => location.reload(), 4500);
+            setTimeout(() => location.reload(), 4000);
         }
 
-        function createDualRain() {
-            const container = document.getElementById('rain-layer');
-            container.style.display = 'block';
-            for (let i = 0; i < 60; i++) {
+        function createRain() {
+            const layer = document.getElementById('rain-layer');
+            layer.style.display = 'block';
+            for(let i=0; i<50; i++){
                 setTimeout(() => {
-                    const drop = document.createElement('div');
-                    drop.className = 'drop';
-                    // Ekranın solundan KLS, sağından USDT yağdır
-                    const isKls = Math.random() > 0.5;
-                    drop.innerText = isKls ? '🪙' : '💵';
-                    drop.style.left = isKls ? (Math.random() * 45 + 'vw') : (Math.random() * 45 + 50 + 'vw');
-                    drop.style.animationDuration = (Math.random() * 2 + 1) + 's';
-                    container.appendChild(drop);
-                    setTimeout(() => drop.remove(), 3000);
-                }, i * 60);
+                    const d = document.createElement('div');
+                    d.className = 'drop'; d.innerText = Math.random() > 0.5 ? '🪙' : '💵';
+                    d.style.left = Math.random() * 90 + 'vw';
+                    d.style.animationDuration = (Math.random()*2+1)+'s';
+                    layer.appendChild(d);
+                    setTimeout(() => d.remove(), 2500);
+                }, i*60);
             }
         }
 
@@ -120,54 +96,45 @@
             document.getElementById('total-usdt').innerText = stats.usdt_bal.toFixed(4);
         }
 
-        window.tab = (t) => {
-            document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
-            document.getElementById('tab-'+t).classList.add('active');
-        };
-
         window.onload = init;
     </script>
 
     <style>
-        :root { --kls: #7b66ff; --usdt: #26a17b; --bg: #0b0b14; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
-        #app { width: 100%; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        :root { --blue: #38b6ff; --purple: #4a34b2; --yellow: #f7d348; --dark: #2c1d7a; }
+        body { margin: 0; background: var(--purple); color: #fff; font-family: 'Arial Rounded MT Bold', sans-serif; overflow: hidden; }
+        #app { width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 15px; box-sizing: border-box; }
         
-        .header { padding: 15px; display: flex; justify-content: space-around; background: rgba(0,0,0,0.4); border-bottom: 1px solid #222; }
-        .stat { text-align: center; }
-        .stat small { font-size: 10px; opacity: 0.6; display: block; }
+        /* Fantastic Pet Header */
+        .top-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .stat-badge { background: rgba(0,0,0,0.4); padding: 8px 15px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.2); text-align: center; min-width: 80px; }
+        .stat-badge small { font-size: 9px; display: block; color: var(--yellow); }
+
+        /* The Pet Box (Oyunun kalbi) */
+        .pet-container { width: 280px; height: 280px; background: var(--blue); border: 8px solid #fff; border-radius: 20px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
+        .pet-img { width: 180px; z-index: 2; transition: 0.3s; }
+        .mining-glow { animation: bgPulse 2s infinite; }
         
-        .p { flex: 1; display: none; flex-direction: column; padding: 15px; }
-        .active { display: flex; }
+        /* Mining Info Panels */
+        .mining-info { width: 100%; display: flex; justify-content: space-between; margin: 20px 0; gap: 10px; }
+        .info-card { flex: 1; background: var(--dark); border-radius: 15px; padding: 10px; text-align: center; border: 2px solid rgba(255,255,255,0.1); }
+        .info-card h3 { margin: 5px 0; font-size: 20px; }
 
-        /* Dual Mining Display */
-        .dual-screen { display: flex; gap: 10px; margin-top: 20px; flex: 1; }
-        .miner-card { flex: 1; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid #222; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; transition: 0.3s; }
-        .active-mine { border-color: var(--kls); box-shadow: inset 0 0 20px rgba(123, 102, 255, 0.1); }
-        .miner-card.usdt-side.active-mine { border-color: var(--usdt); box-shadow: inset 0 0 20px rgba(38, 161, 123, 0.1); }
+        /* Progress Bar */
+        .energy-wrap { width: 100%; margin-bottom: 20px; }
+        .bar-bg { width: 100%; height: 12px; background: #1a1a1a; border-radius: 10px; overflow: hidden; border: 2px solid #fff; }
+        #energy-bar { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4757, var(--yellow)); }
+
+        /* Fantastic Button */
+        .btn-play { width: 100%; background: var(--yellow); color: var(--purple); border: none; padding: 22px; border-radius: 25px; font-size: 24px; font-weight: 900; cursor: pointer; border-bottom: 8px solid #c9a61d; transition: 0.1s; text-transform: uppercase; }
+        .btn-play:active { transform: translateY(4px); border-bottom: 4px solid #c9a61d; }
+
+        /* Animations */
+        @keyframes bgPulse { 0%, 100% { background: var(--blue); } 50% { background: #60c5ff; box-shadow: 0 0 40px var(--blue); } }
+        @keyframes petJump { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
+        .pet-jump { animation: petJump 0.8s infinite ease-in-out; }
         
-        .live-val { font-size: 24px; font-weight: 900; margin: 10px 0; }
-        .kls-color { color: var(--kls); }
-        .usdt-color { color: var(--usdt); }
-
-        /* Center Fan */
-        .fan-container { width: 120px; height: 120px; margin: -60px auto 20px auto; z-index: 10; }
-        .fan-img { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #fff; object-fit: cover; background: #000; }
-        .spinning { animation: rot 2s linear infinite; }
-
-        .energy-section { margin: 20px 0; }
-        .bar { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; }
-        #energy-fill { height: 100%; background: linear-gradient(90deg, #ff4757, #fbc531); width: 100%; transition: 0.3s; }
-
-        .btn-claim { background: #fff; color: #000; border: none; padding: 20px; border-radius: 20px; font-weight: 900; font-size: 18px; width: 100%; cursor: pointer; }
-
         #rain-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; display: none; }
-        .drop { position: absolute; top: -50px; font-size: 25px; animation: fall linear forwards; }
-
-        .nav { height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .nav div { opacity: 0.5; font-size: 10px; text-align: center; cursor: pointer; }
-
-        @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .drop { position: absolute; top: -50px; font-size: 30px; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
     </style>
 </head>
@@ -176,59 +143,36 @@
 <div id="app">
     <div id="rain-layer"></div>
 
-    <div class="header">
-        <div class="stat">
-            <small>KOALAS BALANCE</small>
-            <b id="total-kls" class="kls-color">0.00</b>
+    <div class="top-row">
+        <div class="stat-badge"><small>KOALAS</small><b id="total-kls">0.00</b></div>
+        <div class="stat-badge"><small>USDT</small><b id="total-usdt">0.0000</b></div>
+    </div>
+
+    <div id="pet-box" class="pet-container">
+        <img id="pet-img" src="koalasmining.jpg" class="pet-img">
+        <div style="position:absolute; bottom:10px; background:rgba(0,0,0,0.5); padding:2px 10px; border-radius:10px; font-size:10px;">LVL 1 FANTASTIC KOALA</div>
+    </div>
+
+    <div class="mining-info">
+        <div class="info-card">
+            <small style="color:var(--yellow)">KLS EARNED</small>
+            <h3 id="live-kls">0.000</h3>
         </div>
-        <div class="stat">
-            <small>USDT BALANCE</small>
-            <b id="total-usdt" class="usdt-color">0.0000</b>
+        <div class="info-card">
+            <small style="color:#00ff88">USDT EARNED</small>
+            <h3 id="live-usdt">0.00000</h3>
         </div>
     </div>
 
-    <div id="tab-home" class="p active">
-        <div class="dual-screen">
-            <div class="miner-card kls-side">
-                <small>MINING KLS</small>
-                <div class="live-val kls-color" id="live-kls">0.000</div>
-                <small style="opacity: 0.4;">0.01 / sec</small>
-            </div>
-            <div class="miner-card usdt-side">
-                <small>MINING USDT</small>
-                <div class="live-val usdt-color" id="live-usdt">0.00000</div>
-                <small style="opacity: 0.4;">0.00001 / sec</small>
-            </div>
+    <div class="energy-wrap">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px;">
+            <span>ENERGY LIMIT</span>
+            <span>⚡</span>
         </div>
-
-        <div class="fan-container">
-            <img id="fan" src="koalasmining.jpg" class="fan-img">
-        </div>
-
-        <div class="energy-section">
-            <div style="display:flex; justify-content: space-between; font-size:12px; margin-bottom:5px;">
-                <span>ENERGY</span>
-                <span>⚡</span>
-            </div>
-            <div class="bar"><div id="energy-fill"></div></div>
-        </div>
-
-        <button id="main-btn" class="btn-claim" onclick="toggleMining()">START DUAL MINING</button>
+        <div class="bar-bg"><div id="energy-bar"></div></div>
     </div>
 
-    <div id="tab-wallet" class="p">
-        <h2>Withdrawal</h2>
-        <div class="miner-card" style="width:100%; margin-bottom: 20px;">
-            <p>Available for Withdrawal</p>
-            <h1 class="usdt-color">$<span id="w-bal">0.00</span></h1>
-        </div>
-        <button class="btn-claim" style="opacity:0.3" disabled>WITHDRAW (Min $10)</button>
-    </div>
-
-    <nav class="nav">
-        <div onclick="tab('home')">⛏️<br>Miner</div>
-        <div onclick="tab('wallet')">💰<br>Wallet</div>
-    </nav>
+    <button id="main-btn" class="btn-play" onclick="toggleMining()">Play / Claim</button>
 </div>
 
 </body>
