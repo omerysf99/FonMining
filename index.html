@@ -3,39 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Ad Fix & Ref</title>
+    <title>FonixApp v1300 - Monetag Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     
-    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-    <script type="text/javascript">
-        let adexiumWidget;
-        
-        function initAds() {
-            try {
-                adexiumWidget = new AdexiumWidget({
-                    wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
-                    adFormat: 'interstitial' // Tam ekran
-                });
-                console.log("Adexium: Widget başlatıldı.");
-            } catch (e) {
-                console.error("Adexium: Başlatma hatası!", e);
-            }
-        }
+    <script src='//libtl.com/sdk.js' data-zone='10432457' data-sdk='show_10432457'></script>
 
-        // Reklam Çağırma Fonksiyonu (Daha güvenli)
-        function triggerAd() {
-            if (adexiumWidget) {
-                console.log("Adexium: Reklam tetikleniyor...");
-                adexiumWidget.show();
-            } else {
-                console.warn("Adexium: Widget henüz hazır değil!");
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initAds);
-    </script>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, arrayUnion, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
@@ -54,16 +27,14 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Senin Admin ID'ni hafızadan aldım: 8392479231
         const user = tg.initDataUnsafe?.user;
-        const myID = user?.id ? user.id.toString() : "8392479231"; 
+        const myID = user?.id ? user.id.toString() : "8392479231";
         const myUsername = user?.username || "Miner";
         const myPhoto = user?.photo_url || `https://ui-avatars.com/api/?name=${myUsername}&background=7b66ff&color=fff`;
 
         let stats = { balance: 0.0, completedTasks: [], invitedBy: "" };
         const SEC_REWARD = 0.000002; 
-        const AD_INTERVAL = 20;
-        const REF_BONUS = 0.10; 
+        const REF_BONUS = 0.10;
 
         async function init() {
             const userRef = doc(db, "users", myID);
@@ -74,19 +45,12 @@
             } else {
                 stats = { balance: 0.0, invitedBy: "", completedTasks: [], username: myUsername, photo: myPhoto };
                 await setDoc(userRef, stats);
-                
                 const startParam = tg.initDataUnsafe?.start_param;
-                if (startParam && startParam !== myID) {
-                    await applyReferral(startParam);
-                }
+                if (startParam && startParam !== myID) await applyReferral(startParam);
             }
             
-            if (!stats.invitedBy || stats.invitedBy === "") {
-                document.getElementById('ref-modal').style.display = 'flex';
-            }
-
+            if (!stats.invitedBy || stats.invitedBy === "") document.getElementById('ref-modal').style.display = 'flex';
             updateUI();
-            renderTasks();
             loadFriends();
         }
 
@@ -103,14 +67,11 @@
 
         window.submitReferral = async () => {
             const code = document.getElementById('referral-code-input').value.trim();
-            if (code && code !== myID) {
-                const success = await applyReferral(code);
-                if (success) location.reload(); else alert("Kod geçersiz!");
-            }
+            if (code && code !== myID && await applyReferral(code)) location.reload();
         };
 
-        // --- MINING & AD LOOP ---
-        let miningInterval, sessionEarned = 0, secondsActive = 0;
+        // --- MINING & MONETAG AUTO AD ---
+        let miningInterval, sessionEarned = 0;
 
         window.toggleMining = () => {
             const btn = document.getElementById('main-action-btn');
@@ -126,18 +87,24 @@
             document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
             document.getElementById('main-action-btn').style.background = "#ff4757";
             document.getElementById('mining-fan-outer').classList.add('active-spin');
-            
+
+            // Monetag Auto Ad Trigger (30 saniye aralıklı)
+            if (typeof show_10432457 === 'function') {
+                show_10432457({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 10, // Çoklu reklam için artırıldı
+                        capping: 1, 
+                        interval: 30, // 30 saniyede bir
+                        timeout: 5,
+                        everyPage: false
+                    }
+                });
+            }
+
             miningInterval = setInterval(() => {
                 sessionEarned += SEC_REWARD;
-                secondsActive++;
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
-                
-                // REKLAM TETİKLEME (Düzeltilmiş)
-                if (secondsActive % AD_INTERVAL === 0) {
-                    triggerAd();
-                }
-                
-                document.getElementById('ad-timer').innerText = (AD_INTERVAL - (secondsActive % AD_INTERVAL)) + "s";
             }, 1000);
         }
 
@@ -147,6 +114,19 @@
             await updateDoc(doc(db, "users", myID), { balance: stats.balance });
             location.reload();
         }
+
+        // --- REWARDED TASK ---
+        window.watchAdTask = () => {
+            if (typeof show_10432457 === 'function') {
+                show_10432457().then(async () => {
+                    await updateDoc(doc(db, "users", myID), { balance: increment(0.01) });
+                    tg.showPopup({ message: "Ödül Alındı: $0.01" });
+                    setTimeout(() => location.reload(), 1000);
+                });
+            } else {
+                alert("Reklam yüklenemedi, lütfen tekrar deneyin.");
+            }
+        };
 
         function updateUI() {
             document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(4));
@@ -160,11 +140,11 @@
             document.getElementById('tab-'+t).classList.add('active');
         };
 
-        window.copyRef = () => {
-            const link = `https://t.me/FonixMining2026Bot?start=${myID}`;
-            navigator.clipboard.writeText(link);
-            tg.showPopup({ message: "Link kopyalandı!" });
-        };
+        async function loadFriends() {
+            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
+            const snap = await getDocs(q);
+            document.getElementById('friend-count').innerText = snap.size;
+        }
 
         window.onload = init;
     </script>
@@ -181,8 +161,7 @@
         .mining-circle { width: 200px; height: 200px; margin: 30px auto; position: relative; display: flex; align-items: center; justify-content: center; }
         .fan-outer { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed #333; position: absolute; }
         .active-spin { animation: spin 2s linear infinite; border-color: var(--p); }
-        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: url('pinix.jpg') center/cover; border: 5px solid #111; z-index: 2; }
-        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border: 1px solid #222; }
+        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: #111; border: 5px solid #222; z-index: 2; }
         .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
         .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
         #ref-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; display:none; flex-direction:column; justify-content:center; align-items:center; padding:30px; }
@@ -194,17 +173,16 @@
 
 <div id="app">
     <div id="ref-modal">
-        <h2 style="color:var(--g)">DAVET KODUN VAR MI?</h2>
-        <p>Kod girerek <b>$0.10</b> bonus kazan.</p>
-        <input type="number" id="referral-code-input" placeholder="Kod Buraya">
-        <button class="btn" onclick="submitReferral()">BONUSU AL</button>
-        <p onclick="document.getElementById('ref-modal').style.display='none'" style="margin-top:15px; font-size:12px; opacity:0.5;">Kapat</p>
+        <h2 style="color:var(--g)">KİM DAVET ETTİ?</h2>
+        <input type="number" id="referral-code-input" placeholder="Kod Gir ve $0.10 Kazan">
+        <button class="btn" onclick="submitReferral()">ONAYLA</button>
+        <p onclick="document.getElementById('ref-modal').style.display='none'" style="margin-top:15px; opacity:0.5;">Atla</p>
     </div>
 
     <div class="header">
         <div style="display: flex; align-items: center; gap: 8px;">
             <img id="user-pic" src="" style="width: 30px; border-radius: 50%;">
-            <span id="user-name" style="font-weight: bold; font-size: 13px;">-</span>
+            <span id="user-name" style="font-weight: bold;">-</span>
         </div>
         <div class="balance-badge">🪙 $<span class="bal-val">0.0000</span></div>
     </div>
@@ -212,7 +190,7 @@
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
             <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <small>REKLAM: <b id="ad-timer">20s</b></small>
+            <small style="color:var(--p)">MONETAG ADS ACTIVE (30s)</small>
         </div>
         <div class="mining-circle">
             <div id="mining-fan-outer" class="fan-outer"></div>
@@ -221,28 +199,25 @@
         <button id="main-action-btn" class="btn" onclick="toggleMining()">START MINING</button>
     </div>
 
+    <div id="tab-tasks" class="p">
+        <h2>Görevler</h2>
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+            <div><b>Video Reklam İzle</b><br><small>$0.01 Ödül</small></div>
+            <button onclick="watchAdTask()" style="background:var(--p); color:#fff; border:none; padding:10px 20px; border-radius:10px;">İZLE</button>
+        </div>
+    </div>
+
     <div id="tab-friends" class="p">
-        <h2>Referanslarım (<span id="friend-count">0</span>)</h2>
-        <div class="card" style="justify-content: space-between;">
-            <div>ID: <b id="my-id-display">-</b></div>
-            <button onclick="copyRef()" style="background:var(--p); color:#fff; border:none; padding:8px; border-radius:8px;">KOPYALA</button>
+        <h2>Arkadaşlar (<span id="friend-count">0</span>)</h2>
+        <div style="padding:15px; background:#111; border-radius:15px;">
+            KODUN: <b id="my-id-display">-</b>
         </div>
-        <div id="friends-list"></div>
     </div>
 
-    <div id="tab-wallet" class="p">
-        <h2>Cüzdan</h2>
-        <div class="card" style="background:var(--p); height:100px; justify-content:center; flex-direction:column;">
-            <small>BAKİYE</small>
-            <h1>$<span class="bal-val">0.0000</span></h1>
-        </div>
-        <button class="btn" style="margin-top:20px; opacity:0.5;" disabled>ÇEKİM ($10)</button>
-    </div>
-
-    <nav class="nav" id="nav-bar">
+    <nav class="nav">
         <div onclick="tab('home')">⛏️ Miner</div>
+        <div onclick="tab('tasks')">📋 Görevler</div>
         <div onclick="tab('friends')">👥 Arkadaş</div>
-        <div onclick="tab('wallet')">💰 Cüzdan</div>
     </nav>
 </div>
 
