@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker - Original UI</title>
+    <title>Bums Clicker - Full Navigation</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --panel-bg: rgba(15, 23, 42, 0.9);
+            --panel-bg: rgba(15, 23, 42, 0.95);
         }
 
         body {
@@ -31,80 +31,64 @@
             display: flex; flex-direction: column;
         }
 
-        /* ÜST PANEL */
+        /* ÜST PANEL (SABİT) */
         .top-nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 15px; z-index: 100;
+            padding: 10px 15px; z-index: 100; background: rgba(0,0,0,0.4);
         }
-
-        .profile-box { display: flex; flex-direction: column; align-items: flex-start; }
-        .p-icon-wrap { position: relative; width: 50px; height: 50px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
+        .profile-box { display: flex; flex-direction: column; }
+        .p-icon-wrap { position: relative; width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
         .p-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .lvl-tag { position: absolute; bottom: 0; width: 100%; background: var(--accent-blue); font-size: 10px; text-align: center; }
-        .u-id { font-size: 10px; color: #94a3b8; margin-top: 5px; }
+        .stat-card { background: var(--panel-bg); padding: 5px 12px; border-radius: 12px; text-align: center; min-width: 80px; border: 1px solid #1e293b; }
 
-        .stat-cards { display: flex; gap: 10px; }
-        .stat-card { background: var(--panel-bg); padding: 5px 12px; border-radius: 12px; text-align: center; min-width: 85px; border: 1px solid #1e293b; }
-        .stat-card div:first-child { font-size: 10px; color: #94a3b8; margin-bottom: 2px; }
-        .stat-card div:last-child { font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .coin-mini { width: 14px; height: 14px; border-radius: 50%; }
+        /* EKRANLAR */
+        .screen { display: none; flex-grow: 1; flex-direction: column; position: relative; overflow-y: auto; padding-bottom: 100px; }
+        .active-screen { display: flex; }
 
-        .menu-btn { font-size: 24px; cursor: pointer; color: white; }
+        /* ANA OYUN EKRANI (PLAY) */
+        .side-menu { position: absolute; width: 100%; top: 20px; display: flex; justify-content: space-between; padding: 0 15px; pointer-events: none; }
+        .side-col { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
+        .s-item { width: 60px; text-align: center; font-size: 8px; font-weight: bold; }
+        .s-item img { width: 100%; border-radius: 10px; }
 
-        /* YAN MENÜLER */
-        .side-menu {
-            position: absolute; width: 100%; top: 90px;
-            display: flex; justify-content: space-between;
-            padding: 0 15px; pointer-events: none; z-index: 90;
-        }
-        .side-col { display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
-        .s-item { width: 65px; text-align: center; font-size: 9px; font-weight: bold; }
-        .s-item img { width: 100%; border-radius: 12px; margin-bottom: 3px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-
-        /* ANA OYUN ALANI */
-        .main-view {
-            flex-grow: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            position: relative;
-        }
-
-        .main-score { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .main-score img { width: 35px; }
-        .main-score span { font-size: 3.2rem; font-weight: 900; letter-spacing: -1px; }
-
-        /* TAPLV1 KÜÇÜLTÜLDÜ VE SABİT */
-        #hero {
-            width: 170px; /* Görsel küçültüldü */
-            cursor: pointer;
-            filter: drop-shadow(0 0 30px rgba(0,0,0,0.4));
-            transition: filter 0.1s;
-        }
+        .main-play-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .main-score { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .main-score span { font-size: 3rem; font-weight: 900; }
+        #hero { width: 180px; cursor: pointer; transition: brightness 0.1s; }
         #hero:active { filter: brightness(1.2); }
 
-        .coin-glow { position: absolute; left: 20px; bottom: 25px; width: 90px; filter: drop-shadow(0 0 20px var(--gold)); }
+        /* GELİŞTİRME EKRANI (UPGRADE) */
+        .upgrade-list { padding: 20px; }
+        .up-item { 
+            background: #1e293b; border-radius: 15px; padding: 12px; 
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+            border: 1px solid #334155;
+        }
+        .up-content { display: flex; align-items: center; gap: 12px; }
+        .up-img { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .up-txt div:first-child { font-weight: bold; font-size: 14px; }
+        .up-txt div:last-child { font-size: 11px; color: #94a3b8; }
+        .buy-btn { background: var(--accent-blue); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* ALT PANEL */
+        /* DİĞER EKRANLAR (TASKS/FRIENDS) */
+        .placeholder-text { text-align: center; margin-top: 50px; color: #94a3b8; }
+
+        /* ALT PANEL (SABİT) */
         .bottom-ui {
             background: rgba(15, 23, 42, 0.98);
-            padding: 12px 15px 30px 15px; border-top: 1px solid #1e293b;
-            z-index: 100;
+            padding: 10px 15px 30px 15px; border-top: 1px solid #1e293b;
+            z-index: 100; position: absolute; bottom: 0; width: 100%; box-sizing: border-box;
         }
-
-        .e-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .e-text { font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 5px; }
-        .p-tap { color: #94a3b8; font-size: 12px; }
-
-        .e-bar-bg { background: #1e293b; height: 16px; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; }
-        #e-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.1s; }
-
+        .e-bar-bg { background: #1e293b; height: 12px; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        #e-fill { width: 100%; height: 100%; background: var(--accent-blue); }
         .nav-tabs { display: flex; justify-content: space-around; }
         .tab { text-align: center; color: #94a3b8; font-size: 10px; flex: 1; cursor: pointer; }
-        .tab img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 10px; }
+        .tab img { width: 42px; height: 42px; display: block; margin: 0 auto 4px; border-radius: 10px; }
         .tab.active { color: white; font-weight: bold; }
-        .tab.active img { border: 2px solid var(--gold); }
+        .tab.active img { border: 2px solid var(--gold); background: rgba(251, 191, 36, 0.1); }
 
-        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem; pointer-events: none; animation: rise 0.6s forwards; z-index: 200; }
-        @keyframes rise { to { transform: translateY(-110px); opacity: 0; } }
+        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem; pointer-events: none; animation: rise 0.6s forwards; z-index: 200; }
+        @keyframes rise { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -112,59 +96,71 @@
 <div id="game-container">
     <div class="top-nav">
         <div class="profile-box">
-            <div class="p-icon-wrap">
-                <img src="TapLv1.jpg">
-                <div class="lvl-tag">Lv.1</div>
-            </div>
-            <div class="u-id">ID: 8392479231</div>
+            <div class="p-icon-wrap"><img src="TapLv1.jpg"></div>
+            <div style="font-size: 10px; margin-top: 4px;">ID: 8392479231</div>
         </div>
-        <div class="stat-cards">
-            <div class="stat-card">
-                <div>Coin</div>
-                <div><img src="Notcoin.jpg" class="coin-mini"><span id="c-val">0</span></div>
-            </div>
-            <div class="stat-card">
-                <div>Per hour</div>
-                <div style="color:#10b981;">+0</div>
-            </div>
-        </div>
-        <div class="menu-btn">☰</div>
-    </div>
-
-    <div class="side-menu">
-        <div class="side-col">
-            <div class="s-item"><img src="Jgang.jpg">JOIN GANG</div>
-            <div class="s-item"><img src="TapEarn.jpg">8h 0m</div>
-            <div class="s-item"><img src="Airdrop.jpg">Airdrop</div>
-        </div>
-        <div class="side-col">
-            <div class="s-item"><img src="AutoTap.jpg">Auto tap</div>
-            <div class="s-item" style="width: 75px;"><img src="Nft.jpg"></div>
-            <div class="s-item" style="width: 75px; margin-top: 10px;"><img src="Task.jpg"></div>
+        <div class="stat-card">
+            <div style="font-size: 9px; color: #94a3b8;">Coin</div>
+            <div style="color:var(--gold); font-weight:bold;"><img src="Notcoin.jpg" style="width:12px;"> <span id="top-coin">0</span></div>
         </div>
     </div>
 
-    <div class="main-view" id="click-zone">
-        <div class="main-score">
-            <img src="Notcoin.jpg" style="border-radius: 50%;">
-            <span id="score">0</span>
+    <div id="screen-play" class="screen active-screen">
+        <div class="side-menu">
+            <div class="side-col">
+                <div class="s-item"><img src="Jgang.jpg">GANG</div>
+                <div class="s-item"><img src="TapEarn.jpg">8h 0m</div>
+            </div>
+            <div class="side-col">
+                <div class="s-item"><img src="AutoTap.jpg">AUTO</div>
+                <div class="s-item"><img src="Nft.jpg">NFT</div>
+            </div>
         </div>
-        <img src="TapLv1.jpg" id="hero" alt="Hero">
-        <img src="Notcoin.jpg" class="coin-glow">
+        <div class="main-play-area" id="click-zone">
+            <div class="main-score"><img src="Notcoin.jpg" style="width:30px;"> <span id="main-score">0</span></div>
+            <img src="TapLv1.jpg" id="hero">
+        </div>
+    </div>
+
+    <div id="screen-upgrade" class="screen">
+        <div class="upgrade-list">
+            <h2 style="margin-bottom: 20px;">Geliştirmeler</h2>
+            <div class="up-item">
+                <div class="up-content">
+                    <div class="up-img">🟡</div>
+                    <div class="up-txt"><div>Tap Reward</div><div>Tıklama başına kazanç</div></div>
+                </div>
+                <button class="buy-btn" onclick="buy('tap')">500</button>
+            </div>
+            <div class="up-item">
+                <div class="up-content">
+                    <div class="up-img">⚡</div>
+                    <div class="up-txt"><div>Max Energy</div><div>Enerji kapasitesini artır</div></div>
+                </div>
+                <button class="buy-btn" onclick="buy('energy')">1K</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <div class="placeholder-text"><h2>Görevler</h2><p>Yeni görevler yakında eklenecek!</p></div>
+    </div>
+
+    <div id="screen-friends" class="screen">
+        <div class="placeholder-text"><h2>Arkadaşlar</h2><p>Arkadaşlarını davet et, birlikte kazan!</p></div>
     </div>
 
     <div class="bottom-ui">
-        <div class="e-info">
-            <div class="e-text">⚡ <span id="e-num">2000</span> / 2000</div>
-            <div class="p-tap">🟡 +5 Per tap</div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold;">
+            <span>⚡ <span id="e-val">2000</span>/2000</span>
+            <span style="color:#94a3b8;">+5 Per tap</span>
         </div>
         <div class="e-bar-bg"><div id="e-fill"></div></div>
-
         <div class="nav-tabs">
-            <div class="tab active"><img src="Notcoin.jpg">Play</div>
-            <div class="tab"><img src="Upgrade.jpg">Upgrade</div>
-            <div class="tab"><img src="friends.jpg">Friends</div>
-            <div class="tab"><img src="Task.jpg">Tasks</div>
+            <div class="tab active" onclick="switchTab('play', this)"><img src="Notcoin.jpg">Oyna</div>
+            <div class="tab" onclick="switchTab('upgrade', this)"><img src="Upgrade.jpg">Geliştir</div>
+            <div class="tab" onclick="switchTab('tasks', this)"><img src="Task.jpg">Görevler</div>
+            <div class="tab" onclick="switchTab('friends', this)"><img src="friends.jpg">Arkadaşlar</div>
         </div>
     </div>
 </div>
@@ -174,36 +170,49 @@
     let energy = 2000;
     let power = 5;
 
-    const scoreEl = document.getElementById('score');
-    const cValEl = document.getElementById('c-val');
-    const eFill = document.getElementById('e-fill');
-    const eNum = document.getElementById('e-num');
+    // SEKME GEÇİŞ FONKSİYONU
+    function switchTab(screenId, tabEl) {
+        // Tüm ekranları gizle
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        // Hedef ekranı göster
+        document.getElementById('screen-' + screenId).classList.add('active-screen');
+        // Tüm sekmelerden active sınıfını kaldır
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        // Tıklanan sekmeyi aktif yap
+        tabEl.classList.add('active');
+    }
 
+    // TIKLAMA MANTIĞI
     document.getElementById('click-zone').addEventListener('pointerdown', (e) => {
         if (energy >= power) {
             coins += power;
             energy -= power;
             updateUI();
-            
-            const p = document.createElement('div');
-            p.className = 'pop'; p.innerText = `+${power}`;
-            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
+            createPop(e.clientX, e.clientY);
         }
     });
 
     function updateUI() {
-        scoreEl.innerText = Math.floor(coins).toLocaleString();
-        cValEl.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
-        eFill.style.width = (energy / 2000 * 100) + "%";
-        eNum.innerText = Math.floor(energy);
+        document.getElementById('main-score').innerText = Math.floor(coins).toLocaleString();
+        document.getElementById('top-coin').innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
+        document.getElementById('e-fill').style.width = (energy / 2000 * 100) + "%";
+        document.getElementById('e-val').innerText = Math.floor(energy);
+    }
+
+    function createPop(x, y) {
+        const p = document.createElement('div');
+        p.className = 'pop'; p.innerText = `+${power}`;
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 600);
     }
 
     setInterval(() => {
-        if (energy < 2000) energy = Math.min(2000, energy + 4);
+        if (energy < 2000) energy = Math.min(2000, energy + 5);
         updateUI();
     }, 1000);
+
+    function buy(type) { alert(type + " geliştirmesi için yeterli coin yok!"); }
 </script>
 
 </body>
