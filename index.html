@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Optimized</title>
+    <title>Bums Clicker Pro</title>
     <style>
         :root {
-            --bg-dark: #0a0f1a;
+            --bg-color: #0f172a;
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --nav-img-size: 65px; /* Sekme görselleri büyütüldü */
+            --nav-size: 70px; /* Sekme ikonları daha da büyütüldü */
         }
 
         body {
             margin: 0; padding: 0;
             background-color: #000;
             color: white;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             display: flex; justify-content: center;
             height: 100vh; overflow: hidden;
             user-select: none;
@@ -31,138 +31,139 @@
             display: flex; flex-direction: column;
         }
 
-        /* Üst Panel - TapLv1.jpg Burada */
-        .top-bar {
+        /* Üst Bilgi Paneli */
+        .top-nav {
             display: flex; justify-content: space-between;
-            padding: 15px; background: rgba(0,0,0,0.7);
-            z-index: 100;
+            padding: 15px; background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid #334155;
+            z-index: 20;
         }
 
-        .profile-box { display: flex; align-items: center; gap: 10px; }
-        .profile-img { 
-            width: 50px; height: 50px; 
-            border-radius: 12px; border: 2px solid var(--accent-blue);
-            object-fit: cover;
-        }
+        .profile { display: flex; align-items: center; gap: 10px; }
+        .p-img { width: 45px; height: 45px; border-radius: 10px; border: 2px solid var(--accent-blue); }
 
-        .stats-box { display: flex; gap: 8px; }
-        .stat-item {
-            background: #1e293b; padding: 5px 12px;
-            border-radius: 10px; text-align: center;
-        }
+        .currency-row { display: flex; gap: 8px; }
+        .card { background: #1e293b; padding: 5px 12px; border-radius: 10px; text-align: center; }
 
-        /* Yan Butonlar - Birbirine girmemesi için flex yapısı */
-        .side-menus {
-            position: absolute; width: 100%; top: 120px;
+        /* Yan Menüler - Çakışma Önleyici Sabit Konum */
+        .side-bar {
+            position: absolute; width: 100%; top: 110px;
             display: flex; justify-content: space-between;
             padding: 0 15px; pointer-events: none;
+            z-index: 15;
         }
+        .side-col { display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
+        .s-item { width: 60px; text-align: center; font-size: 0.65rem; font-weight: bold; }
+        .s-item img { width: 100%; border-radius: 12px; margin-bottom: 3px; border: 1px solid #475569; }
 
-        .side-col { display: flex; flex-direction: column; gap: 20px; pointer-events: auto; }
-        .side-item { width: 65px; text-align: center; font-size: 0.7rem; font-weight: bold; }
-        .side-item img { width: 100%; border-radius: 15px; margin-bottom: 4px; border: 1px solid #475569; }
-
-        /* Ana Tıklama Alanı */
-        .play-area {
+        /* ANA OYUN ALANI */
+        .main-stage {
             flex-grow: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            position: relative;
+            position: relative; z-index: 5;
         }
 
-        .score-main { font-size: 3.5rem; font-weight: 900; margin-bottom: 30px; }
+        #score-text { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
 
-        /* MERKEZDEKİ KEDİ */
-        #hero-cat {
-            width: 280px; transition: transform 0.05s;
-            cursor: pointer; filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        /* ANA TIKLANAN GÖRSEL: TapLv1.jpg */
+        #main-hero {
+            width: 260px; /* Ortadaki görsel boyutu */
+            transition: transform 0.05s;
+            cursor: pointer;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.7));
         }
+        #main-hero:active { transform: scale(0.92); }
 
-        /* SOL ALT NOTCOIN */
-        .floating-notcoin {
-            position: absolute; left: 25px; bottom: 30px;
+        /* Notcoin Sol Alt Sabit */
+        .coin-overlay {
+            position: absolute; left: 20px; bottom: 40px;
             width: 90px; filter: drop-shadow(0 0 15px var(--gold));
         }
 
-        /* ALT PANEL - BÜYÜTÜLMÜŞ SEKMELER */
-        .bottom-nav-area {
+        /* ALT PANEL VE BÜYÜK SEKMELER */
+        .bottom-ui {
             background: rgba(15, 23, 42, 0.95);
             padding: 20px 10px; border-top: 2px solid #334155;
+            z-index: 20;
         }
 
-        .energy-status { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
-        .energy-bar { background: #334155; height: 15px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        #energy-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.2s; }
+        .energy-info { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
+        .e-bar-bg { background: #334155; height: 16px; border-radius: 20px; overflow: hidden; margin-bottom: 15px; }
+        #e-bar-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.2s; }
 
-        .tabs-container { display: flex; justify-content: space-around; }
+        .nav-tabs { display: flex; justify-content: space-around; align-items: flex-end; }
         .tab { text-align: center; color: #94a3b8; font-size: 0.8rem; flex: 1; cursor: pointer; }
+        
+        /* BÜYÜK SEKME GÖRSELLERİ */
         .tab img { 
-            width: var(--nav-img-size); height: var(--nav-img-size); 
+            width: var(--nav-size); height: var(--nav-size); 
             display: block; margin: 0 auto 5px; border-radius: 15px;
-            transition: 0.3s;
+            transition: transform 0.2s;
         }
         .tab.active { color: white; font-weight: bold; }
-        .tab.active img { transform: scale(1.1); border: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold); }
+        .tab.active img { transform: translateY(-5px); border: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold); }
 
-        .pop-up {
+        /* Tıklama Baloncuğu */
+        .pop {
             position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem;
             pointer-events: none; animation: rise 0.7s forwards;
         }
-        @keyframes rise { to { transform: translateY(-120px); opacity: 0; } }
+        @keyframes rise { to { transform: translateY(-130px); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="top-bar">
-        <div class="profile-box">
-            <img src="TapLv1.jpg" class="profile-img" alt="TapLv1">
+    <div class="top-nav">
+        <div class="profile">
+            <img src="TapLv1.jpg" class="p-img">
             <div>
-                <div style="font-size:0.9rem; font-weight:bold;">V.Albayra...</div>
-                <div style="font-size:0.7rem; color:var(--text-gray);">ID: 8392479231</div>
+                <div style="font-size:0.85rem; font-weight:bold;">V.Albayra...</div>
+                <div style="font-size:0.65rem; color:#94a3b8;">ID: 8392479231</div>
             </div>
         </div>
-        <div class="stats-box">
-            <div class="stat-item">
-                <div style="font-size:0.6rem;">Coin</div>
-                <div id="top-coin" style="color:var(--gold); font-weight:bold;">0</div>
+        <div class="currency-row">
+            <div class="card">
+                <div style="font-size:0.55rem; color:#94a3b8;">Coin</div>
+                <div id="c-top" style="color:var(--gold); font-weight:bold;">0</div>
             </div>
-            <div class="stat-item">
-                <div style="font-size:0.6rem;">Per hour</div>
-                <div id="per-hour" style="color:#10b981; font-weight:bold;">+0</div>
+            <div class="card">
+                <div style="font-size:0.55rem; color:#94a3b8;">Per hour</div>
+                <div id="h-top" style="color:#10b981; font-weight:bold;">+0</div>
             </div>
         </div>
     </div>
 
-    <div class="side-menus">
+    <div class="side-bar">
         <div class="side-col">
-            <div class="side-item"><img src="Jgang.jpg">GANG</div>
-            <div class="side-item"><img src="TapEarn.jpg">EARN</div>
-            <div class="side-item"><img src="Airdrop.jpg">AIRDROP</div>
+            <div class="s-item"><img src="Jgang.jpg">JOIN GANG</div>
+            <div class="s-item"><img src="TapEarn.jpg">8h 0m</div>
+            <div class="s-item"><img src="Airdrop.jpg">AIRDROP</div>
         </div>
         <div class="side-col">
-            <div class="side-item"><img src="AutoTap.jpg">AUTO</div>
-            <div class="side-item"><img src="Nft.jpg">NFT</div>
+            <div class="s-item"><img src="AutoTap.jpg">AUTO TAP</div>
+            <div class="s-item"><img src="Nft.jpg">NFT</div>
         </div>
     </div>
 
-    <div class="play-area" id="click-zone">
-        <div class="score-main" id="main-score">0</div>
-        <img src="image_81feed.png" id="hero-cat" alt="Kedi">
-        <img src="Notcoin.jpg" class="floating-notcoin" alt="Notcoin">
+    <div class="main-stage" id="tap-zone">
+        <div id="score-text">0</div>
+        
+        <img src="TapLv1.jpg" id="main-hero" alt="Hero">
+        
+        <img src="Notcoin.jpg" class="coin-overlay" alt="Notcoin">
     </div>
 
-    <div class="bottom-nav-area">
-        <div class="energy-status">
-            <span>⚡ <span id="e-text">2000</span> / 2000</span>
-            <span style="color:var(--gold);" id="tap-info">+5 Per tap</span>
+    <div class="bottom-ui">
+        <div class="energy-info">
+            <span>⚡ <span id="e-num">2000</span> / 2000</span>
+            <span style="color:var(--gold);" id="tap-power-info">+5 Per tap</span>
         </div>
-        <div class="energy-bar">
-            <div id="energy-fill"></div>
-        </div>
+        <div class="e-bar-bg"><div id="e-bar-fill"></div></div>
 
-        <div class="tabs-container">
+        <div class="nav-tabs">
             <div class="tab active"><img src="Notcoin.jpg">Bums</div>
-            <div class="tab" onclick="buyUpgrade()"><img src="Upgrade.jpg">Geliştir</div>
+            <div class="tab" onclick="gameUpgrade()"><img src="Upgrade.jpg">Geliştir</div>
             <div class="tab"><img src="Task.jpg">Görevler</div>
             <div class="tab"><img src="friends.jpg">Arkadaşlar</div>
         </div>
@@ -172,53 +173,50 @@
 <script>
     let coins = 0;
     let energy = 2000;
-    let tapPower = 5;
-    let income = 0;
+    let power = 5;
+    let hourly = 0;
 
-    const scoreEl = document.getElementById('main-score');
-    const topScoreEl = document.getElementById('top-coin');
-    const energyEl = document.getElementById('energy-fill');
-    const eText = document.getElementById('e-text');
-    const cat = document.getElementById('hero-cat');
-    const hourEl = document.getElementById('per-hour');
+    const sText = document.getElementById('score-text');
+    const cTop = document.getElementById('c-top');
+    const eBar = document.getElementById('e-bar-fill');
+    const eNum = document.getElementById('e-num');
+    const hTop = document.getElementById('h-top');
 
-    document.getElementById('click-zone').addEventListener('pointerdown', (e) => {
-        if (energy >= tapPower) {
-            coins += tapPower;
-            energy -= tapPower;
+    document.getElementById('tap-zone').addEventListener('pointerdown', (e) => {
+        if (energy >= power) {
+            coins += power;
+            energy -= power;
             updateUI();
-            createEffect(e.clientX, e.clientY);
-            cat.style.transform = "scale(0.9)";
-            setTimeout(() => cat.style.transform = "scale(1)", 50);
+            createPop(e.clientX, e.clientY);
         }
     });
 
     function updateUI() {
-        scoreEl.innerText = Math.floor(coins).toLocaleString();
-        topScoreEl.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
-        energyEl.style.width = (energy / 2000 * 100) + "%";
-        eText.innerText = Math.floor(energy);
-        hourEl.innerText = "+" + income;
-        document.getElementById('tap-info').innerText = `+${tapPower} Per tap`;
+        sText.innerText = Math.floor(coins).toLocaleString();
+        cTop.innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
+        eBar.style.width = (energy / 2000 * 100) + "%";
+        eNum.innerText = Math.floor(energy);
+        hTop.innerText = "+" + hourly;
+        document.getElementById('tap-power-info').innerText = `+${power} Per tap`;
     }
 
-    function buyUpgrade() {
-        let cost = tapPower * 150;
+    function gameUpgrade() {
+        let cost = power * 120;
         if (coins >= cost) {
             coins -= cost;
-            tapPower += 3;
-            income += 100;
+            power += 5;
+            hourly += 150;
             updateUI();
-            alert("GELİŞTİRİLDİ!\nYeni Tık Gücü: " + tapPower);
+            alert("GELİŞTİRİLDİ!\nYeni Güç: " + power + "\nSaatlik: +" + hourly);
         } else {
             alert("Yetersiz Coin! Gerekli: " + cost);
         }
     }
 
-    function createEffect(x, y) {
+    function createPop(x, y) {
         const p = document.createElement('div');
-        p.className = 'pop-up';
-        p.innerText = `+${tapPower}`;
+        p.className = 'pop';
+        p.innerText = `+${power}`;
         p.style.left = x + 'px'; p.style.top = y + 'px';
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 700);
@@ -226,7 +224,7 @@
 
     setInterval(() => {
         if (energy < 2000) energy = Math.min(2000, energy + 5);
-        if (income > 0) coins += (income / 3600);
+        if (hourly > 0) coins += (hourly / 3600);
         updateUI();
     }, 1000);
 </script>
