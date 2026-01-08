@@ -3,26 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Rewarded Ads</title>
+    <title>Koalas Mining Pro</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 
-    <script type="text/javascript">
-        let adexiumWidget;
-        document.addEventListener('DOMContentLoaded', () => {
-            // Standart Push Reklam Tanımlama
-            adexiumWidget = new AdexiumWidget({
-                wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
-                adFormat: 'push-like'
-            });
-            adexiumWidget.autoMode();
-        });
-    </script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCfQGeQUVom6cX8aDyfXdGNly0L1Rlj87I",
@@ -38,195 +26,184 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Kullanıcı Verileri (Admin ID: 8392479231)
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
-        const myUsername = user?.username || "Miner";
-        const myPhoto = user?.photo_url || `https://ui-avatars.com/api/?name=${myUsername}&background=7b66ff&color=fff`;
+        const startParam = tg.initDataUnsafe?.start_param;
 
-        let stats = { balance: 0.0 };
-        const REWARD_PER_SEC = 0.000002;
+        let stats = { balance: 0.0, energy: 100, tasks: [] };
+        let adWidget;
 
         async function init() {
+            adWidget = new AdexiumWidget({ wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', adFormat: 'push-like' });
+            adWidget.autoMode();
+
             const userRef = doc(db, "users", myID);
             const userSnap = await getDoc(userRef);
+
             if (userSnap.exists()) {
                 stats = userSnap.data();
             } else {
-                stats = { balance: 0.0, username: myUsername, photo: myPhoto, invitedBy: "" };
+                stats = { balance: 0.0, energy: 100, invitedBy: startParam || "", tasks: [] };
+                if (startParam && startParam !== myID) {
+                    const refRef = doc(db, "users", startParam);
+                    await updateDoc(refRef, { balance: increment(0.10) });
+                    stats.balance = 0.10;
+                }
                 await setDoc(userRef, stats);
             }
             updateUI();
-            loadFriends();
+            renderTasks();
         }
 
-        // --- MINING & REKLAM DÖNGÜSÜ ---
-        let miningInterval, sessionEarned = 0, adCounter = 0;
+        let miningInterval, sessionEarned = 0, adTimer = 0;
 
         window.toggleMining = () => {
-            const btn = document.getElementById('main-action-btn');
-            if (btn.innerText === "START MINING") {
+            const btn = document.getElementById('main-btn');
+            if (btn.innerText.includes("START")) {
+                if (stats.energy <= 5) return tg.showAlert("Enerji çok düşük!");
                 startMining();
             } else {
-                handleRewardedAd(); // Toplarken reklamı tetikle
+                // Rewarded Reklam Fonksiyonu (Claim anında çalışır)
+                if (typeof show_10432457 === 'function') {
+                    show_10432457('pop').then(() => stopMining()).catch(() => stopMining());
+                } else {
+                    stopMining();
+                }
             }
         };
 
         function startMining() {
-            tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('nav-bar').style.opacity = "0.3";
-            document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
-            document.getElementById('main-action-btn').style.background = "#ff4757";
-            document.getElementById('mining-fan-outer').classList.add('active-spin');
+            tg.HapticFeedback.impactOccurred('heavy');
+            document.getElementById('main-btn').innerText = "STOP & CLAIM";
+            document.getElementById('main-btn').style.background = "#ff4757";
+            document.getElementById('koala-fan').classList.add('spinning');
             
-            sessionEarned = 0;
-            adCounter = 0;
-
             miningInterval = setInterval(() => {
-                sessionEarned += REWARD_PER_SEC;
-                adCounter++;
+                sessionEarned += 0.000005;
+                stats.energy -= 0.15;
+                adTimer++;
+
+                if (stats.energy <= 0) { stats.energy = 0; stopMining(); }
+                
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
+                document.getElementById('energy-bar-fill').style.width = stats.energy + "%";
+                document.getElementById('energy-num').innerText = Math.floor(stats.energy);
 
-                // 10 Saniyede Bir Push Reklam
-                if (adCounter >= 10) {
-                    if (adexiumWidget) adexiumWidget.autoMode();
-                    adCounter = 0;
-                }
+                // 10 Saniyede bir Push Reklam
+                if (adTimer >= 10) { adWidget.autoMode(); adTimer = 0; }
             }, 1000);
-        }
-
-        // --- YENİ EKLENEN REWARDED REKLAM MANTIĞI ---
-        function handleRewardedAd() {
-            // Senin verdiğin Rewarded Popup Kodu
-            if (typeof show_10432457 === 'function') {
-                show_10432457('pop').then(() => {
-                    // Kullanıcı reklamı izledi veya kapattı -> Ödülü ver
-                    stopMining();
-                }).catch(e => {
-                    // Hata olsa bile kullanıcıyı mağdur etmemek için işlemi tamamla
-                    console.error("Ad error:", e);
-                    stopMining();
-                });
-            } else {
-                // Eğer fonksiyon tanımlı değilse doğrudan durdur
-                stopMining();
-            }
         }
 
         async function stopMining() {
             clearInterval(miningInterval);
             stats.balance += sessionEarned;
-            await updateDoc(doc(db, "users", myID), { balance: stats.balance });
-            
-            document.getElementById('earned-final').innerText = "+" + sessionEarned.toFixed(6);
-            document.getElementById('reward-anim').style.display = 'flex';
-            
-            setTimeout(() => { location.reload(); }, 2500);
+            await updateDoc(doc(db, "users", myID), { balance: stats.balance, energy: stats.energy });
+            location.reload();
+        }
+
+        // Görevler
+        const tasks = [{ id: 'join_tg', title: 'Join Channel', reward: 0.5, link: 'https://t.me/example' }];
+        function renderTasks() {
+            const div = document.getElementById('task-container');
+            div.innerHTML = tasks.map(t => `
+                <div class="card">
+                    <span>${t.title} (+$${t.reward})</span>
+                    <button onclick="doTask('${t.id}', '${t.link}', ${t.reward})">${stats.tasks?.includes(t.id) ? '✅' : 'GO'}</button>
+                </div>
+            `).join('');
+        }
+        window.doTask = (id, link, r) => { window.open(link); /* Firebase logic here */ };
+
+        function updateUI() {
+            document.getElementById('main-bal').innerText = stats.balance.toFixed(4);
+            document.getElementById('energy-bar-fill').style.width = stats.energy + "%";
         }
 
         window.tab = (t) => {
-            document.querySelectorAll('.p').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.ni').forEach(n => n.classList.remove('active-nav'));
+            document.querySelectorAll('.tab-p').forEach(p => p.classList.remove('active'));
             document.getElementById('tab-'+t).classList.add('active');
-            document.getElementById('nav-'+t).classList.add('active-nav');
         };
-
-        async function loadFriends() {
-            const q = query(collection(db, "users"), where("invitedBy", "==", myID));
-            const snap = await getDocs(q);
-            document.getElementById('friend-count').innerText = snap.size;
-        }
-
-        window.copyRef = () => {
-            const link = `https://t.me/FonixBot?start=${myID}`;
-            navigator.clipboard.writeText(link);
-            tg.showPopup({ message: "Link kopyalandı!" });
-        };
-
-        function updateUI() {
-            document.querySelectorAll('.bal-val').forEach(e => e.innerText = stats.balance.toFixed(4));
-            document.getElementById('user-pic').src = myPhoto;
-            document.getElementById('user-name').innerText = "@" + myUsername;
-            document.getElementById('my-id-display').innerText = myID;
-        }
 
         window.onload = init;
     </script>
 
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: #000; color: #fff; overflow: hidden; }
-        #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; position: relative; }
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .balance-badge { background: #1a1a2e; padding: 8px 15px; border-radius: 20px; color: var(--g); font-weight: 800; border: 1px solid #333; }
-        .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        #app { width: 100%; max-width: 450px; height: 100vh; margin: auto; display: flex; flex-direction: column; }
+        
+        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .tab-p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
-        .mining-circle { width: 220px; height: 220px; margin: 30px auto; position: relative; display: flex; align-items: center; justify-content: center; }
-        .fan-outer { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed #333; position: absolute; }
-        .active-spin { animation: spin 2s linear infinite; border-color: var(--p); box-shadow: 0 0 20px rgba(123,102,255,0.3); }
-        .fan-inner { width: 85%; height: 85%; border-radius: 50%; background: #111; border: 5px solid #222; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 50px; }
-        .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
-        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; }
-        .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
-        .ni { text-align: center; opacity: 0.4; transition: 0.3s; cursor: pointer; }
-        .active-nav { opacity: 1; color: var(--p); }
-        #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* FAN AYARLARI */
+        .fan-box { width: 220px; height: 220px; margin: 30px auto; position: relative; }
+        .fan-img { 
+            width: 100%; height: 100%; 
+            border-radius: 50%; 
+            border: 6px solid #222; 
+            object-fit: cover; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .spinning { 
+            animation: rotate 3s linear infinite; 
+            border-color: var(--p) !important;
+            box-shadow: 0 0 30px var(--p) !important;
+        }
+
+        .energy-cont { width: 100%; background: #222; height: 15px; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+        #energy-bar-fill { height: 100%; background: linear-gradient(90deg, #ff4757, var(--g)); width: 100%; transition: 0.5s; }
+
+        .btn-main { background: var(--g); border: none; padding: 20px; border-radius: 20px; font-weight: 900; font-size: 18px; width: 100%; cursor: pointer; color: #000; }
+        .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+        .nav { height: 80px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <img id="user-pic" src="" style="width: 30px; border-radius: 50%;">
-            <span id="user-name" style="font-weight: bold;">-</span>
-        </div>
-        <div class="balance-badge">🪙 $<span class="bal-val">0.0000</span></div>
+        <div style="font-weight: 900;">KOALAS <span style="color:var(--p)">MINING</span></div>
+        <div style="color:var(--g); font-weight:bold;">$<span id="main-bal">0.0000</span></div>
     </div>
 
-    <div id="tab-home" class="p active">
+    <div id="tab-home" class="tab-p active">
+        <div style="text-align:center;">
+            <h1 style="font-size: 40px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
+        </div>
+
+        <div class="fan-box">
+            <img id="koala-fan" src="koalasmining.jpg" class="fan-img" alt="fan">
+        </div>
+
         <div style="text-align: center;">
-            <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <small style="color:var(--p); font-weight: bold;">REWARDED ADS LOADED</small>
+            <small>ENERGY: <b id="energy-num">100</b>%</small>
+            <div class="energy-cont"><div id="energy-bar-fill"></div></div>
         </div>
-        <div class="mining-circle">
-            <div id="mining-fan-outer" class="fan-outer"></div>
-            <div class="fan-inner">⛏️</div>
-        </div>
+
         <div style="flex:1"></div>
-        <button id="main-action-btn" class="btn" onclick="toggleMining()">START MINING</button>
+        <button id="main-btn" class="btn-main" onclick="toggleMining()">START MINING</button>
     </div>
 
-    <div id="tab-friends" class="p">
-        <h2>Network</h2>
-        <div class="card">
-            <small>ID'NİZ:</small>
-            <h3 id="my-id-display">-</h3>
-            <button onclick="copyRef()" class="btn" style="padding:10px; font-size: 14px;">LİNKİ KOPYALA</button>
-        </div>
-        <div class="card">Arkadaşlar: <span id="friend-count">0</span></div>
+    <div id="tab-tasks" class="tab-p">
+        <h2>Tasks</h2>
+        <div id="task-container"></div>
     </div>
 
-    <div id="tab-wallet" class="p">
-        <h2>Wallet</h2>
-        <div class="card" style="text-align:center; background:var(--p);">
-            <small>TOTAL BALANCE</small>
-            <h1 style="margin:5px 0;">$<span class="bal-val">0.0000</span></h1>
+    <div id="tab-ref" class="tab-p">
+        <h2>Referral</h2>
+        <div class="card" style="flex-direction:column; gap:10px;">
+            <p>Davet linkini paylaş, bonus kazan!</p>
+            <button onclick="tg.showAlert('Link kopyalandı!')" class="btn-main" style="padding:10px;">COPY LINK</button>
         </div>
     </div>
 
-    <div id="reward-anim">
-        <div style="font-size: 60px;">💰</div>
-        <h2 id="earned-final" style="color:var(--g)">+0.00</h2>
-        <p>REWARD COLLECTED!</p>
-    </div>
-
-    <nav class="nav" id="nav-bar">
-        <div id="nav-home" class="ni active-nav" onclick="tab('home')">🏠<br><small>Mining</small></div>
-        <div id="nav-friends" class="ni" onclick="tab('friends')">👥<br><small>Ref</small></div>
-        <div id="nav-wallet" class="ni" onclick="tab('wallet')">💰<br><small>Wallet</small></div>
+    <nav class="nav">
+        <div onclick="tab('home')">⛏️<br><small>Mining</small></div>
+        <div onclick="tab('tasks')">📋<br><small>Tasks</small></div>
+        <div onclick="tab('ref')">👥<br><small>Friends</small></div>
     </nav>
 </div>
 
