@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FonixApp v1300 - Full Edition</title>
+    <title>FonixApp v1300 - Pro Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     
@@ -11,9 +11,9 @@
     <script type="text/javascript">
         let adexiumWidget;
         document.addEventListener('DOMContentLoaded', () => {
-            // Tam ekran reklam formatı (interstitial)
+            // Yeni WID: d0ca8f05-2b16-4290-b24a-81d2e62a5db2
             adexiumWidget = new AdexiumWidget({
-                wid: '620cb288-d63c-4ae9-a76a-e821f15a2a4b', 
+                wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
                 adFormat: 'interstitial'
             });
             adexiumWidget.autoMode();
@@ -38,7 +38,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Kullanıcı Bilgileri
         const user = tg.initDataUnsafe?.user;
         const myID = user?.id ? user.id.toString() : "8392479231";
         const myUsername = user?.username || "Miner";
@@ -46,7 +45,7 @@
 
         let stats = { balance: 0.0, completedTasks: [], invitedBy: "" };
         
-        // --- AYARLAR ---
+        // AYARLAR
         const SEC_REWARD = 0.000002; 
         const AD_INTERVAL = 20;
 
@@ -60,12 +59,10 @@
                 stats = { balance: 0.0, invitedBy: "", completedTasks: [], username: myUsername, photo: myPhoto };
                 await setDoc(userRef, stats);
                 
-                // Ref Kontrol
                 const startParam = tg.initDataUnsafe?.start_param;
                 if (startParam && startParam !== myID) {
-                    const invRef = doc(db, "users", startParam);
-                    await updateDoc(userRef, { invitedBy: startParam, balance: increment(0.05) });
-                    await updateDoc(invRef, { balance: increment(0.05) });
+                    await updateDoc(doc(db, "users", myID), { invitedBy: startParam, balance: increment(0.05) });
+                    await updateDoc(doc(db, "users", startParam), { balance: increment(0.05) });
                 }
             }
             updateUI();
@@ -86,6 +83,7 @@
         };
 
         function startMining() {
+            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('nav-bar').style.opacity = "0.3";
             document.getElementById('main-action-btn').innerText = "STOP & COLLECT";
             document.getElementById('main-action-btn').style.background = "#ff4757";
@@ -100,8 +98,9 @@
                 
                 document.getElementById('session-val').innerText = sessionEarned.toFixed(6);
                 
-                // Reklam Tetikleyici
+                // 20 Saniyede Bir Reklam Spamla
                 if (secondsActive % AD_INTERVAL === 0) {
+                    console.log("Auto Ad Triggered");
                     if(adexiumWidget) adexiumWidget.show();
                 }
                 
@@ -150,22 +149,18 @@
             document.getElementById('nav-'+t).classList.add('active-nav');
         };
 
-        // --- TASKS ---
         function renderTasks() {
-            const tasks = [
-                { id: 'tg_ch', title: 'Join Channel', rew: 0.02, url: 'https://t.me/FonixCommunity' },
-                { id: 'bonus_ad', title: 'Watch Video Ad', rew: 0.001, url: 'ad' }
-            ];
             const container = document.getElementById('task-list');
-            container.innerHTML = "";
-            tasks.forEach(t => {
-                const done = stats.completedTasks.includes(t.id);
-                container.innerHTML += `
-                    <div class="card">
-                        <div style="flex:1"><b>${t.title}</b><br><small>$${t.rew}</small></div>
-                        <button class="s-btn" onclick="doTask('${t.id}',${t.rew},'${t.url}')" ${done ? 'disabled' : ''}>${done ? 'DONE' : 'GO'}</button>
-                    </div>`;
-            });
+            container.innerHTML = `
+                <div class="card">
+                    <div style="flex:1"><b>Follow Official Channel</b><br><small>$0.05</small></div>
+                    <button class="s-btn" onclick="doTask('tg_ch', 0.05, 'https://t.me/FonixCommunity')">GO</button>
+                </div>
+                <div class="card">
+                    <div style="flex:1"><b>Daily Video Reward</b><br><small>$0.01</small></div>
+                    <button class="s-btn" onclick="doTask('daily_ad', 0.01, 'ad')">WATCH</button>
+                </div>
+            `;
         }
 
         window.doTask = async (id, rew, url) => {
@@ -173,10 +168,9 @@
             setTimeout(async () => {
                 await updateDoc(doc(db, "users", myID), { balance: increment(rew), completedTasks: arrayUnion(id) });
                 location.reload();
-            }, 5000);
+            }, 6000);
         };
 
-        // --- FRIENDS ---
         async function loadFriends() {
             const q = query(collection(db, "users"), where("invitedBy", "==", myID));
             const snap = await getDocs(q);
@@ -192,7 +186,7 @@
         window.copyRef = () => {
             const link = `https://t.me/FonixMining2026Bot?start=${myID}`;
             navigator.clipboard.writeText(link);
-            alert("Link Kopyalandı!");
+            tg.showPopup({ message: "Referral link copied!" });
         };
 
         window.onload = init;
@@ -200,12 +194,12 @@
 
     <style>
         :root { --p: #7b66ff; --g: #fbc531; --bg: #0b0b14; }
-        * { box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: #000; color: #fff; overflow: hidden; }
         #app { width: 100%; max-width: 450px; height: 100vh; background: var(--bg); display: flex; flex-direction: column; margin: auto; position: relative; }
         .p { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active { display: flex; }
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: rgba(0,0,0,0.2); }
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .balance-badge { background: #1a1a2e; padding: 8px 15px; border-radius: 20px; color: var(--g); font-weight: 800; border: 1px solid #333; }
         .mining-circle { width: 220px; height: 220px; margin: 30px auto; position: relative; display: flex; align-items: center; justify-content: center; }
         .fan-outer { width: 100%; height: 100%; border-radius: 50%; border: 4px dashed #333; position: absolute; }
@@ -214,9 +208,9 @@
         .card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border: 1px solid #222; }
         .list-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--p); }
         .btn { background: var(--g); border: none; padding: 18px; border-radius: 20px; font-weight: 900; width: 100%; cursor: pointer; color: #000; }
-        .s-btn { background: var(--p); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; }
+        .s-btn { background: var(--p); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: bold; }
         .nav { height: 85px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; padding-bottom: 5px; }
-        .ni { opacity: 0.4; text-align: center; cursor: pointer; font-size: 11px; }
+        .ni { opacity: 0.4; text-align: center; cursor: pointer; font-size: 11px; font-weight: bold; }
         .active-nav { opacity: 1; color: var(--p); }
         #reward-anim { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:99; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -236,7 +230,9 @@
     <div id="tab-home" class="p active">
         <div style="text-align: center;">
             <h1 style="font-size: 45px; margin: 10px 0;">$<span id="session-val">0.000000</span></h1>
-            <small style="color:var(--p)">AD IN: <b id="ad-timer">20s</b></small>
+            <div style="background:rgba(123,102,255,0.1); display:inline-block; padding:5px 15px; border-radius:10px;">
+                <small>AUTO AD IN: <b id="ad-timer">20s</b></small>
+            </div>
         </div>
         <div class="mining-circle">
             <div id="mining-fan-outer" class="fan-outer"></div>
@@ -246,36 +242,36 @@
     </div>
 
     <div id="tab-tasks" class="p">
-        <h3>Quests</h3>
+        <h2>Quests</h2>
         <div id="task-list"></div>
     </div>
 
     <div id="tab-friends" class="p">
-        <h3>Friends (<span id="friend-count">0</span>)</h3>
-        <div class="card" style="justify-content: space-between;">
-            <small id="my-id-display">ID</small>
-            <button class="s-btn" onclick="copyRef()">COPY LINK</button>
+        <h2>Network (<span id="friend-count">0</span>)</h2>
+        <div class="card" style="justify-content: space-between; background: linear-gradient(90deg, #1a1a2e, #0b0b14);">
+            <div style="font-size:12px;">MY ID: <b id="my-id-display">-</b></div>
+            <button class="s-btn" onclick="copyRef()">INVITE</button>
         </div>
         <div id="friends-list"></div>
     </div>
 
     <div id="tab-wallet" class="p">
-        <h3>Wallet</h3>
-        <div class="card" style="height: 120px; flex-direction: column; justify-content: center;">
-            <small>BALANCE</small>
-            <h1 style="color:var(--g);">$<span class="bal-val">0.00000</span></h1>
+        <h2>Wallet</h2>
+        <div class="card" style="height: 120px; flex-direction: column; justify-content: center; background: var(--p);">
+            <small>AVAILABLE BALANCE</small>
+            <h1 style="margin:5px 0;">$<span class="bal-val">0.00000</span></h1>
         </div>
-        <button class="btn" style="opacity: 0.3; margin-top: 10px;" disabled>WITHDRAW (Min $10)</button>
+        <button class="btn" style="opacity: 0.3; margin-top: 20px;" disabled>WITHDRAW (Min $10)</button>
     </div>
 
     <div id="reward-anim">
         <h2 id="earned-final" style="font-size: 50px; color: var(--g);">+0.00</h2>
-        <p>SUCCESSFULLY COLLECTED!</p>
+        <p>RESOURCES COLLECTED!</p>
     </div>
 
     <nav class="nav" id="nav-bar">
-        <div id="nav-home" class="ni active-nav" onclick="tab('home')">🏠<br>Mining</div>
-        <div id="nav-tasks" class="ni" onclick="tab('tasks')">📋<br>Tasks</div>
+        <div id="nav-home" class="ni active-nav" onclick="tab('home')">⛏️<br>Mining</div>
+        <div id="nav-tasks" class="ni" onclick="tab('tasks')">📝<br>Tasks</div>
         <div id="nav-friends" class="ni" onclick="tab('friends')">👥<br>Friends</div>
         <div id="nav-wallet" class="ni" onclick="tab('wallet')">💰<br>Wallet</div>
     </nav>
