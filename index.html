@@ -3,49 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GramPro - Digital Rewards</title>
+    <title>GramPro - Ad Rewards</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-        
-        body { 
-            background-color: #f0f4f8; 
-            font-family: 'Outfit', sans-serif; 
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Modern Derin Mavi Tonu */
-        .glass-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        }
-
-        /* Sekme İçerik Animasyonu */
+        body { background-color: #f0f4f8; font-family: 'Outfit', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .glass-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
         .tab-content { display: none; }
-        .tab-content.active { 
-            display: block; 
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Alt Menü Aktif Efekti */
+        .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .nav-active { color: #2563eb !important; }
         .nav-active i { transform: translateY(-8px); filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.4)); }
-        .nav-active span { opacity: 1 !important; transform: scale(1.1); }
-
-        /* Premium Buton Efekti */
-        .btn-bounce { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-bounce:active { transform: scale(0.92); }
-
-        /* Kart Parlaması */
-        .card-glow {
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
-        }
+        .btn-bounce:active { transform: scale(0.92); transition: 0.2s; }
     </style>
 </head>
 <body class="max-w-md mx-auto min-h-screen pb-32 border-x border-gray-100 bg-white relative shadow-2xl">
@@ -54,153 +28,99 @@
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                    <i class="fa-solid fa-crown text-yellow-300"></i>
+                    <i class="fa-solid fa-gem text-blue-400"></i>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">GramPro</h1>
                     <p class="text-[10px] text-blue-100 font-medium">ID: 8392479231</p>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-solid fa-bell text-xs"></i></button>
-                <button class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-solid fa-gear text-xs"></i></button>
-            </div>
+            <div class="bg-white/10 px-4 py-1.5 rounded-full text-[11px] font-semibold border border-white/10">Active</div>
         </div>
         
         <div class="bg-white/10 border border-white/20 p-4 rounded-3xl backdrop-blur-sm flex justify-between items-center">
-            <div>
-                <p class="text-[10px] uppercase font-bold text-blue-200 tracking-wider">Server Status</p>
-                <p class="text-sm font-semibold flex items-center gap-2">
-                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Encrypted & Active
-                </p>
-            </div>
-            <i class="fa-solid fa-shield-halved text-2xl text-blue-200/50"></i>
+            <p class="text-xs font-semibold"><i class="fa-solid fa-shield-check text-green-400 mr-2"></i> Adexium Protected</p>
+            <i class="fa-solid fa-tower-broadcast text-blue-200/50 animate-pulse"></i>
         </div>
     </header>
 
     <main class="px-6 py-8">
-        
         <div id="home" class="tab-content active space-y-8">
-            <div class="bg-white rounded-[2.5rem] p-10 text-center card-glow border border-gray-50 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fa-solid fa-wallet text-6xl"></i></div>
+            <div class="bg-white rounded-[2.5rem] p-10 text-center shadow-xl border border-gray-50">
                 <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-2">Total Points</p>
                 <h3 id="balance" class="text-5xl font-black text-slate-800 tracking-tighter">0.00</h3>
-                <div class="mt-6 flex justify-center gap-4">
-                    <div class="px-4 py-2 bg-blue-50 rounded-full text-[10px] font-bold text-blue-600 italic">Verified Account</div>
-                </div>
             </div>
 
-            <div class="bg-slate-900 rounded-[2.5rem] p-8 relative overflow-hidden group btn-bounce">
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 relative overflow-hidden btn-bounce">
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-lg">LIVE TASK</span>
-                        <span class="text-slate-500 text-xs font-mono">Limit: 0/100</span>
+                        <span class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-lg uppercase">Daily Task</span>
+                        <span class="text-slate-500 text-xs font-mono">0 / 100</span>
                     </div>
-                    <h4 class="text-white text-2xl font-bold mb-2">Watch Premium Ad</h4>
-                    <p class="text-slate-400 text-xs mb-8 italic">Earn +0.01 points per video</p>
-                    <button onclick="watchAd()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-3 transition-all">
-                        START NOW <i class="fa-solid fa-play-circle text-xl"></i>
+                    <h4 class="text-white text-2xl font-bold mb-2">Watch Reward Ad</h4>
+                    <p class="text-slate-400 text-xs mb-8 italic">Get points after watching</p>
+                    <button onclick="triggerAd()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3">
+                        WATCH NOW <i class="fa-solid fa-play-circle text-xl"></i>
                     </button>
                 </div>
-                <div class="absolute -right-8 -bottom-8 text-white/5 text-9xl transform -rotate-12 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-clapperboard"></i>
-                </div>
+                <div class="absolute -right-8 -bottom-8 text-white/5 text-9xl transform -rotate-12"><i class="fa-solid fa-clapperboard"></i></div>
             </div>
         </div>
 
-        <div id="wallet" class="tab-content space-y-6">
-            <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-2xl font-black text-slate-800">Secure Vault</h3>
-            </div>
-            
-            <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100 flex items-center gap-4">
-                <i class="fa-solid fa-circle-info text-blue-600 text-xl"></i>
-                <p class="text-xs text-blue-800 leading-relaxed font-medium italic">Min. payout threshold is 10.00 points. Please ensure your details are correct.</p>
-            </div>
-
-            <div class="space-y-4 pt-4">
-                <div class="bg-gray-50 rounded-2xl p-4 focus-within:ring-2 ring-blue-500/20 transition-all border border-gray-100">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Receiver Address</label>
-                    <input type="text" placeholder="Enter ID or Wallet..." class="w-full bg-transparent font-semibold text-slate-700 outline-none">
-                </div>
-                <div class="bg-gray-50 rounded-2xl p-4 focus-within:ring-2 ring-blue-500/20 transition-all border border-gray-100">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Amount</label>
-                    <input type="number" placeholder="0.00" class="w-full bg-transparent font-semibold text-slate-700 outline-none">
-                </div>
-            </div>
-
-            <button onclick="requestPayment()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-3xl btn-bounce shadow-xl mt-4 uppercase tracking-widest text-sm">
-                Request Payout
-            </button>
+        <div id="wallet" class="tab-content text-center py-10">
+            <i class="fa-solid fa-vault text-6xl text-slate-200 mb-4"></i>
+            <h3 class="text-xl font-bold">Secure Vault</h3>
+            <p class="text-slate-400 text-sm">Minimum payout: 10.00 PTS</p>
         </div>
 
-        <div id="friends" class="tab-content text-center py-6">
-            <div class="w-24 h-24 bg-blue-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-people-group text-4xl text-blue-600"></i>
-            </div>
-            <h3 class="text-2xl font-black text-slate-800 mb-2">My Team</h3>
-            <p class="text-slate-500 text-sm px-6 mb-10 leading-relaxed italic">Invite your friends and earn <span class="text-blue-600 font-bold">10% bonus</span> from their total earnings.</p>
-            
-            <div class="bg-slate-50 border-2 border-dashed border-slate-200 p-6 rounded-[2rem] relative">
-                <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Your Referral Link</p>
-                <div class="bg-white p-3 rounded-xl border border-slate-100 mb-4 font-mono text-xs text-slate-600 overflow-hidden">
-                    grampro.app/join/839247
-                </div>
-                <button onclick="copyRef()" class="w-full bg-white border border-blue-600 text-blue-600 font-bold py-3 rounded-xl btn-bounce">
-                    COPY LINK
-                </button>
-            </div>
+        <div id="friends" class="tab-content text-center py-10">
+            <i class="fa-solid fa-users text-6xl text-slate-200 mb-4"></i>
+            <h3 class="text-xl font-bold">Referral Team</h3>
+            <p class="text-slate-400 text-sm">Invite friends for 10% bonus</p>
         </div>
-
     </main>
 
-    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-[2.5rem] flex justify-around items-center py-3 px-2 z-50 border border-gray-50">
-        
-        <button onclick="switchTab('home', this)" class="nav-item nav-active flex flex-col items-center gap-1 flex-1 transition-all duration-300">
-            <i class="fa-solid fa-house-chimney text-xl transition-transform"></i>
-            <span class="text-[9px] font-bold uppercase opacity-50 transition-all">Home</span>
-        </button>
-
-        <button onclick="switchTab('friends', this)" class="nav-item text-slate-400 flex flex-col items-center gap-1 flex-1 transition-all duration-300">
-            <i class="fa-solid fa-user-group text-xl transition-transform"></i>
-            <span class="text-[9px] font-bold uppercase opacity-50 transition-all">Team</span>
-        </button>
-
-        <button onclick="switchTab('wallet', this)" class="nav-item text-slate-400 flex flex-col items-center gap-1 flex-1 transition-all duration-300">
-            <i class="fa-solid fa-vault text-xl transition-transform"></i>
-            <span class="text-[9px] font-bold uppercase opacity-50 transition-all">Vault</span>
-        </button>
-
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white shadow-2xl rounded-[2.5rem] flex justify-around py-3 z-50 border border-gray-100">
+        <button onclick="switchTab('home', this)" class="nav-item nav-active flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[9px] font-bold">Home</span></button>
+        <button onclick="switchTab('friends', this)" class="nav-item text-slate-400 flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-user-group text-xl"></i><span class="text-[9px] font-bold">Team</span></button>
+        <button onclick="switchTab('wallet', this)" class="nav-item text-slate-400 flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-vault text-xl"></i><span class="text-[9px] font-bold">Vault</span></button>
     </nav>
 
-    <script>
-        // Sekme Değiştirme Fonksiyonu
+    <script type="text/javascript">
+        // Telegram Web App Initialization
+        const tele = window.Telegram.WebApp;
+        tele.expand(); // Uygulamayı tam ekran yap
+        tele.ready();
+
+        // Adexium Widget Initialization
+        let adexiumWidget;
+        document.addEventListener('DOMContentLoaded', () => {
+            adexiumWidget = new AdexiumWidget({
+                wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
+                adFormat: 'push-like'
+            });
+            adexiumWidget.autoMode();
+        });
+
+        function triggerAd() {
+            // Butona basıldığında reklamı tetikle
+            if (adexiumWidget) {
+                // Widget push-like olduğu için otomatik veya manuel tetiklenebilir
+                // SDK'nın autoMode'u zaten çalışıyor, butona basıldığında bir bildirim veya reklam gösterimi simülasyonu:
+                tele.MainButton.setText("SHOWING AD...").show();
+                setTimeout(() => {
+                    tele.MainButton.hide();
+                    alert("Ad is being processed. Please watch the popup.");
+                }, 2000);
+            }
+        }
+
         function switchTab(tabId, element) {
-            // Tüm içerikleri gizle
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            // Seçilen içeriği göster
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-
-            // Navigasyon renklerini ve efektlerini temizle
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('nav-active'));
-            // Tıklanan butonu aktif yap
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
             element.classList.add('nav-active');
-
-            // Haptic/Titreşim efekti (destekleyen cihazlarda)
-            if (navigator.vibrate) navigator.vibrate(10);
-        }
-
-        // Örnek Aksiyonlar
-        function watchAd() {
-            alert("Ad loading... Please wait 30 seconds to claim your reward.");
-        }
-
-        function requestPayment() {
-            alert("Insufficient balance. You need at least 10.00 points.");
-        }
-
-        function copyRef() {
-            alert("Link copied! Share it with your friends.");
+            if (window.TapticEngine) TapticEngine.impact({ style: 'light' });
         }
     </script>
 </body>
