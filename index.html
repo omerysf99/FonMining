@@ -22,6 +22,8 @@
 
         .roadmap-card { position: relative; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .roadmap-dot { position: absolute; left: -5px; top: 0; width: 9px; height: 9px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        
+        .btn-done { background: #22c55e !important; color: white !important; }
     </style>
 </head>
 <body>
@@ -69,21 +71,22 @@
                     <p class="text-[11px] font-black italic text-green-500 uppercase">Hazır</p>
                 </div>
             </div>
-
-            <div class="mt-8 p-6 glass rounded-[2.5rem] border-t border-white/10 text-center">
-                <p class="text-[11px] text-gray-400 italic">Analiz ödülünüz başarıyla hesabınıza tanımlanmıştır. Madencilik süreci başladığında puanlarınızı katlayabileceksiniz.</p>
-            </div>
         </div>
 
         <div id="tasks" class="tab-content p-6">
             <h2 class="text-3xl font-black italic mb-8 uppercase tracking-tighter">Görevler</h2>
-            <div class="space-y-3">
-                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-60">
+            <div class="space-y-4">
+                <div class="glass p-5 rounded-[2rem] flex justify-between items-center border border-white/5">
                     <div class="flex items-center gap-4">
-                        <i class="fa-brands fa-telegram text-xl"></i>
-                        <div><p class="font-bold text-sm">Topluluğa Katıl</p><p class="text-[10px]">Ödül: 0 Puan</p></div>
+                        <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
+                            <i class="fa-brands fa-telegram text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Topluluğa Katıl</p>
+                            <p class="text-[10px] text-blue-400 font-black">+100 PUAN</p>
+                        </div>
                     </div>
-                    <button class="bg-white/10 text-white/40 px-5 py-2 rounded-xl text-[10px] font-black">YAKINDA</button>
+                    <button id="tg-btn" onclick="doTelegramTask()" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition">YAP</button>
                 </div>
             </div>
         </div>
@@ -93,8 +96,8 @@
             <div class="glass p-8 rounded-[3rem]">
                 <i class="fa-solid fa-users-rays text-5xl text-blue-500/20 mb-6"></i>
                 <h3 class="text-xl font-bold mb-2">Ekibini Genişlet</h3>
-                <p class="text-xs text-gray-500 italic mb-8 px-4">Her arkadaşın için gelecekteki airdrop payını artırabilirsin.</p>
-                <button class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">DAVET ET</button>
+                <p class="text-xs text-gray-500 italic mb-8 px-4">Referans başına +0.01x çarpan (Aşama 2'de aktif).</p>
+                <button class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">LİNKİ KOPYALA</button>
             </div>
         </div>
 
@@ -104,19 +107,24 @@
                 <div class="roadmap-card">
                     <div class="roadmap-dot"></div>
                     <h4 class="text-blue-500 font-black italic text-sm uppercase">1. Aşama: Başlangıç</h4>
-                    <p class="text-[11px] text-gray-400 mt-1 italic">Analiz sisteminin açılışı ve erken kayıt ödüllerinin dağıtımı.</p>
+                    <p class="text-[11px] text-gray-400 mt-1 italic">Analiz sisteminin açılışı ve 5.000 puanlık karşılama ödülü dağıtımı.</p>
                 </div>
                 <div class="roadmap-card">
                     <div class="roadmap-dot" style="background: #1f2937; box-shadow: none;"></div>
                     <h4 class="text-gray-600 font-black italic text-sm uppercase">2. Aşama: Madencilik</h4>
-                    <p class="text-[11px] text-gray-700 mt-1 italic">Günlük çarpan sisteminin aktif edilmesi ve puan toplama yarışı.</p>
+                    <p class="text-[11px] text-gray-700 mt-1 italic">Günlük çarpan sisteminin (Daily Boost) aktif edilmesi ve Mining dönemi.</p>
+                </div>
+                <div class="roadmap-card" style="border-left: none;">
+                    <div class="roadmap-dot" style="background: #1f2937; box-shadow: none;"></div>
+                    <h4 class="text-gray-600 font-black italic text-sm uppercase">3. Aşama: TGE Lansmanı</h4>
+                    <p class="text-[11px] text-gray-700 mt-1 italic">Borsa listelenmeleri ve puanların token takasına açılması.</p>
                 </div>
             </div>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 h-24 glass border-t border-white/5 flex justify-around items-center px-6 z-50">
             <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-house-chimney text-xl"></i>
+                <i class="fa-solid fa-house text-xl"></i>
                 <span class="text-[9px] font-black uppercase tracking-tighter">Ana Sayfa</span>
             </button>
             <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1.5">
@@ -135,6 +143,9 @@
     </div>
 
     <script>
+        let totalScore = 0;
+        let isTgDone = false;
+
         window.onload = () => {
             let progress = 0;
             const bar = document.getElementById('p-bar');
@@ -151,23 +162,42 @@
                     setTimeout(() => {
                         document.getElementById('checking-screen').style.display = 'none';
                         document.getElementById('app').classList.remove('hidden');
-                        giveReward(5000); // 5000 Puan Veriliyor
+                        updateScore(5000); // 5000 Puan Veriliyor
                     }, 500);
                 }
             }, 50);
         };
 
-        function giveReward(target) {
-            let current = 0;
+        function updateScore(amount) {
+            let current = totalScore;
+            totalScore += amount;
             const timer = setInterval(() => {
                 current += 100;
-                if (current >= target) {
-                    current = target;
+                if (current >= totalScore) {
+                    current = totalScore;
                     clearInterval(timer);
-                    alert("Tebrikler! Erken erişim analizi sonucu 5,000 Puan kazandınız.");
                 }
                 document.getElementById('score-display').innerText = current.toLocaleString();
             }, 20);
+        }
+
+        function doTelegramTask() {
+            if(isTgDone) return;
+            
+            // Kanala yönlendir
+            window.open("https://t.me/AgeYears", "_blank");
+            
+            // Döndüğünde ödül ver (Simüle edilmiş bekleme)
+            const btn = document.getElementById('tg-btn');
+            btn.innerText = "KONTROL...";
+            
+            setTimeout(() => {
+                isTgDone = true;
+                btn.innerText = "ALINDI";
+                btn.classList.add('btn-done');
+                updateScore(100);
+                alert("Telegram görevi tamamlandı! +100 Puan eklendi.");
+            }, 2000);
         }
 
         function switchTab(tabId, el) {
