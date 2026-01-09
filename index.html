@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Airdrop Core - Adil Ödül Sistemi</title>
+    <title>Airdrop Core - Watch & Earn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,178 +18,135 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
         }
-        .check-step { transition: all 0.5s ease; }
         .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .progress-bar { transition: width 0.4s ease-out; }
-        @keyframes pulse-custom {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .ad-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
         }
-        .analyzing { animation: pulse-custom 1.5s infinite; }
+        .loader-ring {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <div id="loading-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8">
-        <div class="mb-8 text-6xl text-blue-500 analyzing">
-            <i class="fa-solid fa-shield-check"></i>
-        </div>
-        <h2 class="text-xl font-bold mb-4 tracking-tight">HESAP KONTROL EDİLİYOR</h2>
-        <div class="w-full max-w-xs space-y-3">
-            <div id="step-1" class="flex items-center gap-3 text-sm text-gray-500">
-                <i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Hesap yaşı analiz ediliyor...
-            </div>
-            <div id="step-2" class="flex items-center gap-3 text-sm text-gray-400 opacity-20">
-                <i class="fa-solid fa-fingerprint"></i> Cihaz ve IP doğrulanıyor...
-            </div>
-            <div id="step-3" class="flex items-center gap-3 text-sm text-gray-400 opacity-20">
-                <i class="fa-solid fa-robot"></i> Bot/Spam filtresi aktif...
-            </div>
-        </div>
+    <div id="ad-container" class="ad-modal flex flex-col items-center justify-center p-6 text-center">
+        <div class="loader-ring mb-4"></div>
+        <h2 class="text-xl font-bold mb-2">Reklam Yükleniyor...</h2>
+        <p class="text-gray-400 text-sm mb-6">Ödülünüzü almak için reklamın bitmesini bekleyin.</p>
+        <div id="ad-timer" class="text-3xl font-mono font-bold text-blue-500">3</div>
     </div>
 
-    <main id="main-content" class="hidden flex-1 p-5 space-y-6">
+    <main id="main-content" class="flex-1 p-5 space-y-6">
         
         <div class="flex justify-between items-center pt-2">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
-                    ID
-                </div>
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">ID</div>
                 <span class="text-xs font-mono text-gray-400">8392479231</span>
             </div>
-            <div class="px-3 py-1 rounded-full glass border-blue-500/30 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                <i class="fa-solid fa-certificate mr-1"></i> Gerçek Kullanıcı
+            <div class="px-3 py-1 rounded-full glass border-green-500/30 text-[10px] font-bold text-green-400 uppercase">
+                <i class="fa-solid fa-check-double mr-1"></i> Doğrulanmış
             </div>
         </div>
 
-        <div class="text-center py-8">
-            <p class="text-gray-400 text-xs uppercase tracking-[0.2em] mb-2">Toplam Puanın</p>
-            <h1 id="score" class="text-6xl font-black mb-4">0</h1>
+        <div class="text-center py-12">
+            <p class="text-gray-400 text-xs uppercase tracking-[0.2em] mb-2">Mevcut Bakiyen</p>
+            <h1 id="score" class="text-6xl font-black mb-4">2,500</h1>
             
             <div class="inline-flex items-center gap-2 px-4 py-2 glass rounded-2xl text-sm mb-4">
-                <span id="level-label" class="text-blue-400 font-bold">Seviye 1: Başlangıç</span>
+                <span id="level-label" class="text-blue-400 font-bold">Seviye 1</span>
             </div>
-
-            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden max-w-[200px] mx-auto">
-                <div id="progress-bar" class="progress-bar bg-blue-500 h-full" style="width: 0%"></div>
-            </div>
-            <p id="next-lv-text" class="text-[10px] text-gray-500 mt-2 uppercase">Level 2 için 5.000 puan gerekli</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-            <button onclick="dailyCheckIn()" class="glass p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition">
-                <i class="fa-solid fa-calendar-star text-yellow-500 text-xl"></i>
-                <span class="text-xs font-medium">Günlük Giriş</span>
+        <div class="glass p-6 rounded-[2.5rem] border-blue-500/20 text-center space-y-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto text-blue-500 text-2xl">
+                <i class="fa-solid fa-play"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold">Hızlı Puan Kazan</h2>
+                <p class="text-xs text-gray-400 px-4">Kısa bir reklam izleyerek anında puanını artırabilirsin.</p>
+            </div>
+            <button onclick="startAd()" id="ad-btn" class="w-full bg-white text-black font-black py-4 rounded-2xl active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clapperboard"></i>
+                REKLAM İZLE & 250 CLAIM
             </button>
-            <button onclick="claimInfo()" class="glass p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition opacity-50">
-                <i class="fa-solid fa-wallet text-purple-500 text-xl"></i>
-                <span class="text-xs font-medium">Claim (Yakında)</span>
-            </button>
+            <p class="text-[10px] text-gray-500">Her reklam izleme +250 puan kazandırır.</p>
         </div>
 
-        <section class="space-y-4">
-            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Görevler</h3>
+        <section class="space-y-4 pt-4">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Sosyal Görevler</h3>
             
-            <div class="space-y-3">
-                <div class="glass p-4 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-                            <i class="fa-brands fa-telegram"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold">Resmi Kanala Katıl</p>
-                            <p class="text-[11px] text-gray-500">+1,000 Puan</p>
-                        </div>
+            <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                        <i class="fa-brands fa-telegram"></i>
                     </div>
-                    <button onclick="doTask(this, 1000)" class="bg-white text-black text-xs font-bold px-4 py-2 rounded-full active:scale-90 transition">Yap</button>
-                </div>
-
-                <div class="glass p-4 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold">Botu Başlat</p>
-                            <p class="text-[11px] text-gray-500">+500 Puan</p>
-                        </div>
+                    <div>
+                        <p class="text-sm font-bold">Gruba Katıl</p>
+                        <p class="text-[11px] text-gray-500">+1,000 Puan</p>
                     </div>
-                    <span class="text-green-500 text-xs font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">Tamamlandı</span>
                 </div>
+                <button onclick="this.innerHTML='✓'; this.disabled=true;" class="bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-full">Yap</button>
             </div>
         </section>
 
-        <div class="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl mt-10">
-            <div class="flex gap-3">
-                <i class="fa-solid fa-shield-halved text-red-500 text-sm mt-0.5"></i>
-                <div class="text-[10px] text-gray-400 space-y-1">
-                    <p class="font-bold text-gray-300">GÜVENLİK PROTOKOLÜ</p>
-                    <p>Bu sistem adil dağıtım için tasarlanmış bir ödül oyunudur. Kimseyle özel anahtarınızı (seed phrase) paylaşmayın. Airdrop zamanı sadece resmi kanalımızdan duyurulacaktır.</p>
-                </div>
-            </div>
+        <div class="text-[10px] text-gray-500 text-center pt-8 pb-4">
+            <p><i class="fa-solid fa-lock mr-1"></i> Verileriniz güvenle saklanmaktadır.</p>
+            <p>Admin ID: 8392479231 | 2026 Airdrop System</p>
         </div>
-
     </main>
 
     <script>
-        let points = 0;
-        let adminId = "8392479231";
+        let points = 2500;
 
-        // Açılış Simülasyonu
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.getElementById('step-1').innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Hesap yaşınız: 3 yıl (Puan: +2,500)';
-                document.getElementById('step-1').classList.replace('text-gray-500', 'text-white');
-                document.getElementById('step-2').classList.remove('opacity-20');
-                document.getElementById('step-2').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Cihaz ve IP doğrulanıyor...';
-            }, 1500);
+        function startAd() {
+            const adContainer = document.getElementById('ad-container');
+            const adTimer = document.getElementById('ad-timer');
+            const adBtn = document.getElementById('ad-btn');
+            let timeLeft = 3;
 
-            setTimeout(() => {
-                document.getElementById('step-2').innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Tekil kullanıcı doğrulandı.';
-                document.getElementById('step-2').classList.replace('text-gray-400', 'text-white');
-                document.getElementById('step-3').classList.remove('opacity-20');
-                document.getElementById('step-3').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Bot/Spam filtresi aktif...';
-            }, 3000);
+            // Reklamı Başlat
+            adContainer.style.display = 'flex';
+            adBtn.disabled = true;
 
-            setTimeout(() => {
-                points = 2500; // Başlangıç puanı
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                updateUI();
-            }, 4500);
-        });
+            const countdown = setInterval(() => {
+                timeLeft--;
+                adTimer.innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    finishAd();
+                }
+            }, 1000);
+        }
+
+        function finishAd() {
+            document.getElementById('ad-container').style.display = 'none';
+            points += 250;
+            updateUI();
+            alert("Tebrikler! 250 puan başarıyla eklendi.");
+            document.getElementById('ad-btn').disabled = false;
+            document.getElementById('ad-timer').innerText = "3";
+        }
 
         function updateUI() {
             document.getElementById('score').innerText = points.toLocaleString();
-            let progress = (points / 10000) * 100;
-            document.getElementById('progress-bar').style.width = Math.min(progress, 100) + '%';
-            
             if(points >= 5000) {
-                document.getElementById('level-label').innerText = "Seviye 2: Aktif Oyuncu";
-                document.getElementById('next-lv-text').innerText = "Level 3 için 15.000 puan gerekli";
+                document.getElementById('level-label').innerText = "Seviye 2: Elmas Üye";
             }
-        }
-
-        function doTask(btn, amount) {
-            points += amount;
-            btn.disabled = true;
-            btn.innerHTML = "Tamamlandı";
-            btn.className = "text-green-500 text-xs font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20";
-            updateUI();
-        }
-
-        function dailyCheckIn() {
-            points += 100;
-            alert("Günlük giriş puanı eklendi: +100");
-            updateUI();
-        }
-
-        function claimInfo() {
-            alert("Claim sistemi henüz aktif değil. Lütfen resmi duyuruları bekleyin. Unutmayın, biz asla sizden ödeme talep etmeyiz!");
         }
     </script>
 </body>
