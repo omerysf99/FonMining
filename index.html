@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GramTron - Mavi Edition</title>
+    <title>GramTron - Digital Rewards</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        /* Derin Mavi Degrade */
         .blue-gradient { background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #3b82f6 100%); }
         .card-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        /* Özel Input Stili */
-        input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body class="max-w-md mx-auto min-h-screen pb-24 border-x border-gray-100 bg-white relative">
@@ -28,19 +25,13 @@
                 <h1 class="text-2xl font-black tracking-tight">GRAM<span class="font-light text-blue-200">TRON</span></h1>
             </div>
             <div class="bg-blue-900/40 px-3 py-1 rounded-full text-[10px] font-bold border border-white/20">
-                ADMIN: 8392479231
+                ID: 8392479231
             </div>
         </div>
         
-        <div class="flex justify-between items-end bg-white/10 p-4 rounded-2xl backdrop-blur-sm">
-            <div>
-                <p id="page-title" class="text-sm font-medium text-blue-100 uppercase tracking-widest">Dashboard</p>
-                <h2 class="text-2xl font-bold italic">TRX Network</h2>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] text-blue-200 uppercase">Live Price</p>
-                <p class="font-mono text-xl font-bold text-green-300">$0.2943</p>
-            </div>
+        <div class="bg-white/10 p-5 rounded-2xl backdrop-blur-sm">
+            <p id="page-title" class="text-xs font-medium text-blue-100 uppercase tracking-widest mb-1">Current Status</p>
+            <h2 class="text-xl font-bold">Member Dashboard</h2>
         </div>
     </header>
 
@@ -49,23 +40,23 @@
         <div id="home" class="tab-content active space-y-6">
             <div class="bg-white rounded-3xl p-8 text-center card-shadow border border-blue-50 relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-50 rounded-full opacity-50"></div>
-                <p class="text-slate-500 font-semibold text-sm">TOTAL EARNINGS</p>
-                <p id="main-balance" class="text-5xl font-black text-blue-700 my-3 tracking-tighter">0.0000 <span class="text-xl">TRX</span></p>
-                <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-xs font-bold">
-                    <i class="fa-solid fa-chart-line"></i> +0.00% Today
+                <p class="text-slate-500 font-semibold text-sm italic">AVAILABLE BALANCE</p>
+                <p id="main-balance" class="text-5xl font-black text-blue-700 my-3 tracking-tighter">0.0000</p>
+                <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-bold">
+                    <i class="fa-solid fa-shield-check"></i> Account Verified
                 </div>
             </div>
 
             <div class="bg-slate-900 rounded-3xl p-6 text-center card-shadow relative">
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-blue-400 text-xs font-bold uppercase tracking-wider">Daily Mission</span>
-                    <span class="text-white text-xs bg-blue-600 px-2 py-1 rounded-md">0 / 100</span>
+                    <span class="text-blue-400 text-xs font-bold uppercase tracking-wider">Today's Task</span>
+                    <span class="text-white text-xs bg-blue-600 px-2 py-1 rounded-md font-mono">0 / 100</span>
                 </div>
-                <h4 class="text-white text-lg font-bold mb-1">Boost Your Wallet</h4>
-                <p class="text-slate-400 text-xs mb-5">Watch high-reward ads to earn instant TRX.</p>
+                <h4 class="text-white text-lg font-bold mb-1">Earn Credits</h4>
+                <p class="text-slate-400 text-xs mb-5">Complete video tasks to increase your balance.</p>
                 
-                <button onclick="watchAd()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-900/20 active:scale-95 transition-all">
-                    <i class="fa-solid fa-circle-play mr-2"></i> WATCH & EARN
+                <button onclick="watchAd()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all">
+                    <i class="fa-solid fa-play-circle mr-2"></i> START WATCHING
                 </button>
             </div>
         </div>
@@ -73,66 +64,65 @@
         <div id="wallet" class="tab-content space-y-5">
             <div class="flex items-center gap-3 mb-4">
                 <div class="h-10 w-1 bg-blue-600 rounded-full"></div>
-                <h3 class="text-2xl font-bold text-slate-800">Withdrawal</h3>
+                <h3 class="text-2xl font-bold text-slate-800">Withdraw Funds</h3>
             </div>
 
             <div class="space-y-4">
                 <div class="group">
-                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">TRC-20 Destination Address</label>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Payment Method / Address</label>
                     <div class="relative mt-1">
-                        <i class="fa-solid fa-link absolute left-4 top-4 text-slate-300"></i>
-                        <input type="text" placeholder="Enter TRX Address..." class="w-full bg-white border border-slate-200 rounded-2xl p-4 pl-12 outline-none transition-all">
+                        <i class="fa-solid fa-wallet absolute left-4 top-4 text-slate-300"></i>
+                        <input type="text" placeholder="Enter your payment details..." class="w-full bg-white border border-slate-200 rounded-2xl p-4 pl-12 outline-none transition-all">
                     </div>
                 </div>
 
                 <div class="group">
                     <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Withdrawal Amount</label>
                     <div class="relative mt-1">
-                        <i class="fa-solid fa-coins absolute left-4 top-4 text-slate-300"></i>
-                        <input type="number" placeholder="Minimum 10.0 TRX" class="w-full bg-white border border-slate-200 rounded-2xl p-4 pl-12 outline-none transition-all">
+                        <i class="fa-solid fa-money-bill-transfer absolute left-4 top-4 text-slate-300"></i>
+                        <input type="number" placeholder="Minimum 10.00" class="w-full bg-white border border-slate-200 rounded-2xl p-4 pl-12 outline-none transition-all">
                     </div>
                 </div>
             </div>
 
             <button onclick="requestPayment()" class="w-full bg-slate-800 text-white font-bold py-5 rounded-2xl hover:bg-slate-900 transition-all shadow-xl">
-                PROCESS PAYMENT
+                SUBMIT REQUEST
             </button>
 
             <div class="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex gap-3">
-                <i class="fa-solid fa-shield-check text-blue-600 mt-1"></i>
+                <i class="fa-solid fa-clock text-blue-600 mt-1"></i>
                 <p class="text-[11px] text-blue-800 leading-relaxed italic">
-                    All transactions are verified by the smart contract. Estimated arrival time is 2-12 hours depending on network congestion.
+                    Requests are processed in the order they are received. Typically takes 24-48 hours.
                 </p>
             </div>
         </div>
 
         <div id="friends" class="tab-content text-center py-12">
             <div class="relative inline-block mb-6">
-                <i class="fa-solid fa-user-group text-7xl text-blue-100"></i>
-                <i class="fa-solid fa-plus absolute -right-2 -bottom-2 bg-blue-600 text-white p-2 rounded-full border-4 border-white"></i>
+                <i class="fa-solid fa-share-nodes text-7xl text-blue-100"></i>
             </div>
-            <h3 class="text-2xl font-bold text-slate-800">Network Growth</h3>
-            <p class="text-slate-500 text-sm px-8 mt-2 leading-relaxed">Refer your partners and receive <span class="text-blue-600 font-bold">10% commission</span> for every ad they complete.</p>
+            <h3 class="text-2xl font-bold text-slate-800">Referral Program</h3>
+            <p class="text-slate-500 text-sm px-8 mt-2 leading-relaxed">Earn <span class="text-blue-600 font-bold">10% extra</span> rewards from your friends' activities.</p>
             
             <div class="mt-8 p-1 bg-slate-100 rounded-2xl flex items-center">
-                <input id="refLink" type="text" readonly value="gramtron.me/ref/8392" class="bg-transparent text-slate-600 text-sm font-medium px-4 flex-1 outline-none">
+                <input id="refLink" type="text" readonly value="gramtron.me/share/8392" class="bg-transparent text-slate-600 text-sm font-medium px-4 flex-1 outline-none">
                 <button onclick="copyRef()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase">Copy</button>
             </div>
         </div>
 
     </main>
 
-    <nav class="fixed bottom-0 max-w-md w-full bg-white/80 backdrop-blur-md border-t border-slate-100 flex justify-around py-4 z-50">
-        <button onclick="showTab('home')" class="nav-item flex flex-col items-center text-blue-600 transition-all scale-110">
-            <i class="fa-solid fa-house-chimney text-xl"></i>
+    <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-slate-100 flex justify-around py-4 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
+        <button onclick="showTab('home')" class="nav-item flex flex-col items-center text-blue-600 transition-all">
+            <i class="fa-solid fa-grid-2 text-xl"></i>
             <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Home</span>
         </button>
         <button onclick="showTab('friends')" class="nav-item flex flex-col items-center text-slate-300">
-            <i class="fa-solid fa-users-viewfinder text-xl"></i>
+            <i class="fa-solid fa-user-plus text-xl"></i>
             <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Friends</span>
         </button>
         <button onclick="showTab('wallet')" class="nav-item flex flex-col items-center text-slate-300">
-            <i class="fa-solid fa-wallet text-xl"></i>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xl"></i>
             <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Withdraw</span>
         </button>
     </nav>
@@ -143,27 +133,17 @@
             document.getElementById(tabId).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('text-blue-600', 'scale-110');
-                item.classList.add('text-slate-300');
+                item.classList.replace('text-blue-600', 'text-slate-300');
             });
             event.currentTarget.classList.replace('text-slate-300', 'text-blue-600');
-            event.currentTarget.classList.add('scale-110');
             
-            const titles = { 'home': 'Dashboard', 'wallet': 'Wallet', 'friends': 'Network' };
+            const titles = { 'home': 'Dashboard', 'wallet': 'Withdraw', 'friends': 'Affiliate' };
             document.getElementById('page-title').innerText = titles[tabId];
         }
 
-        function watchAd() {
-            alert("Loading Premium Ad... Balance will update after 30s.");
-        }
-
-        function requestPayment() {
-            alert("Insufficient Balance. Minimum 10 TRX required.");
-        }
-
-        function copyRef() {
-            alert("Referral link copied to clipboard!");
-        }
+        function watchAd() { alert("Task started. Reward will be added after completion."); }
+        function requestPayment() { alert("Minimum withdrawal balance is 10.00 credits."); }
+        function copyRef() { alert("Referral link copied!"); }
     </script>
 </body>
 </html>
