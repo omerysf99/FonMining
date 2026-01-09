@@ -2,152 +2,195 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airdrop Hub - Telegram Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Airdrop Core - Adil Ödül Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --tg-theme-bg-color: #000000;
+            --tg-theme-text-color: #ffffff;
+            --tg-theme-button-color: #2481cc;
+        }
         body {
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            user-select: none;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
+        .check-step { transition: all 0.5s ease; }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .progress-fill {
-            transition: width 0.5s ease-in-out;
+        .progress-bar { transition: width 0.4s ease-out; }
+        @keyframes pulse-custom {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
-        .claim-btn:disabled {
-            filter: grayscale(1);
-            cursor: not-allowed;
-        }
+        .analyzing { animation: pulse-custom 1.5s infinite; }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center">
+<body class="flex flex-col min-h-screen">
 
-    <div class="w-full max-w-md flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2">
-            <div class="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-lg shadow-blue-500/50">
-                <i class="fa-solid fa-user"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-400">Admin ID</p>
-                <p class="text-sm font-mono leading-none text-blue-300">8392479231</p>
-            </div>
+    <div id="loading-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-8">
+        <div class="mb-8 text-6xl text-blue-500 analyzing">
+            <i class="fa-solid fa-shield-check"></i>
         </div>
-        <div class="text-right">
-            <p class="text-xs text-gray-400">Hesap Durumu</p>
-            <p id="account-status" class="text-sm font-bold text-green-400 tracking-wide">DOĞRULANDI</p>
+        <h2 class="text-xl font-bold mb-4 tracking-tight">HESAP KONTROL EDİLİYOR</h2>
+        <div class="w-full max-w-xs space-y-3">
+            <div id="step-1" class="flex items-center gap-3 text-sm text-gray-500">
+                <i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Hesap yaşı analiz ediliyor...
+            </div>
+            <div id="step-2" class="flex items-center gap-3 text-sm text-gray-400 opacity-20">
+                <i class="fa-solid fa-fingerprint"></i> Cihaz ve IP doğrulanıyor...
+            </div>
+            <div id="step-3" class="flex items-center gap-3 text-sm text-gray-400 opacity-20">
+                <i class="fa-solid fa-robot"></i> Bot/Spam filtresi aktif...
+            </div>
         </div>
     </div>
 
-    <div class="w-full max-w-md glass-card p-6 text-center mb-6">
-        <p class="text-gray-400 text-sm mb-1 uppercase tracking-widest">Toplam Puan</p>
-        <h1 id="total-points" class="text-5xl font-black text-white mb-2">1,250</h1>
-        <div class="flex items-center justify-center gap-2 text-blue-400">
-            <i class="fa-solid fa-bolt"></i>
-            <span id="level-name" class="font-semibold">Bronz Kaşif</span>
-        </div>
+    <main id="main-content" class="hidden flex-1 p-5 space-y-6">
         
-        <div class="w-full bg-gray-800 h-2 rounded-full mt-4 overflow-hidden">
-            <div id="level-progress" class="bg-blue-500 h-full progress-fill" style="width: 25%"></div>
-        </div>
-        <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-            <span>LVL 1</span>
-            <span>LVL 2 İÇİN 2500 PUAN</span>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 w-full max-w-md mb-8">
-        <button onclick="dailyCheckIn()" class="glass-card p-4 flex flex-col items-center hover:bg-white/10 transition">
-            <i class="fa-solid fa-calendar-check text-yellow-400 text-xl mb-2"></i>
-            <span class="text-xs font-medium">Günlük Giriş</span>
-        </button>
-        <button onclick="alert('Henüz resmi bir duyuru yapılmadı. Lütfen kanalı takipte kalın.')" class="glass-card p-4 flex flex-col items-center hover:bg-white/10 transition">
-            <i class="fa-solid fa-gift text-purple-400 text-xl mb-2"></i>
-            <span class="text-xs font-medium">Airdrop Claim</span>
-        </button>
-    </div>
-
-    <div class="w-full max-w-md mb-20">
-        <h3 class="text-sm font-bold mb-4 text-gray-300 flex items-center gap-2">
-            <i class="fa-solid fa-list-check"></i> AKTİF GÖREVLER
-        </h3>
-        
-        <div class="flex flex-col gap-3">
-            <div class="glass-card p-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <i class="fa-brands fa-telegram text-blue-400 text-2xl"></i>
-                    <div>
-                        <p class="text-sm font-semibold">Kanala Katıl</p>
-                        <p class="text-[10px] text-gray-400">+500 Puan</p>
-                    </div>
+        <div class="flex justify-between items-center pt-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
+                    ID
                 </div>
-                <button onclick="completeTask(this, 500)" class="bg-white text-black px-4 py-1 rounded-full text-xs font-bold hover:bg-blue-400 hover:text-white transition">Yap</button>
+                <span class="text-xs font-mono text-gray-400">8392479231</span>
             </div>
-
-            <div class="glass-card p-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-robot text-green-400 text-2xl"></i>
-                    <div>
-                        <p class="text-sm font-semibold">Botu Başlat</p>
-                        <p class="text-[10px] text-gray-400">+100 Puan</p>
-                    </div>
-                </div>
-                <button class="bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-xs font-bold border border-green-500/50" disabled>Tamamlandı</button>
+            <div class="px-3 py-1 rounded-full glass border-blue-500/30 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+                <i class="fa-solid fa-certificate mr-1"></i> Gerçek Kullanıcı
             </div>
         </div>
-    </div>
 
-    <div class="fixed bottom-6 w-full max-w-md px-4">
-        <div class="text-[10px] text-gray-500 text-center bg-black/30 p-3 rounded-xl border border-white/5">
-            <p><i class="fa-solid fa-shield-halved mr-1"></i> Bu bir oyun ve ödül sistemidir. Kazanç vaadi içermez.</p>
-            <p>Resmi duyurular dışında cüzdan bağlamayın, kimseyle kelimelerinizi paylaşmayın.</p>
+        <div class="text-center py-8">
+            <p class="text-gray-400 text-xs uppercase tracking-[0.2em] mb-2">Toplam Puanın</p>
+            <h1 id="score" class="text-6xl font-black mb-4">0</h1>
+            
+            <div class="inline-flex items-center gap-2 px-4 py-2 glass rounded-2xl text-sm mb-4">
+                <span id="level-label" class="text-blue-400 font-bold">Seviye 1: Başlangıç</span>
+            </div>
+
+            <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden max-w-[200px] mx-auto">
+                <div id="progress-bar" class="progress-bar bg-blue-500 h-full" style="width: 0%"></div>
+            </div>
+            <p id="next-lv-text" class="text-[10px] text-gray-500 mt-2 uppercase">Level 2 için 5.000 puan gerekli</p>
         </div>
-    </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="dailyCheckIn()" class="glass p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition">
+                <i class="fa-solid fa-calendar-star text-yellow-500 text-xl"></i>
+                <span class="text-xs font-medium">Günlük Giriş</span>
+            </button>
+            <button onclick="claimInfo()" class="glass p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition opacity-50">
+                <i class="fa-solid fa-wallet text-purple-500 text-xl"></i>
+                <span class="text-xs font-medium">Claim (Yakında)</span>
+            </button>
+        </div>
+
+        <section class="space-y-4">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Görevler</h3>
+            
+            <div class="space-y-3">
+                <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                            <i class="fa-brands fa-telegram"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">Resmi Kanala Katıl</p>
+                            <p class="text-[11px] text-gray-500">+1,000 Puan</p>
+                        </div>
+                    </div>
+                    <button onclick="doTask(this, 1000)" class="bg-white text-black text-xs font-bold px-4 py-2 rounded-full active:scale-90 transition">Yap</button>
+                </div>
+
+                <div class="glass p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">Botu Başlat</p>
+                            <p class="text-[11px] text-gray-500">+500 Puan</p>
+                        </div>
+                    </div>
+                    <span class="text-green-500 text-xs font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">Tamamlandı</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl mt-10">
+            <div class="flex gap-3">
+                <i class="fa-solid fa-shield-halved text-red-500 text-sm mt-0.5"></i>
+                <div class="text-[10px] text-gray-400 space-y-1">
+                    <p class="font-bold text-gray-300">GÜVENLİK PROTOKOLÜ</p>
+                    <p>Bu sistem adil dağıtım için tasarlanmış bir ödül oyunudur. Kimseyle özel anahtarınızı (seed phrase) paylaşmayın. Airdrop zamanı sadece resmi kanalımızdan duyurulacaktır.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <script>
-        let points = 1250;
-        let adminId = "8392479231"; // Kayıtlı Admin ID'niz
+        let points = 0;
+        let adminId = "8392479231";
+
+        // Açılış Simülasyonu
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('step-1').innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Hesap yaşınız: 3 yıl (Puan: +2,500)';
+                document.getElementById('step-1').classList.replace('text-gray-500', 'text-white');
+                document.getElementById('step-2').classList.remove('opacity-20');
+                document.getElementById('step-2').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Cihaz ve IP doğrulanıyor...';
+            }, 1500);
+
+            setTimeout(() => {
+                document.getElementById('step-2').innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Tekil kullanıcı doğrulandı.';
+                document.getElementById('step-2').classList.replace('text-gray-400', 'text-white');
+                document.getElementById('step-3').classList.remove('opacity-20');
+                document.getElementById('step-3').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-500"></i> Bot/Spam filtresi aktif...';
+            }, 3000);
+
+            setTimeout(() => {
+                points = 2500; // Başlangıç puanı
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                updateUI();
+            }, 4500);
+        });
 
         function updateUI() {
-            document.getElementById('total-points').innerText = points.toLocaleString();
+            document.getElementById('score').innerText = points.toLocaleString();
+            let progress = (points / 10000) * 100;
+            document.getElementById('progress-bar').style.width = Math.min(progress, 100) + '%';
             
-            // Seviye Hesaplama
-            let progress = (points / 5000) * 100;
-            document.getElementById('level-progress').style.width = progress + '%';
-            
-            if(points > 3000) {
-                document.getElementById('level-name').innerText = "Gümüş Muhafız";
-                document.getElementById('level-name').className = "font-semibold text-gray-300";
+            if(points >= 5000) {
+                document.getElementById('level-label').innerText = "Seviye 2: Aktif Oyuncu";
+                document.getElementById('next-lv-text').innerText = "Level 3 için 15.000 puan gerekli";
             }
         }
 
-        function completeTask(btn, reward) {
-            points += reward;
+        function doTask(btn, amount) {
+            points += amount;
             btn.disabled = true;
-            btn.innerText = "Tamamlandı";
-            btn.className = "bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-xs font-bold border border-green-500/50";
+            btn.innerHTML = "Tamamlandı";
+            btn.className = "text-green-500 text-xs font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20";
             updateUI();
-            alert(reward + " puan kazandınız!");
         }
 
         function dailyCheckIn() {
-            points += 50;
+            points += 100;
+            alert("Günlük giriş puanı eklendi: +100");
             updateUI();
-            alert("Günlük giriş başarılı! +50 Puan eklendi.");
         }
 
-        // Başlangıç Ayarları
-        window.onload = () => {
-            console.log("Sistem Aktif. Admin ID:", adminId);
-        };
+        function claimInfo() {
+            alert("Claim sistemi henüz aktif değil. Lütfen resmi duyuruları bekleyin. Unutmayın, biz asla sizden ödeme talep etmeyiz!");
+        }
     </script>
 </body>
 </html>
