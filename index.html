@@ -3,88 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GramTron - TRON Ads Faucet</title>
+    <title>GramTron - Wallet & Earning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .red-gradient { background: linear-gradient(180deg, #e53e3e 0%, #c53030 100%); }
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen pb-20 border-x border-gray-200 bg-white">
+<body class="max-w-md mx-auto min-h-screen pb-24 border-x border-gray-200 bg-white relative">
 
-    <header class="red-gradient text-white p-5 rounded-b-3xl relative">
+    <header class="red-gradient text-white p-5 rounded-b-3xl">
         <div class="flex justify-between items-center mb-4">
-            <div>
-                <h1 class="text-2xl font-bold italic">GramTron</h1>
-            </div>
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-ellipsis-vertical"></i>
-                <i class="fa-solid fa-xmark"></i>
-            </div>
+            <h1 class="text-2xl font-bold italic">GramTron</h1>
+            <div class="bg-white/20 px-3 py-1 rounded-full text-xs">TRC-20 Network</div>
         </div>
         <div class="flex justify-between items-end">
             <div>
-                <h2 class="text-xl font-bold">TRON Ads Faucet</h2>
-                <p class="text-[11px] opacity-90">The simplest way to earn TRX.</p>
+                <h2 id="page-title" class="text-xl font-bold">Dashboard</h2>
+                <p class="text-[11px] opacity-90">ID: 8392479231</p>
             </div>
             <div class="text-right">
-                <p class="text-[10px] uppercase">Current Price (TRX)</p>
-                <p class="font-bold text-lg leading-none">$0.2943</p>
-                </div>
+                <p class="text-[10px] uppercase">TRX Price</p>
+                <p class="font-bold text-lg">$0.2943</p>
+            </div>
         </div>
     </header>
 
-    <main class="p-4 space-y-6">
+    <main class="p-4">
         
-        <div class="flex items-center gap-2 border-l-4 border-red-600 pl-3">
-            <i class="fa-solid fa-house text-red-600 text-xl"></i>
-            <h3 class="text-2xl font-bold text-red-600">Home & Earning</h3>
-        </div>
-
-        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center card-shadow">
-            <p class="text-gray-500 font-medium">Your Current Balance (TRX)</p>
-            <p class="text-4xl font-extrabold text-red-600 my-2">0.0000 TRX</p>
-            <p class="text-gray-400 text-sm">≈ $0.00</p>
-        </div>
-
-        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center card-shadow relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-            
-            <div class="flex flex-col items-center gap-2 mb-4">
-                <i class="fa-solid fa-video text-5xl text-red-600"></i>
-                <h4 class="text-xl font-bold text-gray-800">Watch & Earn</h4>
-                <p class="text-sm text-gray-600">You earn <span class="font-bold">**$0.001**</span> worth of TRX per rewarded ad.</p>
+        <div id="home" class="tab-content active space-y-6">
+            <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center card-shadow">
+                <p class="text-gray-500 font-medium">Available Balance</p>
+                <p id="main-balance" class="text-4xl font-extrabold text-red-600 my-2">0.0000 TRX</p>
+                <p class="text-gray-400 text-sm">Min. Withdraw: 10 TRX</p>
             </div>
 
-            <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 mb-4 transition-colors">
-                <i class="fa-solid fa-play"></i>
-                Watch Ad Now
+            <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center card-shadow">
+                <i class="fa-solid fa-circle-play text-5xl text-red-600 mb-2"></i>
+                <h4 class="text-xl font-bold text-gray-800">Earn TRX</h4>
+                <p class="text-sm text-gray-500 mb-4">Watch ads to increase your balance.</p>
+                <button onclick="watchAd()" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl active:scale-95 transition-transform">
+                    WATCH AD (0/100)
+                </button>
+            </div>
+        </div>
+
+        <div id="wallet" class="tab-content space-y-6">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid fa-wallet text-red-600 text-xl"></i>
+                <h3 class="text-xl font-bold text-gray-800">Withdrawal</h3>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="text-xs font-bold text-gray-500 uppercase">TRX Address (TRC20)</label>
+                <input type="text" placeholder="T..." class="w-full bg-white border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-red-500 outline-none">
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <label class="text-xs font-bold text-gray-500 uppercase">Amount to Withdraw</label>
+                <input type="number" placeholder="Min 10.0" class="w-full bg-white border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-red-500 outline-none">
+            </div>
+
+            <button onclick="requestPayment()" class="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-900 transition-colors shadow-lg">
+                SUBMIT WITHDRAWAL
             </button>
 
-            <div class="text-sm">
-                <p class="text-gray-500">Ads Watched Today: <span class="font-bold text-gray-800">0 / 100</span></p>
-                <p class="text-green-600 font-semibold mt-1 italic text-xs underline">Daily limit reset every 24h</p>
+            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-xs text-yellow-800 leading-relaxed">
+                    <i class="fa-solid fa-circle-info mr-1"></i> 
+                    Payments are processed within 24 hours. Make sure your address is a <b>TRC-20</b> compatible wallet like Trust Wallet or TronLink.
+                </p>
             </div>
+        </div>
+
+        <div id="friends" class="tab-content text-center py-10">
+            <i class="fa-solid fa-users text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800">Invite Friends</h3>
+            <p class="text-gray-500 text-sm px-10">Earn 10% commission for every ad your friends watch!</p>
+            <button class="mt-6 bg-red-100 text-red-600 font-bold px-6 py-2 rounded-full border border-red-200">Copy Referral Link</button>
         </div>
 
     </main>
 
-    <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-gray-200 flex justify-around py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-        <div class="flex flex-col items-center text-red-600">
+    <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-gray-200 flex justify-around py-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <button onclick="showTab('home')" class="nav-item flex flex-col items-center text-red-600">
             <i class="fa-solid fa-house text-xl"></i>
             <span class="text-[10px] font-bold">Home</span>
-        </div>
-        <div class="flex flex-col items-center text-gray-400">
+        </button>
+        <button onclick="showTab('friends')" class="nav-item flex flex-col items-center text-gray-400">
             <i class="fa-solid fa-users text-xl"></i>
             <span class="text-[10px] font-bold">Friends</span>
-        </div>
-        <div class="flex flex-col items-center text-gray-400">
+        </button>
+        <button onclick="showTab('wallet')" class="nav-item flex flex-col items-center text-gray-400">
             <i class="fa-solid fa-wallet text-xl"></i>
             <span class="text-[10px] font-bold">Withdraw</span>
-        </div>
+        </button>
     </nav>
 
+    <script>
+        function showTab(tabId) {
+            // Tabları gizle/göster
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            // İkon renklerini güncelle
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.replace('text-red-600', 'text-gray-400'));
+            event.currentTarget.classList.replace('text-gray-400', 'text-red-600');
+            
+            // Başlığı değiştir
+            const titles = { 'home': 'Dashboard', 'wallet': 'Wallet', 'friends': 'Referrals' };
+            document.getElementById('page-title').innerText = titles[tabId];
+        }
+
+        function watchAd() {
+            alert("Ad is loading... Please wait 30 seconds.");
+            // Burada gerçek reklam servisi (AdMob vb.) entegre edilebilir.
+        }
+
+        function requestPayment() {
+            alert("Withdrawal request received! Your balance is 0, please earn at least 10 TRX first.");
+        }
+    </script>
 </body>
 </html>
