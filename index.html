@@ -2,169 +2,94 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums V.Albayrak Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GramTron - TRON Ads Faucet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --accent-blue: #3b82f6;
-            --gold: #fbbf24;
-            --panel-bg: rgba(15, 23, 42, 0.95);
-        }
-
-        body {
-            margin: 0; padding: 0;
-            background-color: #000;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center;
-            height: 100vh; overflow: hidden;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        #game-container {
-            width: 100%; max-width: 450px;
-            height: 100vh;
-            background: url('background.jpg') no-repeat center center; /* */
-            background-size: cover;
-            position: relative;
-            display: flex; flex-direction: column;
-        }
-
-        /* KARAKTER ARKA PLAN SİLME (BEYAZLIK GİDERME) */
-        #hero { 
-            width: 240px; 
-            cursor: pointer; 
-            transition: transform 0.05s; 
-            z-index: 5;
-            /* Beyaz arka planı siyah zeminde şeffaf yapar */
-            mix-blend-mode: screen; 
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
-        }
-        #hero:active { transform: scale(0.95); }
-
-        /* ÜST PANEL */
-        .top-nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 15px; background: rgba(0,0,0,0.6); z-index: 100;
-        }
-        .profile-area { display: flex; align-items: center; gap: 10px; }
-        .p-icon { width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 10px; }
-        
-        .stat-group { display: flex; gap: 8px; }
-        .stat-card { background: var(--panel-bg); padding: 5px 10px; border-radius: 10px; border: 1px solid #334155; text-align: center; min-width: 80px; }
-        .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; }
-        .stat-val { font-size: 13px; font-weight: bold; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 4px; }
-
-        /* ANA EKRAN BUTONLARI */
-        .play-screen { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .side-menu { position: absolute; width: 100%; height: 70%; top: 5%; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; pointer-events: none; }
-        .menu-col { display: flex; flex-direction: column; gap: 20px; pointer-events: auto; }
-        .menu-item { width: 60px; text-align: center; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .menu-item img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 4px; }
-
-        .score-main { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; text-shadow: 0 4px 10px #000; }
-        
-        /* ALT PANEL */
-        .footer-ui { background: #0f172a; padding: 10px 15px 30px; border-top: 1px solid #1e293b; width: 100%; box-sizing: border-box; }
-        .energy-wrap { margin-bottom: 12px; }
-        .bar-bg { background: #1e293b; height: 14px; border-radius: 10px; overflow: hidden; border: 1px solid #334155; }
-        #bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.3s; }
-
-        .nav-tabs { display: flex; justify-content: space-between; gap: 8px; }
-        .tab { 
-            flex: 1; background: #1e293b; border-radius: 12px; padding: 10px 0; 
-            text-align: center; cursor: pointer; transition: 0.3s;
-        }
-        .tab img { width: 28px; height: 28px; display: block; margin: 0 auto 4px; }
-        .tab span { font-size: 10px; color: #94a3b8; font-weight: 600; }
-        .tab.active { background: linear-gradient(180deg, #2563eb, #1e40af); border-top: 2px solid #60a5fa; }
-        .tab.active span { color: white; }
-
-        /* POPUP TEXT */
-        .tap-pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem; pointer-events: none; animation: rise 0.7s forwards; z-index: 100; }
-        @keyframes rise { to { transform: translateY(-120px); opacity: 0; } }
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .red-gradient { background: linear-gradient(180deg, #e53e3e 0%, #c53030 100%); }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
     </style>
 </head>
-<body>
+<body class="max-w-md mx-auto min-h-screen pb-20 border-x border-gray-200 bg-white">
 
-<div id="game-container">
-    <div class="top-nav">
-        <div class="profile-area">
-            <img src="Level1.jpg" class="p-icon"> <div>
-                <div style="font-size: 12px; font-weight: 800;">V.Albayrak</div>
-                <div style="font-size: 9px; color: #94a3b8;">ID: 8392479231</div>
+    <header class="red-gradient text-white p-5 rounded-b-3xl relative">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold italic">GramTron</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+                <i class="fa-solid fa-xmark"></i>
             </div>
         </div>
-        <div class="stat-group">
-            <div class="stat-card">
-                <div class="stat-label">Coin</div>
-                <div class="stat-val">💰 <span id="top-coin">0</span></div>
+        <div class="flex justify-between items-end">
+            <div>
+                <h2 class="text-xl font-bold">TRON Ads Faucet</h2>
+                <p class="text-xs opacity-90">The simplest way to earn TRX.</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] uppercase">Current Price (TRX)</p>
+                <p class="font-bold text-lg leading-none">$0.2943</p>
+                <p class="text-[10px] text-yellow-300 font-bold mt-1">ADMIN MODE</p>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="play-screen">
-        <div class="side-menu">
-            <div class="menu-col">
-                <div class="menu-item"><img src="airdro.jpg">AIRDROP</div> <div class="menu-item"><img src="Level1.jpg">GANG</div>
+    <main class="p-4 space-y-6">
+        
+        <div class="flex items-center gap-2 border-l-4 border-red-600 pl-3">
+            <i class="fa-solid fa-house text-red-600 text-xl"></i>
+            <h3 class="text-2xl font-bold text-red-600">Home & Earning</h3>
+        </div>
+
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-center card-shadow">
+            <p class="text-gray-500 font-medium">Your Current Balance (TRX)</p>
+            <p class="text-4xl font-extrabold text-red-600 my-2">0.7747 TRX</p>
+            <p class="text-gray-400 text-sm">≈ $0.23</p>
+        </div>
+
+        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 text-center card-shadow relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+            
+            <div class="flex flex-col items-center gap-2 mb-4">
+                <i class="fa-solid fa-video text-5xl text-red-600"></i>
+                <h4 class="text-xl font-bold text-gray-800">Watch & Earn</h4>
+                <p class="text-sm text-gray-600">You earn <span class="font-bold">**$0.001**</span> worth of TRX per rewarded ad.</p>
             </div>
-            <div class="menu-col">
-                <div class="menu-item"><img src="autotapl.jpg">AUTO TAP</div> </div>
-        </div>
 
-        <div class="score-main">
-            💰 <span id="big-coin">0</span>
-        </div>
-
-        <img src="kedi.jpg" id="hero" onclick="doTap(event)">
-    </div>
-
-    <div class="footer-ui">
-        <div class="energy-wrap">
-            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; margin-bottom:5px;">
-                <span>⚡ <span id="cur-e">2000</span> / 2000</span>
-                <span style="color:var(--gold);">+5 Per tap</span>
+            <div class="bg-red-300 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 mb-4 cursor-not-allowed">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Daily Limit Reached
             </div>
-            <div class="bar-bg"><div id="bar-fill"></div></div>
+
+            <div class="text-sm">
+                <p class="text-gray-500">Ads Watched Today: <span class="font-bold text-gray-800">89 / 75</span></p>
+                <p class="text-orange-500 font-bold mt-1">Next 75 ads available in: 21h 31m 57s</p>
+            </div>
         </div>
 
-        <div class="nav-tabs">
-            <div class="tab active"><img src="sekme1.jpg"><span>Play</span></div> <div class="tab" onclick="alert('Upgrade yakında!')"><img src="sekme1.jpg" style="filter:hue-rotate(90deg)"><span>Upgrade</span></div>
-            <div class="tab" onclick="alert('Görevler yakında!')"><img src="sekme1.jpg" style="filter:hue-rotate(180deg)"><span>Tasks</span></div>
-            <div class="tab" onclick="alert('ID: 8392479231 Friends aktif!')"><img src="sekme1.jpg" style="filter:hue-rotate(270deg)"><span>Friends</span></div>
+    </main>
+
+    <nav class="fixed bottom-0 max-w-md w-full bg-white border-t border-gray-200 flex justify-around py-3">
+        <div class="flex flex-col items-center text-red-600">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-bold">Home</span>
         </div>
-    </div>
-</div>
-
-<script>
-    let coins = 56749, energy = 2000, power = 5;
-
-    function doTap(e) {
-        if (energy >= power) {
-            coins += power; energy -= power; updateUI();
-            createPop(e);
-        }
-    }
-
-    function createPop(e) {
-        const p = document.createElement('div');
-        p.className = 'tap-pop'; p.innerText = `+${power}`;
-        p.style.left = e.clientX + 'px'; p.style.top = (e.clientY - 50) + 'px';
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 700);
-    }
-
-    function updateUI() {
-        document.getElementById('big-coin').innerText = coins.toLocaleString();
-        document.getElementById('top-coin').innerText = (coins / 1000).toFixed(1) + "K";
-        document.getElementById('cur-e').innerText = energy;
-        document.getElementById('bar-fill').style.width = (energy / 2000 * 100) + "%";
-    }
-
-    setInterval(() => { if (energy < 2000) { energy = Math.min(2000, energy + 3); updateUI(); } }, 1000);
-    updateUI();
-</script>
+        <div class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-users text-xl"></i>
+            <span class="text-[10px] font-bold">Friends</span>
+        </div>
+        <div class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-wallet text-xl"></i>
+            <span class="text-[10px] font-bold">Withdraw</span>
+        </div>
+        <div class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-user-shield text-xl"></i>
+            <span class="text-[10px] font-bold">Admin</span>
+        </div>
+    </nav>
 
 </body>
 </html>
