@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Ultimate Pro</title>
+    <title>Bums Clicker Modal Edition</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --panel-bg: rgba(15, 23, 42, 0.95);
+            --panel-bg: rgba(15, 23, 42, 0.98);
         }
 
         body {
@@ -39,15 +39,37 @@
         .profile-box { display: flex; align-items: center; gap: 8px; }
         .p-icon-wrap { width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
         .p-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        
         .stat-card { background: var(--panel-bg); padding: 5px 12px; border-radius: 12px; border: 1px solid #1e293b; min-width: 90px; text-align: center; }
         .stat-value { font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--gold); }
+
+        /* MODAL (AÇILIR PENCERE) STİLLERİ */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            width: 85%; padding: 25px;
+            border-radius: 20px;
+            border: 2px solid var(--accent-blue);
+            text-align: center;
+            position: relative;
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .close-modal {
+            position: absolute; top: 10px; right: 15px;
+            font-size: 24px; cursor: pointer; color: #94a3b8;
+        }
 
         /* EKRANLAR */
         .screen { display: none; flex-grow: 1; flex-direction: column; position: relative; overflow-y: auto; padding-bottom: 140px; }
         .active-screen { display: flex; }
 
-        /* PLAY EKRANI */
+        /* PLAY EKRANI YAN BUTONLAR */
         .side-menu { position: absolute; width: 100%; top: 20px; display: flex; justify-content: space-between; padding: 0 15px; pointer-events: none; }
         .side-col { display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
         .s-item { width: 65px; text-align: center; font-size: 9px; font-weight: bold; cursor: pointer; }
@@ -67,13 +89,7 @@
             display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
             border: 1px solid #334155;
         }
-        .item-info { display: flex; align-items: center; gap: 12px; }
-        .item-icon { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-        .item-text div:first-child { font-weight: bold; font-size: 14px; }
-        .item-text div:last-child { font-size: 11px; color: #94a3b8; }
-        
-        .action-btn { background: var(--accent-blue); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; min-width: 75px; }
-        .action-btn:disabled { background: #10b981; color: white; cursor: default; }
+        .action-btn { background: var(--accent-blue); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         /* ALT PANEL */
         .bottom-ui {
@@ -81,8 +97,7 @@
             padding: 10px 15px 35px 15px; border-top: 1px solid #1e293b;
             z-index: 200; position: absolute; bottom: 0; width: 100%; box-sizing: border-box;
         }
-        .energy-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; margin-bottom: 8px; }
-        .energy-bar-bg { background: #1e293b; height: 14px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
+        .energy-bar-bg { background: #1e293b; height: 14px; border-radius: 10px; overflow: hidden; margin: 10px 0; }
         #energy-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.2s; }
 
         .nav-tabs { display: flex; justify-content: space-around; }
@@ -98,6 +113,15 @@
 <body>
 
 <div id="game-container">
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Başlık</h2>
+            <div id="modal-body" style="margin: 20px 0; color: #94a3b8;">İçerik burada görünecek.</div>
+            <button id="modal-action-btn" class="action-btn" style="width: 100%;">Onayla</button>
+        </div>
+    </div>
+
     <div class="top-nav">
         <div class="profile-box">
             <div class="p-icon-wrap"><img src="TapLv1.jpg"></div>
@@ -114,13 +138,13 @@
     <div id="screen-play" class="screen active-screen">
         <div class="side-menu">
             <div class="side-col">
-                <div class="s-item" id="btn-gang" onclick="earnGift()"><img src="Jgang.jpg">GANG</div>
-                <div class="s-item" onclick="startPassive()"><img src="TapEarn.jpg">8h 0m</div>
-                <div class="s-item" onclick="alert('Cüzdan: 8392479231')"><img src="Airdrop.jpg">AIRDROP</div>
+                <div class="s-item" onclick="openInfoModal('gang')"><img src="Jgang.jpg">GANG</div>
+                <div class="s-item" onclick="openInfoModal('earn')"><img src="TapEarn.jpg">8h 0m</div>
+                <div class="s-item" onclick="openInfoModal('airdrop')"><img src="Airdrop.jpg">AIRDROP</div>
             </div>
             <div class="side-col">
-                <div class="s-item" onclick="buyAutoTap()"><img src="AutoTap.jpg">AUTO</div>
-                <div class="s-item" onclick="openBox()"><img src="Nft.jpg">NFT</div>
+                <div class="s-item" onclick="openInfoModal('auto')"><img src="AutoTap.jpg">AUTO</div>
+                <div class="s-item" onclick="openInfoModal('nft')"><img src="Nft.jpg">NFT</div>
                 <div class="s-item" onclick="switchTab('tasks', document.getElementById('task-tab'))"><img src="Task.jpg">BONUS</div>
             </div>
         </div>
@@ -134,59 +158,25 @@
     </div>
 
     <div id="screen-upgrade" class="screen">
-        <div class="list-container">
-            <h2>Market</h2>
-            <div class="list-item">
-                <div class="item-info">
-                    <div class="item-icon">👆</div>
-                    <div class="item-text"><div>Tap Reward</div><div>Tıklama: +1</div></div>
-                </div>
-                <button class="action-btn" onclick="buyUpgrade('tap', 500)">500</button>
-            </div>
-            <div class="list-item">
-                <div class="item-info">
-                    <div class="item-icon">⚡</div>
-                    <div class="item-text"><div>Max Energy</div><div>Kapasite: +500</div></div>
-                </div>
-                <button class="action-btn" onclick="buyUpgrade('energy', 1000)">1K</button>
-            </div>
-        </div>
+        <div class="list-container"><h2>Market</h2><div class="list-item"><div>Tap +1</div><button class="action-btn" onclick="buyUpgrade('tap', 500)">500</button></div></div>
     </div>
 
     <div id="screen-tasks" class="screen">
         <div class="list-container">
             <h2>Görevler</h2>
-            <div class="list-item">
-                <div class="item-info">
-                    <div class="item-icon">📱</div>
-                    <div class="item-text"><div>Telegram Kanalı</div><div>+5,000 Puan</div></div>
-                </div>
-                <button class="action-btn" id="task-tg" onclick="completeTask('tg', 5000, 'https://t.me/+pYqOC1FDAnkwMTNk')">Katıl</button>
-            </div>
-            <div class="list-item">
-                <div class="item-info">
-                    <div class="item-icon">📺</div>
-                    <div class="item-text"><div>Watch Ads</div><div>+2,500 Puan</div></div>
-                </div>
-                <button class="action-btn" id="task-ads" onclick="completeTask('ads', 2500)">İzle</button>
-            </div>
+            <div class="list-item"><div>TG Kanalı (+5K)</div><button class="action-btn" onclick="completeTask('tg', 5000, 'https://t.me/+pYqOC1FDAnkwMTNk')">Git</button></div>
+            <div class="list-item"><div>Reklam İzle (+2.5K)</div><button class="action-btn" onclick="completeTask('ads', 2500)">İzle</button></div>
         </div>
     </div>
 
     <div id="screen-friends" class="screen">
-        <div class="list-container">
-            <h2>Arkadaşlar</h2>
-            <div class="list-item" style="flex-direction: column; text-align: center; gap: 15px;">
-                <p>Referans başına 10.000 Puan!</p>
-                <button class="action-btn" style="width: 100%;" onclick="alert('Davet linki kopyalandı!')">DAVET ET</button>
-            </div>
-        </div>
+        <div class="list-container"><h2>Arkadaşlar</h2><p>Davet et, 10K kazan!</p></div>
     </div>
 
     <div class="bottom-ui">
-        <div class="energy-info">
-            <span>⚡ <span id="e-text">2000</span> / <span id="e-max">2000</span></span>
-            <span style="color:#94a3b8;">+<span id="p-text">5</span> Per tap</span>
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span>⚡ <span id="e-text">2000</span>/2000</span>
+            <span>+<span id="p-text">5</span>/tık</span>
         </div>
         <div class="energy-bar-bg"><div id="energy-fill"></div></div>
         <div class="nav-tabs">
@@ -201,12 +191,47 @@
 <script>
     let coins = 0;
     let energy = 2000;
-    let maxEnergy = 2000;
     let power = 5;
-    
-    // Tek seferlik kontroller için bir obje
     const completedTasks = { tg: false, ads: false, gang: false };
 
+    // --- MODAL SİSTEMİ ---
+    function openInfoModal(type) {
+        const overlay = document.getElementById('modal-overlay');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        const btn = document.getElementById('modal-action-btn');
+        
+        overlay.style.display = 'flex';
+        btn.onclick = closeModal;
+        btn.innerText = "Anladım";
+
+        if(type === 'gang') {
+            title.innerText = "Join Gang";
+            body.innerText = "Bir gruba katılarak özel etkinliklere erişebilirsin. Mevcut bonusun: +1.000 Puan!";
+            btn.innerText = "Puanı Al";
+            btn.onclick = () => { if(!completedTasks.gang) { coins += 1000; completedTasks.gang=true; updateUI(); } closeModal(); };
+        } else if(type === 'airdrop') {
+            title.innerText = "Airdrop";
+            body.innerText = "Admin ID: 8392479231. Yakında cüzdan bağlama özelliği aktif edilecektir!";
+        } else if(type === 'nft') {
+            title.innerText = "NFT Box";
+            body.innerText = "500 Coin karşılığında şans kutusu açmak ister misin?";
+            btn.innerText = "Kutuyu Aç (500)";
+            btn.onclick = () => { if(coins >= 500) { coins -= 500; let w = Math.random()>0.5?1000:50; alert(w+" çıktı!"); coins+=w; updateUI(); } closeModal(); };
+        } else if(type === 'auto') {
+            title.innerText = "Auto Tap";
+            body.innerText = "5.000 Coin karşılığında otomatik tıklama botunu aktif et.";
+            btn.innerText = "Satın Al (5.000)";
+        } else if(type === 'earn') {
+            title.innerText = "8h Passive";
+            body.innerText = "Sekiz saatlik pasif kazanç periyodu başlatılsın mı?";
+            btn.innerText = "Başlat";
+        }
+    }
+
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+    // --- TEMEL OYUN FONKSİYONLARI ---
     function switchTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById('screen-' + id).classList.add('active-screen');
@@ -215,79 +240,23 @@
     }
 
     document.getElementById('click-zone').addEventListener('pointerdown', (e) => {
+        if(e.target.id !== 'hero') return; // SADECE KEDİYE TIKLAYINCA PUAN VER
         if (energy >= power) {
-            coins += power;
-            energy -= power;
-            updateUI();
-            const p = document.createElement('div');
-            p.className = 'pop'; p.innerText = `+${power}`;
+            coins += power; energy -= power; updateUI();
+            const p = document.createElement('div'); p.className = 'pop'; p.innerText = `+${power}`;
             p.style.left = e.clientX + 'px'; p.style.top = (e.clientY - 40) + 'px';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
+            document.body.appendChild(p); setTimeout(() => p.remove(), 600);
         }
     });
-
-    // Görev Tamamlama (1 Defa)
-    function completeTask(type, reward, link = null) {
-        if (completedTasks[type]) return;
-        
-        if(link) window.open(link, '_blank');
-        
-        coins += reward;
-        completedTasks[type] = true;
-        
-        const btn = document.getElementById('task-' + type);
-        btn.innerText = "Tamamlandı";
-        btn.disabled = true;
-        updateUI();
-    }
-
-    // Gang Hediyesi (1 Defa)
-    function earnGift() { 
-        if(completedTasks.gang) { alert("Hediyeni zaten aldın!"); return; }
-        coins += 1000; 
-        completedTasks.gang = true;
-        alert("GANG HEDİYESİ: +1000!"); 
-        updateUI(); 
-    }
-
-    function startPassive() { alert("8 Saatlik pasif gelir başladı!"); setInterval(() => { coins += 1; updateUI(); }, 2000); }
-
-    function buyAutoTap() { 
-        if(coins >= 5000) { 
-            coins -= 5000; alert("Auto Tap Aktif!"); 
-            setInterval(() => { if(energy >= power) { coins += power; energy -= power; updateUI(); } }, 1000);
-        } else alert("5000 Coin gerekli!"); 
-    }
-
-    function openBox() {
-        if(coins >= 500) {
-            coins -= 500;
-            let win = Math.random() > 0.6 ? 1500 : 50;
-            alert(win > 500 ? "BÜYÜK ÖDÜL: 1500 COİN!" : "Kutudan 50 coin çıktı.");
-            coins += win; updateUI();
-        } else alert("500 Coin gerekli!");
-    }
-
-    function buyUpgrade(type, cost) {
-        if(coins >= cost) {
-            coins -= cost;
-            if(type === 'tap') power += 1;
-            else { maxEnergy += 500; energy = maxEnergy; }
-            updateUI();
-        } else alert("Yetersiz Bakiye!");
-    }
 
     function updateUI() {
         document.getElementById('score-text').innerText = Math.floor(coins).toLocaleString();
         document.getElementById('wallet-balance').innerText = coins > 1000 ? (coins/1000).toFixed(1) + "K" : Math.floor(coins);
         document.getElementById('e-text').innerText = Math.floor(energy);
-        document.getElementById('e-max').innerText = maxEnergy;
-        document.getElementById('p-text').innerText = power;
-        document.getElementById('energy-fill').style.width = (energy / maxEnergy * 100) + "%";
+        document.getElementById('energy-fill').style.width = (energy / 2000 * 100) + "%";
     }
 
-    setInterval(() => { if(energy < maxEnergy) { energy = Math.min(maxEnergy, energy + 5); updateUI(); } }, 1000);
+    setInterval(() => { if(energy < 2000) { energy = Math.min(2000, energy + 5); updateUI(); } }, 1000);
 </script>
 
 </body>
