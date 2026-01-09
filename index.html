@@ -11,10 +11,9 @@
         body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; margin: 0; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .tab-content { display: none; height: calc(100vh - 80px); overflow-y: auto; padding-bottom: 120px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
-        /* Checking Screen */
         .scan-line { position: absolute; width: 100%; height: 100px; background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.2), transparent); animation: scan 3s infinite; }
         @keyframes scan { 0% { top: -100px; } 100% { top: 100%; } }
 
@@ -23,7 +22,6 @@
 
         .roadmap-card { position: relative; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .roadmap-dot { position: absolute; left: -5px; top: 0; width: 9px; height: 9px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
-        .roadmap-dot.pending { background: #1f2937; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -33,14 +31,13 @@
         <div class="relative w-24 h-24 mb-8">
             <div class="absolute inset-0 border-2 border-blue-500/20 rounded-full"></div>
             <div class="absolute inset-0 border-2 border-t-blue-500 rounded-full animate-spin"></div>
-            <i class="fa-solid fa-shield-virus absolute inset-0 flex items-center justify-center text-3xl text-blue-500 opacity-50"></i>
+            <i class="fa-solid fa-shield-halved absolute inset-0 flex items-center justify-center text-3xl text-blue-500 opacity-50"></i>
         </div>
-        <h1 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Hesap Analizi</h1>
+        <h1 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">HESAP ANALİZİ</h1>
         <div id="log" class="text-[10px] font-mono text-blue-500/60 space-y-1 mb-8">
-            <p>> Telegram oturumu kontrol ediliyor...</p>
-            <p id="l1" class="hidden">> Sybil saldırı koruması aktif.</p>
-            <p id="l2" class="hidden">> Cüzdan uygunluğu denetleniyor...</p>
-            <p id="l3" class="hidden">> Ödül havuzu verileri senkronize ediliyor.</p>
+            <p>> Telegram verileri taranıyor...</p>
+            <p id="l1" class="hidden">> Kullanıcı geçmişi doğrulandı.</p>
+            <p id="l2" class="hidden">> Erken erişim bonusu tanımlanıyor...</p>
         </div>
         <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden max-w-[200px]">
             <div id="p-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%"></div>
@@ -51,151 +48,126 @@
         
         <div id="home" class="tab-content active p-6">
             <div class="flex justify-between items-center mb-10">
-                <span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full italic border border-blue-600/30 uppercase">Doğrulanmış Kullanıcı</span>
-                <i class="fa-solid fa-gear text-gray-600"></i>
+                <span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full italic border border-blue-600/30">ELITE ACCESS</span>
+                <i class="fa-solid fa-bell text-gray-600"></i>
             </div>
 
             <div class="text-center py-10 relative">
                 <div class="absolute inset-0 bg-blue-600/5 blur-[100px]"></div>
-                <img src="https://cdn-icons-png.flaticon.com/512/8015/8015383.png" class="w-32 h-32 mx-auto mb-6 relative z-10 opacity-80">
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-2">Mevcut Bakiyeniz</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/8015/8015383.png" class="w-32 h-32 mx-auto mb-6 relative z-10">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-2">Toplam Bakiyeniz</p>
                 <h1 id="score-display" class="text-7xl font-black italic tracking-tighter leading-none">0</h1>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-10">
-                <div class="glass p-4 rounded-3xl text-center">
+                <div class="glass p-5 rounded-[2rem] text-center border-blue-500/20">
                     <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Aktif Çarpan</p>
-                    <p class="text-xl font-black italic text-gray-600">0.00x</p>
+                    <p class="text-xl font-black italic text-gray-700">0.00x</p>
                 </div>
-                <div class="glass p-4 rounded-3xl text-center">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Sıralama</p>
-                    <p class="text-xl font-black italic">#---</p>
+                <div class="glass p-5 rounded-[2rem] text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Durum</p>
+                    <p class="text-[11px] font-black italic text-green-500 uppercase">Hazır</p>
                 </div>
             </div>
 
-            <div class="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl text-center">
-                <p class="text-[10px] text-yellow-500/70 font-bold italic uppercase">
-                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Madencilik dönemi yakında başlayacaktır.
-                </p>
+            <div class="mt-8 p-6 glass rounded-[2.5rem] border-t border-white/10 text-center">
+                <p class="text-[11px] text-gray-400 italic">Analiz ödülünüz başarıyla hesabınıza tanımlanmıştır. Madencilik süreci başladığında puanlarınızı katlayabileceksiniz.</p>
             </div>
         </div>
 
         <div id="tasks" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-2">GÖREVLER</h2>
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-8">Puan toplamak için tamamla</p>
-            
+            <h2 class="text-3xl font-black italic mb-8 uppercase tracking-tighter">Görevler</h2>
             <div class="space-y-3">
-                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
-                    <div class="flex items-center gap-4">
-                        <i class="fa-brands fa-x-twitter text-xl"></i>
-                        <div><p class="font-bold text-sm">X'te Bizi Takip Et</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
-                    </div>
-                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
-                </div>
-                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
+                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-60">
                     <div class="flex items-center gap-4">
                         <i class="fa-brands fa-telegram text-xl"></i>
-                        <div><p class="font-bold text-sm">Resmi Kanala Katıl</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
+                        <div><p class="font-bold text-sm">Topluluğa Katıl</p><p class="text-[10px]">Ödül: 0 Puan</p></div>
                     </div>
-                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
-                </div>
-                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
-                    <div class="flex items-center gap-4">
-                        <i class="fa-solid fa-users-viewfinder text-xl"></i>
-                        <div><p class="font-bold text-sm">Bir Arkadaşını Çağır</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
-                    </div>
-                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
+                    <button class="bg-white/10 text-white/40 px-5 py-2 rounded-xl text-[10px] font-black">YAKINDA</button>
                 </div>
             </div>
         </div>
 
-        <div id="friends" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-6">EKİBİN</h2>
-            <div class="glass p-8 rounded-[3rem] text-center">
-                <i class="fa-solid fa-share-nodes text-5xl text-blue-500/20 mb-6"></i>
-                <h3 class="text-xl font-bold mb-2">Referans Sistemi</h3>
-                <p class="text-xs text-gray-500 mb-8 leading-relaxed italic">Arkadaşlarını davet ederek yaklaşan büyük airdrop etkinliğinde öncelik kazan.</p>
-                <button class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/40">LİNKİ KOPYALA</button>
+        <div id="friends" class="tab-content p-6 text-center">
+            <h2 class="text-3xl font-black italic mb-10 uppercase">Ekip</h2>
+            <div class="glass p-8 rounded-[3rem]">
+                <i class="fa-solid fa-users-rays text-5xl text-blue-500/20 mb-6"></i>
+                <h3 class="text-xl font-bold mb-2">Ekibini Genişlet</h3>
+                <p class="text-xs text-gray-500 italic mb-8 px-4">Her arkadaşın için gelecekteki airdrop payını artırabilirsin.</p>
+                <button class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">DAVET ET</button>
             </div>
         </div>
 
         <div id="vision" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-8">YOL HARİTASI</h2>
-            
-            <div class="space-y-2">
+            <h2 class="text-3xl font-black italic mb-8 uppercase">Yol Haritası</h2>
+            <div class="space-y-4">
                 <div class="roadmap-card">
                     <div class="roadmap-dot"></div>
-                    <h4 class="text-blue-500 font-black italic text-sm uppercase">1. Aşama: Topluluk İnşası</h4>
-                    <p class="text-[11px] text-gray-400 mt-1">Platformun açılışı, erken erişim kayıtları ve Sybil koruma sistemlerinin entegrasyonu.</p>
+                    <h4 class="text-blue-500 font-black italic text-sm uppercase">1. Aşama: Başlangıç</h4>
+                    <p class="text-[11px] text-gray-400 mt-1 italic">Analiz sisteminin açılışı ve erken kayıt ödüllerinin dağıtımı.</p>
                 </div>
-                
                 <div class="roadmap-card">
-                    <div class="roadmap-dot"></div>
-                    <h4 class="text-blue-500 font-black italic text-sm uppercase">2. Aşama: Mining & Aktiviteler</h4>
-                    <p class="text-[11px] text-gray-400 mt-1">Çarpan sisteminin aktif edilmesi, günlük görevlerin başlaması ve puan kazanma döneminin açılması.</p>
-                </div>
-
-                <div class="roadmap-card">
-                    <div class="roadmap-dot pending"></div>
-                    <h4 class="text-gray-500 font-black italic text-sm uppercase">3. Aşama: Cüzdan & Doğrulama</h4>
-                    <p class="text-[11px] text-gray-600 mt-1">On-chain cüzdan bağlama sürecinin başlaması ve KYC (kimlik doğrulama) adımlarının aktifleşmesi.</p>
-                </div>
-
-                <div class="roadmap-card" style="border-left: none;">
-                    <div class="roadmap-dot pending"></div>
-                    <h4 class="text-gray-500 font-black italic text-sm uppercase">4. Aşama: Listeleme (TGE)</h4>
-                    <p class="text-[11px] text-gray-600 mt-1">Token'ın borsalarda listelenmesi ve biriken puanların gerçek değere dönüşerek cüzdanlara dağıtımı.</p>
+                    <div class="roadmap-dot" style="background: #1f2937; box-shadow: none;"></div>
+                    <h4 class="text-gray-600 font-black italic text-sm uppercase">2. Aşama: Madencilik</h4>
+                    <p class="text-[11px] text-gray-700 mt-1 italic">Günlük çarpan sisteminin aktif edilmesi ve puan toplama yarışı.</p>
                 </div>
             </div>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 h-24 glass border-t border-white/5 flex justify-around items-center px-6 z-50">
             <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-house text-xl"></i>
+                <i class="fa-solid fa-house-chimney text-xl"></i>
                 <span class="text-[9px] font-black uppercase tracking-tighter">Ana Sayfa</span>
             </button>
             <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-list-check text-xl"></i>
+                <i class="fa-solid fa-bolt-lightning text-xl"></i>
                 <span class="text-[9px] font-black uppercase tracking-tighter">Görevler</span>
             </button>
             <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-user-group text-xl"></i>
+                <i class="fa-solid fa-user-astronaut text-xl"></i>
                 <span class="text-[9px] font-black uppercase tracking-tighter">Ekip</span>
             </button>
             <button onclick="switchTab('vision', this)" class="nav-item flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-map-location-dot text-xl"></i>
-                <span class="text-[9px] font-black uppercase tracking-tighter">Yol Haritası</span>
+                <i class="fa-solid fa-compass text-xl"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Vizyon</span>
             </button>
         </nav>
     </div>
 
     <script>
-        // CHECKING SIMULATION
         window.onload = () => {
             let progress = 0;
             const bar = document.getElementById('p-bar');
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 3) + 1;
+                progress += Math.floor(Math.random() * 3) + 2;
                 if(progress > 100) progress = 100;
                 bar.style.width = progress + '%';
                 
-                if(progress > 25) document.getElementById('l1').classList.remove('hidden');
-                if(progress > 55) document.getElementById('l2').classList.remove('hidden');
-                if(progress > 85) document.getElementById('l3').classList.remove('hidden');
+                if(progress > 40) document.getElementById('l1').classList.remove('hidden');
+                if(progress > 80) document.getElementById('l2').classList.remove('hidden');
 
                 if(progress === 100) {
                     clearInterval(interval);
                     setTimeout(() => {
                         document.getElementById('checking-screen').style.display = 'none';
                         document.getElementById('app').classList.remove('hidden');
-                        countPoints(0); // Puan 0'da kalacak
+                        giveReward(5000); // 5000 Puan Veriliyor
                     }, 500);
                 }
-            }, 60);
+            }, 50);
         };
 
-        function countPoints(target) {
-            document.getElementById('score-display').innerText = target;
+        function giveReward(target) {
+            let current = 0;
+            const timer = setInterval(() => {
+                current += 100;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                    alert("Tebrikler! Erken erişim analizi sonucu 5,000 Puan kazandınız.");
+                }
+                document.getElementById('score-display').innerText = current.toLocaleString();
+            }, 20);
         }
 
         function switchTab(tabId, el) {
