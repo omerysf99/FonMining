@@ -2,126 +2,152 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GramPro - Ad Rewards</title>
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Hub - Telegram Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-        body { background-color: #f0f4f8; font-family: 'Outfit', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .glass-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-active { color: #2563eb !important; }
-        .nav-active i { transform: translateY(-8px); filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.4)); }
-        .btn-bounce:active { transform: scale(0.92); transition: 0.2s; }
+        body {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            user-select: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        .progress-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        .claim-btn:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+        }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen pb-32 border-x border-gray-100 bg-white relative shadow-2xl">
+<body class="p-4 flex flex-col items-center">
 
-    <header class="glass-header text-white p-6 rounded-b-[3rem] shadow-xl">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                    <i class="fa-solid fa-gem text-blue-400"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">GramPro</h1>
-                    <p class="text-[10px] text-blue-100 font-medium">ID: 8392479231</p>
-                </div>
+    <div class="w-full max-w-md flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-lg shadow-blue-500/50">
+                <i class="fa-solid fa-user"></i>
             </div>
-            <div class="bg-white/10 px-4 py-1.5 rounded-full text-[11px] font-semibold border border-white/10">Active</div>
+            <div>
+                <p class="text-xs text-gray-400">Admin ID</p>
+                <p class="text-sm font-mono leading-none text-blue-300">8392479231</p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-gray-400">Hesap Durumu</p>
+            <p id="account-status" class="text-sm font-bold text-green-400 tracking-wide">DOĞRULANDI</p>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md glass-card p-6 text-center mb-6">
+        <p class="text-gray-400 text-sm mb-1 uppercase tracking-widest">Toplam Puan</p>
+        <h1 id="total-points" class="text-5xl font-black text-white mb-2">1,250</h1>
+        <div class="flex items-center justify-center gap-2 text-blue-400">
+            <i class="fa-solid fa-bolt"></i>
+            <span id="level-name" class="font-semibold">Bronz Kaşif</span>
         </div>
         
-        <div class="bg-white/10 border border-white/20 p-4 rounded-3xl backdrop-blur-sm flex justify-between items-center">
-            <p class="text-xs font-semibold"><i class="fa-solid fa-shield-check text-green-400 mr-2"></i> Adexium Protected</p>
-            <i class="fa-solid fa-tower-broadcast text-blue-200/50 animate-pulse"></i>
+        <div class="w-full bg-gray-800 h-2 rounded-full mt-4 overflow-hidden">
+            <div id="level-progress" class="bg-blue-500 h-full progress-fill" style="width: 25%"></div>
         </div>
-    </header>
+        <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+            <span>LVL 1</span>
+            <span>LVL 2 İÇİN 2500 PUAN</span>
+        </div>
+    </div>
 
-    <main class="px-6 py-8">
-        <div id="home" class="tab-content active space-y-8">
-            <div class="bg-white rounded-[2.5rem] p-10 text-center shadow-xl border border-gray-50">
-                <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-2">Total Points</p>
-                <h3 id="balance" class="text-5xl font-black text-slate-800 tracking-tighter">0.00</h3>
-            </div>
+    <div class="grid grid-cols-2 gap-4 w-full max-w-md mb-8">
+        <button onclick="dailyCheckIn()" class="glass-card p-4 flex flex-col items-center hover:bg-white/10 transition">
+            <i class="fa-solid fa-calendar-check text-yellow-400 text-xl mb-2"></i>
+            <span class="text-xs font-medium">Günlük Giriş</span>
+        </button>
+        <button onclick="alert('Henüz resmi bir duyuru yapılmadı. Lütfen kanalı takipte kalın.')" class="glass-card p-4 flex flex-col items-center hover:bg-white/10 transition">
+            <i class="fa-solid fa-gift text-purple-400 text-xl mb-2"></i>
+            <span class="text-xs font-medium">Airdrop Claim</span>
+        </button>
+    </div>
 
-            <div class="bg-slate-900 rounded-[2.5rem] p-8 relative overflow-hidden btn-bounce">
-                <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-lg uppercase">Daily Task</span>
-                        <span class="text-slate-500 text-xs font-mono">0 / 100</span>
+    <div class="w-full max-w-md mb-20">
+        <h3 class="text-sm font-bold mb-4 text-gray-300 flex items-center gap-2">
+            <i class="fa-solid fa-list-check"></i> AKTİF GÖREVLER
+        </h3>
+        
+        <div class="flex flex-col gap-3">
+            <div class="glass-card p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fa-brands fa-telegram text-blue-400 text-2xl"></i>
+                    <div>
+                        <p class="text-sm font-semibold">Kanala Katıl</p>
+                        <p class="text-[10px] text-gray-400">+500 Puan</p>
                     </div>
-                    <h4 class="text-white text-2xl font-bold mb-2">Watch Reward Ad</h4>
-                    <p class="text-slate-400 text-xs mb-8 italic">Get points after watching</p>
-                    <button onclick="triggerAd()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3">
-                        WATCH NOW <i class="fa-solid fa-play-circle text-xl"></i>
-                    </button>
                 </div>
-                <div class="absolute -right-8 -bottom-8 text-white/5 text-9xl transform -rotate-12"><i class="fa-solid fa-clapperboard"></i></div>
+                <button onclick="completeTask(this, 500)" class="bg-white text-black px-4 py-1 rounded-full text-xs font-bold hover:bg-blue-400 hover:text-white transition">Yap</button>
+            </div>
+
+            <div class="glass-card p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-robot text-green-400 text-2xl"></i>
+                    <div>
+                        <p class="text-sm font-semibold">Botu Başlat</p>
+                        <p class="text-[10px] text-gray-400">+100 Puan</p>
+                    </div>
+                </div>
+                <button class="bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-xs font-bold border border-green-500/50" disabled>Tamamlandı</button>
             </div>
         </div>
+    </div>
 
-        <div id="wallet" class="tab-content text-center py-10">
-            <i class="fa-solid fa-vault text-6xl text-slate-200 mb-4"></i>
-            <h3 class="text-xl font-bold">Secure Vault</h3>
-            <p class="text-slate-400 text-sm">Minimum payout: 10.00 PTS</p>
+    <div class="fixed bottom-6 w-full max-w-md px-4">
+        <div class="text-[10px] text-gray-500 text-center bg-black/30 p-3 rounded-xl border border-white/5">
+            <p><i class="fa-solid fa-shield-halved mr-1"></i> Bu bir oyun ve ödül sistemidir. Kazanç vaadi içermez.</p>
+            <p>Resmi duyurular dışında cüzdan bağlamayın, kimseyle kelimelerinizi paylaşmayın.</p>
         </div>
+    </div>
 
-        <div id="friends" class="tab-content text-center py-10">
-            <i class="fa-solid fa-users text-6xl text-slate-200 mb-4"></i>
-            <h3 class="text-xl font-bold">Referral Team</h3>
-            <p class="text-slate-400 text-sm">Invite friends for 10% bonus</p>
-        </div>
-    </main>
+    <script>
+        let points = 1250;
+        let adminId = "8392479231"; // Kayıtlı Admin ID'niz
 
-    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white shadow-2xl rounded-[2.5rem] flex justify-around py-3 z-50 border border-gray-100">
-        <button onclick="switchTab('home', this)" class="nav-item nav-active flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[9px] font-bold">Home</span></button>
-        <button onclick="switchTab('friends', this)" class="nav-item text-slate-400 flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-user-group text-xl"></i><span class="text-[9px] font-bold">Team</span></button>
-        <button onclick="switchTab('wallet', this)" class="nav-item text-slate-400 flex-1 flex flex-col items-center gap-1"><i class="fa-solid fa-vault text-xl"></i><span class="text-[9px] font-bold">Vault</span></button>
-    </nav>
-
-    <script type="text/javascript">
-        // Telegram Web App Initialization
-        const tele = window.Telegram.WebApp;
-        tele.expand(); // Uygulamayı tam ekran yap
-        tele.ready();
-
-        // Adexium Widget Initialization
-        let adexiumWidget;
-        document.addEventListener('DOMContentLoaded', () => {
-            adexiumWidget = new AdexiumWidget({
-                wid: 'd0ca8f05-2b16-4290-b24a-81d2e62a5db2', 
-                adFormat: 'push-like'
-            });
-            adexiumWidget.autoMode();
-        });
-
-        function triggerAd() {
-            // Butona basıldığında reklamı tetikle
-            if (adexiumWidget) {
-                // Widget push-like olduğu için otomatik veya manuel tetiklenebilir
-                // SDK'nın autoMode'u zaten çalışıyor, butona basıldığında bir bildirim veya reklam gösterimi simülasyonu:
-                tele.MainButton.setText("SHOWING AD...").show();
-                setTimeout(() => {
-                    tele.MainButton.hide();
-                    alert("Ad is being processed. Please watch the popup.");
-                }, 2000);
+        function updateUI() {
+            document.getElementById('total-points').innerText = points.toLocaleString();
+            
+            // Seviye Hesaplama
+            let progress = (points / 5000) * 100;
+            document.getElementById('level-progress').style.width = progress + '%';
+            
+            if(points > 3000) {
+                document.getElementById('level-name').innerText = "Gümüş Muhafız";
+                document.getElementById('level-name').className = "font-semibold text-gray-300";
             }
         }
 
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('nav-active'));
-            element.classList.add('nav-active');
-            if (window.TapticEngine) TapticEngine.impact({ style: 'light' });
+        function completeTask(btn, reward) {
+            points += reward;
+            btn.disabled = true;
+            btn.innerText = "Tamamlandı";
+            btn.className = "bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-xs font-bold border border-green-500/50";
+            updateUI();
+            alert(reward + " puan kazandınız!");
         }
+
+        function dailyCheckIn() {
+            points += 50;
+            updateUI();
+            alert("Günlük giriş başarılı! +50 Puan eklendi.");
+        }
+
+        // Başlangıç Ayarları
+        window.onload = () => {
+            console.log("Sistem Aktif. Admin ID:", adminId);
+        };
     </script>
 </body>
 </html>
