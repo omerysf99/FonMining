@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Pro UI</title>
+    <title>Bums Clicker V.Albayrak</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --nav-bg: #1e293b; /* Koyu lacivert/gri arkaplan */
-            --active-glow: rgba(59, 130, 246, 0.4);
+            --panel-bg: #0f172a;
+            --item-bg: #1e293b;
         }
 
         body {
@@ -35,94 +35,74 @@
         /* ÜST PANEL */
         .top-nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 15px; background: rgba(0,0,0,0.5); z-index: 100;
+            padding: 10px 15px; background: rgba(0,0,0,0.6); z-index: 100;
         }
-        .profile-box { display: flex; align-items: center; gap: 8px; }
-        .p-icon-wrap { width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
-        .p-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .stat-card { background: rgba(15, 23, 42, 0.9); padding: 5px 12px; border-radius: 12px; border: 1px solid #334155; text-align: center; min-width: 85px; }
-        .stat-val { font-weight: bold; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 14px; }
+        .profile-info { display: flex; align-items: center; gap: 10px; }
+        .p-img { width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 10px; }
+        .stat-box { background: var(--panel-bg); padding: 5px 12px; border-radius: 12px; border: 1px solid #334155; min-width: 90px; }
+        .stat-val { font-weight: bold; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 14px; }
 
-        /* OYUN ALANI */
-        .play-area { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .score-display { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .score-display img { width: 42px; }
-        .score-display span { font-size: 3.5rem; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        #hero-cat { width: 190px; cursor: pointer; transition: transform 0.05s; z-index: 5; }
+        /* EKRAN YÖNETİMİ */
+        .screen { display: none; flex-grow: 1; flex-direction: column; overflow-y: auto; padding-bottom: 150px; }
+        .active-screen { display: flex; }
 
-        /* MODAL (AÇILIR PENCERE) */
-        .modal-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-            backdrop-filter: blur(6px);
+        /* ANA SAYFA (PLAY) */
+        .play-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .score-display { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
+        .score-display img { width: 45px; }
+        .score-display span { font-size: 3.5rem; font-weight: 900; }
+        
+        .side-btns { position: absolute; width: 100%; top: 20px; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; pointer-events: none; }
+        .side-col { display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
+        .s-btn { width: 65px; text-align: center; font-size: 9px; font-weight: bold; cursor: pointer; }
+        .s-btn img { width: 100%; border-radius: 12px; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        #hero { width: 210px; cursor: pointer; transition: transform 0.05s; z-index: 5; }
+
+        /* GELİŞTİRME (UPGRADE) SEKMESİ */
+        .upgrade-list { padding: 15px; }
+        .upgrade-item { 
+            background: var(--item-bg); border-radius: 15px; padding: 12px; 
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+            border: 1px solid #334155;
         }
-        .modal-content {
-            background: #0f172a; width: 80%; padding: 30px;
-            border-radius: 24px; border: 2px solid var(--accent-blue);
-            text-align: center; box-shadow: 0 0 30px var(--active-glow);
+        .up-info { display: flex; align-items: center; gap: 12px; }
+        .up-icon { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .up-text div:first-child { font-weight: bold; font-size: 14px; }
+        .up-text div:last-child { font-size: 11px; color: #94a3b8; }
+        .buy-btn { background: var(--accent-blue); color: white; border: none; padding: 8px 12px; border-radius: 10px; font-weight: bold; min-width: 70px; }
+
+        /* ALT PANEL */
+        .footer { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: #0f172a; padding: 10px 10px 30px; border-top: 1px solid #1e293b; box-sizing: border-box;
         }
+        .energy-bar-wrap { margin-bottom: 12px; }
+        .e-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+        .bar-bg { background: #1e293b; height: 12px; border-radius: 10px; border: 1px solid #334155; overflow: hidden; }
+        #bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); transition: width 0.2s; }
 
-        /* YENİ ALT NAVİGASYON TASARIMI */
-        .footer-ui {
-            position: absolute; bottom: 0; width: 100%;
-            background: #0f172a; /* Tam koyu panel */
-            padding: 10px 10px 30px 10px;
-            border-top: 1px solid #1e293b;
-            box-sizing: border-box;
+        .nav-bar { display: flex; justify-content: space-between; gap: 6px; }
+        .nav-item { 
+            flex: 1; background: #1e293b; border-radius: 12px; padding: 8px 0; 
+            display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #94a3b8;
         }
-
-        .energy-section { margin-bottom: 15px; padding: 0 5px; }
-        .energy-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 6px; }
-        .bar-container { background: #1e293b; height: 14px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
-        #bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); transition: width 0.3s; }
-
-        .nav-tabs { 
-            display: flex; 
-            justify-content: space-between; 
-            gap: 8px; /* Butonlar arası boşluk */
+        .nav-item img { width: 28px; height: 28px; margin-bottom: 3px; opacity: 0.7; }
+        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item.active { 
+            background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%); 
+            color: white; border-top: 2px solid #60a5fa; 
         }
+        .nav-item.active img { opacity: 1; }
 
-        .tab { 
-            flex: 1; 
-            background: var(--nav-bg); /* Koyu kutu arkaplanı */
-            border-radius: 12px; 
-            padding: 10px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #94a3b8;
-            border: 1px solid transparent;
+        /* MODAL */
+        .modal-overlay { 
+            position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); 
+            display:none; justify-content:center; align-items:center; z-index:1000; backdrop-filter: blur(5px);
         }
+        .modal-box { background:#0f172a; width:80%; padding:25px; border-radius:20px; border:2px solid var(--accent-blue); text-align:center; }
 
-        .tab img { 
-            width: 28px; height: 28px; 
-            margin-bottom: 4px;
-            opacity: 0.6;
-            filter: grayscale(0.4);
-        }
-
-        .tab span { font-size: 10px; font-weight: 600; text-transform: capitalize; }
-
-        /* AKTİF SEKME PARLAMASI */
-        .tab.active { 
-            background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%); /* Mavi degrade */
-            color: white;
-            box-shadow: 0 0 15px var(--active-glow);
-            border-top: 2px solid #60a5fa;
-            transform: translateY(-2px);
-        }
-
-        .tab.active img { 
-            opacity: 1; 
-            filter: grayscale(0); 
-            transform: scale(1.1);
-        }
-
-        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem; pointer-events: none; animation: rise 0.7s forwards; z-index: 300; }
+        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2rem; pointer-events: none; animation: rise 0.7s forwards; }
         @keyframes rise { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
@@ -130,103 +110,141 @@
 
 <div id="game-container">
     <div id="modal" class="modal-overlay" onclick="closeM()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="m-t">Bilgi</h2>
-            <p id="m-b" style="color: #94a3b8; margin: 15px 0;"></p>
-            <button onclick="closeM()" style="background:var(--accent-blue); color:white; border:none; padding:12px 25px; border-radius:12px; width:100%; font-weight:bold;">Kapat</button>
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h2 id="m-title">Başlık</h2>
+            <p id="m-body" style="color: #94a3b8; margin: 15px 0;"></p>
+            <button onclick="closeM()" style="background:var(--accent-blue); color:white; border:none; padding:12px; border-radius:10px; width:100%; font-weight:bold;">Kapat</button>
         </div>
     </div>
 
     <div class="top-nav">
-        <div class="profile-box">
-            <div class="p-icon-wrap"><img src="TapLv1.jpg"></div>
+        <div class="profile-info">
+            <img src="TapLv1.jpg" class="p-img">
             <div>
                 <div style="font-size: 12px; font-weight: 800;">V.Albayrak</div>
-                <div style="font-size: 10px; color: #64748b;">ID: 8392479231</div>
+                <div style="font-size: 10px; color: #94a3b8;">ID: 8392479231</div>
             </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-box">
             <div class="stat-val"><img src="Notcoin.jpg" width="14"> <span id="t-coin">56.7K</span></div>
         </div>
     </div>
 
-    <div class="play-area">
-        <div class="score-display">
-            <img src="Notcoin.jpg">
-            <span id="b-coin">56.749</span>
+    <div id="scr-play" class="screen active-screen">
+        <div class="side-btns">
+            <div class="side-col">
+                <div class="s-btn" onclick="openM('GANG', 'Gruba katıl ve bonus kazan!')"><img src="Jgang.jpg">JOIN GANG</div>
+                <div class="s-btn" onclick="openM('EARN', '8 saatlik pasif kazanç!')"><img src="TapEarn.jpg">8h 0m</div>
+                <div class="s-btn" onclick="openM('AIRDROP', 'Cüzdan bağlama yakında!')"><img src="Airdrop.jpg">AIRDROP</div>
+            </div>
+            <div class="side-col">
+                <div class="s-btn" onclick="openM('AUTO', 'Otomatik tıklama botu aktif!')"><img src="AutoTap.jpg">AUTO TAP</div>
+                <div class="s-btn" onclick="openM('NFT', 'NFT Kutuları çok yakında!')"><img src="Nft.jpg">NFT</div>
+            </div>
         </div>
-        <img src="bumslv1.jpg" id="hero-cat" onclick="tap(event)">
+        <div class="play-area">
+            <div class="score-display">
+                <img src="Notcoin.jpg">
+                <span id="b-coin">56.749</span>
+            </div>
+            <img src="TapLv1.jpg" id="hero" onclick="tap(event)">
+        </div>
     </div>
 
-    <div class="footer-ui">
-        <div class="energy-section">
-            <div class="energy-info">
-                <span>⚡ <span id="e-cur">2000</span> / 2000</span>
-                <span style="color:var(--gold);">+5 Per tap</span>
+    <div id="scr-upgrade" class="screen">
+        <div class="upgrade-list">
+            <h2 style="margin-left: 10px;">Market</h2>
+            <div class="upgrade-item">
+                <div class="up-info">
+                    <div class="up-icon">👆</div>
+                    <div class="up-text"><div>Tap Reward</div><div>Tıklama Başı: +1</div></div>
+                </div>
+                <button class="buy-btn" onclick="buy('tap', 500)">500</button>
             </div>
-            <div class="bar-container"><div id="bar-fill"></div></div>
+            <div class="upgrade-item">
+                <div class="up-info">
+                    <div class="up-icon">⚡</div>
+                    <div class="up-text"><div>Max Energy</div><div>Kapasite: +500</div></div>
+                </div>
+                <button class="buy-btn" onclick="buy('energy', 1000)">1K</button>
+            </div>
+            <div class="upgrade-item">
+                <div class="up-info">
+                    <div class="up-icon">🔄</div>
+                    <div class="up-text"><div>Energy Regen</div><div>Yenileme: +2</div></div>
+                </div>
+                <button class="buy-btn" onclick="buy('regen', 1500)">1.5K</button>
+            </div>
         </div>
+    </div>
 
-        <div class="nav-tabs">
-            <div class="tab active" onclick="switchT('play', this)">
-                <img src="Notcoin.jpg">
-                <span>Play</span>
+    <div id="scr-friends" class="screen"><div style="padding:20px;"><h2>Friends</h2><p>Arkadaşlarını davet et!</p></div></div>
+    <div id="scr-tasks" class="screen"><div style="padding:20px;"><h2>Tasks</h2><p>Görevleri tamamla!</p></div></div>
+
+    <div class="footer">
+        <div class="energy-bar-wrap">
+            <div class="e-text">
+                <span>⚡ <span id="e-cur">2000</span> / 2000</span>
+                <span style="color:var(--gold);">+<span id="p-val">5</span> Per tap</span>
             </div>
-            <div class="tab" onclick="switchT('upgrade', this)">
-                <img src="Upgrade.jpg">
-                <span>Upgrade</span>
-            </div>
-            <div class="tab" onclick="switchT('city', this)">
-                <img src="City.jpg">
-                <span>City</span>
-            </div>
-            <div class="tab" onclick="switchT('friends', this)">
-                <img src="friends.jpg">
-                <span>Friends</span>
-            </div>
-            <div class="tab" onclick="switchT('tasks', this)">
-                <img src="Task.jpg">
-                <span>Tasks</span>
-            </div>
+            <div class="bar-bg"><div id="bar-fill"></div></div>
+        </div>
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="sw('play', this)"><img src="Notcoin.jpg"><span>Play</span></div>
+            <div class="nav-item" onclick="sw('upgrade', this)"><img src="Upgrade.jpg"><span>Upgrade</span></div>
+            <div class="nav-item" onclick="sw('friends', this)"><img src="friends.jpg"><span>Friends</span></div>
+            <div class="nav-item" onclick="sw('tasks', this)"><img src="Task.jpg"><span>Tasks</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    let c = 56749, e = 2000;
-    const p = 5;
+    let coins = 56749, energy = 2000, power = 5, regen = 3;
 
     function tap(ev) {
-        if(e >= p) {
-            c += p; e -= p; up();
-            const fl = document.createElement('div');
-            fl.className = 'pop'; fl.innerText = `+${p}`;
-            fl.style.left = ev.clientX + 'px'; fl.style.top = (ev.clientY - 40) + 'px';
-            document.body.appendChild(fl);
-            setTimeout(() => fl.remove(), 600);
+        if(energy >= power) {
+            coins += power; energy -= power; update();
+            const f = document.createElement('div');
+            f.className = 'pop'; f.innerText = `+${power}`;
+            f.style.left = ev.clientX + 'px'; f.style.top = (ev.clientY - 40) + 'px';
+            document.body.appendChild(f);
+            setTimeout(() => f.remove(), 600);
         }
     }
 
-    function switchT(id, el) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    function sw(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById('scr-' + id).classList.add('active-screen');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        if(id !== 'play') {
-            document.getElementById('m-t').innerText = id.toUpperCase();
-            document.getElementById('m-b').innerText = id + " özelliği ID: 8392479231 için yakında aktif olacak!";
-            document.getElementById('modal').style.display = 'flex';
-        }
     }
 
+    function buy(type, cost) {
+        if(coins >= cost) {
+            coins -= cost;
+            if(type === 'tap') power++;
+            else if(type === 'energy') { /* max energy artışı eklenebilir */ }
+            else if(type === 'regen') regen += 2;
+            update();
+        } else alert("Yetersiz bakiye!");
+    }
+
+    function openM(t, b) {
+        document.getElementById('m-title').innerText = t;
+        document.getElementById('m-body').innerText = b;
+        document.getElementById('modal').style.display = 'flex';
+    }
     function closeM() { document.getElementById('modal').style.display = 'none'; }
 
-    function up() {
-        document.getElementById('b-coin').innerText = Math.floor(c).toLocaleString();
-        document.getElementById('t-coin').innerText = (c / 1000).toFixed(1) + "K";
-        document.getElementById('e-cur').innerText = e;
-        document.getElementById('bar-fill').style.width = (e / 2000 * 100) + "%";
+    function update() {
+        document.getElementById('b-coin').innerText = Math.floor(coins).toLocaleString();
+        document.getElementById('t-coin').innerText = (coins / 1000).toFixed(1) + "K";
+        document.getElementById('e-cur').innerText = energy;
+        document.getElementById('p-val').innerText = power;
+        document.getElementById('bar-fill').style.width = (energy / 2000 * 100) + "%";
     }
 
-    setInterval(() => { if(e < 2000) { e = Math.min(2000, e + 3); up(); } }, 1000);
+    setInterval(() => { if(energy < 2000) { energy = Math.min(2000, energy + regen); update(); } }, 1000);
 </script>
 
 </body>
