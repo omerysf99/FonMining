@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Hub v2.0</title>
+    <title>Elite Hub: Cosmic Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     <script src="https://adexora.com/cdn/ads.js?id=1701"></script>
@@ -11,146 +11,122 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;900&display=swap');
         
-        :root { --accent: #3b82f6; --bg: #030712; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; margin: 0; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; margin: 0; touch-action: manipulation; }
+        .font-sync { font-family: 'Syncopate', sans-serif; }
         
-        .font-cyber { font-family: 'Orbitron', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        /* Interactive Background */
+        #nebula-canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; opacity: 0.6; }
         
-        /* Animasyonlu Arka Plan */
-        .bg-glow {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 300px; height: 300px; background: var(--accent);
-            filter: blur(150px); opacity: 0.15; z-index: -1; pointer-events: none;
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .tab-content { display: none; height: calc(100vh - 120px); overflow-y: auto; padding-bottom: 150px; }
+        .tab-content.active { display: block; animation: quantumIn 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+        
+        @keyframes quantumIn { from { opacity: 0; filter: brightness(2) blur(10px); transform: scale(1.1); } to { opacity: 1; filter: brightness(1) blur(0); transform: scale(1); } }
+        
+        /* Floating Animation */
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+
+        .btn-cosmic {
+            background: linear-gradient(45deg, #0062ff, #00d4ff, #7000ff);
+            background-size: 200% 200%;
+            animation: gradientMove 3s linear infinite;
+            box-shadow: 0 0 30px rgba(0, 98, 255, 0.4);
+            border-radius: 2.5rem;
         }
 
-        .tab-content { display: none; height: calc(100vh - 100px); overflow-y: auto; padding-bottom: 140px; }
-        .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
-        
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .nav-item { color: #6b7280; transition: all 0.3s; position: relative; }
-        .nav-item.active { color: #fff; }
-        .nav-item.active::after { content: ''; position: absolute; top: -10px; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        .btn-premium {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), inset 0 0 10px rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .critical-text {
+            position: fixed; pointer-events: none; color: #fbbf24; font-weight: 900; 
+            font-style: italic; z-index: 2000; animation: crit 0.8s ease-out forwards;
         }
-        .btn-premium:active { transform: scale(0.94) translateY(2px); }
-
-        .score-glow { text-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+        @keyframes crit { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-100px) scale(2); } }
     </style>
 </head>
 <body>
 
-    <div class="bg-glow"></div>
+    <canvas id="nebula-canvas"></canvas>
 
-    <div id="checking-screen" class="fixed inset-0 z-[1000] bg-[#030712] flex flex-col items-center justify-center p-8">
-        <div class="relative mb-12">
-            <div class="w-24 h-24 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-                <i class="fa-solid fa-bolt text-3xl text-blue-500"></i>
-            </div>
+    <div id="checking-screen" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center">
+        <div class="relative w-32 h-32 mb-12">
+            <div class="absolute inset-0 border-t-4 border-blue-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-4 border-b-4 border-purple-500 rounded-full animate-spin-reverse" style="animation-duration: 1s;"></div>
+            <div class="absolute inset-0 flex items-center justify-center font-sync text-[10px] text-blue-500 animate-pulse">INIT</div>
         </div>
-        <p class="font-cyber text-[10px] tracking-[0.5em] text-blue-500/80 animate-pulse uppercase">Syncing with Network</p>
-        <div class="w-48 h-[2px] bg-white/5 mt-8 rounded-full overflow-hidden">
-            <div id="p-bar" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
-        </div>
+        <p class="font-sync text-[8px] tracking-[0.8em] opacity-40 uppercase">Quantum Handshake</p>
     </div>
 
     <div id="app" class="hidden">
         
-        <div id="home" class="tab-content active p-6">
-            <header class="flex justify-between items-center mb-12">
-                <div>
-                    <h2 class="font-cyber text-xs text-blue-500 font-black italic tracking-widest">ELITE HUB</h2>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Verified Node 8392479231</p>
+        <div id="home" class="tab-content active p-8">
+            <div class="flex justify-between items-center mb-12">
+                <div class="glass px-4 py-2 rounded-2xl border-blue-500/30">
+                    <p class="text-[8px] font-black tracking-[0.3em] text-blue-400">NODE: 8392479231</p>
                 </div>
-                <div class="w-10 h-10 glass rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-fingerprint text-blue-500"></i>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></span>
+                    <span class="text-[10px] font-bold opacity-50 uppercase">Stable</span>
                 </div>
-            </header>
+            </div>
 
-            <div class="text-center">
-                <div class="inline-block glass px-4 py-1 rounded-full mb-4 border-blue-500/20">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></span> Live Pool Status
-                    </p>
-                </div>
-                <h1 id="score-display" class="font-cyber text-6xl font-black italic tracking-tighter mb-16 score-glow">0</h1>
+            <div class="text-center float-anim">
+                <p class="text-[10px] font-sync tracking-[0.5em] text-gray-500 mb-6">COSMIC BALANCE</p>
+                <h1 id="score-display" class="font-sync text-6xl font-bold tracking-tighter mb-20 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">0</h1>
                 
-                <div class="px-4">
-                    <button onclick="handleAdexoraAd()" class="btn-premium w-full py-7 rounded-[2.5rem] flex items-center justify-center gap-5 relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform"></div>
-                        <i class="fa-solid fa-play text-2xl"></i>
-                        <div class="text-left relative z-10">
-                            <p class="text-xs font-black uppercase tracking-widest leading-none">Execute Reward Ad</p>
-                            <p class="text-[10px] font-bold opacity-60 uppercase tracking-tighter mt-1">+1 Point per cycle</p>
-                        </div>
-                    </button>
-                </div>
+                <button onclick="handleAdexoraAd()" class="btn-cosmic w-full py-8 flex flex-col items-center justify-center gap-2 relative overflow-hidden active:scale-95 transition">
+                    <span class="text-sm font-black uppercase tracking-[0.3em]">Harvest Energy</span>
+                    <span class="text-[9px] font-bold opacity-70 uppercase tracking-widest">Watch Ad & Mine +1</span>
+                </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mt-16 px-4">
-                <div class="glass p-5 rounded-3xl text-center border-white/5">
-                    <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Users Online</p>
-                    <p id="user-count" class="text-lg font-cyber font-black text-gray-200">14,209</p>
-                </div>
-                <div class="glass p-5 rounded-3xl text-center border-white/5">
-                    <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Network Tier</p>
-                    <p class="text-[10px] font-cyber font-black text-blue-500 uppercase italic">Alpha v.2</p>
-                </div>
+            <div class="mt-12 glass p-6 rounded-[2.5rem] text-center">
+                <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-2">Surpriz Özellik</p>
+                <p class="text-xs italic text-gray-400">Telefonunu salla, gizli kozmik tozları topla!</p>
             </div>
         </div>
 
-        <div id="tasks" class="tab-content p-6">
-            <h2 class="font-cyber text-2xl font-black mb-8 uppercase italic tracking-tighter text-white">Operations</h2>
-            <div class="space-y-3">
-                <div class="glass p-5 rounded-[2.5rem] flex justify-between items-center group active:scale-95 transition">
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
-                            <i class="fa-brands fa-telegram text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="font-black text-sm uppercase italic">Join Nexus</p>
-                            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">+100 P</p>
-                        </div>
+        <div id="tasks" class="tab-content p-8">
+            <h2 class="font-sync text-2xl mb-10 uppercase italic">Missions</h2>
+            <div class="glass p-6 rounded-[2.5rem] flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <i class="fa-brands fa-telegram text-3xl text-blue-500"></i>
+                    <div>
+                        <p class="font-black text-sm uppercase">Nexus Channel</p>
+                        <p class="text-[10px] text-blue-400 font-bold">+100 P</p>
                     </div>
-                    <button onclick="doTelegramTask()" id="tg-btn" class="bg-blue-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-lg shadow-blue-500/20">Join</button>
                 </div>
+                <button onclick="doTelegramTask()" id="tg-btn" class="bg-white text-black px-6 py-3 rounded-2xl text-[10px] font-black uppercase">Verify</button>
             </div>
         </div>
 
-        <div id="friends" class="tab-content p-6">
-            <h2 class="font-cyber text-2xl font-black mb-10 uppercase italic tracking-tighter">Referral Link</h2>
-            <div class="glass p-10 rounded-[3.5rem] text-center relative overflow-hidden border-blue-500/10">
-                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-600/5 rounded-full blur-2xl"></div>
-                <i class="fa-solid fa-link text-5xl text-blue-500/20 mb-8"></i>
-                <h3 class="text-xl font-black mb-3 uppercase italic tracking-tighter">Expand Network</h3>
-                <p class="text-[11px] text-gray-500 italic mb-10 px-6 leading-relaxed">
-                    Davet ettiğin her kişi için <span class="text-white font-bold tracking-widest">+500 Puan</span> anında hesabına yansıtılır.
-                </p>
-                <button onclick="referansKazan()" class="btn-premium w-full py-5 rounded-3xl font-black text-xs uppercase tracking-[0.2em]">Invite Friends</button>
+        <div id="friends" class="tab-content p-8">
+            <h2 class="font-sync text-2xl mb-10 uppercase italic">Quantum Link</h2>
+            <div class="glass p-10 rounded-[3.5rem] text-center">
+                <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full mx-auto mb-8 flex items-center justify-center shadow-2xl">
+                    <i class="fa-solid fa-share-nodes text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-black mb-4 uppercase tracking-tighter">Expand Galaxy</h3>
+                <p class="text-xs text-gray-500 mb-10 leading-relaxed italic">Her yeni pilot için <span class="text-blue-400 font-bold">+500 Puan</span> kazanırsın.</p>
+                <button onclick="referansKazan()" class="w-full py-5 bg-white text-black rounded-3xl font-black text-[10px] uppercase tracking-[0.3em]">Invite Pilot</button>
             </div>
         </div>
 
-        <nav class="fixed bottom-6 left-6 right-6 h-20 glass rounded-[2.5rem] flex justify-around items-center px-4 z-50 border-white/10 shadow-2xl">
-            <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1">
-                <i class="fa-solid fa-ghost text-xl"></i>
-                <span class="text-[8px] font-black uppercase tracking-widest">Home</span>
+        <nav class="fixed bottom-8 left-8 right-8 h-20 glass rounded-[2.5rem] flex justify-around items-center px-4 z-50 border-white/10">
+            <button onclick="switchTab('home', this)" class="text-blue-500 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-atom text-xl"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Nexus</span>
             </button>
-            <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1">
-                <i class="fa-solid fa-terminal text-xl"></i>
-                <span class="text-[8px] font-black uppercase tracking-widest">Tasks</span>
+            <button onclick="switchTab('tasks', this)" class="text-gray-500 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-shuttle-space text-xl"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Missions</span>
             </button>
-            <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1">
-                <i class="fa-solid fa-satellite-dish text-xl"></i>
-                <span class="text-[8px] font-black uppercase tracking-widest">Team</span>
+            <button onclick="switchTab('friends', this)" class="text-gray-500 flex flex-col items-center gap-1">
+                <i class="fa-solid fa-users-viewfinder text-xl"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest">Fleet</span>
             </button>
         </nav>
     </div>
@@ -159,78 +135,128 @@
         let totalScore = 0;
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.backgroundColor = '#030712';
-        tg.headerColor = '#030712';
+        tg.backgroundColor = '#000000';
 
-        window.onload = () => {
-            let progress = 0;
-            const bar = document.getElementById('p-bar');
-            const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 2;
-                if(progress > 100) progress = 100;
-                bar.style.width = progress + '%';
-                if(progress === 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('checking-screen').style.display = 'none';
-                        document.getElementById('app').classList.remove('hidden');
-                        updateScore(5000); 
-                    }, 400);
+        // 1. NEBULA CANVAS EFFECT
+        const canvas = document.getElementById('nebula-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(100, 150, 255, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 2. SHAKE TO EARN (Sallayarak Kazan)
+        let lastShake = 0;
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', (e) => {
+                let acc = e.accelerationIncludingGravity;
+                let speed = Math.abs(acc.x + acc.y + acc.z);
+                if (speed > 25) {
+                    let now = Date.now();
+                    if (now - lastShake > 1000) {
+                        lastShake = now;
+                        let gift = (Math.random() * 0.4 + 0.1).toFixed(1);
+                        updateScore(parseFloat(gift));
+                        createCritEffect("COSMIC DUST +" + gift);
+                    }
                 }
-            }, 60);
-            
-            // Simüle edilmiş kullanıcı sayacı
-            setInterval(() => {
-                const counter = document.getElementById('user-count');
-                let count = parseInt(counter.innerText.replace(',', ''));
-                counter.innerText = (count + Math.floor(Math.random() * 5)).toLocaleString();
-            }, 3000);
+            });
+        }
+
+        // 3. SCORE & AD LOGIC
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('checking-screen').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+                updateScore(5000);
+            }, 2500);
         };
 
         function updateScore(amount) {
             totalScore += amount;
-            const display = document.getElementById('score-display');
-            display.innerText = totalScore.toLocaleString();
+            document.getElementById('score-display').innerText = totalScore.toLocaleString(undefined, {minimumFractionDigits: 1});
             tg.HapticFeedback.impactOccurred('medium');
         }
 
         function handleAdexoraAd() {
             if (typeof window.showAdexora === 'function') {
-                window.showAdexora()
-                    .then(() => {
-                        updateScore(1);
-                        tg.HapticFeedback.notificationOccurred('success');
-                    })
-                    .catch(() => { alert("Reklam şu an meşgul, tekrar dene."); });
-            } else { alert("Ad-Network offline."); }
+                window.showAdexora().then(() => {
+                    let gain = Math.random() > 0.9 ? 5 : 1; // %10 ihtimalle kritik vuruş
+                    if(gain > 1) createCritEffect("CRITICAL X5!");
+                    updateScore(gain);
+                }).catch(() => { alert("No energy in this sector."); });
+            }
+        }
+
+        function createCritEffect(txt) {
+            const el = document.createElement('div');
+            el.className = 'critical-text font-sync';
+            el.innerText = txt;
+            el.style.left = '50%';
+            el.style.top = '50%';
+            el.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
         }
 
         function referansKazan() {
             updateScore(500);
-            // Telegram Paylaşım Arayüzü
-            const inviteLink = "https://t.me/SeninBotunLink";
-            const text = "Elite Hub'da puanları topluyorum! Sen de katıl: ";
-            tg.openTelegramLink(`https://t.me/share/url?url=${inviteLink}&text=${text}`);
-            tg.HapticFeedback.notificationOccurred('success');
+            tg.openTelegramLink("https://t.me/share/url?url=https://t.me/SeninBotun&text=Quantum Pilotu Ol!");
         }
 
         function doTelegramTask() {
             tg.openLink("https://t.me/AgeYears");
             setTimeout(() => {
                 const btn = document.getElementById('tg-btn');
-                if(btn.innerText !== "VERIFIED") {
-                    btn.innerText = "VERIFIED";
-                    btn.className = "bg-green-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase";
-                    updateScore(100);
-                }
+                btn.innerText = "VERIFIED";
+                btn.className = "bg-green-500 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase";
+                updateScore(100);
             }, 3000);
         }
 
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('text-blue-500');
+                b.classList.add('text-gray-500');
+            });
             document.getElementById(tabId).classList.add('active');
-            el.classList.add('active');
+            el.classList.remove('text-gray-500');
+            el.classList.add('text-blue-500');
             tg.HapticFeedback.impactOccurred('light');
         }
     </script>
