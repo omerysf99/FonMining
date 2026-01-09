@@ -9,7 +9,7 @@
     <style>
         body { background-color: #000; color: #fff; font-family: sans-serif; overflow: hidden; margin: 0; height: 100vh; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .tab-content { display: none; height: calc(100vh - 80px); overflow-y: auto; padding-bottom: 100px; }
+        .tab-content { display: none; height: calc(100vh - 80px); overflow-y: auto; padding-bottom: 120px; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -20,7 +20,12 @@
         .btn-main { background: #fff; color: #000; font-weight: 800; border-radius: 16px; transition: 0.2s; }
         .btn-main:active { transform: scale(0.96); }
 
-        /* Checking Screen */
+        /* Roadmap Styles */
+        .roadmap-item { position: relative; padding-left: 30px; border-left: 2px solid #1e293b; margin-bottom: 25px; }
+        .roadmap-item::before { content: ''; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .roadmap-item.done { border-left-color: #3b82f6; }
+        .roadmap-item.pending::before { background: #1e293b; box-shadow: none; }
+
         #checking-screen { position: fixed; inset: 0; z-index: 100; background: #000; }
         .fade-out { animation: fadeOut 0.5s forwards; }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
@@ -29,20 +34,17 @@
 <body>
 
     <div id="checking-screen" class="flex flex-col p-10 justify-center text-center">
-        <div class="mb-8">
-            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h1 class="text-2xl font-black tracking-tighter italic">ANALYZING PROFILE...</h1>
+        <div class="mb-8 text-blue-500 text-5xl">
+            <i class="fa-solid fa-shield-halved animate-pulse"></i>
         </div>
-        <div class="space-y-4 max-w-xs mx-auto w-full">
-            <div id="s1" class="flex justify-between text-xs font-bold text-gray-500 uppercase"><span>Account Age</span><span id="s1-v">...</span></div>
-            <div id="s2" class="flex justify-between text-xs font-bold text-gray-500 uppercase"><span>Humanity Score</span><span id="s2-v">...</span></div>
-        </div>
+        <h1 class="text-2xl font-black tracking-tighter italic mb-2">ANALYZING PROFILE...</h1>
+        <p class="text-gray-500 text-[10px] uppercase tracking-widest">Sistem Güvenliği Aktif</p>
     </div>
 
     <div id="app" class="hidden">
         <div id="home" class="tab-content active p-6">
             <div class="flex justify-between items-center mb-10">
-                <span class="text-xs font-black tracking-widest bg-white/10 px-3 py-1 rounded-full text-blue-400">VERIFIED</span>
+                <span class="text-[10px] font-black tracking-widest bg-blue-500/10 px-3 py-1 rounded-full text-blue-400 border border-blue-500/20 italic">REAL USER</span>
                 <span class="text-[10px] text-gray-600 font-mono">8392479231</span>
             </div>
             
@@ -54,97 +56,109 @@
 
             <div class="glass p-6 rounded-[2.5rem] mt-10 text-center border-blue-500/20">
                 <h3 class="font-bold mb-1">Watch & Earn</h3>
-                <p class="text-xs text-gray-500 mb-4">Her reklam +250 Puan</p>
-                <button onclick="watchAd()" class="btn-main w-full py-4 uppercase text-xs tracking-widest">Reklam İzle</button>
+                <p class="text-xs text-gray-500 mb-4">Reklam izle ve puanını katla!</p>
+                <button onclick="watchAd()" class="btn-main w-full py-4 uppercase text-xs tracking-widest italic">Claim 250 Points</button>
             </div>
         </div>
 
         <div id="tasks" class="tab-content p-6">
-            <h2 class="text-2xl font-black mb-6">GÖREVLER</h2>
+            <h2 class="text-2xl font-black mb-6 italic tracking-tight">GÖREVLER</h2>
             <div class="space-y-3">
-                <div class="glass p-4 rounded-2xl flex justify-between items-center">
+                <div class="glass p-4 rounded-2xl flex justify-between items-center border-l-4 border-blue-500">
                     <div class="flex items-center gap-3">
                         <i class="fa-brands fa-telegram text-blue-400 text-xl"></i>
-                        <span class="text-sm font-bold">Kanalı Takip Et</span>
+                        <span class="text-sm font-bold">Resmi Kanal</span>
                     </div>
-                    <button class="bg-blue-600 px-4 py-1.5 rounded-full text-xs font-bold">+1000</button>
-                </div>
-                <div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-square-x-twitter text-xl"></i>
-                        <span class="text-sm font-bold">X'te Paylaş</span>
-                    </div>
-                    <button class="bg-blue-600 px-4 py-1.5 rounded-full text-xs font-bold">+500</button>
+                    <button class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold uppercase">Yap</button>
                 </div>
             </div>
         </div>
 
         <div id="friends" class="tab-content p-6 text-center">
-            <i class="fa-solid fa-user-group text-5xl text-gray-700 mb-4 mt-10"></i>
-            <h2 class="text-2xl font-black mb-2">ARKADAŞLAR</h2>
-            <p class="text-gray-500 text-sm mb-6 px-6">Arkadaşlarını davet et, her başarılı kayıt için %10 bonus kazan!</p>
-            <button class="btn-main w-full py-4 mb-4">ARKADAŞ DAVET ET</button>
-            <div class="glass p-4 rounded-xl text-xs text-gray-400">Henüz kimseyi davet etmedin.</div>
+            <div class="mt-10 mb-6">
+                <i class="fa-solid fa-handshake-angle text-6xl text-blue-500/20"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2 italic">ARKADAŞLAR</h2>
+            <p class="text-gray-500 text-xs mb-8">Arkadaşlarını davet ederek airdrop payını %10 artırabilirsin.</p>
+            <button class="btn-main w-full py-4 mb-4 uppercase text-xs tracking-widest">Davet Linki Kopyala</button>
         </div>
 
         <div id="wallet" class="tab-content p-6">
-            <h2 class="text-2xl font-black mb-6">CÜZDAN</h2>
-            <div class="glass p-8 rounded-[2rem] text-center">
-                <div class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-wallet text-purple-500 text-2xl"></i>
+            <h2 class="text-2xl font-black mb-6 italic tracking-tight">PROJE YOL HARİTASI</h2>
+            
+            <div class="glass p-6 rounded-3xl">
+                <div class="roadmap-item done">
+                    <h4 class="text-sm font-bold text-blue-400 uppercase">Aşama 1: Lansman</h4>
+                    <p class="text-[11px] text-gray-400">Mini App yayına alındı ve kullanıcı analizi sistemi aktif edildi.</p>
                 </div>
-                <h3 class="font-bold mb-2">Cüzdan Bağla</h3>
-                <p class="text-xs text-gray-500 mb-6">Token dağıtımı sırasında cüzdan bağlantısı gerekli olacaktır.</p>
-                <button onclick="alert('Henüz aktif değil.')" class="w-full bg-purple-600 py-3 rounded-xl font-bold text-sm">Bağla</button>
+                
+                <div class="roadmap-item done">
+                    <h4 class="text-sm font-bold text-blue-400 uppercase">Aşama 2: Büyüme</h4>
+                    <p class="text-[11px] text-gray-400">Görev sistemi ve Reklam-Claim mekanizması entegre edildi.</p>
+                </div>
+
+                <div class="roadmap-item">
+                    <h4 class="text-sm font-bold text-gray-200 uppercase">Aşama 3: Topluluk</h4>
+                    <p class="text-[11px] text-gray-500">Global kanalların açılması ve referans yarışmalarının başlaması.</p>
+                </div>
+
+                <div class="roadmap-item pending">
+                    <h4 class="text-sm font-bold text-gray-600 uppercase">Aşama 4: TGE & Airdrop</h4>
+                    <p class="text-[11px] text-gray-600">Token listelenmesi ve hak edilen puanların cüzdanlara dağıtımı.</p>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl">
+                <p class="text-[10px] text-yellow-500/70 text-center uppercase font-bold tracking-tighter">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Cüzdan bağlama işlemleri Aşama 4'te aktif olacaktır.
+                </p>
             </div>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 h-20 glass border-t border-white/10 flex justify-around items-center px-4 z-50">
             <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[10px] font-bold">Ana Sayfa</span>
+                <i class="fa-solid fa-house-chimney text-lg"></i>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Ana Sayfa</span>
             </button>
             <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1">
-                <i class="fa-solid fa-list-check text-lg"></i>
-                <span class="text-[10px] font-bold">Görevler</span>
+                <i class="fa-solid fa-bolt text-lg"></i>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Görevler</span>
             </button>
             <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1">
-                <i class="fa-solid fa-users text-lg"></i>
-                <span class="text-[10px] font-bold">Arkadaşlar</span>
+                <i class="fa-solid fa-user-plus text-lg"></i>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Davet</span>
             </button>
             <button onclick="switchTab('wallet', this)" class="nav-item flex flex-col items-center gap-1">
-                <i class="fa-solid fa-wallet text-lg"></i>
-                <span class="text-[10px] font-bold">Cüzdan</span>
+                <i class="fa-solid fa-map-location-dot text-lg"></i>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Roadmap</span>
             </button>
         </nav>
     </div>
 
     <div id="ad-overlay" class="fixed inset-0 bg-black z-[200] hidden flex flex-col items-center justify-center">
-        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Reklam İzleniyor</p>
-        <h4 id="ad-timer" class="text-6xl font-black">3</h4>
+        <div class="w-12 h-12 border-2 border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Ödül Yükleniyor</p>
+        <h4 id="ad-timer" class="text-6xl font-black italic">3</h4>
     </div>
 
     <script>
         let score = 0;
 
-        // CHECKING SIMULATION
         window.onload = () => {
-            setTimeout(() => { document.getElementById('s1-v').innerHTML = '<span class="text-white">4 Yıl</span>'; }, 800);
-            setTimeout(() => { document.getElementById('s2-v').innerHTML = '<span class="text-green-500">98/100</span>'; }, 1600);
             setTimeout(() => {
                 document.getElementById('checking-screen').classList.add('fade-out');
                 setTimeout(() => {
                     document.getElementById('checking-screen').style.display = 'none';
                     document.getElementById('app').classList.remove('hidden');
-                    countPoints(3450);
+                    countPoints(2450);
                 }, 500);
-            }, 2500);
+            }, 2000);
         };
 
         function countPoints(target) {
             let current = 0;
             const timer = setInterval(() => {
-                current += 75;
+                current += 50;
                 if (current >= target) { current = target; clearInterval(timer); }
                 document.getElementById('score-display').innerText = current.toLocaleString();
             }, 20);
