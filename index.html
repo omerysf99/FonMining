@@ -3,189 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Airdrop Hub</title>
+    <title>Airdrop Hub Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
-        
-        body { background-color: #000; color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; margin: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; margin: 0; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .tab-content { display: none; height: calc(100vh - 80px); overflow-y: auto; padding-bottom: 120px; }
-        .tab-content.active { display: block; animation: slideIn 0.3s ease-out; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Gelişmiş Checking Efektleri */
-        #checking-screen { background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%); z-index: 1000; }
-        .scan-line { height: 2px; background: linear-gradient(90deg, transparent, #3b82f6, transparent); width: 100%; position: absolute; animation: scan 2s linear infinite; }
-        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-        
-        .log-text { font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #3b82f6; opacity: 0.7; }
-        
-        .streak-dot { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.05); }
-        .streak-active { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        
-        .nav-item { color: #4b5563; transition: all 0.3s; }
+        /* Checking Screen */
+        .scan-line { position: absolute; width: 100%; height: 100px; background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.2), transparent); animation: scan 3s infinite; }
+        @keyframes scan { 0% { top: -100px; } 100% { top: 100%; } }
+
+        .nav-item { color: #4b5563; transition: 0.3s; }
         .nav-item.active { color: #fff; }
+
+        .roadmap-card { position: relative; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .roadmap-dot { position: absolute; left: -5px; top: 0; width: 9px; height: 9px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+        .roadmap-dot.pending { background: #1f2937; box-shadow: none; }
     </style>
 </head>
 <body>
 
-    <div id="checking-screen" class="fixed inset-0 flex flex-col p-8">
+    <div id="checking-screen" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center p-8 text-center">
         <div class="scan-line"></div>
-        
-        <div class="mt-12">
-            <h1 class="text-4xl font-light italic tracking-tighter leading-none mb-2">HESAP<br><b>ANALİZ EDİLİYOR</b></h1>
-            <div id="log-container" class="space-y-1 h-20 overflow-hidden mt-4">
-                <p class="log-text">> Veritabanına bağlanılıyor...</p>
-                <p id="log-1" class="log-text hidden">> Telegram ID doğrulandı.</p>
-                <p id="log-2" class="log-text hidden">> Hesap yaşı hesaplanıyor...</p>
-                <p id="log-3" class="log-text hidden">> Anti-bot protokolü aktif.</p>
-                <p id="log-4" class="log-text hidden">> Sybil saldırı koruması OK.</p>
-            </div>
+        <div class="relative w-24 h-24 mb-8">
+            <div class="absolute inset-0 border-2 border-blue-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-2 border-t-blue-500 rounded-full animate-spin"></div>
+            <i class="fa-solid fa-shield-virus absolute inset-0 flex items-center justify-center text-3xl text-blue-500 opacity-50"></i>
         </div>
-
-        <div class="mt-auto mb-12 space-y-6">
-            <div class="flex justify-between items-end">
-                <div>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Analiz Durumu</p>
-                    <p id="status-text" class="text-xl font-bold italic text-blue-500">Hazırlanıyor...</p>
-                </div>
-                <p id="percent" class="text-4xl font-black italic opacity-20">0%</p>
-            </div>
-            <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-blue-500 transition-all duration-300" style="width: 0%"></div>
-            </div>
+        <h1 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Hesap Analizi</h1>
+        <div id="log" class="text-[10px] font-mono text-blue-500/60 space-y-1 mb-8">
+            <p>> Telegram oturumu kontrol ediliyor...</p>
+            <p id="l1" class="hidden">> Sybil saldırı koruması aktif.</p>
+            <p id="l2" class="hidden">> Cüzdan uygunluğu denetleniyor...</p>
+            <p id="l3" class="hidden">> Ödül havuzu verileri senkronize ediliyor.</p>
+        </div>
+        <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden max-w-[200px]">
+            <div id="p-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%"></div>
         </div>
     </div>
 
     <div id="app" class="hidden">
         
         <div id="home" class="tab-content active p-6">
-            <div class="flex justify-between items-center mb-8">
-                <div class="w-10 h-10 rounded-xl glass flex items-center justify-center border-white/10">
-                    <i class="fa-solid fa-bolt-lightning text-blue-500"></i>
+            <div class="flex justify-between items-center mb-10">
+                <span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full italic border border-blue-600/30 uppercase">Doğrulanmış Kullanıcı</span>
+                <i class="fa-solid fa-gear text-gray-600"></i>
+            </div>
+
+            <div class="text-center py-10 relative">
+                <div class="absolute inset-0 bg-blue-600/5 blur-[100px]"></div>
+                <img src="https://cdn-icons-png.flaticon.com/512/8015/8015383.png" class="w-32 h-32 mx-auto mb-6 relative z-10 opacity-80">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-2">Mevcut Bakiyeniz</p>
+                <h1 id="score-display" class="text-7xl font-black italic tracking-tighter leading-none">0</h1>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-10">
+                <div class="glass p-4 rounded-3xl text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Aktif Çarpan</p>
+                    <p class="text-xl font-black italic text-gray-600">0.00x</p>
                 </div>
-                <div class="px-4 py-1 rounded-full glass border-green-500/20">
-                    <span class="text-[10px] font-black text-green-500 uppercase italic animate-pulse">● Premium Active</span>
+                <div class="glass p-4 rounded-3xl text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Sıralama</p>
+                    <p class="text-xl font-black italic">#---</p>
                 </div>
             </div>
 
-            <div class="text-center py-6">
-                <p class="text-[10px] text-gray-500 uppercase tracking-[0.4em] font-bold mb-2">Hub Points Balance</p>
-                <h1 id="score-display" class="text-7xl font-black italic tracking-tighter mb-4">0</h1>
-                <div class="inline-flex items-center gap-2 bg-white/5 px-4 py-1 rounded-full">
-                    <i class="fa-solid fa-circle-nodes text-[10px] text-blue-500"></i>
-                    <span class="text-[11px] font-bold uppercase tracking-widest">Mainnet Ready</span>
-                </div>
-            </div>
-
-            <div class="glass p-6 rounded-[2.5rem] my-8 border-white/5 shadow-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Daily Boost</p>
-                        <h4 class="text-base font-bold italic">+0.01x Daily</h4>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-blue-500 font-bold uppercase">Multiplier</p>
-                        <p id="multiplier-val" class="text-2xl font-black italic leading-none">1.02x</p>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <div class="streak-dot streak-active">1.00</div>
-                    <div class="streak-dot streak-active">1.01</div>
-                    <div class="streak-dot streak-active">1.02</div>
-                    <div class="streak-dot"><i class="fa-solid fa-lock text-[10px] opacity-30"></i></div>
-                    <div class="streak-dot"><i class="fa-solid fa-lock text-[10px] opacity-30"></i></div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-[2.5rem] text-center mb-6 shadow-[0_20px_40px_rgba(255,255,255,0.05)]">
-                <h3 class="text-black font-black text-2xl italic uppercase mb-1">İZLE KAZAN</h3>
-                <p class="text-[11px] text-gray-400 mb-6 font-bold uppercase tracking-tighter">Reklam İzle & Puanını Katla</p>
-                <button onclick="watchAd()" class="w-full bg-black text-white py-5 rounded-2xl font-black uppercase text-[13px] tracking-widest active:scale-95 transition">
-                    Hemen Claim Et
-                </button>
+            <div class="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl text-center">
+                <p class="text-[10px] text-yellow-500/70 font-bold italic uppercase">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Madencilik dönemi yakında başlayacaktır.
+                </p>
             </div>
         </div>
 
-        <div id="wallet" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-8">PROJE VİZYONU</h2>
-            <div class="space-y-6">
-                <div class="relative pl-8 border-l-2 border-blue-500 pb-2">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
-                    <h4 class="font-bold text-blue-500 text-sm italic uppercase">Aşama 1: Veri Toplama</h4>
-                    <p class="text-xs text-gray-500 mt-1 italic">Kullanıcı tabanının oluşturulması ve adil dağıtım algoritmalarının testi.</p>
+        <div id="tasks" class="tab-content p-6">
+            <h2 class="text-3xl font-black italic mb-2">GÖREVLER</h2>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-8">Puan toplamak için tamamla</p>
+            
+            <div class="space-y-3">
+                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-brands fa-x-twitter text-xl"></i>
+                        <div><p class="font-bold text-sm">X'te Bizi Takip Et</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
+                    </div>
+                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
                 </div>
-                <div class="relative pl-8 border-l-2 border-white/10 pb-2 opacity-40">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white/10"></div>
-                    <h4 class="font-bold text-white text-sm italic uppercase">Aşama 2: TGE & Listeleme</h4>
-                    <p class="text-xs text-gray-500 mt-1 italic">Puanların gerçek tokenlara dönüşümü ve global borsa lansmanı.</p>
+                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-brands fa-telegram text-xl"></i>
+                        <div><p class="font-bold text-sm">Resmi Kanala Katıl</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
+                    </div>
+                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
+                </div>
+                <div class="glass p-5 rounded-[2rem] flex justify-between items-center opacity-80">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-users-viewfinder text-xl"></i>
+                        <div><p class="font-bold text-sm">Bir Arkadaşını Çağır</p><p class="text-[10px] text-gray-500">Ödül: 0 Puan</p></div>
+                    </div>
+                    <button class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black">YAP</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="friends" class="tab-content p-6">
+            <h2 class="text-3xl font-black italic mb-6">EKİBİN</h2>
+            <div class="glass p-8 rounded-[3rem] text-center">
+                <i class="fa-solid fa-share-nodes text-5xl text-blue-500/20 mb-6"></i>
+                <h3 class="text-xl font-bold mb-2">Referans Sistemi</h3>
+                <p class="text-xs text-gray-500 mb-8 leading-relaxed italic">Arkadaşlarını davet ederek yaklaşan büyük airdrop etkinliğinde öncelik kazan.</p>
+                <button class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/40">LİNKİ KOPYALA</button>
+            </div>
+        </div>
+
+        <div id="vision" class="tab-content p-6">
+            <h2 class="text-3xl font-black italic mb-8">YOL HARİTASI</h2>
+            
+            <div class="space-y-2">
+                <div class="roadmap-card">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="text-blue-500 font-black italic text-sm uppercase">1. Aşama: Topluluk İnşası</h4>
+                    <p class="text-[11px] text-gray-400 mt-1">Platformun açılışı, erken erişim kayıtları ve Sybil koruma sistemlerinin entegrasyonu.</p>
+                </div>
+                
+                <div class="roadmap-card">
+                    <div class="roadmap-dot"></div>
+                    <h4 class="text-blue-500 font-black italic text-sm uppercase">2. Aşama: Mining & Aktiviteler</h4>
+                    <p class="text-[11px] text-gray-400 mt-1">Çarpan sisteminin aktif edilmesi, günlük görevlerin başlaması ve puan kazanma döneminin açılması.</p>
+                </div>
+
+                <div class="roadmap-card">
+                    <div class="roadmap-dot pending"></div>
+                    <h4 class="text-gray-500 font-black italic text-sm uppercase">3. Aşama: Cüzdan & Doğrulama</h4>
+                    <p class="text-[11px] text-gray-600 mt-1">On-chain cüzdan bağlama sürecinin başlaması ve KYC (kimlik doğrulama) adımlarının aktifleşmesi.</p>
+                </div>
+
+                <div class="roadmap-card" style="border-left: none;">
+                    <div class="roadmap-dot pending"></div>
+                    <h4 class="text-gray-500 font-black italic text-sm uppercase">4. Aşama: Listeleme (TGE)</h4>
+                    <p class="text-[11px] text-gray-600 mt-1">Token'ın borsalarda listelenmesi ve biriken puanların gerçek değere dönüşerek cüzdanlara dağıtımı.</p>
                 </div>
             </div>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 h-24 glass border-t border-white/5 flex justify-around items-center px-6 z-50">
             <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-house-chimney text-xl"></i>
-                <span class="text-[9px] font-black uppercase italic">Home</span>
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Ana Sayfa</span>
             </button>
-            <button onclick="switchTab('wallet', this)" class="nav-item flex flex-col items-center gap-1.5">
-                <i class="fa-solid fa-compass text-xl"></i>
-                <span class="text-[9px] font-black uppercase italic">Vision</span>
+            <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-list-check text-xl"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Görevler</span>
+            </button>
+            <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-user-group text-xl"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Ekip</span>
+            </button>
+            <button onclick="switchTab('vision', this)" class="nav-item flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-map-location-dot text-xl"></i>
+                <span class="text-[9px] font-black uppercase tracking-tighter">Yol Haritası</span>
             </button>
         </nav>
     </div>
 
-    <div id="ad-overlay" class="fixed inset-0 bg-black z-[2000] hidden flex flex-col items-center justify-center">
-        <div class="w-16 h-16 border-2 border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 italic">Processing Ad Data</p>
-        <h4 id="ad-timer" class="text-7xl font-black italic">3</h4>
-    </div>
-
     <script>
-        let score = 0;
-        let multiplier = 1.02;
-
-        // GELİŞMİŞ CHECKING SİMÜLASYONU
+        // CHECKING SIMULATION
         window.onload = () => {
             let progress = 0;
-            const bar = document.getElementById('progress-bar');
-            const percent = document.getElementById('percent');
-            const status = document.getElementById('status-text');
-            
+            const bar = document.getElementById('p-bar');
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 5) + 1;
-                if (progress > 100) progress = 100;
-                
+                progress += Math.floor(Math.random() * 3) + 1;
+                if(progress > 100) progress = 100;
                 bar.style.width = progress + '%';
-                percent.innerText = progress + '%';
+                
+                if(progress > 25) document.getElementById('l1').classList.remove('hidden');
+                if(progress > 55) document.getElementById('l2').classList.remove('hidden');
+                if(progress > 85) document.getElementById('l3').classList.remove('hidden');
 
-                if(progress > 20) { document.getElementById('log-1').style.display = 'block'; status.innerText = 'Veriler Alınıyor...'; }
-                if(progress > 45) { document.getElementById('log-2').style.display = 'block'; status.innerText = 'Hesap Analizi...'; }
-                if(progress > 70) { document.getElementById('log-3').style.display = 'block'; status.innerText = 'Güvenlik Kontrolü...'; }
-                if(progress > 90) { document.getElementById('log-4').style.display = 'block'; status.innerText = 'Sonuçlanıyor...'; }
-
-                if (progress === 100) {
+                if(progress === 100) {
                     clearInterval(interval);
                     setTimeout(() => {
                         document.getElementById('checking-screen').style.display = 'none';
                         document.getElementById('app').classList.remove('hidden');
-                        countPoints(4250);
+                        countPoints(0); // Puan 0'da kalacak
                     }, 500);
                 }
-            }, 50);
+            }, 60);
         };
 
         function countPoints(target) {
-            let current = 0;
-            const timer = setInterval(() => {
-                current += 100;
-                if (current >= target) { current = target; clearInterval(timer); }
-                document.getElementById('score-display').innerText = current.toLocaleString();
-            }, 20);
-            score = target;
+            document.getElementById('score-display').innerText = target;
         }
 
         function switchTab(tabId, el) {
@@ -193,26 +203,6 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
-        }
-
-        function watchAd() {
-            const overlay = document.getElementById('ad-overlay');
-            const timerEl = document.getElementById('ad-timer');
-            let time = 3;
-            overlay.style.display = 'flex';
-            const itv = setInterval(() => {
-                time--;
-                timerEl.innerText = time;
-                if(time <= 0) {
-                    clearInterval(itv);
-                    overlay.style.display = 'none';
-                    const gain = Math.floor(250 * multiplier);
-                    score += gain;
-                    document.getElementById('score-display').innerText = score.toLocaleString();
-                    timerEl.innerText = "3";
-                    alert(`${multiplier}x Çarpan ile ${gain} Puan Claim Edildi!`);
-                }
-            }, 1000);
         }
     </script>
 </body>
