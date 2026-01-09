@@ -56,7 +56,7 @@
         
         <div id="home" class="tab-content active p-6">
             <div class="flex justify-between items-center mb-10">
-                <span class="text-[10px] font-black bg-blue-600/10 text-blue-500 px-4 py-1.5 rounded-full border border-blue-500/20 italic uppercase">Elite Hub</span>
+                <span class="text-[10px] font-black bg-blue-600/10 text-blue-500 px-4 py-1.5 rounded-full border border-blue-500/20 italic uppercase tracking-tighter">Elite Hub</span>
                 <i class="fa-solid fa-circle-check text-blue-500"></i>
             </div>
 
@@ -86,42 +86,48 @@
         </div>
 
         <div id="tasks" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-8 uppercase text-blue-500">GÖREVLER</h2>
+            <h2 class="text-3xl font-black italic mb-8 uppercase text-blue-500 tracking-tighter">GÖREVLER</h2>
             <div class="glass p-5 rounded-[2.5rem] flex justify-between items-center border border-white/5">
                 <div class="flex items-center gap-4">
-                    <i class="fa-brands fa-telegram text-2xl text-blue-500"></i>
-                    <div><p class="font-bold text-sm">Kanala Katıl</p><p class="text-[10px] text-blue-400 font-black">+100 PUAN</p></div>
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
+                        <i class="fa-brands fa-telegram text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Kanala Katıl</p>
+                        <p class="text-[10px] text-blue-400 font-black uppercase">+100 PUAN</p>
+                    </div>
                 </div>
                 <button onclick="doTelegramTask()" id="tg-btn" class="bg-white text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase">YAP</button>
             </div>
         </div>
 
         <div id="friends" class="tab-content p-6 text-center">
-            <h2 class="text-3xl font-black italic mb-10 uppercase text-blue-500">EKİP</h2>
+            <h2 class="text-3xl font-black italic mb-10 uppercase text-blue-500 tracking-tighter">EKİP</h2>
             <div class="glass p-8 rounded-[3rem] border border-blue-500/10">
                 <i class="fa-solid fa-users-rays text-5xl text-blue-500/20 mb-6"></i>
-                <h3 class="text-xl font-bold mb-2">Arkadaşlarını Çağır</h3>
-                <p class="text-xs text-gray-500 italic mb-8 px-4">Her referans için +500 Puan kazanırsın.</p>
-                <button onclick="referansKazan()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">LİNKİ KOPYALA</button>
-            </div>
-        </div>
-
-        <div id="vision" class="tab-content p-6">
-            <h2 class="text-3xl font-black italic mb-8 uppercase text-blue-500">ROADMAP</h2>
-            <div class="space-y-4">
-                <div class="relative pl-8 border-l-2 border-blue-500 pb-6">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"></div>
-                    <h4 class="text-sm font-bold uppercase">Aşama 01: Genesis</h4>
-                    <p class="text-[11px] text-gray-500 mt-1 italic">Analiz ve başlangıç ödülleri.</p>
-                </div>
+                <h3 class="text-xl font-bold mb-2 uppercase italic tracking-tighter text-white">Arkadaşlarını Çağır</h3>
+                <p class="text-xs text-gray-500 italic mb-8 px-4 leading-relaxed">
+                    Arkadaşlarını davet et, bakiyeni <span class="text-blue-500 font-black">+500 Puan</span> ile ödüllendir!
+                </p>
+                <button onclick="referansKazan()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition">
+                    LİNKİ KOPYALA
+                </button>
             </div>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 h-24 glass border-t border-white/5 flex justify-around items-center px-6 z-50">
-            <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1.5"><i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-black uppercase">Home</span></button>
-            <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1.5"><i class="fa-solid fa-bolt text-xl"></i><span class="text-[9px] font-black uppercase">Tasks</span></button>
-            <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1.5"><i class="fa-solid fa-user-group text-xl"></i><span class="text-[9px] font-black uppercase">Team</span></button>
-            <button onclick="switchTab('vision', this)" class="nav-item flex flex-col items-center gap-1.5"><i class="fa-solid fa-map text-xl"></i><span class="text-[9px] font-black uppercase">Vision</span></button>
+            <button onclick="switchTab('home', this)" class="nav-item active flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+                <span class="text-[9px] font-black uppercase">Home</span>
+            </button>
+            <button onclick="switchTab('tasks', this)" class="nav-item flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-bolt-lightning text-xl"></i>
+                <span class="text-[9px] font-black uppercase">Tasks</span>
+            </button>
+            <button onclick="switchTab('friends', this)" class="nav-item flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-user-group text-xl"></i>
+                <span class="text-[9px] font-black uppercase">Team</span>
+            </button>
         </nav>
     </div>
 
@@ -134,7 +140,7 @@
             let progress = 0;
             const bar = document.getElementById('p-bar');
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 5) + 2;
+                progress += Math.floor(Math.random() * 5) + 3;
                 if(progress > 100) progress = 100;
                 bar.style.width = progress + '%';
                 if(progress === 100) {
@@ -142,7 +148,7 @@
                     setTimeout(() => {
                         document.getElementById('checking-screen').style.display = 'none';
                         document.getElementById('app').classList.remove('hidden');
-                        updateScore(5000); 
+                        updateScore(5000); // Başlangıç Puanı
                     }, 500);
                 }
             }, 50);
@@ -159,22 +165,22 @@
             if (typeof window.showAdexora === 'function') {
                 window.showAdexora()
                     .then(() => {
-                        // Reklam başarıyla izlendiğinde 1 puan ver
                         updateScore(1);
                         tg.HapticFeedback.notificationOccurred('success');
                     })
                     .catch(e => {
                         console.error("Adexora Hatası:", e);
-                        alert("Reklam şu an hazır değil, lütfen biraz sonra tekrar deneyin.");
+                        alert("Reklam şu an hazır değil.");
                     });
             } else {
-                alert("Reklam yüklenemedi. Lütfen internet bağlantınızı kontrol edin.");
+                alert("Reklam SDK yüklenemedi.");
             }
         }
 
         function referansKazan() {
             updateScore(500);
-            alert("Referans daveti başarılı! +500 Puan eklendi.");
+            alert("Referans linki kopyalandı ve +500 puan eklendi!");
+            tg.HapticFeedback.notificationOccurred('success');
         }
 
         function doTelegramTask() {
