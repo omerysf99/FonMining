@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bums Clicker Pro - V.Albayrak</title>
+    <title>Bums Clicker Ultimate</title>
     <style>
         :root {
             --accent-blue: #3b82f6;
             --gold: #fbbf24;
-            --dark-bg: #0f172a;
+            --dark-panel: rgba(15, 23, 42, 0.98);
         }
 
         body {
             margin: 0; padding: 0;
             background-color: #000;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex; justify-content: center;
             height: 100vh; overflow: hidden;
             user-select: none;
@@ -31,137 +31,130 @@
             display: flex; flex-direction: column;
         }
 
-        /* ÜST PANEL: Karakter Bilgisi ve Coin */
-        .header-top {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 15px; background: rgba(0,0,0,0.6); z-index: 10;
-        }
-        .profile-area { display: flex; align-items: center; gap: 8px; }
-        .p-icon { width: 40px; height: 40px; border: 2px solid var(--accent-blue); border-radius: 8px; }
-        .id-text { font-size: 10px; color: #94a3b8; }
-
-        .stats-box { display: flex; gap: 10px; }
-        .stat-item { background: rgba(30, 41, 59, 0.9); padding: 5px 10px; border-radius: 10px; text-align: center; min-width: 70px; }
-        .stat-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; }
-        .stat-val { font-size: 14px; font-weight: bold; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 4px; }
-
-        /* MODAL / PENCERE SİSTEMİ */
+        /* MODAL (PENCERE) SİSTEMİ */
         .modal-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none;
+            background: rgba(0,0,0,0.8); display: none;
             justify-content: center; align-items: center; z-index: 1000;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(5px);
         }
         .modal-content {
-            background: var(--dark-bg); border: 2px solid var(--accent-blue);
-            width: 80%; padding: 20px; border-radius: 20px; text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--dark-panel); width: 80%; padding: 25px;
+            border-radius: 20px; border: 2px solid var(--accent-blue);
+            text-align: center; position: relative;
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* ÜST PANEL */
+        .top-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background: rgba(0,0,0,0.5); z-index: 100;
+        }
+        .profile-box { display: flex; align-items: center; gap: 8px; }
+        .p-icon-wrap { width: 45px; height: 45px; border: 2px solid var(--accent-blue); border-radius: 8px; overflow: hidden; }
+        .p-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .stat-card { background: var(--dark-panel); padding: 5px 12px; border-radius: 12px; border: 1px solid #1e293b; text-align: center; min-width: 80px; }
+        .stat-val { font-weight: bold; color: var(--gold); display: flex; align-items: center; justify-content: center; gap: 4px; }
 
         /* ANA EKRAN VE YAN BUTONLAR */
-        .play-screen { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .side-menu { position: absolute; width: 100%; height: 60%; top: 5%; display: flex; justify-content: space-between; padding: 0 15px; pointer-events: none; }
-        .menu-column { display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
-        .menu-btn { width: 60px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .menu-btn img { width: 100%; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .play-area { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .side-menu { position: absolute; width: 100%; top: 20px; display: flex; justify-content: space-between; padding: 0 15px; pointer-events: none; }
+        .side-col { display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
+        .s-item { width: 65px; text-align: center; font-size: 9px; font-weight: bold; cursor: pointer; }
+        .s-item img { width: 100%; border-radius: 12px; margin-bottom: 3px; border: 1px solid rgba(255,255,255,0.1); }
 
-        .main-score { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .main-score img { width: 45px; }
+        .score-box { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .score-box img { width: 40px; }
+        .score-box span { font-size: 3.5rem; font-weight: 900; }
 
-        #character { width: 220px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); cursor: pointer; transition: transform 0.05s; }
-        #character:active { transform: scale(0.96); }
+        #hero-cat { width: 200px; cursor: pointer; transition: transform 0.05s; z-index: 5; }
+        #hero-cat:active { transform: scale(0.95); }
 
-        /* ALT PANEL */
-        .footer-ui { background: rgba(15, 23, 42, 0.95); padding: 10px 15px 30px; border-top: 1px solid #1e293b; width: 100%; box-sizing: border-box; }
-        .energy-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
-        .bar-bg { background: #1e293b; height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        #bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.3s; }
+        /* ALT PANEL VE BÜTÜN SATIR SEKME SİSTEMİ */
+        .footer-ui {
+            background: rgba(15, 23, 42, 0.98);
+            padding: 10px 15px 30px 15px; border-top: 1px solid #1e293b;
+            position: absolute; bottom: 0; width: 100%; box-sizing: border-box;
+        }
+        .energy-bar-container { margin-bottom: 12px; }
+        .energy-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        .bar-bg { background: #1e293b; height: 12px; border-radius: 10px; overflow: hidden; }
+        #bar-fill { width: 100%; height: 100%; background: var(--accent-blue); transition: width 0.2s; }
 
-        .nav-tabs { display: flex; justify-content: space-around; }
-        .tab { text-align: center; color: #94a3b8; font-size: 11px; cursor: pointer; }
-        .tab img { width: 35px; height: 35px; display: block; margin: 0 auto 4px; filter: grayscale(1); opacity: 0.7; }
+        .nav-tabs { 
+            display: flex; justify-content: space-around; 
+            background: rgba(30, 41, 59, 0.4); border-radius: 15px; padding: 8px 0;
+        }
+        .tab { flex: 1; text-align: center; color: #94a3b8; font-size: 10px; cursor: pointer; }
+        .tab img { width: 32px; height: 32px; display: block; margin: 0 auto 4px; border-radius: 8px; }
         .tab.active { color: white; font-weight: bold; }
-        .tab.active img { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
+        .tab.active img { border: 2px solid var(--gold); background: rgba(251, 191, 36, 0.1); }
 
-        .btn-action { background: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; margin-top: 15px; width: 100%; }
+        /* POPUP SAYI */
+        .pop { position: absolute; color: var(--gold); font-weight: 900; font-size: 2.2rem; pointer-events: none; animation: rise 0.7s forwards; z-index: 300; }
+        @keyframes rise { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="modal" class="modal-overlay" onclick="closeModal()">
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="m-title">Başlık</h2>
-            <p id="m-desc" style="color: #94a3b8; line-height: 1.5;"></p>
-            <button class="btn-action" onclick="closeModal()">Kapat</button>
+            <h2 id="modal-title">Başlık</h2>
+            <p id="modal-body" style="margin: 15px 0; color: #94a3b8;"></p>
+            <button onclick="closeModal()" style="background:var(--accent-blue); color:white; border:none; padding:10px 20px; border-radius:10px; width:100%; font-weight:bold;">Kapat</button>
         </div>
     </div>
 
-    <div class="header-top">
-        <div class="profile-area">
-            <img src="TapLv1.jpg" class="p-icon">
+    <div class="top-nav">
+        <div class="profile-box">
+            <div class="p-icon-wrap"><img src="TapLv1.jpg"></div>
             <div>
-                <div style="font-weight: bold; font-size: 13px;">V.Albayra...</div>
-                <div class="id-text">ID: 8392479231</div>
+                <div style="font-size: 11px; font-weight: bold;">V.Albayrak</div>
+                <div style="font-size: 9px; color: #94a3b8;">ID: 8392479231</div>
             </div>
         </div>
-        <div class="stats-box">
-            <div class="stat-item">
-                <div class="stat-label">Coin</div>
-                <div class="stat-val"><img src="Notcoin.jpg" width="14"> <span id="top-coin">56.7K</span></div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">Per hour</div>
-                <div class="stat-val" style="color:#10b981;">+0</div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-val"><img src="Notcoin.jpg" width="14"> <span id="top-coin">56.7K</span></div>
         </div>
     </div>
 
-    <div class="play-screen">
+    <div class="play-area">
         <div class="side-menu">
-            <div class="menu-column">
-                <div class="menu-btn" onclick="openModal('GANG', 'Bir gruba katılarak kazancını artırabilirsin!')">
-                    <img src="Jgang.jpg">JOIN GANG
-                </div>
-                <div class="menu-btn" onclick="openModal('EARN', '8 saatlik pasif kazanç periyodu başlatıldı.')">
-                    <img src="TapEarn.jpg">8h 0m
-                </div>
-                <div class="menu-btn" onclick="openModal('AIRDROP', 'ID: 8392479231 için cüzdan bağlama çok yakında!')">
-                    <img src="Airdrop.jpg">AIRDROP
-                </div>
+            <div class="side-col">
+                <div class="s-item" onclick="openInfo('JOIN GANG', 'Topluluğa katılarak bonus kazanın!')"><img src="Jgang.jpg">GANG</div>
+                <div class="s-item" onclick="openInfo('PASSIVE EARN', '8 saatlik kazanç toplama aktif!')"><img src="TapEarn.jpg">8h 0m</div>
+                <div class="s-item" onclick="openInfo('AIRDROP', 'ID: 8392479231 için cüzdan bağlama yakında.')"><img src="Airdrop.jpg">AIRDROP</div>
             </div>
-            <div class="menu-column">
-                <div class="menu-btn" onclick="openModal('AUTO', 'Auto-tap robotu enerjin bitene kadar tıklar.')">
-                    <img src="AutoTap.jpg">Auto tap
-                </div>
-                <div class="menu-btn" onclick="openModal('NFT', 'Nadir NFT kutularını açmak için coin biriktir!')">
-                    <img src="Nft.jpg">NFT
-                </div>
+            <div class="side-col">
+                <div class="s-item" onclick="openInfo('AUTO TAP', 'Otomatik tıklama botu enerjin bitene kadar çalışır.')"><img src="AutoTap.jpg">AUTO</div>
+                <div class="s-item" onclick="openInfo('NFT BOX', 'Şans kutularıyla nadir kartlar topla!')"><img src="Nft.jpg">NFT</div>
             </div>
         </div>
 
-        <div class="main-score">
+        <div class="score-box">
             <img src="Notcoin.jpg">
             <span id="big-coin">56.749</span>
         </div>
 
-        <img src="bumslv1.jpg" id="character" onclick="doTap(event)">
+        <img src="image_826c28.jpg" id="hero-cat" onclick="tapHero(event)">
     </div>
 
     <div class="footer-ui">
-        <div class="energy-row">
-            <span>⚡ <span id="cur-energy">2000</span> / 2000</span>
-            <span style="color:var(--gold);">+5 Per tap</span>
+        <div class="energy-bar-container">
+            <div class="energy-info">
+                <span>⚡ <span id="e-cur">2000</span> / 2000</span>
+                <span style="color:var(--gold);">+5 Per tap</span>
+            </div>
+            <div class="bar-bg"><div id="bar-fill"></div></div>
         </div>
-        <div class="bar-bg"><div id="bar-fill"></div></div>
 
         <div class="nav-tabs">
-            <div class="tab active"><img src="bumslv1.jpg">Bums</div>
-            <div class="tab" onclick="openModal('Upgrade', 'Market özelliği yakında!')"><img src="Upgrade.jpg">Upgrade</div>
-            <div class="tab" onclick="openModal('Tasks', 'Görevleri tamamla, coinleri kap!')"><img src="Task.jpg">Tasks</div>
-            <div class="tab" onclick="openModal('Friends', 'Arkadaşlarını davet et, 10K hediye al.')"><img src="friends.jpg">Friends</div>
+            <div class="tab active"><img src="Notcoin.jpg">Bums</div>
+            <div class="tab" onclick="openInfo('UPGRADE', 'Tıklama gücünü artır!')"><img src="Upgrade.jpg">Upgrade</div>
+            <div class="tab" onclick="openInfo('TASKS', 'Görevleri yap puanları kap!')"><img src="Task.jpg">Tasks</div>
+            <div class="tab" onclick="openInfo('FRIENDS', 'Arkadaşlarını davet et!')"><img src="friends.jpg">Friends</div>
         </div>
     </div>
 </div>
@@ -171,58 +164,36 @@
     let energy = 2000;
     const power = 5;
 
-    function openModal(title, desc) {
-        document.getElementById('m-title').innerText = title;
-        document.getElementById('m-desc').innerText = desc;
-        document.getElementById('modal').style.display = 'flex';
+    function openInfo(title, text) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerText = text;
+        document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
-    function doTap(e) {
+    function tapHero(e) {
         if (energy >= power) {
             coins += power;
             energy -= power;
             updateUI();
-            createFloatingText(e);
+            
+            const p = document.createElement('div');
+            p.className = 'pop'; p.innerText = `+${power}`;
+            p.style.left = e.clientX + 'px'; p.style.top = (e.clientY - 40) + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
         }
     }
 
     function updateUI() {
-        document.getElementById('big-coin').innerText = coins.toLocaleString();
+        document.getElementById('big-coin').innerText = Math.floor(coins).toLocaleString();
         document.getElementById('top-coin').innerText = (coins / 1000).toFixed(1) + "K";
-        document.getElementById('cur-energy').innerText = energy;
+        document.getElementById('e-cur').innerText = energy;
         document.getElementById('bar-fill').style.width = (energy / 2000 * 100) + "%";
     }
 
-    function createFloatingText(e) {
-        const text = document.createElement('div');
-        text.innerText = "+" + power;
-        text.style.position = 'absolute';
-        text.style.left = e.clientX + 'px';
-        text.style.top = e.clientY + 'px';
-        text.style.color = '#fbbf24';
-        text.style.fontWeight = 'bold';
-        text.style.fontSize = '24px';
-        text.style.pointerEvents = 'none';
-        text.style.animation = 'floatUp 0.8s ease-out forwards';
-        document.body.appendChild(text);
-        setTimeout(() => text.remove(), 800);
-    }
-
-    // Enerji Yenileme
-    setInterval(() => {
-        if (energy < 2000) {
-            energy = Math.min(2000, energy + 2);
-            updateUI();
-        }
-    }, 1000);
-
-    const style = document.createElement('style');
-    style.innerHTML = `@keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } }`;
-    document.head.appendChild(style);
+    setInterval(() => { if(energy < 2000) { energy = Math.min(2000, energy + 3); updateUI(); } }, 1000);
 </script>
 
 </body>
